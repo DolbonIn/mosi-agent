@@ -1182,24 +1182,27 @@ const NAME_LETTER = /[가-힣A-Za-z\u3040-\u30ff\u4e00-\u9fff]/u;
  * '한독약품빌딩 주차장' and '2,000원 1시간'; bluesquare's '751빌딩 주차장 1시간 3,000원 민영' → '751빌딩 주차장' and
  * '3,000원 1시간'), by the month '월' before it as deep-30 wrote monthly passes ('월 120,000원'). '확인 필요' leaves no
  * price. The site's 'P' mark before the name goes with the fee; everything else of the name stays ('제1호', '24시간
- * 주차장', '3번 출구', '1층', a walk '31m · 걸어서 1분': nameWalk). Unchanged, price '', when the fee is not the name's
- * end (other words after it but the lot's hours and kind), when another amount stays in the name, or when no name would
- * be left
+ * 주차장', '3번 출구', '1층', a walk '31m · 걸어서 1분': nameWalk). The lot's hours and kind after the fee are its tags, in
+ * their order, once each ('24시간', '민영': lotName puts them on the detail line). Unchanged, price '', no tags, when the
+ * fee is not the name's end (other words after it but the lot's hours and kind), when another amount stays in the name,
+ * or when no name would be left
  */
-export function nameFee(name: string): { name: string; price: string } {
-  const none = { name, price: "" };
+export function nameFee(name: string): { name: string; price: string; tags: string[] } {
+  const none = { name, price: "", tags: [] };
   let m: RegExpExecArray | null = null;
   for (const x of name.matchAll(NAME_FEE)) m = x;
   if (!m) return none;
   const tail = name.slice(m.index + m[0].length).trim();
-  if (tail && !tail.split(/\s+/u).every((w) => NAME_FEE_TAG.test(w))) return none;
+  const words = tail ? tail.split(/\s+/u) : [];
+  if (!words.every((w) => NAME_FEE_TAG.test(w))) return none;
   const rest = name.slice(0, m.index).replace(/^P\s+(?=\S)/u, "").trim();
   if (rest.length < 2 || !NAME_LETTER.test(rest) || new RegExp(PRICE_RUN.source, "u").test(rest)) return none;
   const [, hours, perHour, day, month, amount] = m;
-  if (!amount) return { name: rest, price: "" };
+  const tags = [...new Set(words)];
+  if (!amount) return { name: rest, price: "", tags };
   const won = amount.trim();
   const basis = hours ? hours.replace(/\s+/gu, "") : perHour ? "1시간" : day ? "1일" : "";
-  return { name: rest, price: month ? `월 ${won}` : `${won} ${basis}` };
+  return { name: rest, price: month ? `월 ${won}` : `${won} ${basis}`, tags };
 }
 
 /** a walk from the searched spot at a name's end, as juchajucha writes it ('… 31m · 걸어서 1분'), the name's last 48
@@ -1217,6 +1220,30 @@ export function nameWalk(name: string): { name: string; walk: string } {
   if (!m) return { name, walk: "" };
   const rest = name.slice(0, name.length - end.length + m.index).trim();
   return rest.length < 2 || !NAME_LETTER.test(rest) ? { name, walk: "" } : { name: rest, walk: m[1]!.replace(/\s+/gu, " ") };
+}
+
+/** a lot's kind in brackets at its name's end, as juchajucha writes it ('시큐어파킹 강남역점 주차장(민영)') */
+const NAME_KIND = /[(（](24시간|공영|민영|제휴)[)）]$/u;
+
+/**
+ * A parking lot's list name apart (deep-38, deep-39): the name, its fee as the card's price (nameFee), and the row's
+ * detail after the area: the walk (nameWalk), then the lot's hours and kind, where the site wrote them, bluesquare after
+ * the fee ('751빌딩 주차장 1시간 3,000원 24시간 민영' → '751빌딩 주차장', '3,000원 1시간', '24시간 · 민영'), juchajucha
+ * in brackets at the name's end ('P 시큐어파킹 강남역점 주차장(민영) 52m · 걸어서 1분 1시간 예상 요금 5,000원' →
+ * '시큐어파킹 강남역점 주차장', '5,000원 1시간', '52m · 걸어서 1분 · 민영'), so both sites show a lot the same way. The
+ * brackets go only from a name whose fee went (a name of anything else keeps its own), never leaving under two
+ * characters; a tag the name already holds ('… 공영주차장' and '공영') is said once, by the name
+ */
+export function lotName(name: string): { name: string; price: string; detail: string } {
+  const fee = nameFee(name);
+  const walked = nameWalk(fee.name);
+  // nameFee took a fee (the name lost it) when its name changed
+  const kind = fee.name !== name ? NAME_KIND.exec(walked.name) : null;
+  const rest = kind ? walked.name.slice(0, kind.index).trim() : "";
+  const lot = kind && rest.length >= 2 && NAME_LETTER.test(rest) ? rest : walked.name;
+  const flat = lot.replace(/\s+/gu, "");
+  const tags = [...new Set([...(lot !== walked.name ? [kind![1]!] : []), ...fee.tags])].filter((t) => !flat.includes(t));
+  return { name: lot, price: fee.price, detail: [walked.walk, ...tags].filter(Boolean).join(" · ") };
 }
 
 /** a list entry kept for the turn (#places) */
@@ -3915,7 +3942,7 @@ export class ExploreTracker {
       const n = normName(p.name);
       if (said.has(n)) continue;
       said.add(n);
-      out.push(nameWalk(nameFee(p.name).name).name);
+      out.push(lotName(p.name).name);
     }
     return out;
   }
@@ -3996,17 +4023,17 @@ export class ExploreTracker {
     // a twin is on the card as its first is (#offCard names neither)
     this.#listKeys = new Set(twins.map((p) => p.key));
     for (const p of places) {
-      // a fee in the name goes to the price, the text's price staying the price when it has one (nameFee); a walk at
-      // its end goes to the detail line after the area (nameWalk)
-      const fee = nameFee(listName(p.name));
-      const { name, walk } = nameWalk(fee.name);
+      // a fee in the name goes to the price, the text's price staying the price when it has one; a walk at its end and
+      // the lot's hours and kind go to the detail line after the area (lotName)
+      const fee = lotName(listName(p.name));
+      const name = fee.name;
       if (taken(p)) continue;
       const url = p.url && MAP_PIN.test(p.url) ? (p.link ?? "") : (p.url ?? p.link ?? "");
       const text = listPrice(p.text);
       // a monthly pass's entry (its page under '/monthly/', '…월주차' in its name): its price is by the month
       const monthly = !!text && !text.startsWith("월") && ((sitePath(p.url ?? "") ?? "").split("/").includes("monthly") || /월\s?(?:주차|정기)/u.test(p.name));
       const price = text ? (monthly ? `월 ${text}` : text) : fee.price;
-      const area = [this.#areaOf(p), walk].filter(Boolean).join(" · ");
+      const area = [this.#areaOf(p), fee.detail].filter(Boolean).join(" · ");
       const row = cardRowOf([this.#groupOf(p, groups), name, area, price, p.tel ?? p.contact ?? "", url, LIST_CHECK]);
       if (!row) continue;
       out.push(row);

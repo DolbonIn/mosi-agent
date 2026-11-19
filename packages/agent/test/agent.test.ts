@@ -8,7 +8,9 @@ let seen: { auth: string | null; body: { model: string; messages: ChatMessage[] 
 let server: ReturnType<typeof Bun.serve>;
 
 beforeAll(() => {
+  // 127.0.0.1 only, as mock-llm.ts: no later 127.0.0.1 listener can take this port and its requests
   server = Bun.serve({
+    hostname: "127.0.0.1",
     port: 0,
     async fetch(req) {
       const body = (await req.json()) as { model: string; messages: ChatMessage[] };

@@ -58,7 +58,10 @@ export function startMockLlm(): MockLlm {
     fallback: { text: ["(no script)"] },
     stop: () => server.stop(true),
   };
+  // 127.0.0.1, not every address: a server listening on all of them shares its port with a later 127.0.0.1 listener,
+  // which then answers every request sent to 127.0.0.1 (29 loop tests got 404 "not found" in a full run on 11-19)
   const server = Bun.serve({
+    hostname: "127.0.0.1",
     port: 0,
     idleTimeout: 30,
     async fetch(req) {

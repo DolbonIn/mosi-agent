@@ -55,6 +55,7 @@ export {
   listPrice,
   nameFee,
   nameWalk,
+  lotName,
   DEEP_MAX_STEPS,
   DEEP_MAX_TOKENS,
   DEEP_SEARCH_DEFAULTS,

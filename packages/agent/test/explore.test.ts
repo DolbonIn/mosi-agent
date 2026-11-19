@@ -22,6 +22,7 @@ import {
   listPrice,
   nameFee,
   nameWalk,
+  lotName,
   cardRowOf,
   cardRows,
   cardTitle,
@@ -4140,6 +4141,44 @@ describe("the rows card draws the lists' places ('전부')", () => {
       expect([name, split(name)]).toEqual([name, [name, "", ""]]);
   });
 
+  test("lotName: the lot's hours and kind go to the detail line after the walk, where either site wrote them (bluesquare after the fee, juchajucha in brackets at the name's end), once each, in their order; a tag the name holds is said by the name; brackets go only from a name whose fee went, never leaving under two characters", () => {
+    for (const [name, want] of [
+      // bluesquare (d29-p1, d29-p3): after the fee
+      ["AC호텔바이메리어트 서울강남점 주차장 1시간 6,000원 24시간 민영", ["AC호텔바이메리어트 서울강남점 주차장", "6,000원 1시간", "24시간 · 민영"]],
+      ["751빌딩 주차장 1시간 3,000원 민영", ["751빌딩 주차장", "3,000원 1시간", "민영"]],
+      ["구룡산제2호 1시간 2,400원 공영", ["구룡산제2호", "2,400원 1시간", "공영"]],
+      ["강남치매안심센터 1시간 4,800원 24시간 공영", ["강남치매안심센터", "4,800원 1시간", "24시간 · 공영"]],
+      ["케이지페이먼츠 서울사무소 역삼동 1시간 6,000원 제휴", ["케이지페이먼츠 서울사무소 역삼동", "6,000원 1시간", "제휴"]],
+      // juchajucha (d27-p1, d29-p1/p2/p3): in brackets at the name's end, after the walk
+      ["P 시큐어파킹 강남역점 주차장(민영) 52m · 걸어서 1분 1시간 예상 요금 5,000원", ["시큐어파킹 강남역점 주차장", "5,000원 1시간", "52m · 걸어서 1분 · 민영"]],
+      ["P 현대주차장(민영) 1시간 예상 요금 4,000원", ["현대주차장", "4,000원 1시간", "민영"]],
+      ["P 강남 24시 주차장(민영) 1시간 예상 요금 3,000원", ["강남 24시 주차장", "3,000원 1시간", "민영"]],
+      ["P 강남센타빌딩 31m · 걸어서 1분 1시간 예상 요금 6,000원", ["강남센타빌딩", "6,000원 1시간", "31m · 걸어서 1분"]],
+      ["P 테헤란 주차장(공영) 127m · 걸어서 2분 1시간 예상 요금 확인 필요", ["테헤란 주차장", "", "127m · 걸어서 2분 · 공영"]],
+      // once each, in their order; a tag the name holds is the name's
+      ["강남 주차장(민영) 1시간 3,000원 24시간 민영", ["강남 주차장", "3,000원 1시간", "민영 · 24시간"]],
+      ["빌딩 주차장 1시간 3,000원 민영 민영 24시간 민영", ["빌딩 주차장", "3,000원 1시간", "민영 · 24시간"]],
+      ["역삼역 3번 출구 공영주차장 1시간 3,600원 공영", ["역삼역 3번 출구 공영주차장", "3,600원 1시간", ""]],
+      ["강남 24시간 주차장 1시간 3,000원 24시간 민영", ["강남 24시간 주차장", "3,000원 1시간", "민영"]],
+      ["P 강남빌딩 유료민영주차장(민영) 1시간 예상 요금 확인 필요", ["강남빌딩 유료민영주차장", "", ""]],
+      // other brackets stay; brackets that would leave under two characters stay
+      ["P 역삼 주차장(B동) 1시간 예상 요금 3,000원", ["역삼 주차장(B동)", "3,000원 1시간", ""]],
+      ["P 주(민영) 1시간 예상 요금 3,000원", ["주(민영)", "3,000원 1시간", ""]],
+      ["P (민영) 1시간 예상 요금 3,000원", ["(민영)", "3,000원 1시간", ""]],
+      // no fee taken: the name is the name
+      ["현대주차장(민영)", ["현대주차장(민영)", "", ""]],
+      ["강남 온누리약국(24시간)", ["강남 온누리약국(24시간)", "", ""]],
+      ["강남역 주차장(민영) 3시간 9,000원 할인", ["강남역 주차장(민영) 3시간 9,000원 할인", "", ""]],
+      ["역삼 공원 1.2km · 걸어서 15분", ["역삼 공원", "", "1.2km · 걸어서 15분"]],
+    ] as const) {
+      const l = lotName(name);
+      expect([name, [l.name, l.price, l.detail]]).toEqual([name, [...want]]);
+    }
+    expect(nameFee("AC호텔바이메리어트 서울강남점 주차장 1시간 6,000원 24시간 민영").tags).toEqual(["24시간", "민영"]);
+    expect(nameFee("빌딩 주차장 1시간 3,000원 민영 민영 24시간 민영").tags).toEqual(["민영", "24시간"]); // once each (a hostile run of tags stays two)
+    expect(nameFee("강남 24시간 주차장").tags).toEqual([]);
+  });
+
   test("nameFee / nameWalk on hostile names: one pass, no backtracking over digit or space runs (1 MB in well under a second)", () => {
     const MB = 1_000_000;
     const fill = (u: string) => u.repeat(Math.ceil(MB / u.length)).slice(0, MB);
@@ -4152,14 +4191,17 @@ describe("the rows card draws the lists' places ('전부')", () => {
       `빌딩 주차장 1시간 3,000원${fill(" 24시간 민영")}`,
       `${fill("1")}m · 걸어서 1분`,
       `빌딩 ${fill("1 ")}m · 걸어서 1분`,
+      `빌딩 주차장${fill("(민영)")} 1시간 3,000원`,
+      `빌딩 주차장${fill("(")}민영) 1시간 3,000원 민영`,
+      `${fill("민영")}(민영) 1시간 3,000원 공영`,
     ]) {
       const t0 = performance.now();
-      nameWalk(nameFee(name).name);
+      lotName(name);
       expect([name.slice(0, 12), performance.now() - t0 < 500]).toEqual([name.slice(0, 12), true]);
     }
   });
 
-  test("a parking list's rows: a fee written at an entry's name end is its price, by its basis (the hour first, minutes, the day and the month after '다른 기준 가격'); a walk at the end goes to the detail line; the entry's text price stays its price; same names on different lots stay two rows", async () => {
+  test("a parking list's rows: a fee written at an entry's name end is its price, by its basis (the hour first, minutes, the day and the month after '다른 기준 가격'); a walk at the end goes to the detail line, the lot's hours and kind after it (written after the fee, or in brackets at the name's end); the entry's text price stays its price; same names on different lots stay two rows", async () => {
     const read = { name: "web_read", explore: "read" } as unknown as ToolDef;
     const JU = "https://juchajucha.example.kr/parking/gangnam";
     const names = [
@@ -4175,16 +4217,19 @@ describe("the rows card draws the lists' places ('전부')", () => {
       "P 강남 공영주차장 1일 예상 요금 20,000원",
       "P 역삼 오피스텔 월정기권 120,000원",
       "P 강남빌딩 유료민영주차장 127m · 걸어서 2분 1시간 예상 요금 확인 필요",
+      "P 시큐어파킹 강남역점 주차장(민영) 52m · 걸어서 1분 1시간 예상 요금 5,000원",
+      "751빌딩 주차장 1시간 3,000원 24시간 민영",
+      "P 역삼 주차장(B동) 1시간 예상 요금 3,500원",
     ];
     const items = names.map((n, i) => ({ name: n, key: n.replace(/[\s·,]/g, "").toLowerCase(), url: `https://juchajucha.example.kr/parking/${1000 + i}`, ...(i === 7 ? { text: "10분 1,000원" } : {}) }));
     const t = new ExploreTracker(undefined, Date.now(), "text", { text: "강남역 근처 주차장 전부 카드로 보여줘", card: { name: "sys_create_artifact", kind: "html" } });
     t.result(read, { ok: true, summary: "", data: { url: JU, title: "강남역 주차장 요금 | 주차주차", items, itemsTotal: items.length } });
-    expect(t.listPlaces()).toBe(12);
+    expect(t.listPlaces()).toBe(15);
     const { ctx, saved } = cardCtx();
     const rt = t.rowsTool(realArt())!;
     expect(t.takeLateCard("")).toBe(true);
     expect((await rt.run({ rows: [], more: false }, ctx)).ok).toBe(true);
-    expect(t.drawn()?.rows).toBe(12);
+    expect(t.drawn()?.rows).toBe(15);
     const raw = saved.at(-1)?.content ?? "";
     const html = unglue(raw);
     const row = (name: string, rest = "") => new RegExp(`<b>${name.replace(/[()]/g, "\\$&")}</b>${rest}`);
@@ -4202,26 +4247,30 @@ describe("the rows card draws the lists' places ('전부')", () => {
     // the walk under the name (the card ties its '·' to the word before)
     expect(html).toMatch(row("강남센타빌딩", `<small>31m\u00a0· 걸어서 1분</small></div><span class="p"><b>6,000원</b><small>1시간</small>`));
     expect(html).toMatch(row("강남빌딩 유료민영주차장", `<small>127m\u00a0· 걸어서 2분</small></div></div></li>`)); // '확인 필요': no price
+    // the lot's kind and hours on the detail line, after the walk, as either site wrote them: '(민영)' at the name's end,
+    // '24시간 민영' after the fee
+    expect(html).toMatch(row("시큐어파킹 강남역점 주차장", `<small>52m\u00a0· 걸어서 1분\u00a0· 민영</small></div><span class="p"><b>5,000원</b><small>1시간</small>`));
+    expect(html).toMatch(row("751빌딩 주차장", `<small>24시간\u00a0· 민영</small></div><span class="p"><b>3,000원</b><small>1시간</small>`));
     // two lots of one name (other pages, other fees): two rows
-    expect(html.match(/<b>현대주차장\(민영\)<\/b>/g)?.length).toBe(2);
-    // the bracket glued to what it holds, a break box before it: no '주차장( / 민영)' (WebKit, keep-all)
-    expect(raw.match(/<b>현대주차장<span class="t-brk"><\/span><span class="t-glue">\(민영\)<\/span><\/b>/g)?.length).toBe(2);
-    for (const gone of ["예상 요금", "확인 필요", "<b>P ", "걸어서 1분 1시간"]) expect([gone, html.includes(gone)]).toEqual([gone, false]);
+    expect(html.match(/<b>현대주차장<\/b><small>민영<\/small>/g)?.length).toBe(2);
+    // a bracket that is no kind stays, glued to what it holds, a break box before it: no '주차장( / B동)' (WebKit, keep-all)
+    expect(raw).toMatch(/<b>역삼 주차장<span class="t-brk"><\/span><span class="t-glue">\(B동\)<\/span><\/b>/);
+    for (const gone of ["예상 요금", "확인 필요", "<b>P ", "걸어서 1분 1시간", "(민영)", " 24시간 민영"]) expect([gone, html.includes(gone)]).toEqual([gone, false]);
     // by the hour first (the most rows), the other bases after '다른 기준 가격', the lot with no price last
     const sep = html.indexOf("다른 기준 가격");
     expect(sep).toBeGreaterThan(0);
-    for (const name of ["한독약품빌딩 주차장", "강남센타빌딩", "현대주차장(민영)"]) expect([name, html.indexOf(`<b>${name}</b>`) < sep]).toEqual([name, true]);
+    for (const name of ["한독약품빌딩 주차장", "강남센타빌딩", "현대주차장", "시큐어파킹 강남역점 주차장", "751빌딩 주차장"]) expect([name, html.indexOf(`<b>${name}</b>`) < sep]).toEqual([name, true]);
     for (const name of ["테헤란빌딩 1층 주차장", "강남 공영주차장", "역삼 오피스텔", "리젠메디타워 주차장", "강남빌딩 유료민영주차장"]) expect([name, html.indexOf(`<b>${name}</b>`) > sep]).toEqual([name, true]);
     expect(html.indexOf("<b>강남빌딩 유료민영주차장</b>")).toBeGreaterThan(html.indexOf("<b>역삼 오피스텔</b>"));
     expect(html).toMatch(/1시간\s기준\s최저\s2,000원\s·<\/span>\s<span class="n">최고\s6,000원</); // the hour's fees
   });
 
-  test("a card that left list places off names them without the fee or walk their list wrote into the name", async () => {
+  test("a card that left list places off names them without the fee, walk or bracketed kind their list wrote into the name", async () => {
     const read = { name: "web_read", explore: "read" } as unknown as ToolDef;
     const JU = "https://parking-list.jp/gangnam";
     const items = Array.from({ length: 17 }, (_, i) => {
       const n = `빌딩${String(i).padStart(2, "0")} 주차장`;
-      return { name: i % 2 ? `P ${n} ${30 + i}m · 걸어서 1분 1시간 예상 요금 ${2 + i},000원` : `P ${n} 1시간 예상 요금 ${2 + i},000원`, key: `p${n}${i}`, url: `https://lot${i}.jp/` };
+      return { name: i % 2 ? `P ${n}(민영) ${30 + i}m · 걸어서 1분 1시간 예상 요금 ${2 + i},000원` : `P ${n} 1시간 예상 요금 ${2 + i},000원`, key: `p${n}${i}`, url: `https://lot${i}.jp/` };
     });
     const t = new ExploreTracker(undefined, 0, "text", { text: "강남역 주차장 카드로", card: { name: "sys_create_artifact", kind: "html" } });
     t.result(read, { ok: true, summary: "", data: { url: JU, title: "강남역 주차장 요금 | 주차주차", items, itemsTotal: items.length } });
@@ -4229,7 +4278,7 @@ describe("the rows card draws the lists' places ('전부')", () => {
     const rt = t.rowsTool(realArt())!;
     expect(t.takeLateCard("")).toBe(true);
     t.call(rt, "card_rows", {});
-    await rt.run({ title: "강남역 주차장", rows: items.slice(0, 5).map((it) => ["강남", nameFee(it.name).name, "", "", "", it.url, ""]), more: true }, ctx);
+    await rt.run({ title: "강남역 주차장", rows: items.slice(0, 5).map((it) => ["강남", lotName(it.name).name, "", "", "", it.url, ""]), more: true }, ctx);
     const left = Array.from({ length: 10 }, (_, i) => `빌딩${String(i + 5).padStart(2, "0")} 주차장`).join(", ");
     expect(t.cardLine()).toStartWith(`카드에 5곳을 담았어요. 시간 안에 받을 수 있는 만큼만 받아서, 카드에 넣지 못한 곳이 12곳 더 있어요: ${left} 외 2곳.`);
   });
