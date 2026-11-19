@@ -1,0 +1,761 @@
+{
+  "when": "2026-11-11T23:23:09.759Z",
+  "results": [
+    {
+      "tag": "chromium/light",
+      "name": "server: every thread carries preview (string) and waiting (null | {kind, text})",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no agent head; the search comes first",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "'맡긴 일' with the '보관한 대화' text switch",
+      "ok": true,
+      "detail": {
+        "h": "맡긴 일",
+        "b": "보관한 대화"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no '지금 하는 일' while nothing is live",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "rows: subtitles are the agent's last sentence (2-line clamp)",
+      "ok": true,
+      "detail": [
+        [
+          "깽이와 진우님의 모시",
+          "진우님의 모시와 친구가 되었어요.",
+          "2"
+        ],
+        [
+          "연세바른치과에 전화",
+          "02-****-1234로 전화해서 전했어요.",
+          "2"
+        ],
+        [
+          "11월 12일 주간회의",
+          "정한 것 2개, 할 일 2개를 정리했어요.",
+          "2"
+        ],
+        [
+          "이사 준비",
+          "체크리스트를 만들었어요.",
+          "2"
+        ],
+        [
+          "아침 브리핑",
+          "내일 오전 7:00에 보내 드릴게요.",
+          "2"
+        ]
+      ]
+    },
+    {
+      "tag": "chromium/light",
+      "name": "rows: 20 px glyphs, no plates; the friend shows their agent's face",
+      "ok": true,
+      "detail": [
+        {
+          "w": 24,
+          "avatar": true
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        }
+      ]
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no badges",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no unmasked number in the drawer",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "archive switch: heading '보관한 대화', button back to '맡긴 일'",
+      "ok": true,
+      "detail": {
+        "h": "보관한 대화",
+        "b": "맡긴 일"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "empty search lists the recent conversations",
+      "ok": true,
+      "detail": {
+        "head": "최근 대화",
+        "n": 5,
+        "label": "최근 대화"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "초성 ㅎㅇ → 11월 12일 주간회의, the matched letters bold",
+      "ok": true,
+      "detail": {
+        "n": 1,
+        "text": "11월 12일 주간회의",
+        "titleWeight": "400",
+        "mark": {
+          "text": "회의",
+          "weight": "700",
+          "color": "rgb(29, 29, 31)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "label": "rgb(29, 29, 31)",
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true,
+        "coarse": true
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "hit title regular, matched letters --label (not accent)",
+      "ok": true,
+      "detail": {
+        "w": "400",
+        "mark": "rgb(29, 29, 31)",
+        "label": "rgb(29, 29, 31)"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "phone (coarse pointer): no accent slab; the top hit shows the chevron",
+      "ok": true,
+      "detail": {
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no hit: says so and how to search",
+      "ok": true,
+      "detail": "찾는 대화가 없어요\n다른 글자나 초성으로 찾아보세요"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "'지금 하는 일' pinned above 기본 채팅 with the meeting",
+      "ok": true,
+      "detail": {
+        "live": [
+          {
+            "title": "11월 12일 주간회의",
+            "sub": "회의 중 · 듣고 받아 적고 있어요."
+          }
+        ],
+        "before": true
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "the live meeting left '맡긴 일' (no duplicate row), still no badge",
+      "ok": true,
+      "detail": [
+        "깽이와 진우님의 모시",
+        "연세바른치과에 전화",
+        "이사 준비",
+        "아침 브리핑"
+      ]
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "server: every thread carries preview (string) and waiting (null | {kind, text})",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no agent head; the search comes first",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "'맡긴 일' with the '보관한 대화' text switch",
+      "ok": true,
+      "detail": {
+        "h": "맡긴 일",
+        "b": "보관한 대화"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no '지금 하는 일' while nothing is live",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "rows: subtitles are the agent's last sentence (2-line clamp)",
+      "ok": true,
+      "detail": [
+        [
+          "깽이와 진우님의 모시",
+          "진우님의 모시와 친구가 되었어요.",
+          "2"
+        ],
+        [
+          "연세바른치과에 전화",
+          "02-****-1234로 전화해서 전했어요.",
+          "2"
+        ],
+        [
+          "11월 12일 주간회의",
+          "정한 것 2개, 할 일 2개를 정리했어요.",
+          "2"
+        ],
+        [
+          "이사 준비",
+          "체크리스트를 만들었어요.",
+          "2"
+        ],
+        [
+          "아침 브리핑",
+          "내일 오전 7:00에 보내 드릴게요.",
+          "2"
+        ]
+      ]
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "rows: 20 px glyphs, no plates; the friend shows their agent's face",
+      "ok": true,
+      "detail": [
+        {
+          "w": 24,
+          "avatar": true
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        }
+      ]
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no badges",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no unmasked number in the drawer",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "archive switch: heading '보관한 대화', button back to '맡긴 일'",
+      "ok": true,
+      "detail": {
+        "h": "보관한 대화",
+        "b": "맡긴 일"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "empty search lists the recent conversations",
+      "ok": true,
+      "detail": {
+        "head": "최근 대화",
+        "n": 5,
+        "label": "최근 대화"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "초성 ㅎㅇ → 11월 12일 주간회의, the matched letters bold",
+      "ok": true,
+      "detail": {
+        "n": 1,
+        "text": "11월 12일 주간회의",
+        "titleWeight": "400",
+        "mark": {
+          "text": "회의",
+          "weight": "700",
+          "color": "rgb(245, 245, 247)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "label": "rgb(245, 245, 247)",
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true,
+        "coarse": true
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "hit title regular, matched letters --label (not accent)",
+      "ok": true,
+      "detail": {
+        "w": "400",
+        "mark": "rgb(245, 245, 247)",
+        "label": "rgb(245, 245, 247)"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "phone (coarse pointer): no accent slab; the top hit shows the chevron",
+      "ok": true,
+      "detail": {
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no hit: says so and how to search",
+      "ok": true,
+      "detail": "찾는 대화가 없어요\n다른 글자나 초성으로 찾아보세요"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "'지금 하는 일' pinned above 기본 채팅 with the meeting",
+      "ok": true,
+      "detail": {
+        "live": [
+          {
+            "title": "11월 12일 주간회의",
+            "sub": "회의 중 · 듣고 받아 적고 있어요."
+          }
+        ],
+        "before": true
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "the live meeting left '맡긴 일' (no duplicate row), still no badge",
+      "ok": true,
+      "detail": [
+        "깽이와 진우님의 모시",
+        "연세바른치과에 전화",
+        "이사 준비",
+        "아침 브리핑"
+      ]
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/light",
+      "name": "server: every thread carries preview (string) and waiting (null | {kind, text})",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no agent head; the search comes first",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "'맡긴 일' with the '보관한 대화' text switch",
+      "ok": true,
+      "detail": {
+        "h": "맡긴 일",
+        "b": "보관한 대화"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no '지금 하는 일' while nothing is live",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "rows: subtitles are the agent's last sentence (2-line clamp)",
+      "ok": true,
+      "detail": [
+        [
+          "깽이와 진우님의 모시",
+          "진우님의 모시와 친구가 되었어요.",
+          "2"
+        ],
+        [
+          "연세바른치과에 전화",
+          "02-****-1234로 전화해서 전했어요.",
+          "2"
+        ],
+        [
+          "11월 12일 주간회의",
+          "정한 것 2개, 할 일 2개를 정리했어요.",
+          "2"
+        ],
+        [
+          "이사 준비",
+          "체크리스트를 만들었어요.",
+          "2"
+        ],
+        [
+          "아침 브리핑",
+          "내일 오전 7:00에 보내 드릴게요.",
+          "2"
+        ]
+      ]
+    },
+    {
+      "tag": "webkit/light",
+      "name": "rows: 20 px glyphs, no plates; the friend shows their agent's face",
+      "ok": true,
+      "detail": [
+        {
+          "w": 24,
+          "avatar": true
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        }
+      ]
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no badges",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no unmasked number in the drawer",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "archive switch: heading '보관한 대화', button back to '맡긴 일'",
+      "ok": true,
+      "detail": {
+        "h": "보관한 대화",
+        "b": "맡긴 일"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "empty search lists the recent conversations",
+      "ok": true,
+      "detail": {
+        "head": "최근 대화",
+        "n": 5,
+        "label": "최근 대화"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "초성 ㅎㅇ → 11월 12일 주간회의, the matched letters bold",
+      "ok": true,
+      "detail": {
+        "n": 1,
+        "text": "11월 12일 주간회의",
+        "titleWeight": "400",
+        "mark": {
+          "text": "회의",
+          "weight": "700",
+          "color": "rgb(29, 29, 31)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "label": "rgb(29, 29, 31)",
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true,
+        "coarse": true
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "hit title regular, matched letters --label (not accent)",
+      "ok": true,
+      "detail": {
+        "w": "400",
+        "mark": "rgb(29, 29, 31)",
+        "label": "rgb(29, 29, 31)"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "phone (coarse pointer): no accent slab; the top hit shows the chevron",
+      "ok": true,
+      "detail": {
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no hit: says so and how to search",
+      "ok": true,
+      "detail": "찾는 대화가 없어요\n다른 글자나 초성으로 찾아보세요"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "'지금 하는 일' pinned above 기본 채팅 with the meeting",
+      "ok": true,
+      "detail": {
+        "live": [
+          {
+            "title": "11월 12일 주간회의",
+            "sub": "회의 중 · 듣고 받아 적고 있어요."
+          }
+        ],
+        "before": true
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "the live meeting left '맡긴 일' (no duplicate row), still no badge",
+      "ok": true,
+      "detail": [
+        "깽이와 진우님의 모시",
+        "연세바른치과에 전화",
+        "이사 준비",
+        "아침 브리핑"
+      ]
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "server: every thread carries preview (string) and waiting (null | {kind, text})",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no agent head; the search comes first",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "'맡긴 일' with the '보관한 대화' text switch",
+      "ok": true,
+      "detail": {
+        "h": "맡긴 일",
+        "b": "보관한 대화"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no '지금 하는 일' while nothing is live",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "rows: subtitles are the agent's last sentence (2-line clamp)",
+      "ok": true,
+      "detail": [
+        [
+          "깽이와 진우님의 모시",
+          "진우님의 모시와 친구가 되었어요.",
+          "2"
+        ],
+        [
+          "연세바른치과에 전화",
+          "02-****-1234로 전화해서 전했어요.",
+          "2"
+        ],
+        [
+          "11월 12일 주간회의",
+          "정한 것 2개, 할 일 2개를 정리했어요.",
+          "2"
+        ],
+        [
+          "이사 준비",
+          "체크리스트를 만들었어요.",
+          "2"
+        ],
+        [
+          "아침 브리핑",
+          "내일 오전 7:00에 보내 드릴게요.",
+          "2"
+        ]
+      ]
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "rows: 20 px glyphs, no plates; the friend shows their agent's face",
+      "ok": true,
+      "detail": [
+        {
+          "w": 24,
+          "avatar": true
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        },
+        {
+          "w": 20,
+          "avatar": false
+        }
+      ]
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no badges",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no unmasked number in the drawer",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "archive switch: heading '보관한 대화', button back to '맡긴 일'",
+      "ok": true,
+      "detail": {
+        "h": "보관한 대화",
+        "b": "맡긴 일"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "empty search lists the recent conversations",
+      "ok": true,
+      "detail": {
+        "head": "최근 대화",
+        "n": 5,
+        "label": "최근 대화"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "초성 ㅎㅇ → 11월 12일 주간회의, the matched letters bold",
+      "ok": true,
+      "detail": {
+        "n": 1,
+        "text": "11월 12일 주간회의",
+        "titleWeight": "400",
+        "mark": {
+          "text": "회의",
+          "weight": "700",
+          "color": "rgb(245, 245, 247)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "label": "rgb(245, 245, 247)",
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true,
+        "coarse": true
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "hit title regular, matched letters --label (not accent)",
+      "ok": true,
+      "detail": {
+        "w": "400",
+        "mark": "rgb(245, 245, 247)",
+        "label": "rgb(245, 245, 247)"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "phone (coarse pointer): no accent slab; the top hit shows the chevron",
+      "ok": true,
+      "detail": {
+        "slab": "rgba(0, 0, 0, 0)",
+        "chev": true
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no hit: says so and how to search",
+      "ok": true,
+      "detail": "찾는 대화가 없어요\n다른 글자나 초성으로 찾아보세요"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "'지금 하는 일' pinned above 기본 채팅 with the meeting",
+      "ok": true,
+      "detail": {
+        "live": [
+          {
+            "title": "11월 12일 주간회의",
+            "sub": "회의 중 · 듣고 받아 적고 있어요."
+          }
+        ],
+        "before": true
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "the live meeting left '맡긴 일' (no duplicate row), still no badge",
+      "ok": true,
+      "detail": [
+        "깽이와 진우님의 모시",
+        "연세바른치과에 전화",
+        "이사 준비",
+        "아침 브리핑"
+      ]
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    }
+  ]
+}

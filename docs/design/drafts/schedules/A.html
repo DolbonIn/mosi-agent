@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 일정 · A 두 줄 행</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <div class="d-on-list">
+  <main class="k-screen d-masked">
+    <div class="d-scroll">
+      <h1 class="d-large">예약된 일</h1>
+      <div class="d-page">
+        <div class="d-paper" role="list" aria-label="예약 목록">
+            <div class="d-row d-sched"><button class="d-row-main" aria-label="모닝콜, 매일 오전 7:30" data-open><span class="d-main"><span class="d-title">모닝콜</span><span class="d-sub tnum">매일 오전 7:30 · <span data-for="s1" data-show="on">다음은 오늘</span><span data-for="s1" data-show="off" hidden>꺼져 있어요</span></span></span></button><button class="d-toggle" id="s1" role="switch" aria-checked="true" aria-label="모닝콜 켜기"><i></i></button></div>
+            <div class="d-row d-sched"><button class="d-row-main" aria-label="출석체크, 평일 오전 9:00" data-open><span class="d-main"><span class="d-title">출석체크</span><span class="d-sub tnum">평일 오전 9:00 · <span data-for="s2" data-show="on">다음은 오늘</span><span data-for="s2" data-show="off" hidden>꺼져 있어요</span></span></span></button><button class="d-toggle" id="s2" role="switch" aria-checked="true" aria-label="출석체크 켜기"><i></i></button></div>
+            <div class="d-row d-sched" data-off><button class="d-row-main" aria-label="저녁 브리핑, 매일 오후 9:30" data-open><span class="d-main"><span class="d-title">저녁 브리핑</span><span class="d-sub tnum">매일 오후 9:30 · <span data-for="s3" data-show="on">다음은 오늘</span><span data-for="s3" data-show="off" hidden>꺼져 있어요</span></span></span></button><button class="d-toggle" id="s3" role="switch" aria-checked="false" aria-label="저녁 브리핑 켜기"><i></i></button></div>
+        </div>
+        <!-- one add action, named for where it goes (보관함's empty CTA pattern); the hint names the agent, josa-safe -->
+        <div class="d-new">
+          <button class="d-btn d-btn--neutral">깽이에게 예약 부탁하기</button>
+          <p class="d-note">“매일 7시 30분에 깨워 줘”처럼 말하면 깽이가 예약을 만들어요.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 2 glass shapes (back circle, tab bar). The top-bar "+" is gone: it was a 4th glass shape doing what
+       the content already offers (critique P1); the agent's name is not repeated on a pushed screen (RH-1) -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="뒤로"><i data-icon="chevron-left" data-weight="medium"></i></button>
+  </header>
+  <div class="k-bottom">
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab"><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab" data-on><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+
+  <!-- ?state=sheet: 모닝콜, opened from its row (the sheet morphs out of the row) -->
+  <div class="d-sheet-layer">
+    <div class="d-scrim"></div>
+    <section class="glass d-sheet" data-sheet role="dialog" aria-modal="true" aria-labelledby="sh-h">
+      <div class="d-sheet-head">
+        <span class="d-grabber"></span>
+        <h2 class="d-sheet-title" id="sh-h">모닝콜</h2>
+        <button class="d-sheet-close" aria-label="닫기"><span><i data-icon="close" data-size="16" data-weight="semibold"></i></span></button>
+      </div>
+      <div class="d-sheet-body">
+        <!-- facts: label / value rows on the sheet itself, no recessed panel, no guessed glyphs -->
+        <dl class="d-facts tnum">
+          <div class="d-fact"><dt>반복</dt><dd>매일 오전 7:30</dd></div>
+          <div class="d-fact"><dt>다음 실행</dt><dd>오늘 오전 7:30</dd></div>
+          <div class="d-fact"><dt>마지막 실행</dt><dd>아직 없어요</dd></div>
+        </dl>
+        <!-- what was asked, as quoted words (not a field that invites a tap) -->
+        <div class="d-asked">
+          <h3 class="d-h2">깽이에게 맡긴 일</h3>
+          <p class="d-quote">“7시 30분에 전화로 깨워 줘”</p>
+        </div>
+        <!-- the one way to change it, said out loud (critique Q1): fills the composer with "모닝콜 바꿔 줘", never sends -->
+        <button class="d-btn d-btn--neutral d-btn--full">깽이에게 바꿔 달라고 하기</button>
+        <!-- delete: compact and centred like 보관함's, two taps (한 번 더 누르면 지워요) -->
+        <div class="d-danger-zone">
+          <button class="d-btn d-btn--danger">예약 지우기</button>
+          <p class="d-note">지우면 다음 실행부터 멈춰요. 지난 결과는 대화에 그대로 남아요.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <!-- ?state=chat: where a schedule is made (critique shot 16). Chrome per the kit: menu, name as text, composer, tab bar -->
+  <div class="d-on-chat">
+  <main class="k-screen has-composer" aria-label="대화">
+    <div class="d-thread">
+      <div class="d-me">내일 일정 알려 줘</div>
+      <div class="d-asst">내일은 오전 10시 팀 회의 하나예요. 회의실은 3층 큰 방이에요.</div>
+      <div class="d-me">매일 아침 7시에 날씨랑 뉴스 브리핑해줘</div>
+      <div class="d-steps"><span><i data-icon="check-circle" data-size="16" data-weight="medium"></i></span><span class="tnum">1단계 · 3초</span><span><i data-icon="chevron-down" data-size="14" data-weight="medium"></i></span></div>
+      <div class="d-asst">매일 아침 7시에 브리핑을 보내 드릴게요.</div>
+      <section class="d-ccard d-sched" aria-label="예약"><span class="d-main"><span class="d-title">아침 브리핑</span><span class="d-sub tnum">매일 오전 7:00</span></span><button class="d-toggle" id="c1" role="switch" aria-checked="true" aria-label="아침 브리핑 켜기"><i></i></button></section>
+    </div>
+  </main>
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><i data-icon="menu" data-weight="medium"></i></button>
+    <div class="k-title"><i data-avatar data-size="30"></i>깽이</div>
+  </header>
+  <div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><i data-icon="plus"></i></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><i data-icon="mic"></i></span>
+      <span class="k-composer-icon"><i data-icon="phone"></i></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "일정",
+  "variant": "A",
+  "title": "두 줄 행: 타일과 중복 시간을 걷고, 만드는 길은 하나",
+  "rationale": [
+    "위쪽 '+'와 '새 예약 만들기' 두 개를 '깽이에게 예약 부탁하기' 하나로 줄였어요. 어디로 가는지 이름이 말해 줘요. 유리 모양은 넷에서 둘이 돼요 (P1-1).",
+    "제목으로 추측하던 아이콘 타일(sparkles 포함)을 없앴어요. 행은 16px 여백에서 시작하고 구분선도 16px에서 시작해요 (P2-1, IT-6, CP-8).",
+    "세 줄 행은 두 줄이 돼요: 이름, 그리고 '매일 오전 7:30 · 다음은 오늘'. '다음 오늘'은 사라지고, 꺼진 행은 '꺼져 있어요'예요 (P2-2).",
+    "시트의 오목한 패널과 타일 대신 라벨과 값 행이에요. 맡긴 일은 입력창처럼 보이지 않게 따옴표 친 문장이고, 지우기는 작은 가운데 캡슐이에요 (P2-3, NC).",
+    "시트에 '깽이에게 바꿔 달라고 하기'를 넣었어요. 시간이나 내용을 바꾸려면 지우고 다시 부탁해야 했는데, 대화로 바꾸는 길을 이름으로 알려 줘요(critique 질문 1). 힌트는 에이전트 이름과 '깨워 줘' 띄어쓰기를 써요."
+  ],
+  "motion": [
+    "토글은 lead/trail knob, snap 트랙, 누르면 렌즈 (§3 Toggle)",
+    "켜고 끄면 '다음은 오늘' ↔ '꺼져 있어요'가 content swap (§3)",
+    "행 → 시트 morph, 닫힐 때 재등장 없음 (§3 Sheet, §8.2)",
+    "지우기는 두 번 누르기 확인, 서버 확인 뒤 loader → check (§3, §8.6)"
+  ],
+  "fixes": ["P1-1", "P2-1", "P2-2", "P2-3", "P2-4", "slop:GL-2", "critique:Q1"],
+  "compare": [
+    "chromium-light-41-schedules.jpg",
+    "chromium-light-42-schedule-sheet.jpg",
+    "chromium-light-16-chat-schedule-card.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+<script src="draft-state.js"></script>
+</body>
+</html>

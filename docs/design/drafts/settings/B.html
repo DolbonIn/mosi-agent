@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 설정 · B 말한 그대로</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen d-masked d-screen-privacy">
+    <div class="d-scroll">
+      <h1 class="d-large">정보 공개 범위</h1>
+      <div class="d-page">
+
+        <!-- P1: first, and the off-confirm grows in place inside the same group (two-step tap in the same place, §8.6) -->
+        <section class="d-section" aria-labelledby="send-h">
+          <h2 class="d-h2" id="send-h">보내기 전에</h2>
+          <div class="d-paper" data-confirm-host>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="send-t">다른 사람에게 보내기 전에 묻기</span><span class="d-sub" data-for="send" data-show="on">메시지를 보내기 전에 보낼 내용을 그대로 보여 드리고 확인받아요</span><span class="d-sub" data-for="send" data-show="off" hidden>지금은 묻지 않고 바로 보내요</span></span><button class="d-toggle" id="send" role="switch" aria-checked="true" aria-labelledby="send-t" data-guard><i></i></button></div>
+            <!-- a11y: not modal, so a labelled group read politely; focus goes to 취소, 취소/Esc returns it to the switch -->
+            <div class="d-inline-confirm d-rule" role="group" aria-live="polite" aria-labelledby="cf-h" aria-describedby="cf-b">
+              <p class="d-confirm-title" id="cf-h">이제 깽이가 묻지 않고 보내요</p>
+              <p class="d-confirm-body" id="cf-b">언제든 여기서 다시 켤 수 있어요.</p>
+              <div class="d-confirm-actions">
+                <button class="d-btn d-btn--neutral" data-act="cancel">취소</button>
+                <button class="d-btn d-btn--danger" data-act="off">끄기</button>
+              </div>
+            </div>
+          </div>
+          <p class="d-foot">결제와 지우기처럼 되돌릴 수 없는 일은 이 설정과 관계없이 항상 확인받아요.</p>
+        </section>
+
+        <!-- the preview card is gone: each row's subtitle IS what the friend's agent sees, and swaps with the toggle -->
+        <section class="d-section" aria-labelledby="fr-h">
+          <h2 class="d-h2" id="fr-h">친구의 모시에게</h2>
+          <div class="d-paper" aria-live="polite">
+            <div class="d-row"><span class="d-main"><span class="d-title" id="ask-t">부탁 받기</span><span class="d-sub" data-for="ask" data-show="on">친구의 모시가 내 모시에게 말을 전하거나 물어볼 수 있어요</span><span class="d-sub" data-for="ask" data-show="off" hidden>친구의 모시는 부탁할 수 없어요</span></span><button class="d-toggle" id="ask" role="switch" aria-checked="true" aria-labelledby="ask-t"><i></i></button></div>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="sched-t">내 일정 보여 주기</span><span class="d-sub" data-for="sched" data-show="on">친구의 모시에게 ‘오후 3:00 · 팀 회의’처럼 제목과 시간만 보여요</span><span class="d-sub" data-for="sched" data-show="off" hidden>친구의 모시는 내 일정을 볼 수 없어요</span></span><button class="d-toggle" id="sched" role="switch" aria-checked="false" aria-labelledby="sched-t"><i></i></button></div>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="loc-t">대략적인 위치</span><span class="d-sub" data-for="loc" data-show="on">‘강남구 근처’처럼 구 단위까지만 보여요</span><span class="d-sub" data-for="loc" data-show="off" hidden>친구의 모시는 내 위치를 볼 수 없어요</span></span><button class="d-toggle" id="loc" role="switch" aria-checked="false" aria-labelledby="loc-t"><i></i></button></div>
+          </div>
+          <p class="d-foot">로그인 정보는 어떤 경우에도 친구의 모시에게 보이지 않아요.</p>
+        </section>
+
+        <section class="d-section" aria-labelledby="mem-h">
+          <h2 class="d-h2" id="mem-h">깽이</h2>
+          <div class="d-paper">
+            <div class="d-row"><span class="d-main"><span class="d-title" id="mem-t">깽이가 기억하기</span><span class="d-sub">대화에서 알게 된 취향과 정보를 기억해 다음에 써요</span></span><button class="d-toggle" id="mem" role="switch" aria-checked="true" aria-labelledby="mem-t"><i></i></button></div>
+            <button class="d-row d-press"><span class="d-main"><span class="d-title">기억한 내용 보기</span></span><span class="d-chev"><i data-icon="chevron-right" data-size="16" data-weight="semibold"></i></span></button>
+          </div>
+          <p class="d-foot">끄면 새로 기억하지 않아요. 이미 기억한 내용은 깽이 설정에서 하나씩 지울 수 있어요.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <main class="k-screen d-masked d-screen-notif">
+    <div class="d-scroll">
+      <h1 class="d-large">알림 설정</h1>
+      <div class="d-page">
+        <section class="d-paper d-device" aria-labelledby="dev-h">
+          <h2 class="d-device-title" id="dev-h">이 기기에서 알림을 받으려면 허용해 주세요</h2>
+          <p class="d-confirm-body" style="margin-top: -6px">허용하기 전에는 아래 알림이 앱을 닫았을 때 오지 않아요.</p>
+          <button class="d-btn d-btn--primary d-btn--lg d-btn--full">알림 허용하기</button>
+        </section>
+        <section class="d-section" aria-labelledby="kinds-h">
+          <h2 class="d-h2" id="kinds-h">깽이가 보내는 알림</h2>
+          <div class="d-paper">
+            <div class="d-row"><span class="d-main"><span class="d-title" id="brief-t">매일 브리핑</span><span class="d-sub">날씨·일정·뉴스를 정해진 시간에 정리해 보내요</span></span><button class="d-toggle" id="brief" role="switch" aria-checked="true" aria-labelledby="brief-t" disabled><i></i></button></div>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="bt-t">브리핑 시간</span></span><span class="d-time tnum is-off" aria-labelledby="bt-t" aria-disabled="true">오전 7:30</span></div>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="done-t">맡긴 일 완료</span><span class="d-sub">맡긴 일이 끝나면 알려요</span></span><button class="d-toggle" id="done" role="switch" aria-checked="true" aria-labelledby="done-t" disabled><i></i></button></div>
+            <div class="d-row"><span class="d-main"><span class="d-title" id="friend-t">친구 메시지</span><span class="d-sub">친구나 친구의 모시가 말을 전하면 알려요</span></span><button class="d-toggle" id="friend" role="switch" aria-checked="true" aria-labelledby="friend-t" disabled><i></i></button></div>
+          </div>
+          <p class="d-foot">앱을 쓰는 동안에는 화면 맨 위에서 알림이 잠깐 내려와요.</p>
+        </section>
+        <section class="d-section" aria-labelledby="opt-h">
+          <h2 class="d-h2" id="opt-h">선택 동의</h2>
+          <div class="d-paper">
+            <div class="d-row"><span class="d-main"><span class="d-title" id="promo-t">혜택·소식</span><span class="d-sub">켜면 알림 없이 목록에만 쌓여요</span></span><button class="d-toggle" id="promo" role="switch" aria-checked="false" aria-labelledby="promo-t" disabled><i></i></button></div>
+          </div>
+          <p class="d-foot">새 기능과 혜택 소식은 동의한 경우에만 보내요. 언제든 끌 수 있어요.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <main class="k-screen d-masked d-screen-display">
+    <div class="d-scroll">
+      <h1 class="d-large">화면 및 디자인</h1>
+      <div class="d-page">
+        <section class="d-section" aria-labelledby="th-h">
+          <h2 class="d-h2" id="th-h">테마</h2>
+          <div class="d-paper" role="radiogroup" aria-label="테마">
+            <button class="d-row d-press" role="radio" aria-checked="true"><span class="d-main"><span class="d-title">시스템 따름</span></span><span class="d-check"><i data-icon="checkmark" data-size="20" data-weight="semibold"></i></span></button><button class="d-row d-press" role="radio" aria-checked="false"><span class="d-main"><span class="d-title">라이트</span></span></button><button class="d-row d-press" role="radio" aria-checked="false"><span class="d-main"><span class="d-title">다크</span></span></button>
+          </div>
+          <p class="d-foot d-theme-now">지금은 기기 설정에 맞춰 <span data-when="light">라이트</span><span data-when="dark">다크</span>로 보여요.</p>
+        </section>
+        <section class="d-section" aria-labelledby="ts-h">
+          <h2 class="d-h2" id="ts-h">글자 크기</h2>
+          <div class="d-paper d-tp-card">
+            <div class="d-tp" aria-hidden="true"><p class="d-tp-me">내일 아침 날씨 알려 줘</p><p class="d-tp-agent">내일 아침 서울은 맑고 6도예요. 낮에는 14도까지 올라가니 얇은 겉옷이면 충분해요. 깽이가 7시에 한 번 더 알려 드릴게요.</p></div>
+            <div class="d-rule d-tp-slider"><div class="d-slider" role="group" aria-label="글자 크기"><span class="d-slider-icon"><i data-icon="minus" data-size="18" data-weight="semibold"></i></span><span class="d-slider-area" role="slider" tabindex="0" aria-label="글자 크기" aria-valuemin="90" aria-valuemax="130" aria-valuenow="100" aria-valuetext="100%" style="--v: 0.25"><span class="d-slider-track"><span class="d-slider-fill"></span></span><span class="d-slider-knob"></span></span><span class="d-slider-icon"><i data-icon="plus" data-size="18" data-weight="semibold"></i></span><span class="d-slider-value tnum">100%</span></div></div>
+          </div>
+          <p class="d-foot">손을 떼면 앱 전체 글자 크기가 바뀌어요. 기본은 100%예요.</p>
+        </section>
+        <section class="d-section" aria-labelledby="ov-h">
+          <h2 class="d-h2" id="ov-h">시스템과 다르게</h2>
+          <div class="d-paper">
+            <div class="d-row d-row--stack"><span class="d-row-line"><span class="d-title">동작 줄이기</span><span class="d-detail">지금은 꺼짐</span></span><div class="d-seg d-seg--sm" role="radiogroup" aria-label="동작 줄이기" id="seg-motion" style="--on: 0; --n: 3"><i class="d-seg-thumb"></i><button class="d-seg-item" role="radio" aria-checked="true" data-on>시스템 따름</button><button class="d-seg-item" role="radio" aria-checked="false">켜기</button><button class="d-seg-item" role="radio" aria-checked="false">끄기</button></div></div>
+            <div class="d-row d-row--stack"><span class="d-row-line"><span class="d-title">투명도 줄이기</span><span class="d-detail">지금은 꺼짐</span></span><div class="d-seg d-seg--sm" role="radiogroup" aria-label="투명도 줄이기" id="seg-glass" style="--on: 0; --n: 3"><i class="d-seg-thumb"></i><button class="d-seg-item" role="radio" aria-checked="true" data-on>시스템 따름</button><button class="d-seg-item" role="radio" aria-checked="false">켜기</button><button class="d-seg-item" role="radio" aria-checked="false">끄기</button></div></div>
+          </div>
+          <p class="d-foot">켜면 화면 전환과 유리 효과를 줄여요. 기기의 손쉬운 사용 설정을 따르는 게 기본이에요.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 2 glass shapes (back circle, tab bar). A pushed screen never repeats the agent's name up top (RH-1);
+       the title appears there only once the large title scrolls away -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="뒤로"><i data-icon="chevron-left" data-weight="medium"></i></button>
+  </header>
+  <div class="k-bottom">
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab"><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab" data-on><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "설정",
+  "variant": "B",
+  "title": "말한 그대로: 미리보기를 행 안으로, 끄기 확인은 그 자리에서",
+  "rationale": [
+    "'보내기 전에 묻기'가 맨 위예요. 끄려고 하면 모달 대신 그 행이 morph로 자라며 '이제 깽이가 묻지 않고 보내요 · 취소/끄기'를 보여 줘요. 같은 자리에서 두 번 누르는 확인이고, 다시 켤 때는 묻지 않아요 (P1-1, §8.6).",
+    "'친구의 모시는 이렇게 봐요' 카드를 없앴어요. 각 행의 부제가 친구의 모시가 실제로 보는 내용이고, 토글과 함께 바뀌어요. 같은 말을 두 번 하지 않아요 (P2-1, GR-R3, critique 질문 4).",
+    "판, 타일, sparkles를 모두 뺐어요. 이 화면의 상자는 묶음 세 개뿐이에요 (P2-2, IT-15, IT-16, CP-8).",
+    "알림 설정(보조 캡처)은 기기 상태로 시작해요. 허용 전에는 종류별 토글을 저장된 상태 그대로 흐리게 보여 줘서, 켜져 보이는데 오지 않는 일이 없어요 (P1-2, critique 질문 2).",
+    "섹션 제목은 h2, 화면 이름은 '정보 공개 범위' 하나예요 (skipped-heading, Naming)."
+  ],
+  "motion": [
+    "끄기 확인은 같은 묶음이 morph로 커지고 내용은 content swap으로 들어와요 (§3 Morph, Content swap)",
+    "토글 knob은 lead/trail 두 모서리, 트랙은 snap으로 채워져요 (§3 Toggle)",
+    "행 부제는 토글과 함께 content swap으로 바뀌어요 (§3)",
+    "저장 실패 시 토글이 되돌아가고 섬 배너가 말해요 (§8.13)"
+  ],
+  "fixes": [
+    "P1-1",
+    "P1-2",
+    "P2-2",
+    "P2-3",
+    "slop:IT-15",
+    "critique:Q4"
+  ],
+  "compare": [
+    "chromium-light-47-settings-privacy.jpg",
+    "chromium-light-46-settings-notifications.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+<script src="draft-state.js"></script>
+</body>
+</html>

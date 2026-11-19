@@ -1,0 +1,152 @@
+.sheet-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 40;
+}
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+.sheet-scrim[data-dim="none"] {
+  background: transparent; /* undimmed modal: still catches the tap, draws nothing */
+}
+.sheet-panel {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + var(--safe-bottom) + var(--kb));
+  max-height: calc(100% - var(--chrome-top) - 8px - var(--kb));
+  display: flex;
+  flex-direction: column;
+  padding: 10px; /* r38 − 10 → inner r28 */
+  outline: none;
+  overscroll-behavior: contain;
+}
+.sheet-head {
+  position: relative;
+  flex: none; /* a body taller than the sheet never squeezes the head under its title (min-height is only a floor) */
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  min-height: 52px;
+  padding-top: 8px;
+  touch-action: none;
+  cursor: grab;
+}
+.sheet-grabber {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 38px;
+  height: 5px;
+  margin-left: -19px;
+  border-radius: var(--r-capsule);
+  background: var(--fill-3);
+}
+.sheet-title {
+  grid-column: 2;
+  text-align: center;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  padding: 0 4px;
+}
+/* titleAlign "start": the title reads from the leading edge, a size up (the close plate keeps its corner) */
+.sheet-panel[data-title="start"] .sheet-head {
+  padding-top: 14px;
+}
+.sheet-panel[data-title="start"] .sheet-title {
+  grid-column: 1 / 3;
+  text-align: left;
+  font-size: var(--t-title3);
+  padding: 0 8px 0 14px;
+}
+/* a start title next to a leading button keeps to its own column, so the two never overlap */
+.sheet-panel[data-title="start"] .sheet-leading + .sheet-title {
+  grid-column: 2;
+  padding-left: 4px;
+}
+.sheet-close {
+  grid-column: 3;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-control);
+  color: var(--label-2);
+}
+.sheet-leading {
+  grid-column: 1; /* the head's empty leading slot (e.g. "이전 단계"), built like the close button */
+}
+.sheet-close-plate {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-capsule);
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.sheet-close:active .sheet-close-plate {
+  background: var(--fill-2);
+}
+.sheet-close[aria-disabled="true"] {
+  opacity: 0.4;
+}
+.sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 8px 12px;
+  border-radius: var(--r-sheet-inner);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sheet-body::-webkit-scrollbar {
+  display: none;
+}
+/* scroll edges, like Screen's top edge: rows thin out over the 12 px under the head once the body has scrolled
+   (data-scrolled) and over the 12 px at its end while more is below (data-more), so a cut row never sits as a hard line
+   against the head or the footer. Sheet.tsx ramps --edge-from / --edge-to over the 12 px of scroll next to each end, so
+   the first row at the top and the last row at the end are never thinned, and no edge pops in. */
+.sheet-panel[data-scrolled] .sheet-body,
+.sheet-panel[data-more] .sheet-body {
+  -webkit-mask-image: linear-gradient(to bottom, var(--edge-from, #000) 0, #000 12px, #000 calc(100% - 12px), var(--edge-to, #000) 100%);
+  mask-image: linear-gradient(to bottom, var(--edge-from, #000) 0, #000 12px, #000 calc(100% - 12px), var(--edge-to, #000) 100%);
+}
+/* increased contrast: no thinning; lines instead, under the head once the body has scrolled and above the footer while
+   more is below (none at a footer-less end: the sheet's rounded corner is the edge). Reduced transparency keeps the
+   thinning: the sheet is an opaque surface and nothing behind it shows through (Screen drops its mask there because the
+   wallpaper does). */
+:root[data-contrast="more"] .sheet-panel[data-scrolled] .sheet-body,
+:root[data-contrast="more"] .sheet-panel[data-more] .sheet-body {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+:root[data-contrast="more"] .sheet-panel[data-scrolled] .sheet-head::after,
+:root[data-contrast="more"] .sheet-panel[data-more] .sheet-footer::before {
+  content: "";
+  position: absolute;
+  z-index: 1; /* above the body's rows */
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  pointer-events: none;
+}
+:root[data-contrast="more"] .sheet-panel[data-scrolled] .sheet-head::after {
+  bottom: -1px;
+}
+:root[data-contrast="more"] .sheet-panel[data-more] .sheet-footer {
+  position: relative;
+}
+:root[data-contrast="more"] .sheet-panel[data-more] .sheet-footer::before {
+  top: 0;
+}
+.sheet-footer {
+  padding: 6px 4px 4px;
+}

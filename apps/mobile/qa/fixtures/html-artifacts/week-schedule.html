@@ -1,0 +1,66 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wk{text-wrap:pretty}
+.wk h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.sub{margin-top:2px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.days{list-style:none;margin-top:12px}
+.day{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.day:last-child{padding-bottom:0}
+.date{display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.dow{font-size:13px;color:var(--text-2)}
+.dn{display:grid;place-items:center;width:34px;height:34px;margin-top:4px;border-radius:50%;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.today .dow{color:var(--accent);font-weight:600}
+.today .dn{background:var(--accent-fill);color:var(--on-accent)}
+.evs{list-style:none;display:flex;flex-direction:column;gap:8px;min-width:0;padding-top:2px}
+.ev{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:baseline}
+.ev time{font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.ev b{display:block;font-size:16px;font-weight:600;line-height:1.4}
+.ev div span{display:block;font-size:14px;color:var(--text-2);line-height:1.45}
+.ev .allday{justify-self:start;padding:1px 8px;border-radius:999px;background:var(--surface);font-size:13px;line-height:1.5;color:var(--text-2)}
+.none{font-size:15px;color:var(--text-2);padding-top:6px}
+.free{display:flex;align-items:baseline;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;color:var(--text-2)}
+.free b{width:40px;text-align:center;font-size:15px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+</style>
+<section class="wk">
+  <h2>이번 주 일정</h2>
+  <p class="sub">11월 16일(월) – 22일(일) · 일정 7개</p>
+  <ol class="days">
+    <li class="day">
+      <div class="date"><span class="dow">월</span><span class="dn">16</span></div>
+      <ul class="evs">
+        <li class="ev"><time>09:30</time><div><b>주간 회의</b><span>온라인 · 30분</span></div></li>
+        <li class="ev"><time>15:00</time><div><b>디자인 리뷰</b><span>3층 회의실</span></div></li>
+      </ul>
+    </li>
+    <li class="day today">
+      <div class="date"><span class="dow">화</span><span class="dn">17</span></div>
+      <ul class="evs">
+        <li class="ev"><time>12:30</time><div><b>하늘과 점심</b><span>을지로 · 이동 20분</span></div></li>
+      </ul>
+    </li>
+    <li class="free"><b>18</b>수 · 일정 없음</li>
+    <li class="day">
+      <div class="date"><span class="dow">목</span><span class="dn">19</span></div>
+      <ul class="evs">
+        <li class="ev"><time>10:00</time><div><b>치과 정기 검진</b><span>예약 확인 문자 받음</span></div></li>
+        <li class="ev"><time>19:00</time><div><b>요가</b><span>매주 목요일</span></div></li>
+      </ul>
+    </li>
+    <li class="day">
+      <div class="date"><span class="dow">금</span><span class="dn">20</span></div>
+      <ul class="evs">
+        <li class="ev"><time>18:00</time><div><b>이하늘 생일 저녁</b><span>합정 · 선물 챙기기</span></div></li>
+      </ul>
+    </li>
+    <li class="day">
+      <div class="date"><span class="dow">토</span><span class="dn">21</span></div>
+      <ul class="evs">
+        <li class="ev"><span class="allday">종일</span><div><b>제주 여행</b><span>23일(월)까지</span></div></li>
+      </ul>
+    </li>
+    <li class="day">
+      <div class="date"><span class="dow">일</span><span class="dn">22</span></div>
+      <p class="none">제주 여행 중</p>
+    </li>
+  </ol>
+</section>

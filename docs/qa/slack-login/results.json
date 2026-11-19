@@ -1,0 +1,523 @@
+{
+  "at": "2026-11-11T19:03:55.220Z",
+  "api": "http://127.0.0.1:8853",
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "form: Slack 로그인 first (workspace optional + email, no token fields)",
+          "ok": true,
+          "detail": "슬랙\n연결 전\n\nSlack 계정으로 로그인하면 바로 연결돼요. 메일로 받은 코드로 로그인해서 비밀번호는 필요 없어요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수"
+        },
+        {
+          "name": "form: 고급: 토큰 직접 입력 is offered",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "form: 코드 받기 is disabled until an email is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: the old token + cookie form",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: 'Slack 로그인으로 돌아가기' goes back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sso: friendly Korean message, no automation of the company login",
+          "ok": true,
+          "detail": "이 워크스페이스는 회사 SSO(Google·Okta 등)로만 로그인할 수 있어요. 아직 지원하지 않아서 '고급: 토큰 직접 입력'을 써 주세요."
+        },
+        {
+          "name": "sso: offers 토큰 직접 입력으로 연결하기",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "password form: 비밀번호 field is autocomplete=current-password",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "progress: the button says what is happening",
+          "ok": true,
+          "detail": "Slack에 로그인하는 중"
+        },
+        {
+          "name": "2fa: numeric OTP (inputmode numeric, one-time-code)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "2fa: wrong code → Korean message, same step",
+          "ok": true,
+          "detail": "인증 코드가 맞지 않아요. 새 코드로 다시 입력해 주세요."
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code input, upper-case letters allowed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: says where the code went",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: typed letters are upper-cased into the cells",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: wrong code → 그 코드는 맞지 않아요-style Korean message, retry allowed",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 메일에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "workspaces: both of the account's workspaces are listed",
+          "ok": true,
+          "detail": "Acme Corp\nacme.slack.com | Beta Labs\nbeta.slack.com"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: slack is connected for this user",
+          "ok": true,
+          "detail": "{\"provider\":\"slack\",\"status\":\"connected\",\"accountLabel\":\"kim · Beta Labs\",\"credentialId\":\"f9c88b0c-4c34-4ac8-8655-53d28e0dfd4b\",\"lastError\":null,\"connectedAt\":1794423856771,\"updatedAt\":1794423856771}"
+        },
+        {
+          "name": "vault: the session is a sealed credential (hint = the workspace, never the token)",
+          "ok": true,
+          "detail": "{\"id\":\"f9c88b0c-4c34-4ac8-8655-53d28e0dfd4b\",\"service\":\"slack\",\"serviceName\":\"슬랙\",\"label\":\"슬랙 (beta.slack.com)\",\"kind\":\"token\",\"hint\":\"beta.slack.com\",\"keepFor\":\"30d\",\"expiresAt\":1797015856769,\"expire"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "slack-chromium-light-01-connections-list.png",
+        "slack-chromium-light-02-form.png",
+        "slack-chromium-light-03-advanced-token-form.png",
+        "slack-chromium-light-04-sso-unsupported.png",
+        "slack-chromium-light-05-form-password.png",
+        "slack-chromium-light-06-signing-in.png",
+        "slack-chromium-light-07-totp.png",
+        "slack-chromium-light-08-totp-wrong.png",
+        "slack-chromium-light-09-password-step.png",
+        "slack-chromium-light-10-form-filled.png",
+        "slack-chromium-light-11-sending-code.png",
+        "slack-chromium-light-12-code.png",
+        "slack-chromium-light-13-code-typing.png",
+        "slack-chromium-light-14-code-wrong.png",
+        "slack-chromium-light-15-workspaces.png",
+        "slack-chromium-light-16-workspace-connecting.png",
+        "slack-chromium-light-17-connected.png"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "form: Slack 로그인 first (workspace optional + email, no token fields)",
+          "ok": true,
+          "detail": "슬랙\n연결 전\n\nSlack 계정으로 로그인하면 바로 연결돼요. 메일로 받은 코드로 로그인해서 비밀번호는 필요 없어요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수"
+        },
+        {
+          "name": "form: 고급: 토큰 직접 입력 is offered",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "form: 코드 받기 is disabled until an email is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: the old token + cookie form",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: 'Slack 로그인으로 돌아가기' goes back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sso: friendly Korean message, no automation of the company login",
+          "ok": true,
+          "detail": "이 워크스페이스는 회사 SSO(Google·Okta 등)로만 로그인할 수 있어요. 아직 지원하지 않아서 '고급: 토큰 직접 입력'을 써 주세요."
+        },
+        {
+          "name": "sso: offers 토큰 직접 입력으로 연결하기",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "password form: 비밀번호 field is autocomplete=current-password",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "progress: the button says what is happening",
+          "ok": true,
+          "detail": "Slack에 로그인하는 중"
+        },
+        {
+          "name": "2fa: numeric OTP (inputmode numeric, one-time-code)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "2fa: wrong code → Korean message, same step",
+          "ok": true,
+          "detail": "인증 코드가 맞지 않아요. 새 코드로 다시 입력해 주세요."
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code input, upper-case letters allowed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: says where the code went",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: typed letters are upper-cased into the cells",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: wrong code → 그 코드는 맞지 않아요-style Korean message, retry allowed",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 메일에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "workspaces: both of the account's workspaces are listed",
+          "ok": true,
+          "detail": "Acme Corp\nacme.slack.com | Beta Labs\nbeta.slack.com"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: slack is connected for this user",
+          "ok": true,
+          "detail": "{\"provider\":\"slack\",\"status\":\"connected\",\"accountLabel\":\"kim · Beta Labs\",\"credentialId\":\"5bfa9ea3-0dc8-464b-a20d-a2b76c2db88c\",\"lastError\":null,\"connectedAt\":1794423879479,\"updatedAt\":1794423879479}"
+        },
+        {
+          "name": "vault: the session is a sealed credential (hint = the workspace, never the token)",
+          "ok": true,
+          "detail": "{\"id\":\"5bfa9ea3-0dc8-464b-a20d-a2b76c2db88c\",\"service\":\"slack\",\"serviceName\":\"슬랙\",\"label\":\"슬랙 (beta.slack.com)\",\"kind\":\"token\",\"hint\":\"beta.slack.com\",\"keepFor\":\"30d\",\"expiresAt\":1797015879478,\"expire"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "slack-chromium-dark-01-connections-list.png",
+        "slack-chromium-dark-02-form.png",
+        "slack-chromium-dark-03-advanced-token-form.png",
+        "slack-chromium-dark-04-sso-unsupported.png",
+        "slack-chromium-dark-05-form-password.png",
+        "slack-chromium-dark-06-signing-in.png",
+        "slack-chromium-dark-07-totp.png",
+        "slack-chromium-dark-08-totp-wrong.png",
+        "slack-chromium-dark-09-password-step.png",
+        "slack-chromium-dark-10-form-filled.png",
+        "slack-chromium-dark-11-sending-code.png",
+        "slack-chromium-dark-12-code.png",
+        "slack-chromium-dark-13-code-typing.png",
+        "slack-chromium-dark-14-code-wrong.png",
+        "slack-chromium-dark-15-workspaces.png",
+        "slack-chromium-dark-16-workspace-connecting.png",
+        "slack-chromium-dark-17-connected.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "form: Slack 로그인 first (workspace optional + email, no token fields)",
+          "ok": true,
+          "detail": "슬랙\n연결 전\n\nSlack 계정으로 로그인하면 바로 연결돼요. 메일로 받은 코드로 로그인해서 비밀번호는 필요 없어요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수"
+        },
+        {
+          "name": "form: 고급: 토큰 직접 입력 is offered",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "form: 코드 받기 is disabled until an email is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: the old token + cookie form",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: 'Slack 로그인으로 돌아가기' goes back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sso: friendly Korean message, no automation of the company login",
+          "ok": true,
+          "detail": "이 워크스페이스는 회사 SSO(Google·Okta 등)로만 로그인할 수 있어요. 아직 지원하지 않아서 '고급: 토큰 직접 입력'을 써 주세요."
+        },
+        {
+          "name": "sso: offers 토큰 직접 입력으로 연결하기",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "password form: 비밀번호 field is autocomplete=current-password",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "progress: the button says what is happening",
+          "ok": true,
+          "detail": "Slack에 로그인하는 중"
+        },
+        {
+          "name": "2fa: numeric OTP (inputmode numeric, one-time-code)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "2fa: wrong code → Korean message, same step",
+          "ok": true,
+          "detail": "인증 코드가 맞지 않아요. 새 코드로 다시 입력해 주세요."
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code input, upper-case letters allowed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: says where the code went",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: typed letters are upper-cased into the cells",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: wrong code → 그 코드는 맞지 않아요-style Korean message, retry allowed",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 메일에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "workspaces: both of the account's workspaces are listed",
+          "ok": true,
+          "detail": "Acme Corp\nacme.slack.com | Beta Labs\nbeta.slack.com"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: slack is connected for this user",
+          "ok": true,
+          "detail": "{\"provider\":\"slack\",\"status\":\"connected\",\"accountLabel\":\"kim · Beta Labs\",\"credentialId\":\"bf7d9e6a-39a0-43fc-91c6-0d669332f6d7\",\"lastError\":null,\"connectedAt\":1794423914590,\"updatedAt\":1794423914590}"
+        },
+        {
+          "name": "vault: the session is a sealed credential (hint = the workspace, never the token)",
+          "ok": true,
+          "detail": "{\"id\":\"bf7d9e6a-39a0-43fc-91c6-0d669332f6d7\",\"service\":\"slack\",\"serviceName\":\"슬랙\",\"label\":\"슬랙 (beta.slack.com)\",\"kind\":\"token\",\"hint\":\"beta.slack.com\",\"keepFor\":\"30d\",\"expiresAt\":1797015914589,\"expire"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "slack-webkit-light-01-connections-list.png",
+        "slack-webkit-light-02-form.png",
+        "slack-webkit-light-03-advanced-token-form.png",
+        "slack-webkit-light-04-sso-unsupported.png",
+        "slack-webkit-light-05-form-password.png",
+        "slack-webkit-light-06-signing-in.png",
+        "slack-webkit-light-07-totp.png",
+        "slack-webkit-light-08-totp-wrong.png",
+        "slack-webkit-light-09-password-step.png",
+        "slack-webkit-light-10-form-filled.png",
+        "slack-webkit-light-11-sending-code.png",
+        "slack-webkit-light-12-code.png",
+        "slack-webkit-light-13-code-typing.png",
+        "slack-webkit-light-14-code-wrong.png",
+        "slack-webkit-light-15-workspaces.png",
+        "slack-webkit-light-16-workspace-connecting.png",
+        "slack-webkit-light-17-connected.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "form: Slack 로그인 first (workspace optional + email, no token fields)",
+          "ok": true,
+          "detail": "슬랙\n연결 전\n\nSlack 계정으로 로그인하면 바로 연결돼요. 메일로 받은 코드로 로그인해서 비밀번호는 필요 없어요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수"
+        },
+        {
+          "name": "form: 고급: 토큰 직접 입력 is offered",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "form: 코드 받기 is disabled until an email is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: the old token + cookie form",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "advanced: 'Slack 로그인으로 돌아가기' goes back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sso: friendly Korean message, no automation of the company login",
+          "ok": true,
+          "detail": "이 워크스페이스는 회사 SSO(Google·Okta 등)로만 로그인할 수 있어요. 아직 지원하지 않아서 '고급: 토큰 직접 입력'을 써 주세요."
+        },
+        {
+          "name": "sso: offers 토큰 직접 입력으로 연결하기",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "password form: 비밀번호 field is autocomplete=current-password",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "progress: the button says what is happening",
+          "ok": true,
+          "detail": "Slack에 로그인하는 중"
+        },
+        {
+          "name": "2fa: numeric OTP (inputmode numeric, one-time-code)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "2fa: wrong code → Korean message, same step",
+          "ok": true,
+          "detail": "인증 코드가 맞지 않아요. 새 코드로 다시 입력해 주세요."
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code input, upper-case letters allowed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: says where the code went",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: typed letters are upper-cased into the cells",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: wrong code → 그 코드는 맞지 않아요-style Korean message, retry allowed",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 메일에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "workspaces: both of the account's workspaces are listed",
+          "ok": true,
+          "detail": "Acme Corp\nacme.slack.com | Beta Labs\nbeta.slack.com"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: slack is connected for this user",
+          "ok": true,
+          "detail": "{\"provider\":\"slack\",\"status\":\"connected\",\"accountLabel\":\"kim · Beta Labs\",\"credentialId\":\"bdf2247d-0201-4b05-af9b-dcb02c87a42f\",\"lastError\":null,\"connectedAt\":1794423938273,\"updatedAt\":1794423938273}"
+        },
+        {
+          "name": "vault: the session is a sealed credential (hint = the workspace, never the token)",
+          "ok": true,
+          "detail": "{\"id\":\"bdf2247d-0201-4b05-af9b-dcb02c87a42f\",\"service\":\"slack\",\"serviceName\":\"슬랙\",\"label\":\"슬랙 (beta.slack.com)\",\"kind\":\"token\",\"hint\":\"beta.slack.com\",\"keepFor\":\"30d\",\"expiresAt\":1797015938272,\"expire"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "slack-webkit-dark-01-connections-list.png",
+        "slack-webkit-dark-02-form.png",
+        "slack-webkit-dark-03-advanced-token-form.png",
+        "slack-webkit-dark-04-sso-unsupported.png",
+        "slack-webkit-dark-05-form-password.png",
+        "slack-webkit-dark-06-signing-in.png",
+        "slack-webkit-dark-07-totp.png",
+        "slack-webkit-dark-08-totp-wrong.png",
+        "slack-webkit-dark-09-password-step.png",
+        "slack-webkit-dark-10-form-filled.png",
+        "slack-webkit-dark-11-sending-code.png",
+        "slack-webkit-dark-12-code.png",
+        "slack-webkit-dark-13-code-typing.png",
+        "slack-webkit-dark-14-code-wrong.png",
+        "slack-webkit-dark-15-workspaces.png",
+        "slack-webkit-dark-16-workspace-connecting.png",
+        "slack-webkit-dark-17-connected.png"
+      ]
+    }
+  ],
+  "serverLog": {
+    "lines": 402,
+    "relaySteps": 284,
+    "leaks": []
+  }
+}

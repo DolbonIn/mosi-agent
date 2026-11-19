@@ -1,0 +1,69 @@
+{
+ "SeoulRtd.citydata_ppltn": [
+  {
+   "AREA_NM": "성수카페거리",
+   "AREA_CD": "POI068",
+   "AREA_CONGEST_LVL": "약간 붐빔",
+   "AREA_CONGEST_MSG": "사람들이 몰려있을 가능성이 크고 붐빈다고 느낄 수 있어요. 인구밀도가 높은 구간에서는 도보 이동시 부딪힘이 발생할 수 있어요.",
+   "AREA_PPLTN_MIN": "32000",
+   "AREA_PPLTN_MAX": "34000",
+   "MALE_PPLTN_RATE": "46.7",
+   "FEMALE_PPLTN_RATE": "53.3",
+   "PPLTN_RATE_0": "0.5",
+   "PPLTN_RATE_10": "4.3",
+   "PPLTN_RATE_20": "32.7",
+   "PPLTN_RATE_30": "25.0",
+   "PPLTN_RATE_40": "15.5",
+   "PPLTN_RATE_50": "12.1",
+   "PPLTN_RATE_60": "6.3",
+   "PPLTN_RATE_70": "3.6",
+   "RESNT_PPLTN_RATE": "30.9",
+   "NON_RESNT_PPLTN_RATE": "69.1",
+   "REPLACE_YN": "N",
+   "PPLTN_TIME": "2026-11-11 18:35",
+   "FCST_YN": "Y",
+   "FCST_PPLTN": [
+    {
+     "FCST_TIME": "2026-11-11 20:00",
+     "FCST_CONGEST_LVL": "보통",
+     "FCST_PPLTN_MIN": "28000",
+     "FCST_PPLTN_MAX": "30000"
+    },
+    {
+     "FCST_TIME": "2026-11-11 21:00",
+     "FCST_CONGEST_LVL": "보통",
+     "FCST_PPLTN_MIN": "24000",
+     "FCST_PPLTN_MAX": "26000"
+    },
+    {
+     "FCST_TIME": "2026-11-11 22:00",
+     "FCST_CONGEST_LVL": "여유",
+     "FCST_PPLTN_MIN": "20000",
+     "FCST_PPLTN_MAX": "22000"
+    },
+    {
+     "FCST_TIME": "2026-11-11 23:00",
+     "FCST_CONGEST_LVL": "여유",
+     "FCST_PPLTN_MIN": "16000",
+     "FCST_PPLTN_MAX": "18000"
+    },
+    {
+     "FCST_TIME": "2026-11-12 00:00",
+     "FCST_CONGEST_LVL": "여유",
+     "FCST_PPLTN_MIN": "14000",
+     "FCST_PPLTN_MAX": "16000"
+    },
+    {
+     "FCST_TIME": "2026-11-12 01:00",
+     "FCST_CONGEST_LVL": "여유",
+     "FCST_PPLTN_MIN": "9000",
+     "FCST_PPLTN_MAX": "9500"
+    }
+   ]
+  }
+ ],
+ "RESULT": {
+  "RESULT.CODE": "INFO-000",
+  "RESULT.MESSAGE": "정상 처리되었습니다."
+ }
+}

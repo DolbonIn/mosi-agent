@@ -1,0 +1,47 @@
+{
+  "feature": "payment",
+  "title": "결제 수단",
+  "critique": "../../impeccable/critique/payment.md",
+  "score": "19/28",
+  "current": [
+    "chromium-light-43-payment.jpg",
+    "chromium-dark-43-payment.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "정직한 빈 상태",
+      "summary": "빈 상태는 그대로 두되 '결제 수단은 아직 연결할 수 없어요'로 고쳤어요. 판과 중복 문장도 뺐어요. 버튼은 하는 일대로 '로그인 정보는 어떻게 지키는지 보기'예요. 약속 넷과 각주는 제목과 본문이 있는 세 행이 됐고, 타일과 그림자 없이 모두 탭 바 위에 보여요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "P3-1",
+        "slop:GR-R2"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      }
+    },
+    {
+      "id": "B",
+      "name": "첫 문장이 상태",
+      "summary": "가운데 빈 상태 블록 대신 큰 제목 바로 아래 '아직 연결할 수 없어요 / 깽이가 대신 결제하는 일도 하지 않아요.'가 와요. 약속 셋은 critique 문구 그대로인 문장 행이에요. '저장된 로그인 보기'는 저장된 로그인을 말하는 첫 행 아래 글자 링크로 옮겼어요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "P3-1",
+        "slop:GR-R2",
+        "critique:Q3"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      }
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요. 나의 모시의 '결제 수단' 행 제목이 큰 제목으로 morph하고 camera 슬라이드가 따라와요(§6.6). 누르면 같은 프레임에 평평한 press 틴트가 보여요(§3). 돌아올 때는 재등장이 없어요(§8.2)."
+}

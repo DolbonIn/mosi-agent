@@ -1,0 +1,1671 @@
+{
+  "real": false,
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "server lists k-skill services itself: no 국내 서비스 messenger group",
+          "ok": true,
+          "detail": "{\"listsKorea\":true,\"group\":6,\"msgr\":8,\"kor\":false}"
+        },
+        {
+          "name": "group title is 모시가 쓰는 서비스",
+          "ok": true,
+          "detail": "모시가 쓰는 서비스"
+        },
+        {
+          "name": "the five offered services, linked first (연결됨 / 다시 연결), then 연결 전",
+          "ok": true,
+          "detail": "naver-searchad,popbill,toss-investment,coupang-partners,riss"
+        },
+        {
+          "name": "키로 연결 stays out while the server lists no key service (the four keys have no tool yet)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "never listed: 번개장터 · 사람인 · 잡코리아 · CODEF · 숲나들e, and 헤이유미 while the server hasn't enabled it",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "k-skill services are never messenger rows (no conn-row, no 국내 서비스 group)",
+          "ok": true,
+          "detail": "0 rows · 0 sections"
+        },
+        {
+          "name": "title's one sentence covers services too (no sealing line there)",
+          "ok": true,
+          "detail": "연결하면 모시가 대화를 읽고 내 서비스를 조회해요. 보내거나 실행하는 건 내가 허락할 때만 해요."
+        },
+        {
+          "name": "no logos, plates or tiles on any k-skill row",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "states: one 연결됨, one 다시 연결 pill; 연결 전 rows carry no pill",
+          "ok": true,
+          "detail": "연결됨,다시 연결"
+        },
+        {
+          "name": "row subtitle ≥ 4.5:1",
+          "ok": true,
+          "detail": "5.07"
+        },
+        {
+          "name": "every row ≥ 44 px",
+          "ok": true,
+          "detail": "62,80,62,62,62"
+        },
+        {
+          "name": "row name reads 이름, 상태, 설명",
+          "ok": true,
+          "detail": "토스증권, 연결 전, 계좌 · 보유 종목 조회"
+        },
+        {
+          "name": "RISS: first line says only universities and non-profits get the key; API 키로 연결; 발급 row links to the RISS API centre (said once)",
+          "ok": true,
+          "detail": "{\"first\":\"RISS 검색 API 키는 대학과 비영리 기관에만 발급돼요. 개인은 대부분 받을 수 없어요.\",\"how\":\"API 키로 연결\",\"href\":\"https://www.riss.kr/apicenter/apiMain.do\",\"issue\":\"어디서 발급하나요?RISS API 센터 › 검색 API 이용 신청\",\"fields\":1}"
+        },
+        {
+          "name": "RISS sheet: the notice, the scope line and the sealing line under the key break only between sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"RISS 검색 API 키는 대학과 비영리 기\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"학위논문과 학술지 논문을 검색만 해요. 원문\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"입력한 정보는 이 기기에서 암호화한 뒤에만 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-riss: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":418}"
+        },
+        {
+          "name": "RISS: sealed, and the list hint is empty (label is just RISS)",
+          "ok": true,
+          "detail": "{\"hint\":\"\",\"label\":\"RISS\"}"
+        },
+        {
+          "name": "sheet: start-aligned title 토스증권, live state 연결 전",
+          "ok": true,
+          "detail": "토스증권 · left · 연결 전"
+        },
+        {
+          "name": "sheet: one plain line says what 모시 does and that it only reads",
+          "ok": true,
+          "detail": "계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요."
+        },
+        {
+          "name": "sheet: visible labels; secrets masked; autocomplete off on every field",
+          "ok": true,
+          "detail": "[{\"label\":\"Client ID\",\"labelVisible\":true,\"type\":\"text\",\"ac\":\"off\"},{\"label\":\"Client Secret\",\"labelVisible\":true,\"type\":\"password\",\"ac\":\"off\"}]"
+        },
+        {
+          "name": "sheet: the sealing sentence sits under the secret",
+          "ok": true,
+          "detail": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+        },
+        {
+          "name": "sheet: 어디서 발급하나요 → official console, new tab, noopener, ≥ 44 px",
+          "ok": true,
+          "detail": "{\"href\":\"https://www.tossinvest.com\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"h\":60,\"text\":\"어디서 발급하나요?토스증권 PC 웹 › 설정 › Open API\"}"
+        },
+        {
+          "name": "sheet: keep-for summary row says 30일",
+          "ok": true,
+          "detail": "30일"
+        },
+        {
+          "name": "연결하기 waits for the required fields",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "sheet-form: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":451}"
+        },
+        {
+          "name": "sheet (토스증권): no sentence ends on a one-word line — 320 → 430 (the hint's .t-copy and each .t-s wrap pretty)",
+          "ok": true,
+          "detail": "{\"partsSeen\":4,\"loneEnds\":[]}"
+        },
+        {
+          "name": "sheets: every k-skill service's placeholder fits its field — 320 → 430",
+          "ok": true,
+          "detail": "{\"holdersSeen\":8,\"at320\":[\"room 228 (box 256, bar 0)\",\"toss-investment.clientId 188.6\",\"naver-searchad.apiKey 219.2\",\"naver-searchad.customerId 29.4\",\"popbill.linkId 201.4\",\"popbill.corpNum 188.2\",\"popbill.userId 174.8\",\"popbill.env 111.6\",\"coupang-partners.accessKey 149\"]}"
+        },
+        {
+          "name": "연결하기 is ready once both fields are filled",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sent sealed: the request carries an envelope and none of the typed values",
+          "ok": true,
+          "detail": "531 bytes"
+        },
+        {
+          "name": "sealed as kind token (auth api_key) and the server accepted it",
+          "ok": true,
+          "detail": "token · 연결됨"
+        },
+        {
+          "name": "connected: 연결됨, the form is gone, what to ask next",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"chips\":[\"내 토스증권 보유 종목 보여 줘\",\"삼성전자 지금 얼마야?\"],\"inputs\":0}"
+        },
+        {
+          "name": "sheet-connected: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":144}"
+        },
+        {
+          "name": "row shows 연결됨 after connecting",
+          "ok": true,
+          "detail": "토스증권 qa*** · 방금 연결 연결됨"
+        },
+        {
+          "name": "a refused key is said inline in Korean, inputs kept, 다시 연결 / 다시 연결하기",
+          "ok": true,
+          "detail": "{\"err\":\"쿠팡 파트너스가 키를 받지 않았어요. 발급한 값을 다시 확인해 주세요.\",\"live\":\"다시 연결\",\"kept\":\"qa-access-0001\",\"btn\":\"다시 연결하기\"}"
+        },
+        {
+          "name": "unreachable upstream (needs_verification): 연결 중 with the server's note, no error, the form cleared",
+          "ok": true,
+          "detail": "{\"live\":\"연결 중\",\"note\":\"지금은 쿠팡 파트너스에 확인하지 못했어요. 저장해 두었고 잠시 후 다시 확인할게요.\",\"err\":null,\"inputs\":0,\"btn\":\"다시 입력하기\"}"
+        },
+        {
+          "name": "다시 입력하기 brings the fields back",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "다시 연결 (팝빌): the form with the reason; the line says it issues only with approval",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"err\":\"저장한 키가 만료됐어요. 다시 입력해 주세요.\",\"fields\":5,\"lead\":\"전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요.\"}"
+        },
+        {
+          "name": "다시 연결 (팝빌): the error line's icon starts on the body's left line",
+          "ok": true,
+          "detail": "{\"icon\":32,\"lead\":32}"
+        },
+        {
+          "name": "fields the server marks optional (팝빌 아이디, 환경) can stay empty",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "optional fields say so in their label (선택), as the app's other forms do; required ones don't",
+          "ok": true,
+          "detail": "LinkID,SecretKey,사업자번호,팝빌 아이디 (선택),환경 (선택)"
+        },
+        {
+          "name": "connected sheet: words only — no icon plates",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected sheet: the masked key, since when, and what 연결 해제 removes",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"rows\":[\"qa***\",\"11월 17일부터\"],\"note\":\"연결을 해제하면 모시가 더 이상 토스증권을 쓰지 않아요. 저장한 키도 함께 지워요.\"}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note starts on the lead's left line",
+          "ok": true,
+          "detail": "{\"lead\":32,\"note\":32}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note breaks only between its sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"연결을 해제하면 모시가 더 이상 토스증권을 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-manage: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":229}"
+        },
+        {
+          "name": "연결 해제 (tap twice) revokes on the server and the row is back to 연결 전",
+          "ok": true,
+          "detail": "http://127.0.0.1:5306/api/connections/toss-investment"
+        },
+        {
+          "name": "server: the revoked login is gone",
+          "ok": true,
+          "detail": "[\"naver-searchad\",\"popbill\",\"riss\",\"coupang-partners\"]"
+        },
+        {
+          "name": "no horizontal overflow",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "skills screen: 연결하기 (토스증권) and 다시 연결 (팝빌) on their rows, none on connected logins, never 키 필요 on them; ≥ 44 px",
+          "ok": true,
+          "detail": "{\"toss\":{\"id\":\"k_toss_quote\",\"btn\":\"연결하기\",\"h\":44,\"keyPill\":false,\"label\":\"토스증권 연결하기\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"pop\":{\"id\":\"k_popbill_invoices\",\"btn\":\"다시 연결\",\"h\":44,\"keyPill\":false,\"label\":\"팝빌 다시 연결\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"naverOrRiss\":[\"k_naver_ad_report\",\"k_naver_ad_keywords\""
+        },
+        {
+          "name": "skills screen: the button names its service",
+          "ok": true,
+          "detail": "토스증권 연결하기"
+        },
+        {
+          "name": "skills screen: 연결하기 is accent text under the line (left-aligned with it, no fill); the switch stays alone at the end",
+          "ok": true,
+          "detail": "[{\"id\":\"k_coupang_search\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_quote\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_portfolio\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_orders\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":"
+        },
+        {
+          "name": "skills screen: a row with 연결하기 never ends its description on a one-word line (text-wrap: pretty)",
+          "ok": true,
+          "detail": "[[\"내 쿠팡 파트너스 키로 상품·가격·\",\"로켓배송을 찾아요.\"],[\"내 토스증권 앱 키로 국내·미국 주식\",\"현재가를 봐요.\"],[\"내 토스증권 계좌의 평가금액과 손익을 봐요.\"],[\"내 토스증권 대기·완료 주문을 봐요.\",\"주문은 넣지 않아요.\"],[\"내 팝빌 계정의 매출·매입\",\"전자세금계산서를 봐요.\"],[\"승인을 받은 뒤 팝빌로\",\"전자세금계산서를 발행해요.\"]]"
+        },
+        {
+          "name": "skills screen: no skill line ends on \"(\" or starts with \")\", \"·\" or \".\" — at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"measured\":30,\"tight\":[]}"
+        },
+        {
+          "name": "skills screen: a two-sentence skill line breaks only between its sentences — 320 → 430",
+          "ok": true,
+          "detail": "{\"twoSentence\":2,\"split\":[]}"
+        },
+        {
+          "name": "skills screen: every line's last glyph stays inside its description's box (no tie runs under the switch) — 320 → 430",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "name": "skills screen: 연결하기 opens the 토스증권 sheet over the skills screen",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권\",\"inputs\":2,\"under\":true}"
+        },
+        {
+          "name": "skills screen: opened from the keyboard, closing the sheet puts focus back on its 연결하기",
+          "ok": true,
+          "detail": "true"
+        },
+        {
+          "name": "card: still pending with 연결하기 while the list says 토스증권 is connected (a refused login)",
+          "ok": true,
+          "detail": "{\"tossListed\":\"connected\",\"title\":\"토스증권 연결이 필요해요\",\"btn\":\"연결하기\",\"pill\":null}"
+        },
+        {
+          "name": "card: title, the sheet's scope line (not the server's reason again), 연결하기 — and no field in the chat",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결이 필요해요\",\"why\":\"계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요.\",\"btn\":\"연결하기\",\"inputs\":0,\"plates\":0}"
+        },
+        {
+          "name": "card: 연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "card: the sheet opens over the thread (no navigation: the waiting turn's stream stays)",
+          "ok": true,
+          "detail": "{\"chatTab\":\"true\",\"cardAttached\":true,\"composer\":true}"
+        },
+        {
+          "name": "card: its sheet opens on the fields (다시 연결), not the connected view",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"inputs\":2,\"manage\":false}"
+        },
+        {
+          "name": "card: sent sealed from the chat too",
+          "ok": true,
+          "detail": "525 bytes"
+        },
+        {
+          "name": "card (connected): the same card flips in place to 토스증권 연결됐어요 — no chip, no button, 이어서 하기 ≥ 44 px; no second card",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결됐어요\",\"btn\":0,\"pill\":null,\"next\":\"이어서 하기\",\"h\":54,\"cards0\":1,\"cards1\":1}"
+        },
+        {
+          "name": "card (connected): the stored card is what flipped (the server's message event, not the screen)",
+          "ok": true,
+          "detail": "connected"
+        },
+        {
+          "name": "card (connected): 이어서 하기 sends the server's words once",
+          "ok": true,
+          "detail": "true · 1→2"
+        },
+        {
+          "name": "card: no connection card in the chat has a field (every service's card: keys go in the sheet only)",
+          "ok": true,
+          "detail": "{\"cards\":11,\"fields\":[]}"
+        },
+        {
+          "name": "card: every scope line breaks only between sentences (no sentence starts on the line before and wraps), at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"n\":[\"320:10\",\"360:10\",\"390:10\",\"430:10\"],\"multi\":5,\"bad\":[]}"
+        },
+        {
+          "name": "키로 연결 starts folded (aria-expanded=false, no key rows)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "키로 연결 opens with the four keys and its one line",
+          "ok": true,
+          "detail": "building-register-search,korean-patent-search,lck-analytics,government-bond-analysis · 직접 발급한 개발자 키가 있을 때만 필요해요."
+        },
+        {
+          "name": "a service the server can't connect now: not a button, no chevron, says the server's reason",
+          "ok": true,
+          "detail": "[{\"id\":\"government-bond-analysis\",\"tag\":\"DIV\",\"chev\":false,\"detail\":\"점검 중이에요\"}]"
+        },
+        {
+          "name": "that row stays readable (detail ≥ 4.5:1, title ≥ 4.5:1)",
+          "ok": true,
+          "detail": "5.07 / 16.83"
+        },
+        {
+          "name": "LCK: the 언제 필요한가요 row is words only (no link)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "특허 검색: 발급처 links to KIPRIS Plus",
+          "ok": true,
+          "detail": "https://plus.kipris.or.kr"
+        },
+        {
+          "name": "키로 연결 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "lines (qa/lib/lines.mjs, every rule): no finding in the account rows, 나의 모시's skills and the chat cards (320 → 430) or the sheets (토스증권 320 → 430; RISS, 다시 연결, 관리 at 390)",
+          "ok": true,
+          "detail": "{\"seen\":{\"rows\":44,\"skills\":240,\"sheets\":72,\"cards\":88},\"bad\":[]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/skill-accounts/chromium-light-list.png",
+        "docs/qa/skill-accounts/applied-list-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-list-end.png",
+        "docs/qa/skill-accounts/chromium-light-sheet-riss.png",
+        "docs/qa/skill-accounts/applied-sheet-riss-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-sheet-form.png",
+        "docs/qa/skill-accounts/applied-sheet-form-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-sheet-form-320.png",
+        "docs/qa/skill-accounts/chromium-light-sheet-connected.png",
+        "docs/qa/skill-accounts/applied-sheet-connected-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-sheet-refused.png",
+        "docs/qa/skill-accounts/chromium-light-sheet-checking.png",
+        "docs/qa/skill-accounts/chromium-light-sheet-reconnect.png",
+        "docs/qa/skill-accounts/chromium-light-sheet-manage.png",
+        "docs/qa/skill-accounts/applied-sheet-manage-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-skills-sheet.png",
+        "docs/qa/skill-accounts/chromium-light-skills-list.png",
+        "docs/qa/skill-accounts/applied-skills-list-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-card-pending.png",
+        "docs/qa/skill-accounts/applied-card-pending-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-card-sheet.png",
+        "docs/qa/skill-accounts/chromium-light-card-connected.png",
+        "docs/qa/skill-accounts/applied-card-connected-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-keys-open.png",
+        "docs/qa/skill-accounts/applied-keys-open-light.jpg",
+        "docs/qa/skill-accounts/chromium-light-sheet-key.png"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "server lists k-skill services itself: no 국내 서비스 messenger group",
+          "ok": true,
+          "detail": "{\"listsKorea\":true,\"group\":6,\"msgr\":8,\"kor\":false}"
+        },
+        {
+          "name": "group title is 모시가 쓰는 서비스",
+          "ok": true,
+          "detail": "모시가 쓰는 서비스"
+        },
+        {
+          "name": "the five offered services, linked first (연결됨 / 다시 연결), then 연결 전",
+          "ok": true,
+          "detail": "naver-searchad,popbill,toss-investment,coupang-partners,riss"
+        },
+        {
+          "name": "키로 연결 stays out while the server lists no key service (the four keys have no tool yet)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "never listed: 번개장터 · 사람인 · 잡코리아 · CODEF · 숲나들e, and 헤이유미 while the server hasn't enabled it",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "k-skill services are never messenger rows (no conn-row, no 국내 서비스 group)",
+          "ok": true,
+          "detail": "0 rows · 0 sections"
+        },
+        {
+          "name": "title's one sentence covers services too (no sealing line there)",
+          "ok": true,
+          "detail": "연결하면 모시가 대화를 읽고 내 서비스를 조회해요. 보내거나 실행하는 건 내가 허락할 때만 해요."
+        },
+        {
+          "name": "no logos, plates or tiles on any k-skill row",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "states: one 연결됨, one 다시 연결 pill; 연결 전 rows carry no pill",
+          "ok": true,
+          "detail": "연결됨,다시 연결"
+        },
+        {
+          "name": "row subtitle ≥ 4.5:1",
+          "ok": true,
+          "detail": "6.61"
+        },
+        {
+          "name": "every row ≥ 44 px",
+          "ok": true,
+          "detail": "62,80,62,62,62"
+        },
+        {
+          "name": "row name reads 이름, 상태, 설명",
+          "ok": true,
+          "detail": "토스증권, 연결 전, 계좌 · 보유 종목 조회"
+        },
+        {
+          "name": "RISS: first line says only universities and non-profits get the key; API 키로 연결; 발급 row links to the RISS API centre (said once)",
+          "ok": true,
+          "detail": "{\"first\":\"RISS 검색 API 키는 대학과 비영리 기관에만 발급돼요. 개인은 대부분 받을 수 없어요.\",\"how\":\"API 키로 연결\",\"href\":\"https://www.riss.kr/apicenter/apiMain.do\",\"issue\":\"어디서 발급하나요?RISS API 센터 › 검색 API 이용 신청\",\"fields\":1}"
+        },
+        {
+          "name": "RISS sheet: the notice, the scope line and the sealing line under the key break only between sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"RISS 검색 API 키는 대학과 비영리 기\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"학위논문과 학술지 논문을 검색만 해요. 원문\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"입력한 정보는 이 기기에서 암호화한 뒤에만 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-riss: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":418}"
+        },
+        {
+          "name": "RISS: sealed, and the list hint is empty (label is just RISS)",
+          "ok": true,
+          "detail": "{\"hint\":\"\",\"label\":\"RISS\"}"
+        },
+        {
+          "name": "sheet: start-aligned title 토스증권, live state 연결 전",
+          "ok": true,
+          "detail": "토스증권 · left · 연결 전"
+        },
+        {
+          "name": "sheet: one plain line says what 모시 does and that it only reads",
+          "ok": true,
+          "detail": "계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요."
+        },
+        {
+          "name": "sheet: visible labels; secrets masked; autocomplete off on every field",
+          "ok": true,
+          "detail": "[{\"label\":\"Client ID\",\"labelVisible\":true,\"type\":\"text\",\"ac\":\"off\"},{\"label\":\"Client Secret\",\"labelVisible\":true,\"type\":\"password\",\"ac\":\"off\"}]"
+        },
+        {
+          "name": "sheet: the sealing sentence sits under the secret",
+          "ok": true,
+          "detail": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+        },
+        {
+          "name": "sheet: 어디서 발급하나요 → official console, new tab, noopener, ≥ 44 px",
+          "ok": true,
+          "detail": "{\"href\":\"https://www.tossinvest.com\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"h\":60,\"text\":\"어디서 발급하나요?토스증권 PC 웹 › 설정 › Open API\"}"
+        },
+        {
+          "name": "sheet: keep-for summary row says 30일",
+          "ok": true,
+          "detail": "30일"
+        },
+        {
+          "name": "연결하기 waits for the required fields",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "sheet-form: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":451}"
+        },
+        {
+          "name": "sheet (토스증권): no sentence ends on a one-word line — 320 → 430 (the hint's .t-copy and each .t-s wrap pretty)",
+          "ok": true,
+          "detail": "{\"partsSeen\":4,\"loneEnds\":[]}"
+        },
+        {
+          "name": "sheets: every k-skill service's placeholder fits its field — 320 → 430",
+          "ok": true,
+          "detail": "{\"holdersSeen\":8,\"at320\":[\"room 228 (box 256, bar 0)\",\"toss-investment.clientId 188.6\",\"naver-searchad.apiKey 219.2\",\"naver-searchad.customerId 29.4\",\"popbill.linkId 201.4\",\"popbill.corpNum 188.2\",\"popbill.userId 174.8\",\"popbill.env 111.6\",\"coupang-partners.accessKey 149\"]}"
+        },
+        {
+          "name": "연결하기 is ready once both fields are filled",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sent sealed: the request carries an envelope and none of the typed values",
+          "ok": true,
+          "detail": "531 bytes"
+        },
+        {
+          "name": "sealed as kind token (auth api_key) and the server accepted it",
+          "ok": true,
+          "detail": "token · 연결됨"
+        },
+        {
+          "name": "connected: 연결됨, the form is gone, what to ask next",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"chips\":[\"내 토스증권 보유 종목 보여 줘\",\"삼성전자 지금 얼마야?\"],\"inputs\":0}"
+        },
+        {
+          "name": "sheet-connected: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":144}"
+        },
+        {
+          "name": "row shows 연결됨 after connecting",
+          "ok": true,
+          "detail": "토스증권 qa*** · 방금 연결 연결됨"
+        },
+        {
+          "name": "a refused key is said inline in Korean, inputs kept, 다시 연결 / 다시 연결하기",
+          "ok": true,
+          "detail": "{\"err\":\"쿠팡 파트너스가 키를 받지 않았어요. 발급한 값을 다시 확인해 주세요.\",\"live\":\"다시 연결\",\"kept\":\"qa-access-0001\",\"btn\":\"다시 연결하기\"}"
+        },
+        {
+          "name": "unreachable upstream (needs_verification): 연결 중 with the server's note, no error, the form cleared",
+          "ok": true,
+          "detail": "{\"live\":\"연결 중\",\"note\":\"지금은 쿠팡 파트너스에 확인하지 못했어요. 저장해 두었고 잠시 후 다시 확인할게요.\",\"err\":null,\"inputs\":0,\"btn\":\"다시 입력하기\"}"
+        },
+        {
+          "name": "다시 입력하기 brings the fields back",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "다시 연결 (팝빌): the form with the reason; the line says it issues only with approval",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"err\":\"저장한 키가 만료됐어요. 다시 입력해 주세요.\",\"fields\":5,\"lead\":\"전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요.\"}"
+        },
+        {
+          "name": "다시 연결 (팝빌): the error line's icon starts on the body's left line",
+          "ok": true,
+          "detail": "{\"icon\":32,\"lead\":32}"
+        },
+        {
+          "name": "fields the server marks optional (팝빌 아이디, 환경) can stay empty",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "optional fields say so in their label (선택), as the app's other forms do; required ones don't",
+          "ok": true,
+          "detail": "LinkID,SecretKey,사업자번호,팝빌 아이디 (선택),환경 (선택)"
+        },
+        {
+          "name": "connected sheet: words only — no icon plates",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected sheet: the masked key, since when, and what 연결 해제 removes",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"rows\":[\"qa***\",\"11월 17일부터\"],\"note\":\"연결을 해제하면 모시가 더 이상 토스증권을 쓰지 않아요. 저장한 키도 함께 지워요.\"}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note starts on the lead's left line",
+          "ok": true,
+          "detail": "{\"lead\":32,\"note\":32}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note breaks only between its sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"연결을 해제하면 모시가 더 이상 토스증권을 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-manage: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":229}"
+        },
+        {
+          "name": "연결 해제 (tap twice) revokes on the server and the row is back to 연결 전",
+          "ok": true,
+          "detail": "http://127.0.0.1:5306/api/connections/toss-investment"
+        },
+        {
+          "name": "server: the revoked login is gone",
+          "ok": true,
+          "detail": "[\"naver-searchad\",\"popbill\",\"riss\",\"coupang-partners\"]"
+        },
+        {
+          "name": "no horizontal overflow",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "skills screen: 연결하기 (토스증권) and 다시 연결 (팝빌) on their rows, none on connected logins, never 키 필요 on them; ≥ 44 px",
+          "ok": true,
+          "detail": "{\"toss\":{\"id\":\"k_toss_quote\",\"btn\":\"연결하기\",\"h\":44,\"keyPill\":false,\"label\":\"토스증권 연결하기\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"pop\":{\"id\":\"k_popbill_invoices\",\"btn\":\"다시 연결\",\"h\":44,\"keyPill\":false,\"label\":\"팝빌 다시 연결\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"naverOrRiss\":[\"k_naver_ad_report\",\"k_naver_ad_keywords\""
+        },
+        {
+          "name": "skills screen: the button names its service",
+          "ok": true,
+          "detail": "토스증권 연결하기"
+        },
+        {
+          "name": "skills screen: 연결하기 is accent text under the line (left-aligned with it, no fill); the switch stays alone at the end",
+          "ok": true,
+          "detail": "[{\"id\":\"k_coupang_search\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_quote\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_portfolio\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_orders\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":"
+        },
+        {
+          "name": "skills screen: a row with 연결하기 never ends its description on a one-word line (text-wrap: pretty)",
+          "ok": true,
+          "detail": "[[\"내 쿠팡 파트너스 키로 상품·가격·\",\"로켓배송을 찾아요.\"],[\"내 토스증권 앱 키로 국내·미국 주식\",\"현재가를 봐요.\"],[\"내 토스증권 계좌의 평가금액과 손익을 봐요.\"],[\"내 토스증권 대기·완료 주문을 봐요.\",\"주문은 넣지 않아요.\"],[\"내 팝빌 계정의 매출·매입\",\"전자세금계산서를 봐요.\"],[\"승인을 받은 뒤 팝빌로\",\"전자세금계산서를 발행해요.\"]]"
+        },
+        {
+          "name": "skills screen: no skill line ends on \"(\" or starts with \")\", \"·\" or \".\" — at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"measured\":30,\"tight\":[]}"
+        },
+        {
+          "name": "skills screen: a two-sentence skill line breaks only between its sentences — 320 → 430",
+          "ok": true,
+          "detail": "{\"twoSentence\":2,\"split\":[]}"
+        },
+        {
+          "name": "skills screen: every line's last glyph stays inside its description's box (no tie runs under the switch) — 320 → 430",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "name": "skills screen: 연결하기 opens the 토스증권 sheet over the skills screen",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권\",\"inputs\":2,\"under\":true}"
+        },
+        {
+          "name": "skills screen: opened from the keyboard, closing the sheet puts focus back on its 연결하기",
+          "ok": true,
+          "detail": "true"
+        },
+        {
+          "name": "card: still pending with 연결하기 while the list says 토스증권 is connected (a refused login)",
+          "ok": true,
+          "detail": "{\"tossListed\":\"connected\",\"title\":\"토스증권 연결이 필요해요\",\"btn\":\"연결하기\",\"pill\":null}"
+        },
+        {
+          "name": "card: title, the sheet's scope line (not the server's reason again), 연결하기 — and no field in the chat",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결이 필요해요\",\"why\":\"계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요.\",\"btn\":\"연결하기\",\"inputs\":0,\"plates\":0}"
+        },
+        {
+          "name": "card: 연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "card: the sheet opens over the thread (no navigation: the waiting turn's stream stays)",
+          "ok": true,
+          "detail": "{\"chatTab\":\"true\",\"cardAttached\":true,\"composer\":true}"
+        },
+        {
+          "name": "card: its sheet opens on the fields (다시 연결), not the connected view",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"inputs\":2,\"manage\":false}"
+        },
+        {
+          "name": "card: sent sealed from the chat too",
+          "ok": true,
+          "detail": "525 bytes"
+        },
+        {
+          "name": "card (connected): the same card flips in place to 토스증권 연결됐어요 — no chip, no button, 이어서 하기 ≥ 44 px; no second card",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결됐어요\",\"btn\":0,\"pill\":null,\"next\":\"이어서 하기\",\"h\":54,\"cards0\":1,\"cards1\":1}"
+        },
+        {
+          "name": "card (connected): the stored card is what flipped (the server's message event, not the screen)",
+          "ok": true,
+          "detail": "connected"
+        },
+        {
+          "name": "card (connected): 이어서 하기 sends the server's words once",
+          "ok": true,
+          "detail": "true · 1→2"
+        },
+        {
+          "name": "card: no connection card in the chat has a field (every service's card: keys go in the sheet only)",
+          "ok": true,
+          "detail": "{\"cards\":11,\"fields\":[]}"
+        },
+        {
+          "name": "card: every scope line breaks only between sentences (no sentence starts on the line before and wraps), at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"n\":[\"320:10\",\"360:10\",\"390:10\",\"430:10\"],\"multi\":5,\"bad\":[]}"
+        },
+        {
+          "name": "키로 연결 starts folded (aria-expanded=false, no key rows)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "키로 연결 opens with the four keys and its one line",
+          "ok": true,
+          "detail": "building-register-search,korean-patent-search,lck-analytics,government-bond-analysis · 직접 발급한 개발자 키가 있을 때만 필요해요."
+        },
+        {
+          "name": "a service the server can't connect now: not a button, no chevron, says the server's reason",
+          "ok": true,
+          "detail": "[{\"id\":\"government-bond-analysis\",\"tag\":\"DIV\",\"chev\":false,\"detail\":\"점검 중이에요\"}]"
+        },
+        {
+          "name": "that row stays readable (detail ≥ 4.5:1, title ≥ 4.5:1)",
+          "ok": true,
+          "detail": "6.61 / 15.63"
+        },
+        {
+          "name": "LCK: the 언제 필요한가요 row is words only (no link)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "특허 검색: 발급처 links to KIPRIS Plus",
+          "ok": true,
+          "detail": "https://plus.kipris.or.kr"
+        },
+        {
+          "name": "키로 연결 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "lines (qa/lib/lines.mjs, every rule): no finding in the account rows, 나의 모시's skills and the chat cards (320 → 430) or the sheets (토스증권 320 → 430; RISS, 다시 연결, 관리 at 390)",
+          "ok": true,
+          "detail": "{\"seen\":{\"rows\":44,\"skills\":240,\"sheets\":72,\"cards\":88},\"bad\":[]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/skill-accounts/chromium-dark-list.png",
+        "docs/qa/skill-accounts/applied-list-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-list-end.png",
+        "docs/qa/skill-accounts/chromium-dark-sheet-riss.png",
+        "docs/qa/skill-accounts/applied-sheet-riss-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-sheet-form.png",
+        "docs/qa/skill-accounts/applied-sheet-form-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-sheet-form-320.png",
+        "docs/qa/skill-accounts/chromium-dark-sheet-connected.png",
+        "docs/qa/skill-accounts/applied-sheet-connected-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-sheet-refused.png",
+        "docs/qa/skill-accounts/chromium-dark-sheet-checking.png",
+        "docs/qa/skill-accounts/chromium-dark-sheet-reconnect.png",
+        "docs/qa/skill-accounts/chromium-dark-sheet-manage.png",
+        "docs/qa/skill-accounts/applied-sheet-manage-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-skills-sheet.png",
+        "docs/qa/skill-accounts/chromium-dark-skills-list.png",
+        "docs/qa/skill-accounts/applied-skills-list-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-card-pending.png",
+        "docs/qa/skill-accounts/applied-card-pending-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-card-sheet.png",
+        "docs/qa/skill-accounts/chromium-dark-card-connected.png",
+        "docs/qa/skill-accounts/applied-card-connected-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-keys-open.png",
+        "docs/qa/skill-accounts/applied-keys-open-dark.jpg",
+        "docs/qa/skill-accounts/chromium-dark-sheet-key.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "server lists k-skill services itself: no 국내 서비스 messenger group",
+          "ok": true,
+          "detail": "{\"listsKorea\":true,\"group\":6,\"msgr\":8,\"kor\":false}"
+        },
+        {
+          "name": "group title is 모시가 쓰는 서비스",
+          "ok": true,
+          "detail": "모시가 쓰는 서비스"
+        },
+        {
+          "name": "the five offered services, linked first (연결됨 / 다시 연결), then 연결 전",
+          "ok": true,
+          "detail": "naver-searchad,popbill,toss-investment,coupang-partners,riss"
+        },
+        {
+          "name": "키로 연결 stays out while the server lists no key service (the four keys have no tool yet)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "never listed: 번개장터 · 사람인 · 잡코리아 · CODEF · 숲나들e, and 헤이유미 while the server hasn't enabled it",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "k-skill services are never messenger rows (no conn-row, no 국내 서비스 group)",
+          "ok": true,
+          "detail": "0 rows · 0 sections"
+        },
+        {
+          "name": "title's one sentence covers services too (no sealing line there)",
+          "ok": true,
+          "detail": "연결하면 모시가 대화를 읽고 내 서비스를 조회해요. 보내거나 실행하는 건 내가 허락할 때만 해요."
+        },
+        {
+          "name": "no logos, plates or tiles on any k-skill row",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "states: one 연결됨, one 다시 연결 pill; 연결 전 rows carry no pill",
+          "ok": true,
+          "detail": "연결됨,다시 연결"
+        },
+        {
+          "name": "row subtitle ≥ 4.5:1",
+          "ok": true,
+          "detail": "5.07"
+        },
+        {
+          "name": "every row ≥ 44 px",
+          "ok": true,
+          "detail": "62,80,62,62,62"
+        },
+        {
+          "name": "row name reads 이름, 상태, 설명",
+          "ok": true,
+          "detail": "토스증권, 연결 전, 계좌 · 보유 종목 조회"
+        },
+        {
+          "name": "RISS: first line says only universities and non-profits get the key; API 키로 연결; 발급 row links to the RISS API centre (said once)",
+          "ok": true,
+          "detail": "{\"first\":\"RISS 검색 API 키는 대학과 비영리 기관에만 발급돼요. 개인은 대부분 받을 수 없어요.\",\"how\":\"API 키로 연결\",\"href\":\"https://www.riss.kr/apicenter/apiMain.do\",\"issue\":\"어디서 발급하나요?RISS API 센터 › 검색 API 이용 신청\",\"fields\":1}"
+        },
+        {
+          "name": "RISS sheet: the notice, the scope line and the sealing line under the key break only between sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"RISS 검색 API 키는 대학과 비영리 기\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"학위논문과 학술지 논문을 검색만 해요. 원문\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"입력한 정보는 이 기기에서 암호화한 뒤에만 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-riss: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":418}"
+        },
+        {
+          "name": "RISS: sealed, and the list hint is empty (label is just RISS)",
+          "ok": true,
+          "detail": "{\"hint\":\"\",\"label\":\"RISS\"}"
+        },
+        {
+          "name": "sheet: start-aligned title 토스증권, live state 연결 전",
+          "ok": true,
+          "detail": "토스증권 · left · 연결 전"
+        },
+        {
+          "name": "sheet: one plain line says what 모시 does and that it only reads",
+          "ok": true,
+          "detail": "계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요."
+        },
+        {
+          "name": "sheet: visible labels; secrets masked; autocomplete off on every field",
+          "ok": true,
+          "detail": "[{\"label\":\"Client ID\",\"labelVisible\":true,\"type\":\"text\",\"ac\":\"off\"},{\"label\":\"Client Secret\",\"labelVisible\":true,\"type\":\"password\",\"ac\":\"off\"}]"
+        },
+        {
+          "name": "sheet: the sealing sentence sits under the secret",
+          "ok": true,
+          "detail": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+        },
+        {
+          "name": "sheet: 어디서 발급하나요 → official console, new tab, noopener, ≥ 44 px",
+          "ok": true,
+          "detail": "{\"href\":\"https://www.tossinvest.com\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"h\":60,\"text\":\"어디서 발급하나요?토스증권 PC 웹 › 설정 › Open API\"}"
+        },
+        {
+          "name": "sheet: keep-for summary row says 30일",
+          "ok": true,
+          "detail": "30일"
+        },
+        {
+          "name": "연결하기 waits for the required fields",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "sheet-form: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":451}"
+        },
+        {
+          "name": "sheet (토스증권): no sentence ends on a one-word line — 320 → 430 (the hint's .t-copy and each .t-s wrap pretty)",
+          "ok": true,
+          "detail": "{\"partsSeen\":4,\"loneEnds\":[]}"
+        },
+        {
+          "name": "sheets: every k-skill service's placeholder fits its field — 320 → 430",
+          "ok": true,
+          "detail": "{\"holdersSeen\":8,\"at320\":[\"room 228 (box 256, bar 0)\",\"toss-investment.clientId 188.6\",\"naver-searchad.apiKey 219.2\",\"naver-searchad.customerId 29.4\",\"popbill.linkId 201.4\",\"popbill.corpNum 188.2\",\"popbill.userId 174.8\",\"popbill.env 111.6\",\"coupang-partners.accessKey 149\"]}"
+        },
+        {
+          "name": "연결하기 is ready once both fields are filled",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sent sealed: the request carries an envelope and none of the typed values",
+          "ok": true,
+          "detail": "531 bytes"
+        },
+        {
+          "name": "sealed as kind token (auth api_key) and the server accepted it",
+          "ok": true,
+          "detail": "token · 연결됨"
+        },
+        {
+          "name": "connected: 연결됨, the form is gone, what to ask next",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"chips\":[\"내 토스증권 보유 종목 보여 줘\",\"삼성전자 지금 얼마야?\"],\"inputs\":0}"
+        },
+        {
+          "name": "sheet-connected: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":144}"
+        },
+        {
+          "name": "row shows 연결됨 after connecting",
+          "ok": true,
+          "detail": "토스증권 qa*** · 방금 연결 연결됨"
+        },
+        {
+          "name": "a refused key is said inline in Korean, inputs kept, 다시 연결 / 다시 연결하기",
+          "ok": true,
+          "detail": "{\"err\":\"쿠팡 파트너스가 키를 받지 않았어요. 발급한 값을 다시 확인해 주세요.\",\"live\":\"다시 연결\",\"kept\":\"qa-access-0001\",\"btn\":\"다시 연결하기\"}"
+        },
+        {
+          "name": "unreachable upstream (needs_verification): 연결 중 with the server's note, no error, the form cleared",
+          "ok": true,
+          "detail": "{\"live\":\"연결 중\",\"note\":\"지금은 쿠팡 파트너스에 확인하지 못했어요. 저장해 두었고 잠시 후 다시 확인할게요.\",\"err\":null,\"inputs\":0,\"btn\":\"다시 입력하기\"}"
+        },
+        {
+          "name": "다시 입력하기 brings the fields back",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "다시 연결 (팝빌): the form with the reason; the line says it issues only with approval",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"err\":\"저장한 키가 만료됐어요. 다시 입력해 주세요.\",\"fields\":5,\"lead\":\"전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요.\"}"
+        },
+        {
+          "name": "다시 연결 (팝빌): the error line's icon starts on the body's left line",
+          "ok": true,
+          "detail": "{\"icon\":32,\"lead\":32}"
+        },
+        {
+          "name": "fields the server marks optional (팝빌 아이디, 환경) can stay empty",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "optional fields say so in their label (선택), as the app's other forms do; required ones don't",
+          "ok": true,
+          "detail": "LinkID,SecretKey,사업자번호,팝빌 아이디 (선택),환경 (선택)"
+        },
+        {
+          "name": "connected sheet: words only — no icon plates",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected sheet: the masked key, since when, and what 연결 해제 removes",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"rows\":[\"qa***\",\"11월 17일부터\"],\"note\":\"연결을 해제하면 모시가 더 이상 토스증권을 쓰지 않아요. 저장한 키도 함께 지워요.\"}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note starts on the lead's left line",
+          "ok": true,
+          "detail": "{\"lead\":32,\"note\":32}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note breaks only between its sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"연결을 해제하면 모시가 더 이상 토스증권을 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-manage: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":229}"
+        },
+        {
+          "name": "연결 해제 (tap twice) revokes on the server and the row is back to 연결 전",
+          "ok": true,
+          "detail": "http://127.0.0.1:5306/api/connections/toss-investment"
+        },
+        {
+          "name": "server: the revoked login is gone",
+          "ok": true,
+          "detail": "[\"naver-searchad\",\"popbill\",\"riss\",\"coupang-partners\"]"
+        },
+        {
+          "name": "no horizontal overflow",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "skills screen: 연결하기 (토스증권) and 다시 연결 (팝빌) on their rows, none on connected logins, never 키 필요 on them; ≥ 44 px",
+          "ok": true,
+          "detail": "{\"toss\":{\"id\":\"k_toss_quote\",\"btn\":\"연결하기\",\"h\":44,\"keyPill\":false,\"label\":\"토스증권 연결하기\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"pop\":{\"id\":\"k_popbill_invoices\",\"btn\":\"다시 연결\",\"h\":44,\"keyPill\":false,\"label\":\"팝빌 다시 연결\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"naverOrRiss\":[\"k_naver_ad_report\",\"k_naver_ad_keywords\""
+        },
+        {
+          "name": "skills screen: the button names its service",
+          "ok": true,
+          "detail": "토스증권 연결하기"
+        },
+        {
+          "name": "skills screen: 연결하기 is accent text under the line (left-aligned with it, no fill); the switch stays alone at the end",
+          "ok": true,
+          "detail": "[{\"id\":\"k_coupang_search\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_quote\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_portfolio\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_orders\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":"
+        },
+        {
+          "name": "skills screen: a row with 연결하기 never ends its description on a one-word line (text-wrap: pretty)",
+          "ok": true,
+          "detail": "[[\"내 쿠팡 파트너스 키로 상품·\",\"가격·로켓배송을 찾아요.\"],[\"내 토스증권 앱 키로 국내·미국\",\"주식 현재가를 봐요.\"],[\"내 토스증권 계좌의 평가금액과 손익을 봐요.\"],[\"내 토스증권 대기·완료 주문을 봐요.\",\"주문은 넣지 않아요.\"],[\"내 팝빌 계정의 매출·매입\",\"전자세금계산서를 봐요.\"],[\"승인을 받은 뒤 팝빌로\",\"전자세금계산서를 발행해요.\"]]"
+        },
+        {
+          "name": "skills screen: no skill line ends on \"(\" or starts with \")\", \"·\" or \".\" — at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"measured\":30,\"tight\":[]}"
+        },
+        {
+          "name": "skills screen: a two-sentence skill line breaks only between its sentences — 320 → 430",
+          "ok": true,
+          "detail": "{\"twoSentence\":2,\"split\":[]}"
+        },
+        {
+          "name": "skills screen: every line's last glyph stays inside its description's box (no tie runs under the switch) — 320 → 430",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "name": "skills screen: 연결하기 opens the 토스증권 sheet over the skills screen",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권\",\"inputs\":2,\"under\":true}"
+        },
+        {
+          "name": "skills screen: opened from the keyboard, closing the sheet puts focus back on its 연결하기",
+          "ok": true,
+          "detail": "true"
+        },
+        {
+          "name": "card: still pending with 연결하기 while the list says 토스증권 is connected (a refused login)",
+          "ok": true,
+          "detail": "{\"tossListed\":\"connected\",\"title\":\"토스증권 연결이 필요해요\",\"btn\":\"연결하기\",\"pill\":null}"
+        },
+        {
+          "name": "card: title, the sheet's scope line (not the server's reason again), 연결하기 — and no field in the chat",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결이 필요해요\",\"why\":\"계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요.\",\"btn\":\"연결하기\",\"inputs\":0,\"plates\":0}"
+        },
+        {
+          "name": "card: 연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "card: the sheet opens over the thread (no navigation: the waiting turn's stream stays)",
+          "ok": true,
+          "detail": "{\"chatTab\":\"true\",\"cardAttached\":true,\"composer\":true}"
+        },
+        {
+          "name": "card: its sheet opens on the fields (다시 연결), not the connected view",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"inputs\":2,\"manage\":false}"
+        },
+        {
+          "name": "card: sent sealed from the chat too",
+          "ok": true,
+          "detail": "525 bytes"
+        },
+        {
+          "name": "card (connected): the same card flips in place to 토스증권 연결됐어요 — no chip, no button, 이어서 하기 ≥ 44 px; no second card",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결됐어요\",\"btn\":0,\"pill\":null,\"next\":\"이어서 하기\",\"h\":54,\"cards0\":1,\"cards1\":1}"
+        },
+        {
+          "name": "card (connected): the stored card is what flipped (the server's message event, not the screen)",
+          "ok": true,
+          "detail": "connected"
+        },
+        {
+          "name": "card (connected): 이어서 하기 sends the server's words once",
+          "ok": true,
+          "detail": "true · 1→2"
+        },
+        {
+          "name": "card: no connection card in the chat has a field (every service's card: keys go in the sheet only)",
+          "ok": true,
+          "detail": "{\"cards\":11,\"fields\":[]}"
+        },
+        {
+          "name": "card: every scope line breaks only between sentences (no sentence starts on the line before and wraps), at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"n\":[\"320:10\",\"360:10\",\"390:10\",\"430:10\"],\"multi\":5,\"bad\":[]}"
+        },
+        {
+          "name": "키로 연결 starts folded (aria-expanded=false, no key rows)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "키로 연결 opens with the four keys and its one line",
+          "ok": true,
+          "detail": "building-register-search,korean-patent-search,lck-analytics,government-bond-analysis · 직접 발급한 개발자 키가 있을 때만 필요해요."
+        },
+        {
+          "name": "a service the server can't connect now: not a button, no chevron, says the server's reason",
+          "ok": true,
+          "detail": "[{\"id\":\"government-bond-analysis\",\"tag\":\"DIV\",\"chev\":false,\"detail\":\"점검 중이에요\"}]"
+        },
+        {
+          "name": "that row stays readable (detail ≥ 4.5:1, title ≥ 4.5:1)",
+          "ok": true,
+          "detail": "5.07 / 16.83"
+        },
+        {
+          "name": "LCK: the 언제 필요한가요 row is words only (no link)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "특허 검색: 발급처 links to KIPRIS Plus",
+          "ok": true,
+          "detail": "https://plus.kipris.or.kr"
+        },
+        {
+          "name": "키로 연결 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "lines (qa/lib/lines.mjs, every rule): no finding in the account rows, 나의 모시's skills and the chat cards (320 → 430) or the sheets (토스증권 320 → 430; RISS, 다시 연결, 관리 at 390)",
+          "ok": true,
+          "detail": "{\"seen\":{\"rows\":44,\"skills\":240,\"sheets\":72,\"cards\":88},\"bad\":[]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/skill-accounts/webkit-light-list.png",
+        "docs/qa/skill-accounts/webkit-light-list-end.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-riss.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-form.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-form-320.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-connected.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-refused.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-checking.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-reconnect.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-manage.png",
+        "docs/qa/skill-accounts/webkit-light-skills-sheet.png",
+        "docs/qa/skill-accounts/webkit-light-skills-list.png",
+        "docs/qa/skill-accounts/webkit-light-card-pending.png",
+        "docs/qa/skill-accounts/webkit-light-card-sheet.png",
+        "docs/qa/skill-accounts/webkit-light-card-connected.png",
+        "docs/qa/skill-accounts/webkit-light-keys-open.png",
+        "docs/qa/skill-accounts/webkit-light-sheet-key.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "server lists k-skill services itself: no 국내 서비스 messenger group",
+          "ok": true,
+          "detail": "{\"listsKorea\":true,\"group\":6,\"msgr\":8,\"kor\":false}"
+        },
+        {
+          "name": "group title is 모시가 쓰는 서비스",
+          "ok": true,
+          "detail": "모시가 쓰는 서비스"
+        },
+        {
+          "name": "the five offered services, linked first (연결됨 / 다시 연결), then 연결 전",
+          "ok": true,
+          "detail": "naver-searchad,popbill,toss-investment,coupang-partners,riss"
+        },
+        {
+          "name": "키로 연결 stays out while the server lists no key service (the four keys have no tool yet)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "never listed: 번개장터 · 사람인 · 잡코리아 · CODEF · 숲나들e, and 헤이유미 while the server hasn't enabled it",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "k-skill services are never messenger rows (no conn-row, no 국내 서비스 group)",
+          "ok": true,
+          "detail": "0 rows · 0 sections"
+        },
+        {
+          "name": "title's one sentence covers services too (no sealing line there)",
+          "ok": true,
+          "detail": "연결하면 모시가 대화를 읽고 내 서비스를 조회해요. 보내거나 실행하는 건 내가 허락할 때만 해요."
+        },
+        {
+          "name": "no logos, plates or tiles on any k-skill row",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "states: one 연결됨, one 다시 연결 pill; 연결 전 rows carry no pill",
+          "ok": true,
+          "detail": "연결됨,다시 연결"
+        },
+        {
+          "name": "row subtitle ≥ 4.5:1",
+          "ok": true,
+          "detail": "6.61"
+        },
+        {
+          "name": "every row ≥ 44 px",
+          "ok": true,
+          "detail": "62,80,62,62,62"
+        },
+        {
+          "name": "row name reads 이름, 상태, 설명",
+          "ok": true,
+          "detail": "토스증권, 연결 전, 계좌 · 보유 종목 조회"
+        },
+        {
+          "name": "RISS: first line says only universities and non-profits get the key; API 키로 연결; 발급 row links to the RISS API centre (said once)",
+          "ok": true,
+          "detail": "{\"first\":\"RISS 검색 API 키는 대학과 비영리 기관에만 발급돼요. 개인은 대부분 받을 수 없어요.\",\"how\":\"API 키로 연결\",\"href\":\"https://www.riss.kr/apicenter/apiMain.do\",\"issue\":\"어디서 발급하나요?RISS API 센터 › 검색 API 이용 신청\",\"fields\":1}"
+        },
+        {
+          "name": "RISS sheet: the notice, the scope line and the sealing line under the key break only between sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"RISS 검색 API 키는 대학과 비영리 기\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"학위논문과 학술지 논문을 검색만 해요. 원문\",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true},{\"text\":\"입력한 정보는 이 기기에서 암호화한 뒤에만 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-riss: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":418}"
+        },
+        {
+          "name": "RISS: sealed, and the list hint is empty (label is just RISS)",
+          "ok": true,
+          "detail": "{\"hint\":\"\",\"label\":\"RISS\"}"
+        },
+        {
+          "name": "sheet: start-aligned title 토스증권, live state 연결 전",
+          "ok": true,
+          "detail": "토스증권 · left · 연결 전"
+        },
+        {
+          "name": "sheet: one plain line says what 모시 does and that it only reads",
+          "ok": true,
+          "detail": "계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요."
+        },
+        {
+          "name": "sheet: visible labels; secrets masked; autocomplete off on every field",
+          "ok": true,
+          "detail": "[{\"label\":\"Client ID\",\"labelVisible\":true,\"type\":\"text\",\"ac\":\"off\"},{\"label\":\"Client Secret\",\"labelVisible\":true,\"type\":\"password\",\"ac\":\"off\"}]"
+        },
+        {
+          "name": "sheet: the sealing sentence sits under the secret",
+          "ok": true,
+          "detail": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+        },
+        {
+          "name": "sheet: 어디서 발급하나요 → official console, new tab, noopener, ≥ 44 px",
+          "ok": true,
+          "detail": "{\"href\":\"https://www.tossinvest.com\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"h\":60,\"text\":\"어디서 발급하나요?토스증권 PC 웹 › 설정 › Open API\"}"
+        },
+        {
+          "name": "sheet: keep-for summary row says 30일",
+          "ok": true,
+          "detail": "30일"
+        },
+        {
+          "name": "연결하기 waits for the required fields",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "sheet-form: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":451}"
+        },
+        {
+          "name": "sheet (토스증권): no sentence ends on a one-word line — 320 → 430 (the hint's .t-copy and each .t-s wrap pretty)",
+          "ok": true,
+          "detail": "{\"partsSeen\":4,\"loneEnds\":[]}"
+        },
+        {
+          "name": "sheets: every k-skill service's placeholder fits its field — 320 → 430",
+          "ok": true,
+          "detail": "{\"holdersSeen\":8,\"at320\":[\"room 228 (box 256, bar 0)\",\"toss-investment.clientId 188.6\",\"naver-searchad.apiKey 219.2\",\"naver-searchad.customerId 29.4\",\"popbill.linkId 201.4\",\"popbill.corpNum 188.2\",\"popbill.userId 174.8\",\"popbill.env 111.6\",\"coupang-partners.accessKey 149\"]}"
+        },
+        {
+          "name": "연결하기 is ready once both fields are filled",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "sent sealed: the request carries an envelope and none of the typed values",
+          "ok": true,
+          "detail": "531 bytes"
+        },
+        {
+          "name": "sealed as kind token (auth api_key) and the server accepted it",
+          "ok": true,
+          "detail": "token · 연결됨"
+        },
+        {
+          "name": "connected: 연결됨, the form is gone, what to ask next",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"chips\":[\"내 토스증권 보유 종목 보여 줘\",\"삼성전자 지금 얼마야?\"],\"inputs\":0}"
+        },
+        {
+          "name": "sheet-connected: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":144}"
+        },
+        {
+          "name": "row shows 연결됨 after connecting",
+          "ok": true,
+          "detail": "토스증권 qa*** · 방금 연결 연결됨"
+        },
+        {
+          "name": "a refused key is said inline in Korean, inputs kept, 다시 연결 / 다시 연결하기",
+          "ok": true,
+          "detail": "{\"err\":\"쿠팡 파트너스가 키를 받지 않았어요. 발급한 값을 다시 확인해 주세요.\",\"live\":\"다시 연결\",\"kept\":\"qa-access-0001\",\"btn\":\"다시 연결하기\"}"
+        },
+        {
+          "name": "unreachable upstream (needs_verification): 연결 중 with the server's note, no error, the form cleared",
+          "ok": true,
+          "detail": "{\"live\":\"연결 중\",\"note\":\"지금은 쿠팡 파트너스에 확인하지 못했어요. 저장해 두었고 잠시 후 다시 확인할게요.\",\"err\":null,\"inputs\":0,\"btn\":\"다시 입력하기\"}"
+        },
+        {
+          "name": "다시 입력하기 brings the fields back",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "다시 연결 (팝빌): the form with the reason; the line says it issues only with approval",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"err\":\"저장한 키가 만료됐어요. 다시 입력해 주세요.\",\"fields\":5,\"lead\":\"전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요.\"}"
+        },
+        {
+          "name": "다시 연결 (팝빌): the error line's icon starts on the body's left line",
+          "ok": true,
+          "detail": "{\"icon\":32,\"lead\":32}"
+        },
+        {
+          "name": "fields the server marks optional (팝빌 아이디, 환경) can stay empty",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "optional fields say so in their label (선택), as the app's other forms do; required ones don't",
+          "ok": true,
+          "detail": "LinkID,SecretKey,사업자번호,팝빌 아이디 (선택),환경 (선택)"
+        },
+        {
+          "name": "connected sheet: words only — no icon plates",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected sheet: the masked key, since when, and what 연결 해제 removes",
+          "ok": true,
+          "detail": "{\"live\":\"연결됨\",\"rows\":[\"qa***\",\"11월 17일부터\"],\"note\":\"연결을 해제하면 모시가 더 이상 토스증권을 쓰지 않아요. 저장한 키도 함께 지워요.\"}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note starts on the lead's left line",
+          "ok": true,
+          "detail": "{\"lead\":32,\"note\":32}"
+        },
+        {
+          "name": "connected sheet: the 연결 해제 note breaks only between its sentences",
+          "ok": true,
+          "detail": "[{\"text\":\"연결을 해제하면 모시가 더 이상 토스증권을 \",\"sentences\":2,\"spans\":2,\"lines\":[1,1],\"ok\":true}]"
+        },
+        {
+          "name": "sheet-manage: the status pill sits whole inside the sheet body (not clipped under the head)",
+          "ok": true,
+          "detail": "{\"top\":2,\"bottom\":229}"
+        },
+        {
+          "name": "연결 해제 (tap twice) revokes on the server and the row is back to 연결 전",
+          "ok": true,
+          "detail": "http://127.0.0.1:5306/api/connections/toss-investment"
+        },
+        {
+          "name": "server: the revoked login is gone",
+          "ok": true,
+          "detail": "[\"naver-searchad\",\"popbill\",\"riss\",\"coupang-partners\"]"
+        },
+        {
+          "name": "no horizontal overflow",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "skills screen: 연결하기 (토스증권) and 다시 연결 (팝빌) on their rows, none on connected logins, never 키 필요 on them; ≥ 44 px",
+          "ok": true,
+          "detail": "{\"toss\":{\"id\":\"k_toss_quote\",\"btn\":\"연결하기\",\"h\":44,\"keyPill\":false,\"label\":\"토스증권 연결하기\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"pop\":{\"id\":\"k_popbill_invoices\",\"btn\":\"다시 연결\",\"h\":44,\"keyPill\":false,\"label\":\"팝빌 다시 연결\",\"under\":{\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1}},\"naverOrRiss\":[\"k_naver_ad_report\",\"k_naver_ad_keywords\""
+        },
+        {
+          "name": "skills screen: the button names its service",
+          "ok": true,
+          "detail": "토스증권 연결하기"
+        },
+        {
+          "name": "skills screen: 연결하기 is accent text under the line (left-aligned with it, no fill); the switch stays alone at the end",
+          "ok": true,
+          "detail": "[{\"id\":\"k_coupang_search\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_quote\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_portfolio\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":\"k_toss_orders\",\"inMain\":true,\"below\":true,\"left\":0,\"fill\":\"rgba(0, 0, 0, 0)\",\"endKids\":1},{\"id\":"
+        },
+        {
+          "name": "skills screen: a row with 연결하기 never ends its description on a one-word line (text-wrap: pretty)",
+          "ok": true,
+          "detail": "[[\"내 쿠팡 파트너스 키로 상품·\",\"가격·로켓배송을 찾아요.\"],[\"내 토스증권 앱 키로 국내·미국\",\"주식 현재가를 봐요.\"],[\"내 토스증권 계좌의 평가금액과 손익을 봐요.\"],[\"내 토스증권 대기·완료 주문을 봐요.\",\"주문은 넣지 않아요.\"],[\"내 팝빌 계정의 매출·매입\",\"전자세금계산서를 봐요.\"],[\"승인을 받은 뒤 팝빌로\",\"전자세금계산서를 발행해요.\"]]"
+        },
+        {
+          "name": "skills screen: no skill line ends on \"(\" or starts with \")\", \"·\" or \".\" — at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"measured\":30,\"tight\":[]}"
+        },
+        {
+          "name": "skills screen: a two-sentence skill line breaks only between its sentences — 320 → 430",
+          "ok": true,
+          "detail": "{\"twoSentence\":2,\"split\":[]}"
+        },
+        {
+          "name": "skills screen: every line's last glyph stays inside its description's box (no tie runs under the switch) — 320 → 430",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "name": "skills screen: 연결하기 opens the 토스증권 sheet over the skills screen",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권\",\"inputs\":2,\"under\":true}"
+        },
+        {
+          "name": "skills screen: opened from the keyboard, closing the sheet puts focus back on its 연결하기",
+          "ok": true,
+          "detail": "true"
+        },
+        {
+          "name": "card: still pending with 연결하기 while the list says 토스증권 is connected (a refused login)",
+          "ok": true,
+          "detail": "{\"tossListed\":\"connected\",\"title\":\"토스증권 연결이 필요해요\",\"btn\":\"연결하기\",\"pill\":null}"
+        },
+        {
+          "name": "card: title, the sheet's scope line (not the server's reason again), 연결하기 — and no field in the chat",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결이 필요해요\",\"why\":\"계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요.\",\"btn\":\"연결하기\",\"inputs\":0,\"plates\":0}"
+        },
+        {
+          "name": "card: 연결하기 ≥ 44 px",
+          "ok": true,
+          "detail": "52"
+        },
+        {
+          "name": "card: the sheet opens over the thread (no navigation: the waiting turn's stream stays)",
+          "ok": true,
+          "detail": "{\"chatTab\":\"true\",\"cardAttached\":true,\"composer\":true}"
+        },
+        {
+          "name": "card: its sheet opens on the fields (다시 연결), not the connected view",
+          "ok": true,
+          "detail": "{\"live\":\"다시 연결\",\"inputs\":2,\"manage\":false}"
+        },
+        {
+          "name": "card: sent sealed from the chat too",
+          "ok": true,
+          "detail": "525 bytes"
+        },
+        {
+          "name": "card (connected): the same card flips in place to 토스증권 연결됐어요 — no chip, no button, 이어서 하기 ≥ 44 px; no second card",
+          "ok": true,
+          "detail": "{\"title\":\"토스증권 연결됐어요\",\"btn\":0,\"pill\":null,\"next\":\"이어서 하기\",\"h\":54,\"cards0\":1,\"cards1\":1}"
+        },
+        {
+          "name": "card (connected): the stored card is what flipped (the server's message event, not the screen)",
+          "ok": true,
+          "detail": "connected"
+        },
+        {
+          "name": "card (connected): 이어서 하기 sends the server's words once",
+          "ok": true,
+          "detail": "true · 1→2"
+        },
+        {
+          "name": "card: no connection card in the chat has a field (every service's card: keys go in the sheet only)",
+          "ok": true,
+          "detail": "{\"cards\":11,\"fields\":[]}"
+        },
+        {
+          "name": "card: every scope line breaks only between sentences (no sentence starts on the line before and wraps), at 320 / 360 / 390 / 430",
+          "ok": true,
+          "detail": "{\"n\":[\"320:10\",\"360:10\",\"390:10\",\"430:10\"],\"multi\":5,\"bad\":[]}"
+        },
+        {
+          "name": "키로 연결 starts folded (aria-expanded=false, no key rows)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "키로 연결 opens with the four keys and its one line",
+          "ok": true,
+          "detail": "building-register-search,korean-patent-search,lck-analytics,government-bond-analysis · 직접 발급한 개발자 키가 있을 때만 필요해요."
+        },
+        {
+          "name": "a service the server can't connect now: not a button, no chevron, says the server's reason",
+          "ok": true,
+          "detail": "[{\"id\":\"government-bond-analysis\",\"tag\":\"DIV\",\"chev\":false,\"detail\":\"점검 중이에요\"}]"
+        },
+        {
+          "name": "that row stays readable (detail ≥ 4.5:1, title ≥ 4.5:1)",
+          "ok": true,
+          "detail": "6.61 / 15.63"
+        },
+        {
+          "name": "LCK: the 언제 필요한가요 row is words only (no link)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "특허 검색: 발급처 links to KIPRIS Plus",
+          "ok": true,
+          "detail": "https://plus.kipris.or.kr"
+        },
+        {
+          "name": "키로 연결 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "lines (qa/lib/lines.mjs, every rule): no finding in the account rows, 나의 모시's skills and the chat cards (320 → 430) or the sheets (토스증권 320 → 430; RISS, 다시 연결, 관리 at 390)",
+          "ok": true,
+          "detail": "{\"seen\":{\"rows\":44,\"skills\":240,\"sheets\":72,\"cards\":88},\"bad\":[]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/skill-accounts/webkit-dark-list.png",
+        "docs/qa/skill-accounts/webkit-dark-list-end.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-riss.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-form.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-form-320.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-connected.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-refused.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-checking.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-reconnect.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-manage.png",
+        "docs/qa/skill-accounts/webkit-dark-skills-sheet.png",
+        "docs/qa/skill-accounts/webkit-dark-skills-list.png",
+        "docs/qa/skill-accounts/webkit-dark-card-pending.png",
+        "docs/qa/skill-accounts/webkit-dark-card-sheet.png",
+        "docs/qa/skill-accounts/webkit-dark-card-connected.png",
+        "docs/qa/skill-accounts/webkit-dark-keys-open.png",
+        "docs/qa/skill-accounts/webkit-dark-sheet-key.png"
+      ]
+    }
+  ],
+  "summary": {
+    "checks": 308,
+    "failed": 0
+  }
+}

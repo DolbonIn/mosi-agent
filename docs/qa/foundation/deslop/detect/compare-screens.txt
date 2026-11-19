@@ -1,0 +1,80 @@
+shots compared: 76  (only before: 0, only after: 0)
+total findings: before 434 → after 436
+rule                          before   after
+nested-cards                     180     228
+low-contrast                     106      57
+organic-clip-path                 94      94
+skipped-heading                   54      54
+radial-halo                        0       3
+
+unique (rule, snippet): before 23 → after 21
+  low-contrast                   14 →   11
+  nested-cards                    1 →    1
+  organic-clip-path               2 →    2
+  radial-halo                     0 →    1
+  skipped-heading                 6 →    6
+
+resolved (9):
+  - low-contrast: 3.6:1 (need 4.5:1) — text #ffffff on #0a84ff
+  - low-contrast: 4.1:1 (need 4.5:1) — text #6e6e73 on #e6e6e9
+  - low-contrast: 4.2:1 (need 4.5:1) — text #d70015 on #f6dfdf
+  - low-contrast: placeholder "010-1234-5678" 2.0:1 (need 4.5:1) — text #b9b9bb on #ffffff
+  - low-contrast: placeholder "010-1234-5678" 2.6:1 (need 4.5:1) — text #5e5e63 on #1c1c1e
+  - low-contrast: placeholder "example@kakao.com" 2.0:1 (need 4.5:1) — text #b9b9bb on #ffffff
+  - low-contrast: placeholder "example@kakao.com" 2.6:1 (need 4.5:1) — text #5e5e63 on #1c1c1e
+  - low-contrast: placeholder "이메일 또는 전화번호" 1.9:1 (need 4.5:1) — text #afafb2 on #efeff0
+  - low-contrast: placeholder "이메일 또는 전화번호" 2.5:1 (need 4.5:1) — text #6d6d73 on #323236
+
+new (7):
+  + low-contrast: placeholder "010-1234-5678" 3.6:1 (need 4.5:1) — text #86868b on #ffffff
+  + low-contrast: placeholder "010-1234-5678" 4.1:1 (need 4.5:1) — text #7c7c80 on #1c1c1e
+  + low-contrast: placeholder "example@kakao.com" 3.6:1 (need 4.5:1) — text #86868b on #ffffff
+  + low-contrast: placeholder "example@kakao.com" 4.1:1 (need 4.5:1) — text #7c7c80 on #1c1c1e
+  + low-contrast: placeholder "이메일 또는 전화번호" 3.1:1 (need 4.5:1) — text #7c7c80 on #323236
+  + low-contrast: placeholder "이메일 또는 전화번호" 3.2:1 (need 4.5:1) — text #86868b on #efeff0
+  + radial-halo: radial-gradient halo (#6a1cf5 → transparent) on dark page
+
+per feature (all rules):
+  archive            23 →   23
+  call               45 →   37
+  chat               94 →   78
+  connections        23 →   32
+  empty              12 →   12
+  explore            10 →    8
+  meet               65 →   53
+  phone              34 →   33
+  profile            61 →   90
+  schedules          23 →   19
+  settings           44 →   51
+
+per feature (excluding organic-clip-path = K, glass group union):
+  archive            15 →   15
+  call               37 →   29
+  chat               80 →   64
+  connections        17 →   26
+  empty               4 →    4
+  explore             4 →    2
+  meet               57 →   45
+  phone              28 →   27
+  profile            47 →   76
+  schedules          19 →   15
+  settings           32 →   39
+
+per theme × rule (76 shots: chromium light 38 + dark 38):
+  light: total 124 → 88
+     low-contrast             50 →   14
+     organic-clip-path        47 →   47
+     skipped-heading          27 →   27
+  dark: total 310 → 348
+     nested-cards            180 →  228
+     low-contrast             56 →   43
+     organic-clip-path        47 →   47
+     skipped-heading          27 →   27
+     radial-halo               0 →    3
+
+the 4 real screens + settings (all shots of those features, both themes), excluding organic-clip-path (K):
+  chat       all  80 →  64   low-contrast  29 →  13
+  explore    all   4 →   2   low-contrast   4 →   2
+  archive    all  15 →  15   low-contrast   2 →   2
+  profile    all  47 →  76   low-contrast   7 →   6
+  settings   all  32 →  39   low-contrast   7 →   5

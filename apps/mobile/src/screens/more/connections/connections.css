@@ -1,0 +1,455 @@
+/* Connections screen + connect sheet (screens/more/connections). Tokens only. */
+
+:root {
+  --plate-s: 72%;
+  --plate-l: 52%;
+}
+:root[data-theme="dark"] {
+  --plate-s: 60%;
+  --plate-l: 46%;
+}
+:root[data-contrast="more"] {
+  --plate-s: 80%;
+  --plate-l: 36%;
+}
+
+.conn-row .list-row-detail {
+  max-width: none;
+  overflow: visible;
+}
+
+/* the title says what the list is; its subtitle is the screen's one sentence (draft B) */
+.conn-title {
+  padding-bottom: 22px;
+}
+.conn-title .large-title-sub {
+  margin-top: 6px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* the 고급 fold row is the group's own heading (no plate); the first bot row under it keeps the hairline */
+.conn-adv-h {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.conn-adv-h + .list-row .list-row-main::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+
+/* "고급 · 직접 만든 봇 연결" fold: the chevron turns on the snap spring, bot rows rise in (staggered), leave in 120 ms */
+.conn-adv-chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+.conn-adv--open .conn-adv-chev svg {
+  transform: rotate(180deg);
+}
+.conn-adv--open .conn-row {
+  animation: conn-adv-in var(--dur-snap) var(--ease-snap) both;
+}
+.conn-adv--open .conn-row:nth-child(3) {
+  animation-delay: 35ms;
+}
+.conn-adv--open .conn-row:nth-child(n + 4) {
+  animation-delay: 70ms;
+}
+.conn-adv--open .list-footer {
+  animation: conn-adv-in var(--dur-snap) var(--ease-snap) 90ms both;
+}
+.conn-adv--closing .conn-row,
+.conn-adv--closing .list-footer {
+  animation: conn-adv-out var(--dur-exit) ease-in both;
+}
+@keyframes conn-adv-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+@keyframes conn-adv-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+:root[data-motion="reduce"] .conn-adv-chev svg {
+  transition: none;
+}
+:root[data-motion="reduce"] .conn-adv .conn-row,
+:root[data-motion="reduce"] .conn-adv .list-footer {
+  animation: none;
+}
+
+/* ── sheet ── */
+/* the title reads from the leading edge (Sheet titleAlign="start"); the live pill sits under it (no plate) */
+.conn-sheet-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: -10px;
+  padding: 0 4px;
+  min-width: 0;
+}
+.conn-sheet-account {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+.conn-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.conn-footer .more-error {
+  margin: 0 6px;
+}
+
+/* live status capsule (width morphs, words swap, check draws) */
+.conn-livepill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 12px 4px 9px;
+  border-radius: var(--r-capsule);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: var(--fill);
+  color: var(--label);
+}
+/* "연결 전": label on the fill (label-2 there was 4.4:1), with the info glyph */
+.conn-livepill--none {
+  padding-left: 8px;
+}
+.conn-livepill--error {
+  background: var(--danger-fill);
+  color: var(--danger-on-fill);
+}
+.conn-livepill__icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}
+.conn-livepill__ring {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.8px solid var(--fill-3);
+  border-top-color: var(--label);
+}
+.conn-livepill__ring[data-loop] {
+  animation: conn-spin 0.9s linear infinite;
+}
+@keyframes conn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+:root[data-motion="reduce"] .conn-livepill__ring[data-loop] {
+  animation-duration: 2.4s;
+}
+
+/* the sealing sentence, as the secret field's own hint */
+.conn-lockhint {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+.conn-lockhint > svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* summary rows that open in place: 깽이가 할 수 있는 일 · 로그인 정보 보관 */
+.conn-folds {
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 1px 0 var(--separator), inset 0 -1px 0 var(--separator);
+}
+.conn-fold + .conn-fold {
+  box-shadow: inset 0 1px 0 var(--separator);
+}
+.conn-fold__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 4px;
+  text-align: left;
+  color: var(--label);
+  font-size: var(--t-subhead);
+  border-radius: var(--r-control);
+}
+.conn-fold__row:active {
+  background: var(--press-tint);
+}
+.conn-fold__row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.conn-fold__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.conn-fold__title {
+  font-weight: 500;
+}
+.conn-fold__sub {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.conn-fold__value {
+  flex: none;
+  color: var(--label-2);
+}
+.conn-fold__chev {
+  flex: none;
+  display: grid;
+  color: var(--label-2);
+}
+.conn-fold__chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+.conn-fold.is-open .conn-fold__chev svg {
+  transform: rotate(180deg);
+}
+:root[data-motion="reduce"] .conn-fold__chev svg {
+  transition: none;
+}
+.conn-fold__panel {
+  overflow: hidden;
+}
+.conn-fold__inner {
+  padding: 2px 4px 14px;
+}
+/* one column: the four checks in --label, closed by the one "never" line in --label-2 */
+.conn-can {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.conn-can li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+}
+.conn-can li svg {
+  flex: none;
+  margin-top: 2px;
+}
+.conn-can li.is-not {
+  padding-left: 23px;
+  color: var(--label-2);
+}
+
+.conn-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* passcode */
+.conn-passcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 12px 14px;
+  border-radius: var(--r-group);
+  background: var(--surface-2);
+  text-align: center;
+}
+:root[data-theme="dark"] .conn-passcode {
+  background: var(--fill);
+}
+.conn-passcode__prompt {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label);
+  text-wrap: pretty;
+}
+.conn-passcode__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.conn-passcode__code {
+  display: flex;
+  gap: 6px;
+}
+.conn-passcode__cell {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 3.5rem;
+  border-radius: var(--r-tile);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--label);
+}
+.conn-passcode__long {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--label);
+  overflow-wrap: anywhere;
+}
+.conn-passcode__status {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.conn-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+}
+.conn-ring svg {
+  position: absolute;
+  inset: 0;
+}
+.conn-ring__track {
+  fill: none;
+  stroke: var(--fill-2);
+  stroke-width: 4;
+}
+.conn-ring__fill {
+  fill: none;
+  stroke: var(--label);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+:root[data-motion="reduce"] .conn-ring__fill {
+  transition: none;
+}
+.conn-ring__text {
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label);
+}
+
+.conn-plain-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--r-control);
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--label);
+}
+.conn-plain-btn:active {
+  background: var(--press-tint);
+}
+.conn-plain-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* after connecting */
+.conn-next__chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.conn-next__chips .chip {
+  height: auto;
+  min-height: 36px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+/* manage view */
+.conn-chats {
+  list-style: none;
+}
+.conn-chat-kind {
+  margin-left: 4px;
+  font-size: var(--t-footnote);
+  font-weight: 400;
+  color: var(--label-2);
+}
+.conn-chat-last {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.conn-chat-meta {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.conn-unread {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-capsule);
+  display: grid;
+  place-items: center;
+  font-size: var(--t-footnote);
+  font-weight: 700;
+  line-height: 1;
+  background: var(--label);
+  color: var(--surface);
+}
+.conn-chats-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--r-tile);
+  overflow: hidden;
+}
+.conn-chats-placeholder > span {
+  height: 52px;
+  background: var(--fill);
+}
+.conn-disconnect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.conn-disconnect__note {
+  padding: 0 6px;
+}

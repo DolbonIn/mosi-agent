@@ -1,0 +1,498 @@
+{
+  "at": "2026-11-11T19:12:21.812Z",
+  "api": "http://127.0.0.1:8871",
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": true,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": true,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    },
+    {
+      "engine": "chromium",
+      "variant": "reduced",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": true,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": false,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": false,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    },
+    {
+      "engine": "webkit",
+      "variant": "reduced",
+      "checks": [
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "3 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "3/3 rows with an icon"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": false,
+        "windows": 7,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [],
+      "screenshots": 8
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "feature": "connections",
+  "title": "연결 (메신저 연결 목록)",
+  "critique": "../../impeccable/critique/connections.md",
+  "score": "25/40",
+  "current": [
+    "chromium-light-38-connections.jpg",
+    "chromium-dark-38-connections.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "앱 아이콘 그대로",
+      "summary": "레이아웃은 그대로예요. 색 타일을 실제 앱 아이콘으로 바꾸고, 부제는 로그인 방식으로 바꿨어요. 봇 3종은 접힌 '고급 · 직접 만든 봇 연결' 한 행 아래로 내렸어요. 푸시된 화면이라 상단 가운데는 비워 두고, 스크롤하면 제목이 맨 글자로 나와요. 연결 시트에서는 판과 두 칸 패널을 걷고, 암호화 문장은 비밀번호 칸 힌트 한 곳에만 남겼어요.",
+      "fixes": [
+        "P2-1",
+        "slop:CP-5",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "A-end",
+          "name": "끝까지 스크롤 · 고급 펼침",
+          "html": "A-end.html",
+          "shots": {
+            "light": "A-end-light.jpg",
+            "dark": "A-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-39-connections-scrolled.jpg",
+            "chromium-dark-39-connections-scrolled.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1"
+          ]
+        },
+        {
+          "id": "A-sheet",
+          "name": "연결 시트 · 카카오톡 (비밀번호 단계)",
+          "html": "A-sheet.html",
+          "shots": {
+            "light": "A-sheet-light.jpg",
+            "dark": "A-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-40-connect-sheet-kakaotalk.jpg",
+            "chromium-dark-40-connect-sheet-kakaotalk.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P3-1",
+            "slop:CP-9",
+            "slop:NC-5",
+            "critique:Q3"
+          ]
+        },
+        {
+          "id": "A-vault",
+          "name": "저장된 로그인 · 빈 상태",
+          "summary": "작업 트리 구조 그대로예요. 안심 문구 없이 원 없는 열쇠 글리프, 제목, 한 문장, '카카오톡 연결하기' 하나예요. 버튼은 --accent-fill이에요.",
+          "html": "A-vault.html",
+          "shots": {
+            "light": "A-vault-light.jpg",
+            "dark": "A-vault-dark.jpg"
+          },
+          "current": [
+            "chromium-light-49-vault.jpg",
+            "chromium-dark-49-vault.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "A-vault-log",
+          "name": "접근 기록 · 빈 상태",
+          "summary": "원 없는 눈 글리프, 제목, 한 문장뿐이에요. 바로 위 세그먼트가 이미 '로그인 정보'로 가는 길이라 행동을 따로 두지 않아요. 큰 제목은 세그먼트를 따라가요.",
+          "html": "A-vault-log.html",
+          "shots": {
+            "light": "A-vault-log-light.jpg",
+            "dark": "A-vault-log-dark.jpg"
+          },
+          "current": [
+            "chromium-light-50-vault-access-log.jpg",
+            "chromium-dark-50-vault-access-log.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "A-vault-full",
+          "name": "저장된 로그인 · 2개 (현재 캡처 없음, 소스 기준)",
+          "summary": "안심 문구는 로그인이 있을 때 맨 위에 한 번이에요. 카드 머리의 '29일 남음' 알약은 '보관 기간 · 29일 남음' 라벨로 옮겼어요.",
+          "html": "A-vault-full.html",
+          "shots": {
+            "light": "A-vault-full-light.jpg",
+            "dark": "A-vault-full-dark.jpg"
+          },
+          "current": [
+            "chromium-light-49-vault.jpg",
+            "chromium-dark-49-vault.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "A-vault-log-full",
+          "name": "접근 기록 · 4건 (현재 캡처 없음, 소스 기준)",
+          "summary": "레일은 그대로예요. '완료' 알약은 빼고 거절·실패일 때만 상태를 말해요. 기기 키 확인은 내 승인 결정에만 붙고(서버와 같음), 테두리 없는 글이에요.",
+          "html": "A-vault-log-full.html",
+          "shots": {
+            "light": "A-vault-log-full-light.jpg",
+            "dark": "A-vault-log-full-dark.jpg"
+          },
+          "current": [
+            "chromium-light-50-vault-access-log.jpg",
+            "chromium-dark-50-vault-access-log.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "일상과 업무로 나눈 목록",
+      "summary": "A에 더해 제목을 내용대로 '메신저 연결'로 바꾸고, 안내 문장은 큰 제목의 부제로 합쳤어요. 8개는 일상(5) · 업무(3) 두 묶음으로 나눴어요. 연결 시트는 입력 칸이 먼저 오고, 할 수 있는 일과 보관 기간은 요약 행 두 줄로 접었어요.",
+      "fixes": [
+        "P2-1",
+        "slop:CP-5",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "B-end",
+          "name": "끝까지 스크롤 · 고급 펼침",
+          "html": "B-end.html",
+          "shots": {
+            "light": "B-end-light.jpg",
+            "dark": "B-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-39-connections-scrolled.jpg",
+            "chromium-dark-39-connections-scrolled.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1"
+          ]
+        },
+        {
+          "id": "B-sheet",
+          "name": "연결 시트 · 카카오톡 (비밀번호 단계)",
+          "html": "B-sheet.html",
+          "shots": {
+            "light": "B-sheet-light.jpg",
+            "dark": "B-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-40-connect-sheet-kakaotalk.jpg",
+            "chromium-dark-40-connect-sheet-kakaotalk.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P3-1",
+            "slop:CP-9",
+            "slop:NC-5",
+            "critique:Q3"
+          ]
+        },
+        {
+          "id": "B-vault",
+          "name": "저장된 로그인 · 빈 상태",
+          "summary": "글리프와 약속 없이 제목, 한 문장, 카카오톡 행 하나예요. 행은 바로 카카오톡 연결 시트를 열어요. 로그인이 생기면 같은 목록이 채워져요.",
+          "html": "B-vault.html",
+          "shots": {
+            "light": "B-vault-light.jpg",
+            "dark": "B-vault-dark.jpg"
+          },
+          "current": [
+            "chromium-light-49-vault.jpg",
+            "chromium-dark-49-vault.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "B-vault-log",
+          "name": "접근 기록 · 빈 상태",
+          "summary": "글리프 없이 제목과 한 문장뿐이에요. 행동은 바로 위 세그먼트예요.",
+          "html": "B-vault-log.html",
+          "shots": {
+            "light": "B-vault-log-light.jpg",
+            "dark": "B-vault-log-dark.jpg"
+          },
+          "current": [
+            "chromium-light-50-vault-access-log.jpg",
+            "chromium-dark-50-vault-access-log.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "B-vault-full",
+          "name": "저장된 로그인 · 2개 (현재 캡처 없음, 소스 기준)",
+          "summary": "로그인 하나가 묶음 하나예요: 누구인지, 보관 기간, 마지막 사용, 지우기. 5칸 보관 기간은 행을 펼칠 때만 보여요(캡처는 카카오톡을 펼친 상태).",
+          "html": "B-vault-full.html",
+          "shots": {
+            "light": "B-vault-full-light.jpg",
+            "dark": "B-vault-full-dark.jpg"
+          },
+          "current": [
+            "chromium-light-49-vault.jpg",
+            "chromium-dark-49-vault.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        },
+        {
+          "id": "B-vault-log-full",
+          "name": "접근 기록 · 4건 (현재 캡처 없음, 소스 기준)",
+          "summary": "레일 대신 날짜별 행 묶음이에요. 시간은 오른쪽 값이에요. 거절이나 기기 키 확인(내 승인 결정에만)은 조용한 한 줄이에요.",
+          "html": "B-vault-log-full.html",
+          "shots": {
+            "light": "B-vault-log-full-light.jpg",
+            "dark": "B-vault-log-full-dark.jpg"
+          },
+          "current": [
+            "chromium-light-50-vault-access-log.jpg",
+            "chromium-dark-50-vault-access-log.jpg"
+          ],
+          "fixes": [
+            "slop:RH-1",
+            "slop:GL-2"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요. 행을 누르면 연결 시트가 morph로 열려요(§3 Sheet). 큰 제목은 상단 맨 글자 제목으로 content swap돼요(§6.6). 고급 펼침은 morph 스프링, 셰브런은 snap이에요. 행을 누르면 평면 틴트가 들어가요. 시트 안의 라이브 필 폭 morph와 체크 그리기(§3 Loader→check), 보관 기간 행이 같은 세그먼트로 펼쳐지는 것도 그대로예요."
+}

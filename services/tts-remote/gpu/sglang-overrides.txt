@@ -1,0 +1,2 @@
+# protobuf pin from sglang-omni 0.2.0 pyproject [tool.uv] override-dependencies (linux); without it the set does not resolve
+protobuf>=6.31.1,<7.0.0

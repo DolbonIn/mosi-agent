@@ -1,0 +1,135 @@
+/* TextField (ui/TextField.tsx) */
+.tf {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tf-label {
+  padding: 0 4px 6px;
+  font-size: var(--t-footnote);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+
+.tf-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  border-radius: var(--r-field);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  padding-left: 14px;
+}
+.tf--filled .tf-box {
+  background: var(--fill);
+  box-shadow: none;
+}
+/* focus ring: at once, on the field's own radius */
+.tf-box:focus-within {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.tf.is-invalid .tf-box:not(:focus-within) {
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+.tf.is-disabled .tf-box {
+  opacity: 0.5;
+}
+
+.tf-leading {
+  flex: none;
+  display: grid;
+  place-items: center;
+  margin: 0 10px 0 -2px;
+}
+
+.tf-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 52px;
+  padding: 0 14px 0 0;
+  border: 0;
+  background: transparent;
+  font-size: 17px; /* ≥ 16px: no iOS zoom */
+  line-height: 1.3;
+  color: var(--label);
+  caret-color: var(--accent);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.tf-input:focus-visible {
+  outline: none;
+}
+.tf-input::placeholder {
+  color: var(--placeholder); /* ≈3:1 (label-3 was 2:1); every field also has a visible label */
+  opacity: 1;
+}
+.tf-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.tf-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--label);
+  transition: background-color 600000s 0s;
+}
+.tf-box:has(.tf-btn) .tf-input,
+.tf-box:has(.tf-trailing) .tf-input {
+  padding-right: 0;
+}
+
+.tf-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: 4px;
+  color: var(--label-2);
+  border-radius: var(--r-control);
+}
+.tf-eye.is-on {
+  color: var(--accent-text);
+}
+.tf-clear-dot {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-capsule);
+  background: var(--label-2);
+  color: var(--surface);
+}
+
+.tf-trailing {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  color: var(--label-2);
+}
+
+.tf-error-wrap {
+  overflow: hidden;
+}
+.tf-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 4px 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--danger);
+}
+.tf-error > svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.tf-hint {
+  padding: 8px 4px 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}

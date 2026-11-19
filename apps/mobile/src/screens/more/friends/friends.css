@@ -1,0 +1,180 @@
+/* 친구 — invite sheet, friend rows, add by link */
+
+/* ── invite sheet: no link panel, no tile, no raw URL — the facts sit on the decision in the footer ── */
+.more-sheet.invite-body {
+  gap: 14px;
+}
+.invite-body > .more-note {
+  padding: 0 4px;
+}
+.invite-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.invite-until {
+  padding: 0 4px 2px;
+  text-align: center;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.more-inline-link {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── friend rows ── */
+.friend-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.friend-row + .friend-row::before,
+.friend-row + .friend-invite-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 68px;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+.friend-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 0 10px 16px;
+  text-align: left;
+  color: var(--label);
+}
+.friend-main:not(:disabled):active,
+.friend-invite-row:active {
+  background: var(--press-tint);
+}
+@media (hover: hover) and (pointer: fine) {
+  .friend-main:not(:disabled):hover:not(:active),
+  .friend-invite-row:hover:not(:active) {
+    background: var(--hover-tint);
+  }
+}
+.friend-main:disabled {
+  cursor: default;
+}
+.friend-main:focus-visible,
+.friend-more:focus-visible,
+.friend-invite-row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.friend-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.friend-name {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.friend-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+/* the whole row opens the shared conversation: the list chevron, so "…" is the one separate control */
+.friend-chev {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--label-3);
+}
+.friend-more {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 64px;
+  color: var(--label-2);
+}
+.friend-more:active {
+  background: var(--press-tint);
+}
+/* invite: the friend group's last row — the glyph in the avatar column, the words where names start */
+.friend-invite-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  text-align: left;
+  font-size: var(--t-body);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--accent-text);
+}
+.friend-invite-row__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+}
+.friend-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── add by link ── */
+.friend-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.friend-add__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.friend-add__row .tf {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.friend-add__row .tf-label {
+  padding-left: 16px;
+}
+.friend-add__btn {
+  flex: none;
+  margin-top: calc(var(--t-footnote) * 1.4 + 10px);
+}
+
+.friend-invite-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.friend-invite-card__title {
+  font-size: var(--t-body);
+  font-weight: 600;
+}
+.friend-invite-card__body {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+}

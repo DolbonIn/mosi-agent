@@ -1,0 +1,101 @@
+{
+ "response": {
+  "request": {
+   "keyword": "채식주의자",
+   "sort": "loan_count",
+   "direction": "desc",
+   "exactMatch": false,
+   "pageNo": 1,
+   "pageSize": 5,
+   "format": "json"
+  },
+  "numFound": 97,
+  "docs": [
+   {
+    "doc": {
+     "bookname": "채식주의자:한강 연작소설",
+     "authors": "한강",
+     "publisher": "창비",
+     "publication_year": "2007",
+     "isbn13": "9788936433598",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "813.6",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://bookthumb-phinf.pstatic.net/cover/033/094/03309417.jpg?type=m1&udate=20180609",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=2155671",
+     "loan_count": "247324"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "작별하지 않는다 :한강 장편소설 ",
+     "authors": "지은이: 한강",
+     "publisher": "문학동네",
+     "publication_year": "2021",
+     "isbn13": "9788954682152",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "813.62",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://image.aladin.co.kr/product/27877/5/cover/8954682154_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=6086446",
+     "loan_count": "137256"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "대도시의 사랑법 :박상영 연작소설 ",
+     "authors": "지은이: 박상영",
+     "publisher": "창비",
+     "publication_year": "2019",
+     "isbn13": "9788936437978",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "813.7",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://image.aladin.co.kr/product/19543/91/cover/8936437976_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=5435897",
+     "loan_count": "72004"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "희랍어 시간 :한강 장편소설 ",
+     "authors": "지은이: 한강",
+     "publisher": "문학동네",
+     "publication_year": "2011",
+     "isbn13": "9788954616515",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "813.62",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://bookthumb-phinf.pstatic.net/cover/067/707/06770742.jpg?type=m1&udate=20170801",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=1207905",
+     "loan_count": "70286"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "바람이 분다, 가라 :한강 장편소설 ",
+     "authors": "한강",
+     "publisher": "문학과지성사",
+     "publication_year": "2010",
+     "isbn13": "9788932020006",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "813.62",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://bookthumb-phinf.pstatic.net/cover/062/425/06242590.jpg?type=m1&udate=20161201",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=1041841",
+     "loan_count": "65499"
+    }
+   }
+  ]
+ },
+ "query": {
+  "keyword": "채식주의자",
+  "pageNo": 1,
+  "pageSize": 5
+ }
+}

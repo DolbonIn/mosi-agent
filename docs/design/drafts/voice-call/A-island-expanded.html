@@ -1,0 +1,214 @@
+<!doctype html>
+<!--
+  모시 draft · voice-call · A (island-expanded) · 줄인 통화: 길게 눌러 펼친 섬
+  draft-a, 2026-11-12, impeccable de-slop pass. Static mock: app tokens only (apps/mobile/src/styles/tokens.css by
+  relative path), synthetic fixture data (docs/design/impeccable/capture.mjs), no network. ?theme=light|dark.
+  Glyphs are inlined from apps/mobile/src/ui/Icon.tsx. Rationale: notes.md in this folder.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: voice-call · A · island-expanded</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+:root { --accent-fill: #0071e3; }
+.kit-phone { font-family: var(--font-text); }
+/* the app's composer placeholder is --label-2 (chat.css .composer-field::placeholder); the kit's --label-3 is 1.9:1 */
+.k-composer-field:not([data-filled]) { color: var(--label-2); }
+
+/* scroller: content runs under the floating chrome and thins out at both edges (app/Screen.css .screen-scroll) */
+.d-scroll {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+  position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  padding: calc(var(--edge-top) + 12px) var(--gutter) 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+/* threads are bottom-anchored like the real list: the newest line rests just above the composer */
+.d-thread { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--edge-bottom) + 24px - var(--peek, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* user bubble: neutral 8 % ink, 20 px with the 8 px tail on the speaker's side (DESIGN Shapes) */
+.d-me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: var(--r-group) var(--r-group) 8px var(--r-group); background: color-mix(in srgb, var(--label) 8%, var(--surface)); color: var(--label); font-size: var(--t-body); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* paper: flat. Light separates by value (#fff on #f5f5f7), dark by a hairline (DESIGN Flat Paper) */
+.d-paper { background: var(--surface); color: var(--label); }
+:root[data-theme="dark"] .d-paper { box-shadow: inset 0 0 0 1px var(--separator); }
+
+/* assistant reply as paper (variant A): the tail corner is back (critique chat P2-1) and the radius is the card's */
+.d-asst { align-self: flex-start; max-width: 100%; padding: 12px 16px; border-radius: 8px var(--r-card) var(--r-card) var(--r-card); font-size: var(--t-body); line-height: 1.55; }
+/* assistant reply as plain text on the page (variant B, DESIGN "plain text for conversation") */
+.d-say { font-size: var(--t-body); line-height: 1.55; color: var(--label); padding: 0 4px; }
+.d-turn { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.d-turn-head { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: -8px 0 -6px; padding: 0 4px; align-self: flex-start; font-size: var(--t-subhead); color: var(--label-2); }
+.d-turn-head .avatar { flex: none; }
+
+/* folded tool steps "N단계 · 1분 33초 ⌄" (chat.css .tools-pill) */
+.d-steps { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -6px 0; padding: 0 10px 0 8px; font-size: var(--t-subhead); color: var(--label-2); }
+
+/* one chat card = one paper object; inside it only rows, hairlines and text (no tiles, no recessed panels) */
+.d-card { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 16px; border-radius: var(--r-card); word-break: keep-all; }
+.d-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; text-wrap: balance; }
+.d-sub { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); }
+.d-foot { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.d-hair { height: 0; border-top: 0.5px solid var(--separator); }
+.d-glyph { flex: none; color: var(--label-2); }
+.nowrap { white-space: nowrap; }
+
+/* buttons: capsules (height / 2); one blue per screen = --accent-fill; everything else neutral */
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; color: var(--label); }
+.d-btn-lg { min-height: 52px; }
+.d-btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+.d-btn-neutral { background: var(--fill); color: var(--label); }
+.d-btn-plain { background: none; color: var(--label); }
+.d-btn-block { display: flex; width: 100%; }
+
+/* receipt: status pill with icon + words (kept: CH-4), label colour for AA */
+.d-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.d-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--fill); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+
+/* new-below dot on the current tab (variant B of chat): tapping the current tab jumps to the latest, iOS-style */
+
+/* event notes: plain centred footnote text on the page, no pill (GT-1, CH-3) */
+.d-note { align-self: center; max-width: 92%; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); text-wrap: balance; }
+.d-note + .d-note { margin-top: -6px; }
+
+/* ── voice-call A ── */
+/* the call card is the island grown to the device: island black + island label in both themes (call.css) */
+.call { position: absolute; inset: 0; z-index: 2; background: var(--island); color: var(--island-label);
+  --call-fill: color-mix(in srgb, var(--island-label) 16%, transparent);
+  --call-dim: color-mix(in srgb, var(--island-label) 62%, transparent);
+  /* proposed call-scope token (critique voice-call P2-2): one red on the always-black card, white glyph 5.4:1 */
+  --call-end: #d70015;
+  display: flex; flex-direction: column; padding: calc(var(--chrome-top) + 8px) 24px 34px; }
+.on-call .kit-status { color: var(--island-label); }
+.on-call .kit-home { background: var(--island-label); }
+.kit-status { padding-left: 34px; padding-right: 24px; }
+.kit-island { display: none; }
+/* compact call island: avatar · timer · five level dots (rest floor = round 4 px dots, never dashes) */
+.isl { position: absolute; z-index: 52; top: 11px; left: 50%; width: 180px; height: 37px; margin-left: -90px; border-radius: 999px; background: var(--island); color: var(--island-label); display: grid; grid-template-columns: 37px 1fr auto; align-items: center; padding-right: 13px; }
+.isl .avatar { justify-self: center; }
+.isl-timer { padding-left: 4px; font-size: var(--t-footnote); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
+.isl-dots { display: inline-flex; align-items: center; gap: 3px; height: 16px; }
+.isl-dots i { display: block; width: 4px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--island-label) 90%, transparent); }
+.call-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; }
+.call-min { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--island-label); }
+.call-who { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.call-name { font-family: var(--font-display); font-size: var(--t-title3); font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; }
+.call-phase { font-size: var(--t-footnote); line-height: 1.45; color: var(--call-dim); }
+.call-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 220px; }
+.call-transcript { list-style: none; align-self: stretch; min-height: 132px; margin: 0 0 16px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; text-align: start; }
+.call-controls { display: flex; justify-content: space-around; gap: 16px; }
+.call-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 72px; }
+.call-btn { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--call-fill); color: var(--island-label); }
+.call-btn[data-on] { background: color-mix(in srgb, var(--island-label) 88%, transparent); color: var(--island); }
+.call-btn[data-end] { background: var(--call-end); color: #fff; }
+.call-btn[data-end] svg { transform: rotate(135deg); }
+.call-btn-label { font-size: var(--t-footnote); color: var(--call-dim); white-space: nowrap; }
+/* B: the name and status are the character's caption, under it */
+.callb-who { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.callb-who .call-name { font-size: var(--t-title2); letter-spacing: -0.02em; }
+/* long-press on the minimised island: it grows in place (same morph spring as island → card), no scrim.
+   Name, phase + timer, 음소거, 종료 (the only red). Collapses on release-outside or after 4 s. */
+.islx { position: absolute; z-index: 52; top: 11px; left: 10px; right: 10px; min-height: 84px; border-radius: 42px; background: var(--island); color: var(--island-label);
+  --call-fill: color-mix(in srgb, var(--island-label) 16%, transparent); --call-dim: color-mix(in srgb, var(--island-label) 62%, transparent); --call-end: #d70015;
+  display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; padding: 20px 20px 20px 20px; }
+.islx-who { display: flex; flex-direction: column; min-width: 0; }
+.islx-name { font-size: var(--t-headline); font-weight: 600; line-height: 1.3; }
+.islx-phase { font-size: var(--t-footnote); line-height: 1.35; color: var(--call-dim); font-variant-numeric: tabular-nums; }
+.islx-btns { display: flex; gap: 12px; }
+.islx-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--call-fill); color: var(--island-label); }
+.islx-btn[data-end] { background: var(--call-end); color: #fff; }
+.islx-btn[data-end] svg { transform: rotate(135deg); }
+/* chat behind the minimised island (state "island") */
+.sched { display: flex; align-items: center; gap: 12px; }
+.sched-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sched-when { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-footnote); color: var(--label-2); }
+.tgl { flex: none; position: relative; width: 51px; height: 31px; border-radius: 999px; background: var(--accent); }
+.tgl::after { content: ""; position: absolute; top: 2px; right: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08); }
+.art { display: flex; align-items: center; gap: 12px; }
+.art > svg:first-child { flex: none; align-self: flex-start; margin-top: 2px; }
+.art-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.art-body b { font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.art-chev { flex: none; color: var(--label-3); }
+
+</style>
+</head>
+<body>
+<div class="kit-phone">
+
+<main class="d-scroll" aria-label="대화">
+  <div class="d-thread" style="--peek:96px">
+    <p class="d-note">회의가 끝나서 나왔어요.</p>
+    <section class="d-card d-paper" aria-label="회의록"><div class="art"><svg class="d-glyph" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h6.5L18.5 8.5v10.25a1.75 1.75 0 0 1-1.75 1.75H7.25A1.75 1.75 0 0 1 5.5 18.75V5A1.5 1.5 0 0 1 7 3.5Z"/><path d="M13.5 3.5v5h5M8.75 12.75h6.5M8.75 16.25h4.5"/></svg><div class="art-body"><b>11월 12일 주간회의 회의록</b><span class="d-foot tnum">문서 · 참석 4명 · 42분 · 정한 것 2 · 할 일 2</span></div><svg class="art-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></svg></div></section>
+    <div class="d-me">매일 아침 7시에 날씨랑 뉴스 브리핑해줘</div>
+    <div class="d-steps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.25 12.25 2.5 2.5 5-5.25"/></svg><span class="tnum">1단계 · 3초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+    <div class="d-asst d-paper">매일 아침 7시에 브리핑을 보내 드릴게요.</div>
+    <section class="d-card d-paper" aria-label="예약"><div class="sched"><div class="sched-body"><b class="d-title">아침 브리핑</b><span class="sched-when tnum"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>매일 오전 7:00</span></div><span class="tgl" role="switch" aria-checked="true" aria-label="아침 브리핑 켜짐"></span></div></section>
+    <div class="d-me">연세바른치과에 내일 3시 예약 되는지 전화해서 물어봐 줘</div>
+    <div class="d-steps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.25 12.25 2.5 2.5 5-5.25"/></svg><span class="tnum">1단계 · 1초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+    <section class="d-card d-paper" aria-label="전화 확인"><h3 class="d-title">연세바른치과에 전화할까요?</h3><p class="d-sub tnum" style="font-size:var(--t-body)">02-1234-1234</p><p class="d-sub" style="font-size:var(--t-callout)">“안녕하세요, 하늘 님 대신 연락드렸어요. 내일 오후 3시에 진료 예약이 가능한지 여쭤봐도 될까요?”</p></section>
+  </div>
+</main>
+<header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.75h14M5 15.25h14"/></svg></button>
+    <button class="k-title" aria-label="깽이 프로필"><i data-avatar data-size="30"></i>깽이</button>
+    
+  </header>
+<div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></span>
+      <span class="k-composer-icon" aria-label="깽이와 통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.25h2.6c.4 0 .75.27.85.66l.8 3.1c.1.4-.02.82-.32 1.1l-1.48 1.4a12.2 12.2 0 0 0 4.44 4.44l1.4-1.48c.28-.3.7-.42 1.1-.32l3.1.8c.39.1.66.45.66.85v2.6c0 .9-.73 1.6-1.62 1.6A15.75 15.75 0 0 1 5 5.87c0-.9.71-1.62 1.6-1.62Z"/></svg></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.75c4.56 0 8.25 2.98 8.25 6.65s-3.69 6.65-8.25 6.65c-.86 0-1.68-.1-2.46-.3L5.25 19.5l1-3.55C4.69 14.74 3.75 13.15 3.75 11.4c0-3.67 3.69-6.65 8.25-6.65Z"/></svg>채팅</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2.05 4.75-4.75 2.05 2.05-4.75 4.75-2.05Z"/></svg>둘러보기</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="5" width="16.5" height="4.25" rx="1.3"/><path d="M5.25 9.25v8A1.75 1.75 0 0 0 7 19h10a1.75 1.75 0 0 0 1.75-1.75v-8M10 12.75h4"/></svg>보관함</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.25" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>나의 모시</span>
+    </nav>
+  </div>
+<div class="islx" role="group" aria-label="깽이와 통화 중"><i data-avatar data-size="44"></i><div class="islx-who"><b class="islx-name">깽이</b><span class="islx-phase">듣고 있어요 · 00:05</span></div><div class="islx-btns"><button class="islx-btn" aria-pressed="false" aria-label="음소거"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></button><button class="islx-btn" data-end aria-label="통화 종료"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.25h2.6c.4 0 .75.27.85.66l.8 3.1c.1.4-.02.82-.32 1.1l-1.48 1.4a12.2 12.2 0 0 0 4.44 4.44l1.4-1.48c.28-.3.7-.42 1.1-.32l3.1.8c.39.1.66.45.66.85v2.6c0 .9-.73 1.6-1.62 1.6A15.75 15.75 0 0 1 5 5.87c0-.9.71-1.62 1.6-1.62Z"/></svg></button></div></div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "음성 통화",
+  "variant": "A · island-expanded",
+  "title": "줄인 통화: 길게 눌러 펼친 섬",
+  "rationale": [
+    "줄인 통화에서 바로 음소거 · 종료: 섬을 길게 누르면 그 자리에서 펼쳐짐(iOS 관례). 탭은 지금처럼 통화 카드를 다시 엶 (lead 결정, 비평 Casey)",
+    "펼친 섬: 아바타 44 · '깽이' · '듣고 있어요 · 00:05' · 음소거 · 종료. 빨강은 종료 하나(--call-end, 카드와 같은 토큰) (P2-2)",
+    "음소거는 이름 고정 + aria-pressed, 켜지면 섬 글자색 88% 채움(카드와 같은 규칙) (P2-3)",
+    "새 모션 없음: 섬이 카드로 자라는 morph 스프링을 그대로, 바깥을 누르거나 4초 뒤 다시 접힘",
+    "어둡게 깔지 않음: 대화는 그대로 보이고 섬만 커짐"
+  ],
+  "motion": [
+    "§3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것)",
+    "§8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음)",
+    "§8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지",
+    "§3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜",
+    "자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)"
+  ],
+  "fixes": [
+    "P2-1",
+    "P2-2",
+    "P2-3",
+    "P3-1",
+    "slop:RQ-2",
+    "critique:Q2"
+  ],
+  "compare": [
+    "chromium-light-19-call-minimised-island.jpg",
+    "chromium-dark-19-call-minimised-island.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+ "schoolInfo": [
+  {
+   "head": [
+    {
+     "list_total_count": 1
+    },
+    {
+     "RESULT": {
+      "CODE": "INFO-000",
+      "MESSAGE": "정상 처리되었습니다."
+     }
+    }
+   ]
+  },
+  {
+   "row": [
+    {
+     "ATPT_OFCDC_SC_CODE": "B10",
+     "ATPT_OFCDC_SC_NM": "서울특별시교육청",
+     "SD_SCHUL_CODE": "7010083",
+     "SCHUL_NM": "서울고등학교",
+     "ENG_SCHUL_NM": "Seoul High School",
+     "SCHUL_KND_SC_NM": "고등학교",
+     "LCTN_SC_NM": "서울특별시",
+     "JU_ORG_NM": "서울특별시교육청",
+     "FOND_SC_NM": "공립",
+     "ORG_RDNZC": "06669 ",
+     "ORG_RDNMA": "서울특별시 서초구 효령로 197",
+     "ORG_RDNDA": "(서초동,서울고등학교)",
+     "COEDU_SC_NM": "남",
+     "HS_SC_NM": "일반고",
+     "INDST_SPECL_CCCCL_EXST_YN": "N",
+     "HS_GNRL_BUSNS_SC_NM": "일반계",
+     "SPCLY_PURPS_HS_ORD_NM": null,
+     "ENE_BFE_SEHF_SC_NM": "후기",
+     "DGHT_SC_NM": "주간",
+     "FOND_YMD": "19460201",
+     "FOAS_MEMRD": "19460201",
+     "LOAD_DTM": "20260423"
+    }
+   ]
+  }
+ ],
+ "resolved_education_office": {
+  "input": "서울",
+  "atpt_ofcdc_sc_code": "B10",
+  "matched_label": "서울"
+ },
+ "query": {
+  "education_office": "서울",
+  "school_name": "서울고등학교",
+  "p_index": 1,
+  "p_size": 100
+ }
+}

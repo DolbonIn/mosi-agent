@@ -1,0 +1,173 @@
+{
+  "feature": "settings",
+  "title": "설정",
+  "critique": "../../impeccable/critique/settings.md",
+  "score": "26/40",
+  "current": [
+    "chromium-light-47-settings-privacy.jpg",
+    "chromium-dark-47-settings-privacy.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "순서와 확인",
+      "summary": "'다른 사람에게 보내기 전에 묻기'를 맨 위로 올렸어요. 끄려고 하면 토글에서 시트가 펼쳐져 '이제 깽이가 묻지 않고 보내요 · 끄기/취소'로 한 번 묻고, 다시 켤 때는 묻지 않아요. 판과 타일은 빼고, 미리보기는 그림 없는 두 열 글로 남겼어요.",
+      "fixes": [
+        "P1-2",
+        "P2-2",
+        "P2-3",
+        "slop:IT-15"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "confirm",
+          "name": "끄기 확인",
+          "shots": {
+            "light": "A-confirm-light.jpg",
+            "dark": "A-confirm-dark.jpg"
+          },
+          "current": [
+            "chromium-light-47-settings-privacy.jpg",
+            "chromium-dark-47-settings-privacy.jpg"
+          ],
+          "fixes": []
+        },
+        {
+          "id": "off",
+          "name": "꺼진 상태 (다시 켤 수 있음)",
+          "shots": {
+            "light": "A-off-light.jpg",
+            "dark": "A-off-dark.jpg"
+          },
+          "current": [
+            "chromium-light-47-settings-privacy.jpg",
+            "chromium-dark-47-settings-privacy.jpg"
+          ],
+          "fixes": []
+        },
+        {
+          "id": "notifications",
+          "name": "알림 설정",
+          "shots": {
+            "light": "A-notifications-light.jpg",
+            "dark": "A-notifications-dark.jpg"
+          },
+          "current": [
+            "chromium-light-46-settings-notifications.jpg",
+            "chromium-dark-46-settings-notifications.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "P2-3",
+            "slop:IT-15"
+          ]
+        },
+        {
+          "id": "display",
+          "name": "화면 및 디자인",
+          "summary": "같은 구성 그대로, 미리보기와 슬라이더를 한 종이에(가는 선 위). 깽이의 답은 채팅처럼 말풍선 없이, 내 말은 bubble-me. 다크에서도 종이에 선이 없어요.",
+          "shots": {
+            "light": "A-display-light.jpg",
+            "dark": "A-display-dark.jpg"
+          },
+          "current": [
+            "chromium-light-48-settings-display.jpg",
+            "chromium-dark-48-settings-display.jpg"
+          ],
+          "fixes": []
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "말한 그대로",
+      "summary": "같은 순서에서, 끄기 확인은 모달 없이 그 행이 morph로 자라며 '취소/끄기'를 보여 줘요. '친구의 모시는 이렇게 봐요' 카드는 없애고, 각 행의 부제가 친구의 모시가 실제로 보는 내용이 돼 토글과 함께 바뀌어요. 알림 설정은 기기 허용으로 시작해요.",
+      "fixes": [
+        "P1-1",
+        "P1-2",
+        "P2-2",
+        "P2-3",
+        "slop:IT-15",
+        "critique:Q4"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "confirm",
+          "name": "끄기 확인 (그 자리에서)",
+          "shots": {
+            "light": "B-confirm-light.jpg",
+            "dark": "B-confirm-dark.jpg"
+          },
+          "current": [
+            "chromium-light-47-settings-privacy.jpg",
+            "chromium-dark-47-settings-privacy.jpg"
+          ],
+          "fixes": [
+            "P1-1"
+          ]
+        },
+        {
+          "id": "off",
+          "name": "꺼진 상태 (다시 켤 수 있음)",
+          "shots": {
+            "light": "B-off-light.jpg",
+            "dark": "B-off-dark.jpg"
+          },
+          "current": [
+            "chromium-light-47-settings-privacy.jpg",
+            "chromium-dark-47-settings-privacy.jpg"
+          ],
+          "fixes": [
+            "P1-1"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "알림 설정",
+          "shots": {
+            "light": "B-notifications-light.jpg",
+            "dark": "B-notifications-dark.jpg"
+          },
+          "current": [
+            "chromium-light-46-settings-notifications.jpg",
+            "chromium-dark-46-settings-notifications.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "P2-3",
+            "slop:IT-15",
+            "critique:Q2"
+          ]
+        },
+        {
+          "id": "display",
+          "name": "화면 및 디자인",
+          "summary": "다른 설정 화면과 같은 목록 문법: 테마는 체크 하나인 선택 목록, 덮어쓰기는 지금 값을 말하는 행 안에 3단 컨트롤.",
+          "shots": {
+            "light": "B-display-light.jpg",
+            "dark": "B-display-dark.jpg"
+          },
+          "current": [
+            "chromium-light-48-settings-display.jpg",
+            "chromium-dark-48-settings-display.jpg"
+          ],
+          "fixes": []
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요: §3 Toggle(두 모서리 knob lead/trail, 트랙 snap 채움), §3 Content swap(행 부제와 미리보기 값), §3 Morph(B: 끄기 확인이 같은 묶음 안에서 자람) / §3 Sheet(A: 토글에서 펼쳐짐, §8.2 닫힐 때 재등장 없음), §8.13 저장 실패 시 토글 되돌림과 섬 배너. 화면 및 디자인: 테마는 유일한 루트 crossfade(§6.12, 동작 줄이기면 즉시), 세그먼트 thumb spring, 슬라이더 잡으면 렌즈·손 떼면 적용, §8.15 시스템 따름과 지금 값."
+}

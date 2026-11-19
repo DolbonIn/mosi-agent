@@ -1,0 +1,67 @@
+.drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--chrome-top) + 4px) 12px calc(var(--safe-bottom) + 16px) 12px;
+  background: var(--surface-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.drawer::-webkit-scrollbar {
+  display: none;
+}
+.drawer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: var(--r-field) /* row highlight: the field radius */;
+  text-align: left;
+  font-size: var(--t-body);
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.drawer-item:active {
+  background: var(--press-tint);
+}
+.drawer-item[data-on] {
+  background: var(--fill);
+  font-weight: 600;
+}
+.drawer-item[data-on] .drawer-item-icon {
+  color: var(--accent-text);
+}
+.drawer-item-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  color: var(--label-2);
+}
+.drawer-extra {
+  margin-top: 16px;
+  border-top: 0.5px solid var(--separator);
+  padding-top: 12px;
+}
+.drawer-extra[data-alone] {
+  margin-top: 4px;
+  border-top: 0;
+  padding-top: 0;
+  /* the content owns the whole drawer: its compact destination row rests at the bottom */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.drawer-extra[data-alone] > * {
+  flex: 1 0 auto;
+}

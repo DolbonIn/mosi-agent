@@ -1,0 +1,227 @@
+/* Shared pieces for the explore / archive / profile half (screens/more). Tokens only — every twin comes for free. */
+
+.more-stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* hue-tinted plate, white glyph (templates, providers) */
+.more-plate {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  background: hsl(var(--h) 72% 52%);
+}
+:root[data-theme="dark"] .more-plate {
+  background: hsl(var(--h) 60% 46%);
+}
+:root[data-contrast="more"] .more-plate {
+  background: hsl(var(--h) 80% 36%);
+}
+@media (forced-colors: active) {
+  .more-plate {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+}
+
+/* status pill: icon + words, never colour alone */
+.more-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--r-capsule);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: var(--fill);
+  color: var(--label); /* label on the fill in every tone: label-2 there was 4.4:1 (§2) */
+}
+.more-pill--error {
+  background: var(--danger-fill);
+  color: var(--danger-on-fill);
+}
+
+.more-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--danger);
+}
+.more-error svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.more-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--t-footnote);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+}
+.more-note svg {
+  flex: none;
+  margin-top: 1px;
+}
+/* the copy span (Note) takes the row's width, so a short caption is not a narrow block of its own */
+.more-note > .t-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.more-label {
+  font-family: var(--font-text);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--label-2);
+  padding: 0 4px;
+}
+
+.more-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--r-group);
+  overflow: hidden;
+}
+.more-placeholder > span {
+  display: block;
+  background: var(--surface);
+  opacity: 0.6;
+}
+
+/* a sheet body laid out as a stack of blocks */
+.more-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 2px 6px 8px;
+  min-width: 0;
+}
+.more-sheet-lead {
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--label);
+  text-wrap: pretty;
+}
+.more-sheet-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* recessed rows inside a sheet (sheet is near-opaque; rows sit on --fill, never a second glass) */
+.more-sheet-rows {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-tile);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .more-sheet-rows {
+  background: var(--fill);
+}
+.more-sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 14px;
+  font-size: var(--t-subhead);
+  line-height: 1.4;
+}
+.more-sheet-row + .more-sheet-row {
+  box-shadow: inset 0 1px 0 var(--separator);
+}
+.more-sheet-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.more-sheet-row__title {
+  font-weight: 500;
+  color: var(--label);
+}
+.more-sheet-row__sub {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.more-sheet-row__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-plate);
+  background: var(--fill);
+  color: var(--label);
+}
+
+/* two-column facts (time · quota) */
+.more-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.more-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--r-field);
+  background: var(--surface-2);
+}
+:root[data-theme="dark"] .more-fact {
+  background: var(--fill);
+}
+.more-fact__label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.more-fact__value {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--label);
+}
+
+/* a row of actions at the bottom of a card or sheet */
+.more-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.more-actions > * {
+  flex: 1 1 0;
+}
+
+.more-muted {
+  color: var(--label-2);
+}
+.more-danger-text {
+  color: var(--danger);
+}
+
+/* notes that sit on the wallpaper line up with list section titles and footers */
+.more-stack > .more-note,
+.agent-skills > .more-note,
+.agent-memories > .more-note,
+.account-logout > .more-note {
+  padding: 0 16px;
+}

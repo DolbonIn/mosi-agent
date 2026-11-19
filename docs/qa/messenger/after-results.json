@@ -1,0 +1,538 @@
+{
+  "tag": "after",
+  "legacy": false,
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "the room opens from the turn's line (folded record)",
+          "ok": true,
+          "detail": "fold"
+        },
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no raw JSON in the card",
+          "ok": true,
+          "detail": "BTR-moka, 초롱별 외 3명\n\n카카오톡 · 안 읽음 7 · 메시지 16개 · 오후 7:12–7:30\n\n김도윤, 오후 7:15:\n김도윤\n토요일 리허설은 11월 15일 오후 2시, 대학로 연습실에서 해요\n오후 7:"
+        },
+        {
+          "name": "no raw ids in the card",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "no host-hidden message",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "collapsed shows 1–3 highlights only",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "collapsed hides the room",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long texts get a real column (≥ 160 px)",
+          "ok": true,
+          "detail": "242,242,242"
+        },
+        {
+          "name": "toggle aria-expanded=false",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "aria-controls points at the body",
+          "ok": true,
+          "detail": "_r_v_"
+        },
+        {
+          "name": "toggle ≥ 44 px tall",
+          "ok": true,
+          "detail": "44"
+        },
+        {
+          "name": "expand keeps the toggle in place (±4 px)",
+          "ok": true,
+          "detail": "589.1 → 589.2"
+        },
+        {
+          "name": "toggle aria-expanded=true",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "room is a list",
+          "ok": true,
+          "detail": "17"
+        },
+        {
+          "name": "each bubble reads sender + time",
+          "ok": true,
+          "detail": "김도윤, 오후 7:13:"
+        },
+        {
+          "name": "expanded: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "expanded long texts ≥ 160 px wide",
+          "ok": true,
+          "detail": "202,202,202,202,202"
+        },
+        {
+          "name": "collapse: highlights complete from the first frame",
+          "ok": true,
+          "detail": "[{\"h\":307,\"o\":1},{\"h\":307,\"o\":1},{\"h\":307,\"o\":1}]"
+        },
+        {
+          "name": "friend step: the friend sent a photo (server)",
+          "ok": true,
+          "detail": "201 201"
+        },
+        {
+          "name": "friend step: the friend's 모시 answered with an html card (server)",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "name": "friend thread: the friend's 모시 html card loads (GET /api/artifacts/:id 200, never 404) and shows its content",
+          "ok": true,
+          "detail": "{\"state\":\"ready\",\"gets\":[200],\"frame\":\"강남역 저녁\\n\\n세 곳을 골랐어요.\\n\\n가온 식당\\n모퉁이 국수\\n소담 한식\"}"
+        },
+        {
+          "name": "friend thread: the friend's photo loads (GET /api/attachments/:id/raw 200, never 404) and shows",
+          "ok": true,
+          "detail": "{\"complete\":true,\"w\":480,\"h\":320,\"shown\":200,\"gets\":[200]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/after-chromium-light-collapsed.png",
+        "docs/qa/messenger/after-chromium-light-card-collapsed.png",
+        "docs/qa/messenger/after-chromium-light-expanding-80ms.png",
+        "docs/qa/messenger/after-chromium-light-expanded.png",
+        "docs/qa/messenger/after-chromium-light-expanded-top.png",
+        "docs/qa/messenger/after-chromium-light-card-expanded.png",
+        "docs/qa/messenger/after-chromium-light-collapsed-again.png",
+        "docs/qa/messenger/after-chromium-light-friend-card.png",
+        "docs/qa/messenger/after-chromium-light-friend-photo.png"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "the room opens from the turn's line (folded record)",
+          "ok": true,
+          "detail": "fold"
+        },
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no raw JSON in the card",
+          "ok": true,
+          "detail": "BTR-moka, 초롱별 외 3명\n\n카카오톡 · 안 읽음 7 · 메시지 16개 · 오후 7:12–7:30\n\n김도윤, 오후 7:15:\n김도윤\n토요일 리허설은 11월 15일 오후 2시, 대학로 연습실에서 해요\n오후 7:"
+        },
+        {
+          "name": "no raw ids in the card",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "no host-hidden message",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "collapsed shows 1–3 highlights only",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "collapsed hides the room",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long texts get a real column (≥ 160 px)",
+          "ok": true,
+          "detail": "242,242,242"
+        },
+        {
+          "name": "toggle aria-expanded=false",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "aria-controls points at the body",
+          "ok": true,
+          "detail": "_r_v_"
+        },
+        {
+          "name": "toggle ≥ 44 px tall",
+          "ok": true,
+          "detail": "44"
+        },
+        {
+          "name": "expand keeps the toggle in place (±4 px)",
+          "ok": true,
+          "detail": "589.1 → 589.2"
+        },
+        {
+          "name": "toggle aria-expanded=true",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "room is a list",
+          "ok": true,
+          "detail": "17"
+        },
+        {
+          "name": "each bubble reads sender + time",
+          "ok": true,
+          "detail": "김도윤, 오후 7:13:"
+        },
+        {
+          "name": "expanded: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "expanded long texts ≥ 160 px wide",
+          "ok": true,
+          "detail": "202,202,202,202,202"
+        },
+        {
+          "name": "collapse: highlights complete from the first frame",
+          "ok": true,
+          "detail": "[{\"h\":307,\"o\":1},{\"h\":307,\"o\":1},{\"h\":307,\"o\":1}]"
+        },
+        {
+          "name": "friend step: the friend sent a photo (server)",
+          "ok": true,
+          "detail": "201 201"
+        },
+        {
+          "name": "friend step: the friend's 모시 answered with an html card (server)",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "name": "friend thread: the friend's 모시 html card loads (GET /api/artifacts/:id 200, never 404) and shows its content",
+          "ok": true,
+          "detail": "{\"state\":\"ready\",\"gets\":[200],\"frame\":\"강남역 저녁\\n\\n세 곳을 골랐어요.\\n\\n가온 식당\\n모퉁이 국수\\n소담 한식\"}"
+        },
+        {
+          "name": "friend thread: the friend's photo loads (GET /api/attachments/:id/raw 200, never 404) and shows",
+          "ok": true,
+          "detail": "{\"complete\":true,\"w\":480,\"h\":320,\"shown\":200,\"gets\":[200]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/after-chromium-dark-collapsed.png",
+        "docs/qa/messenger/after-chromium-dark-card-collapsed.png",
+        "docs/qa/messenger/after-chromium-dark-expanding-80ms.png",
+        "docs/qa/messenger/after-chromium-dark-expanded.png",
+        "docs/qa/messenger/after-chromium-dark-expanded-top.png",
+        "docs/qa/messenger/after-chromium-dark-card-expanded.png",
+        "docs/qa/messenger/after-chromium-dark-collapsed-again.png",
+        "docs/qa/messenger/after-chromium-dark-friend-card.png",
+        "docs/qa/messenger/after-chromium-dark-friend-photo.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "the room opens from the turn's line (folded record)",
+          "ok": true,
+          "detail": "fold"
+        },
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no raw JSON in the card",
+          "ok": true,
+          "detail": "BTR-moka, 초롱별 외 3명\n\n카카오톡 · 안 읽음 7 · 메시지 16개 · 오후 7:12–7:30\n\n김도윤, 오후 7:15:\n김도윤\n토요일 리허설은 11월 15일 오후 2시, 대학로 연습실에서 해요\n오후 7:"
+        },
+        {
+          "name": "no raw ids in the card",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "no host-hidden message",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "collapsed shows 1–3 highlights only",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "collapsed hides the room",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long texts get a real column (≥ 160 px)",
+          "ok": true,
+          "detail": "242,242,242"
+        },
+        {
+          "name": "toggle aria-expanded=false",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "aria-controls points at the body",
+          "ok": true,
+          "detail": "_r_v_"
+        },
+        {
+          "name": "toggle ≥ 44 px tall",
+          "ok": true,
+          "detail": "44"
+        },
+        {
+          "name": "expand keeps the toggle in place (±4 px)",
+          "ok": true,
+          "detail": "588.1 → 588.2"
+        },
+        {
+          "name": "toggle aria-expanded=true",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "room is a list",
+          "ok": true,
+          "detail": "17"
+        },
+        {
+          "name": "each bubble reads sender + time",
+          "ok": true,
+          "detail": "김도윤, 오후 7:13:"
+        },
+        {
+          "name": "expanded: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "expanded long texts ≥ 160 px wide",
+          "ok": true,
+          "detail": "202,202,202,202,202"
+        },
+        {
+          "name": "collapse: highlights complete from the first frame",
+          "ok": true,
+          "detail": "[{\"h\":307,\"o\":1},{\"h\":307,\"o\":1},{\"h\":307,\"o\":1}]"
+        },
+        {
+          "name": "friend step: the friend sent a photo (server)",
+          "ok": true,
+          "detail": "201 201"
+        },
+        {
+          "name": "friend step: the friend's 모시 answered with an html card (server)",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "name": "friend thread: the friend's 모시 html card loads (GET /api/artifacts/:id 200, never 404) and shows its content",
+          "ok": true,
+          "detail": "{\"state\":\"ready\",\"gets\":[200],\"frame\":\"강남역 저녁\\n\\n세 곳을 골랐어요.\\n\\n가온 식당\\n모퉁이 국수\\n소담 한식\"}"
+        },
+        {
+          "name": "friend thread: the friend's photo loads (GET /api/attachments/:id/raw 200, never 404) and shows",
+          "ok": true,
+          "detail": "{\"complete\":true,\"w\":480,\"h\":320,\"shown\":200,\"gets\":[200]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/after-webkit-light-collapsed.png",
+        "docs/qa/messenger/after-webkit-light-card-collapsed.png",
+        "docs/qa/messenger/after-webkit-light-expanding-80ms.png",
+        "docs/qa/messenger/after-webkit-light-expanded.png",
+        "docs/qa/messenger/after-webkit-light-expanded-top.png",
+        "docs/qa/messenger/after-webkit-light-card-expanded.png",
+        "docs/qa/messenger/after-webkit-light-collapsed-again.png",
+        "docs/qa/messenger/after-webkit-light-friend-card.png",
+        "docs/qa/messenger/after-webkit-light-friend-photo.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "the room opens from the turn's line (folded record)",
+          "ok": true,
+          "detail": "fold"
+        },
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no raw JSON in the card",
+          "ok": true,
+          "detail": "BTR-moka, 초롱별 외 3명\n\n카카오톡 · 안 읽음 7 · 메시지 16개 · 오후 7:12–7:30\n\n김도윤, 오후 7:15:\n김도윤\n토요일 리허설은 11월 15일 오후 2시, 대학로 연습실에서 해요\n오후 7:"
+        },
+        {
+          "name": "no raw ids in the card",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "no host-hidden message",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "collapsed shows 1–3 highlights only",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "collapsed hides the room",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long texts get a real column (≥ 160 px)",
+          "ok": true,
+          "detail": "242,242,242"
+        },
+        {
+          "name": "toggle aria-expanded=false",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "aria-controls points at the body",
+          "ok": true,
+          "detail": "_r_v_"
+        },
+        {
+          "name": "toggle ≥ 44 px tall",
+          "ok": true,
+          "detail": "44"
+        },
+        {
+          "name": "expand keeps the toggle in place (±4 px)",
+          "ok": true,
+          "detail": "588.1 → 588.2"
+        },
+        {
+          "name": "toggle aria-expanded=true",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "room is a list",
+          "ok": true,
+          "detail": "17"
+        },
+        {
+          "name": "each bubble reads sender + time",
+          "ok": true,
+          "detail": "김도윤, 오후 7:13:"
+        },
+        {
+          "name": "expanded: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "expanded long texts ≥ 160 px wide",
+          "ok": true,
+          "detail": "202,202,202,202,202"
+        },
+        {
+          "name": "collapse: highlights complete from the first frame",
+          "ok": true,
+          "detail": "[{\"h\":307,\"o\":1},{\"h\":307,\"o\":1},{\"h\":307,\"o\":1}]"
+        },
+        {
+          "name": "friend step: the friend sent a photo (server)",
+          "ok": true,
+          "detail": "201 201"
+        },
+        {
+          "name": "friend step: the friend's 모시 answered with an html card (server)",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "name": "friend thread: the friend's 모시 html card loads (GET /api/artifacts/:id 200, never 404) and shows its content",
+          "ok": true,
+          "detail": "{\"state\":\"ready\",\"gets\":[200],\"frame\":\"강남역 저녁\\n\\n세 곳을 골랐어요.\\n\\n가온 식당\\n모퉁이 국수\\n소담 한식\"}"
+        },
+        {
+          "name": "friend thread: the friend's photo loads (GET /api/attachments/:id/raw 200, never 404) and shows",
+          "ok": true,
+          "detail": "{\"complete\":true,\"w\":480,\"h\":320,\"shown\":200,\"gets\":[200]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/after-webkit-dark-collapsed.png",
+        "docs/qa/messenger/after-webkit-dark-card-collapsed.png",
+        "docs/qa/messenger/after-webkit-dark-expanding-80ms.png",
+        "docs/qa/messenger/after-webkit-dark-expanded.png",
+        "docs/qa/messenger/after-webkit-dark-expanded-top.png",
+        "docs/qa/messenger/after-webkit-dark-card-expanded.png",
+        "docs/qa/messenger/after-webkit-dark-collapsed-again.png",
+        "docs/qa/messenger/after-webkit-dark-friend-card.png",
+        "docs/qa/messenger/after-webkit-dark-friend-photo.png"
+      ]
+    }
+  ]
+}

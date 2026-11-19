@@ -1,0 +1,371 @@
+{
+  "label": "after",
+  "query": "",
+  "at": "2026-11-11T17:21:41.593Z",
+  "firstLoadJs": {
+    "files": [
+      "/assets/index-bAf70BBg.js",
+      "/assets/rolldown-runtime-XKyaHtl9.js",
+      "/assets/vendor-DfHFyFxv.js"
+    ],
+    "rawKB": 593.8,
+    "gzipKB": 192.5
+  },
+  "passes": [
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "wallpaper": "css",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/after-chromium-light-1-chat.png",
+        "docs/qa/wallpaper/raw/after-chromium-light-5-drawer.png",
+        "docs/qa/wallpaper/raw/after-chromium-light-2-empty.png",
+        "docs/qa/wallpaper/raw/after-chromium-light-3-archive.png",
+        "docs/qa/wallpaper/raw/after-chromium-light-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(250 255 253)",
+          "min": 16.66,
+          "p5": 16.66,
+          "median": 16.66
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(255 255 255)",
+          "min": 16.83,
+          "p5": 16.83,
+          "median": 16.83
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(0, 113, 227)",
+          "bgMean": "rgb(255 255 255)",
+          "min": 4.7,
+          "p5": 4.7,
+          "median": 4.7
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(250 255 253)",
+          "min": 16.66,
+          "p5": 16.66,
+          "median": 16.66
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(255 255 255)",
+          "min": 16.83,
+          "p5": 16.83,
+          "median": 16.83
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "wallpaper": "css",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/after-chromium-dark-1-chat.png",
+        "docs/qa/wallpaper/raw/after-chromium-dark-5-drawer.png",
+        "docs/qa/wallpaper/raw/after-chromium-dark-2-empty.png",
+        "docs/qa/wallpaper/raw/after-chromium-dark-3-archive.png",
+        "docs/qa/wallpaper/raw/after-chromium-dark-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(25 29 30)",
+          "min": 14.96,
+          "p5": 15.44,
+          "median": 15.61
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(18 18 21)",
+          "min": 17.03,
+          "p5": 17.03,
+          "median": 17.17
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(64, 156, 255)",
+          "bgMean": "rgb(59 59 65)",
+          "min": 3.87,
+          "p5": 3.87,
+          "median": 3.93
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(24 29 30)",
+          "min": 14.96,
+          "p5": 15.48,
+          "median": 15.64
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(18 18 21)",
+          "min": 17.03,
+          "p5": 17.03,
+          "median": 17.17
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "wallpaper": "css",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/after-webkit-light-1-chat.png",
+        "docs/qa/wallpaper/raw/after-webkit-light-5-drawer.png",
+        "docs/qa/wallpaper/raw/after-webkit-light-2-empty.png",
+        "docs/qa/wallpaper/raw/after-webkit-light-3-archive.png",
+        "docs/qa/wallpaper/raw/after-webkit-light-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(249 252 251)",
+          "min": 16.27,
+          "p5": 16.27,
+          "median": 16.31
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(246 246 248)",
+          "min": 15.59,
+          "p5": 15.59,
+          "median": 15.59
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(0, 113, 227)",
+          "bgMean": "rgb(254 254 254)",
+          "min": 4.66,
+          "p5": 4.66,
+          "median": 4.66
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(249 252 251)",
+          "min": 16.27,
+          "p5": 16.27,
+          "median": 16.31
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(246 246 248)",
+          "min": 15.59,
+          "p5": 15.59,
+          "median": 15.59
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "wallpaper": "css",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/after-webkit-dark-1-chat.png",
+        "docs/qa/wallpaper/raw/after-webkit-dark-5-drawer.png",
+        "docs/qa/wallpaper/raw/after-webkit-dark-2-empty.png",
+        "docs/qa/wallpaper/raw/after-webkit-dark-3-archive.png",
+        "docs/qa/wallpaper/raw/after-webkit-dark-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(26 29 30)",
+          "min": 15.07,
+          "p5": 15.42,
+          "median": 15.57
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(18 18 20)",
+          "min": 17.18,
+          "p5": 17.18,
+          "median": 17.18
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(64, 156, 255)",
+          "bgMean": "rgb(60 60 66)",
+          "min": 3.87,
+          "p5": 3.87,
+          "median": 3.87
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(26 29 30)",
+          "min": 15.4,
+          "p5": 15.42,
+          "median": 15.57
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(18 18 20)",
+          "min": 17.18,
+          "p5": 17.18,
+          "median": 17.18
+        }
+      ]
+    }
+  ],
+  "perf": {
+    "cpuThrottle": 4,
+    "runs": [
+      {
+        "fcp": 336,
+        "lcp": 488,
+        "tbt": 133,
+        "longTasks": 5,
+        "jsRequested": 28,
+        "jsKB": 262.4,
+        "threeRequested": [],
+        "canvases": 0,
+        "wallpaper": "css",
+        "idle": {
+          "rafIn3s": 0,
+          "rafStacks": [],
+          "animations": 0,
+          "taskMsPerSec": 0.5,
+          "scriptMsPerSec": 0
+        }
+      },
+      {
+        "fcp": 364,
+        "lcp": 528,
+        "tbt": 122,
+        "longTasks": 5,
+        "jsRequested": 28,
+        "jsKB": 262.4,
+        "threeRequested": [],
+        "canvases": 0,
+        "wallpaper": "css",
+        "idle": {
+          "rafIn3s": 0,
+          "rafStacks": [],
+          "animations": 0,
+          "taskMsPerSec": 0.3,
+          "scriptMsPerSec": 0
+        }
+      },
+      {
+        "fcp": 340,
+        "lcp": 480,
+        "tbt": 104,
+        "longTasks": 4,
+        "jsRequested": 28,
+        "jsKB": 262.4,
+        "threeRequested": [],
+        "canvases": 0,
+        "wallpaper": "css",
+        "idle": {
+          "rafIn3s": 0,
+          "rafStacks": [],
+          "animations": 0,
+          "taskMsPerSec": 0.5,
+          "scriptMsPerSec": 0
+        }
+      }
+    ],
+    "median": {
+      "fcp": 340,
+      "lcp": 488,
+      "tbt": 122,
+      "jsKB": 262.4,
+      "idleRafIn3s": 0,
+      "idleTaskMsPerSec": 0.5
+    }
+  },
+  "retint": [
+    {
+      "engine": "chromium",
+      "reduced": false,
+      "from": "oklab(0.983522 -0.0156533 0.00470399)",
+      "to": "oklab(0.965263 0.0224701 -0.00613607)",
+      "during": [
+        "background-color"
+      ],
+      "after": {
+        "color": "oklab(0.965263 0.0224701 -0.00613607)",
+        "anims": [],
+        "tintAnim": false
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "reduced": false,
+      "from": "oklab(0.983529 -0.015698 0.004685)",
+      "to": "oklab(0.965268 0.022427 -0.006156)",
+      "during": [
+        "background-color"
+      ],
+      "after": {
+        "color": "oklab(0.965268 0.022427 -0.006156)",
+        "anims": [],
+        "tintAnim": false
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "reduced": true,
+      "from": "oklab(0.983522 -0.0156533 0.00470399)",
+      "to": "oklab(0.965263 0.0224701 -0.00613607)",
+      "during": [],
+      "after": {
+        "color": "oklab(0.965263 0.0224701 -0.00613607)",
+        "anims": [],
+        "tintAnim": false
+      },
+      "errors": [],
+      "ok": true
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 40px 24px;
+  word-break: keep-all;
+}
+/* a bare glyph, no plate (IT-18): the sentence carries the state */
+.empty-state__plate {
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+  margin-bottom: 4px;
+}
+.empty-state__title {
+  font-family: var(--font-display);
+  font-size: var(--t-title3);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--label);
+}
+.empty-state__body {
+  max-width: 28ch;
+  font-size: var(--t-subhead);
+  line-height: 1.55;
+  color: var(--label-2);
+}
+.empty-state__action {
+  margin-top: 12px;
+}

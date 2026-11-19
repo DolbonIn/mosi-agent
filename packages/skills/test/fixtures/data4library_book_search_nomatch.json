@@ -1,0 +1,101 @@
+{
+ "response": {
+  "request": {
+   "keyword": "소년이 온다",
+   "sort": "loan_count",
+   "direction": "desc",
+   "exactMatch": false,
+   "pageNo": 1,
+   "pageSize": 50,
+   "format": "json"
+  },
+  "numFound": 17,
+  "docs": [
+   {
+    "doc": {
+     "bookname": "보기왕이 온다 :사와무라 이치 장편소설 ",
+     "authors": "지은이: 사와무라 이치 ;옮긴이: 이선희",
+     "publisher": "Arte(북이십일 아르테)",
+     "publication_year": "2018",
+     "isbn13": "9788950977795",
+     "addition_symbol": "03830",
+     "vol": "",
+     "class_no": "833.6",
+     "class_nm": "문학 > 일본문학 > 소설",
+     "bookImageURL": "https://image.aladin.co.kr/product/16234/13/cover/8950977796_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=5229078",
+     "loan_count": "14009"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "야, 눈 온다 ",
+     "authors": "이상교 글 ;김선진 그림",
+     "publisher": "보림(보림출판사)",
+     "publication_year": "2023",
+     "isbn13": "9788943315153",
+     "addition_symbol": "77810",
+     "vol": "",
+     "class_no": "813.6",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://image.aladin.co.kr/product/30739/36/cover/8943315155_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=6616292",
+     "loan_count": "9786"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "엄마 꿈속에서 ",
+     "authors": "유준재 글·그림",
+     "publisher": "문학동네",
+     "publication_year": "2013",
+     "isbn13": "9788954620796",
+     "addition_symbol": "77810",
+     "vol": "",
+     "class_no": "813.7",
+     "class_nm": "문학 > 한국문학 > 소설",
+     "bookImageURL": "https://bookthumb-phinf.pstatic.net/cover/071/742/07174257.jpg?type=m1&udate=20150805",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=1930276",
+     "loan_count": "9313"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "기묘한 괴담 하우스 ",
+     "authors": "저자: 사와무라 이치 ;옮긴이: 남소현",
+     "publisher": "Book Plaza(북플라자)",
+     "publication_year": "2022",
+     "isbn13": "9791190157742",
+     "addition_symbol": "03830",
+     "vol": "",
+     "class_no": "833.6",
+     "class_nm": "문학 > 일본문학 > 소설",
+     "bookImageURL": "https://image.aladin.co.kr/product/30026/30/cover/k552838454_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=6550188",
+     "loan_count": "8350"
+    }
+   },
+   {
+    "doc": {
+     "bookname": "아이가 잠들면 서재로 숨었다 :육아에 무너진 여자를 일으킨 독서의 조각들 ",
+     "authors": "김슬기 지음",
+     "publisher": "Whale books(웨일북)",
+     "publication_year": "2018",
+     "isbn13": "9791188248223",
+     "addition_symbol": "03810",
+     "vol": "",
+     "class_no": "818",
+     "class_nm": "문학 > 한국문학 > 르포르타주 및 기타",
+     "bookImageURL": "http://image.aladin.co.kr/product/15075/78/cover/s202533267_1.jpg",
+     "bookDtlUrl": "https://data4library.kr/bookV?seq=3768802",
+     "loan_count": "8051"
+    }
+   }
+  ]
+ },
+ "query": {
+  "keyword": "소년이 온다",
+  "pageNo": 1,
+  "pageSize": 50
+ }
+}

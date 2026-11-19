@@ -1,0 +1,355 @@
+/* 둘러보기 (draft B) — text rail, template rows, pre-delegation sheet */
+
+.explore-h {
+  font-family: var(--font-text);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--label-2);
+  padding: 0 4px 10px;
+}
+/* the agent signs its own suggestions with its face (not sparkles) */
+.explore-h--agent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explore-h--agent .avatar {
+  flex: none;
+}
+/* "맡길 수 있는 일 전체" brings the rail back to just under the bar */
+.explore-rail {
+  scroll-margin-top: var(--top-clear, 0px);
+}
+
+/* ── category rail: words; bleeds to the device edges, fades at the scrolled edge ── */
+.cat-rail {
+  position: relative;
+  margin: 0 calc(var(--gutter) * -1);
+}
+.cat-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+}
+.cat-scroll::-webkit-scrollbar {
+  display: none;
+}
+.cat-rail[data-fade-l] .cat-scroll {
+  --fade-l: 20px;
+}
+.cat-rail[data-fade-r] .cat-scroll {
+  --fade-r: 28px;
+}
+.cat-track {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  width: max-content;
+  padding: 0 var(--gutter);
+}
+/* a 44 px target; the droplet draws 40 px inside it */
+.cat-item {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  height: 44px;
+  padding: 0 15px;
+  border-radius: var(--r-capsule);
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--label-2);
+  white-space: nowrap;
+  transition: color var(--dur-snap) var(--ease-snap);
+}
+.cat-item[data-on] {
+  color: var(--label);
+  font-weight: 700;
+}
+.cat-label {
+  display: inline-grid;
+}
+.cat-label::after {
+  content: attr(data-text);
+  font-weight: 700;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.cat-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+/* the droplet: a vibrant solid (never a second glass), travels by two edges */
+.cat-droplet {
+  position: absolute;
+  z-index: 0;
+  top: 2px;
+  left: 0;
+  height: 40px;
+  border-radius: var(--r-capsule);
+  background: var(--surface); /* flat paper on the grey ground (SH-1): no lift */
+  pointer-events: none;
+}
+:root[data-theme="dark"] .cat-droplet {
+  background: var(--fill-3);
+}
+:root[data-contrast="more"] .cat-droplet {
+  box-shadow: inset 0 0 0 2px var(--label);
+}
+@media (forced-colors: active) {
+  .cat-droplet {
+    background: Highlight;
+  }
+  .cat-item[data-on] {
+    color: HighlightText;
+  }
+}
+
+/* ── template rows: one paper group, the whole row is the button ── */
+.tpl-list {
+  list-style: none;
+  background: var(--surface);
+  border-radius: var(--r-group);
+  overflow: hidden;
+}
+/* flat paper (SH-1): no lift in light; a hairline in dark / increased contrast, as .paper and .list-card */
+:root[data-theme="dark"] .tpl-list,
+:root[data-contrast="more"] .tpl-list {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+/* the separator starts where the words start (16 + 30 lead + 12), as List rows with a leading icon */
+.tpl-list > li + li :is(.tpl-row, .tpl-all)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 58px;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+.tpl-list > li + li .tpl-all::before {
+  left: 16px;
+}
+.tpl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 16px 12px 16px 16px;
+  text-align: left;
+  color: var(--label);
+  background: transparent;
+}
+.tpl-row:active,
+.tpl-all:active {
+  background: var(--press-tint);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tpl-row:hover:not(:active),
+  .tpl-all:hover:not(:active) {
+    background: var(--hover-tint);
+  }
+}
+.tpl-row:focus-visible,
+.tpl-all:focus-visible {
+  outline: none;
+  background: var(--accent-wash);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+/* the lead: the service's app icon (30, R.plate, its own tile) or a bare glyph in the same 30 px column — no tile */
+.tpl-lead {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--label-2);
+}
+.tpl-lead .brand-icon {
+  display: grid;
+}
+.tpl-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tpl-title {
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+/* two lines are enough; the sheet restates the rest */
+.tpl-desc {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tpl-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: var(--t-footnote);
+  font-weight: 500;
+  color: var(--label-2);
+}
+.tpl-chevron,
+.tpl-all-end svg {
+  flex: none;
+  color: var(--label-3, var(--label-2));
+  opacity: 0.7;
+}
+.tpl-chevron {
+  align-self: center;
+}
+
+/* "맡길 수 있는 일 전체 N개": the catalogue, one more step away (the number is the real list length) */
+.tpl-all {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 12px 0 16px;
+  text-align: left;
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+  background: transparent;
+}
+.tpl-all-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.tpl-all-end .tnum {
+  font-weight: 500;
+  color: var(--label-2);
+}
+
+/* ── pre-delegation sheet ── */
+/* the sentence-length title reads from the leading edge: Sheet titleAlign="start" (ui/Sheet.css) */
+.pre-body {
+  gap: 22px;
+}
+/* plain numbered lines on the sheet: no tile, no recessed panel */
+.pre-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 4px;
+}
+.pre-step {
+  display: flex;
+  gap: 10px;
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+}
+.pre-step-no {
+  flex: none;
+  min-width: 1.2em;
+  font-weight: 600;
+  color: var(--label-2);
+}
+.pre-step-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pre-step-title {
+  font-weight: 500;
+  color: var(--label);
+}
+.pre-step-sub {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.pre-body > .more-note,
+.pre-body .more-sheet-group > .more-note {
+  padding: 0 4px;
+}
+
+/* what is still missing and what it costs, right above the one accent */
+.pre-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pre-footer .more-error {
+  margin-top: 0;
+}
+.pre-needs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pre-need {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 4px;
+}
+.pre-need-lead {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--label-2);
+}
+.pre-need-lead .brand-icon {
+  display: grid;
+}
+.pre-need-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pre-need-title {
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--label);
+}
+.pre-need-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.pre-need .btn {
+  flex: none;
+}
+.pre-facts {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  text-align: center;
+  padding: 0 4px;
+}

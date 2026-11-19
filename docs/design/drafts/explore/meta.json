@@ -1,0 +1,128 @@
+{
+  "feature": "explore",
+  "title": "둘러보기",
+  "critique": "../../impeccable/critique/explore.md",
+  "score": "25/40",
+  "current": [
+    "chromium-light-22-explore.jpg",
+    "chromium-dark-22-explore.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "같은 화면, 색과 숫자를 뺀",
+      "summary": "구조는 그대로예요. 만든 숫자 '17,166명이 맡겼어요'를 지우고 섹션 이름을 '맡길 수 있는 일'로 바꿨어요. '깽이의 제안'은 목록 위로 올렸어요. 카테고리 판은 무채색 하나로, 행 앞 색 타일은 22 px 글리프로 바꿨어요. 위임 시트에서는 상자를 걷어 냈어요.",
+      "fixes": [
+        "P2-1",
+        "P2-3",
+        "slop:IT-11",
+        "slop:IT-12",
+        "slop:RH-3",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "A-end",
+          "name": "끝까지 내린 화면",
+          "html": "A-end.html",
+          "shots": {
+            "light": "A-end-light.jpg",
+            "dark": "A-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-23-explore-scrolled.jpg",
+            "chromium-dark-23-explore-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-3"
+          ]
+        },
+        {
+          "id": "A-sheet",
+          "name": "맡기기 전 시트 (전화 체험)",
+          "html": "A-sheet.html",
+          "shots": {
+            "light": "A-sheet-light.jpg",
+            "dark": "A-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-24-predelegate-sheet.jpg",
+            "chromium-dark-24-predelegate-sheet.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "slop:IT-13",
+            "slop:NC-6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "추천은 나에게, 전체는 한 번 더",
+      "summary": "카테고리를 글자 줄로 바꾸고 '전체'를 더했어요. 추천에서는 깽이의 제안 3개와 처음 해 볼 일 2개를 보여 주고, 23개 전체는 한 번 더 눌러야 나와요. 행은 제목만으로 시작해요. 위임 시트는 제목을 왼쪽에 두고, 준비물과 비용을 버튼 바로 위로 옮겼어요.",
+      "fixes": [
+        "P2-1",
+        "P2-3",
+        "slop:IT-11",
+        "slop:IT-12",
+        "slop:RH-3",
+        "critique:Q1",
+        "critique:Q3",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "B-end",
+          "name": "끝까지 내린 화면",
+          "html": "B-end.html",
+          "shots": {
+            "light": "B-end-light.jpg",
+            "dark": "B-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-23-explore-scrolled.jpg",
+            "chromium-dark-23-explore-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-3"
+          ]
+        },
+        {
+          "id": "B-sheet",
+          "name": "맡기기 전 시트 (전화 체험)",
+          "html": "B-sheet.html",
+          "shots": {
+            "light": "B-sheet-light.jpg",
+            "dark": "B-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-24-predelegate-sheet.jpg",
+            "chromium-dark-24-predelegate-sheet.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "slop:IT-13",
+            "slop:NC-6"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요. 큰 제목이 상단 바 캡슐로 넘어가요(§6.4). 카테고리 드롭렛은 두 모서리로 이동하고(§6.4·§3), B의 글자 줄에서도 같은 드롭렛을 써요. 카테고리를 바꾸면 방향 있는 content swap이 일어나요(§3). 행을 누르면 위임 시트가 shared-element morph로 열리고(§8.9), 맡기기는 loader → check 뒤 시트가 컴포저로 줄어들어요(§3·§8.9)."
+}

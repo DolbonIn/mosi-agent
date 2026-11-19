@@ -1,0 +1,12 @@
+gallery-before.json unique findings 8 {'low-contrast': 4, 'nested-cards': 3, 'organic-clip-path': 1}
+    3 nested-cards Card inside card
+    1 low-contrast 3.6:1 (need 4.5:1) — text #ffffff on #0a84ff
+    1 low-contrast placeholder "무엇이든 맡겨보세요" 2.0:1 (need 4.5:1) — text #b9b9bb on #ffffff
+    1 low-contrast placeholder "검색" 1.9:1 (need 4.5:1) — text #afafb2 on #efeff0
+    1 organic-clip-path clip-path: path() with 16 curve segments
+    1 low-contrast 4.0:1 (need 4.5:1) — text #1d1d1f on #4183aa (gradient on div.blur-gro
+gallery-after.json unique findings 4 {'low-contrast': 3, 'organic-clip-path': 1}
+    1 low-contrast placeholder "무엇이든 맡겨보세요" 3.6:1 (need 4.5:1) — text #86868b on #ffffff
+    1 low-contrast placeholder "검색" 3.2:1 (need 4.5:1) — text #86868b on #efeff0
+    1 organic-clip-path clip-path: path() with 16 curve segments
+    1 low-contrast 4.0:1 (need 4.5:1) — text #1d1d1f on #4182aa (gradient on div.blur-gro

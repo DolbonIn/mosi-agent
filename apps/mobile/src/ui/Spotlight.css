@@ -1,0 +1,287 @@
+/* Spotlight (ui/Spotlight.tsx) */
+.spot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.spot-bar {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 4px 0 16px;
+  gap: 10px;
+}
+
+.spot-icon {
+  flex: none;
+  color: var(--label-2);
+  display: grid;
+  place-items: center;
+}
+
+.spot-field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.spot-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: inherit;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: transparent;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.spot-input:focus-visible {
+  outline: none;
+}
+.spot-input::placeholder {
+  color: var(--label-2);
+  -webkit-text-fill-color: var(--label-2);
+  opacity: 1;
+}
+.spot-input::-webkit-search-cancel-button,
+.spot-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* native fallback when the caret is not at the end or text is selected */
+.spot-field.is-native .spot-input {
+  color: var(--label);
+  -webkit-text-fill-color: var(--label);
+  caret-color: var(--accent);
+}
+.spot-field.is-native .spot-mirror {
+  visibility: hidden;
+}
+
+.spot-mirror {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--label);
+}
+.spot-glyph {
+  display: inline-block;
+}
+
+/* I-beam caret: 2px × 1.15em, accent, blinks at 1 Hz; solid while typing */
+.spot-caret {
+  display: inline-block;
+  flex: none;
+  width: 2px;
+  height: 1.15em;
+  margin-left: 1px;
+  border-radius: var(--r-capsule);
+  background: var(--accent);
+  animation: spot-blink 1s steps(1, end) infinite;
+}
+.spot-caret.is-typing {
+  animation: none;
+}
+@keyframes spot-blink {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.spot-clear {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--surface);
+}
+.spot-clear-dot {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-capsule);
+  background: var(--label-2);
+  color: var(--surface);
+}
+
+/* results: opaque paper, never glass on glass */
+.spot-results {
+  background: var(--surface);
+  border-radius: var(--r-group);
+  padding: 6px;
+  overflow: hidden;
+}
+/* flat paper: value in light, a hairline in dark / increased contrast */
+:root[data-theme="dark"] .spot-results,
+:root[data-contrast="more"] .spot-results {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.spot-section {
+  padding: 6px 10px 4px;
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.spot-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.spot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 10px 8px 12px;
+  border-radius: calc(var(--r-group) - 6px); /* concentric: group 20 − 6 */
+  cursor: pointer;
+  color: var(--label);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.spot-row[aria-selected="true"] {
+  background: var(--accent-fill); /* white label + sub ≥4.5:1 */
+  color: var(--on-accent);
+}
+.spot-row-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+}
+.spot-row[aria-selected="true"] .spot-row-icon,
+.spot-row[aria-selected="true"] .spot-row-enter {
+  color: var(--on-accent);
+}
+.spot-row-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.spot-row-label {
+  font-size: var(--t-body);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spot-row-label mark {
+  background: none;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.spot-row[aria-selected="true"] mark {
+  color: inherit;
+}
+.spot-row-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spot-row[aria-selected="true"] .spot-row-sub {
+  color: var(--on-accent);
+}
+.spot-row-enter {
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.spot-empty {
+  padding: 14px 12px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}
+.spot-empty-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--t-footnote);
+}
+
+/* a phone has no cursor to follow: no slab; the matched letters (and the top row's chevron) carry the selection */
+@media (pointer: coarse) {
+  .spot-row[aria-selected="true"] {
+    background: none;
+    color: var(--label);
+  }
+  .spot-row[aria-selected="true"] .spot-row-icon,
+  .spot-row[aria-selected="true"] .spot-row-sub {
+    color: var(--label-2);
+  }
+  .spot-row[aria-selected="true"] .spot-row-enter {
+    color: var(--label-3);
+  }
+  .spot-row[aria-selected="true"] mark {
+    color: var(--accent-text);
+  }
+}
+
+/* inline (the drawer): a plain field on paper, rows straight on the page */
+.spot-bar--field {
+  height: 44px;
+  padding: 0 0 0 14px;
+  gap: 8px;
+  border-radius: var(--r-capsule);
+  background: var(--surface);
+}
+:root[data-theme="dark"] .spot-bar--field,
+:root[data-contrast="more"] .spot-bar--field {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.spot-bar--field .spot-icon > svg {
+  width: 18px;
+  height: 18px;
+}
+.spot--inline .spot-results,
+:root[data-theme] .spot--inline .spot-results,
+:root[data-contrast] .spot--inline .spot-results {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.spot--inline .spot-section {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+}
+.spot--inline .spot-row {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--r-field);
+}

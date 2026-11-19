@@ -1,0 +1,47 @@
+.send-btn {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-control);
+  display: grid;
+  place-items: center;
+  color: var(--label);
+  background-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fade) var(--ease-fade),
+    color var(--dur-fade) var(--ease-fade),
+    transform var(--dur-press) var(--ease-press);
+}
+.send-btn[data-mode="send"] {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+.send-btn[data-mode="stop"] {
+  background-color: var(--label);
+  color: var(--surface);
+}
+/* same-frame press: CSS only */
+.send-btn:active:not([aria-disabled="true"]) {
+  transform: scale(0.9);
+  transition-duration: 1ms;
+}
+.send-btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+.send-btn-glyph {
+  align-items: center;
+  justify-items: center;
+}
+.send-btn-stop {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px; /* glyph geometry (stop.fill), not a surface corner */
+  background: currentColor;
+}
+.send-btn:focus-visible {
+  outline-offset: 2px;
+}

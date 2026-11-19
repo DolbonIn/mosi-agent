@@ -1,0 +1,791 @@
+{
+  "at": "2026-11-11T19:03:57.993Z",
+  "api": "http://127.0.0.1:8861",
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "list: no row says 토큰으로 연결",
+          "ok": true,
+          "detail": "연결된 앱 및 서비스\n\n메신저를 연결하면 모시가 대신 대화를 읽고, 내가 허락한 메시지만 보내요.\n\n연결할 수 있는 메신저\n카카오톡\n계정으로 로그인\n슬랙\n이메일 코드로 로그인\n디스코드\n앱에서 승인해 로그인\n텔레그램\n준비 중이에요\n라인\n계정으로 로그인\n인스타그램\n계정으로 로그인\nMicrosoft Teams\n회사 계정으로 로그인\nWebex\n계정으로 로그인\n고급"
+        },
+        {
+          "name": "list: telegram is 준비 중이에요 without api_id (row disabled)",
+          "ok": true,
+          "detail": "텔레그램\n준비 중이에요"
+        },
+        {
+          "name": "list: discord says it signs in through the app",
+          "ok": true,
+          "detail": "디스코드\n앱에서 승인해 로그인"
+        },
+        {
+          "name": "list: bot rows are folded away",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "list: 고급 · 직접 만든 봇 연결 holds the three bots",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "discord intro: no token input, says no password/token is typed",
+          "ok": true,
+          "detail": "디스코드\n연결 전\n\n디스코드 앱에서 ‘로그인’만 누르면 연결돼요. 비밀번호나 토큰은 입력하지 않아요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수 없는 일\n허락 없이 메시지 보내기\n비밀번호 원문 보기\n친구 추가·삭제나 설정 바꾸기\n\n"
+        },
+        {
+          "name": "discord intro: ToS caution shown",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: primary is a link to https://discord.com/ra/…",
+          "ok": true,
+          "detail": "https://discord.com/ra/FAKEfingerprint-0123456789abcdefghijklmnopq"
+        },
+        {
+          "name": "waiting_scan: link says 디스코드 앱에서 로그인 승인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: target=_blank rel=noopener",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: QR is a data:image/svg+xml image that loads under the CSP",
+          "ok": true,
+          "detail": "{\"src\":\"data:image/svg+xml;base64,\",\"w\":150,\"complete\":true}"
+        },
+        {
+          "name": "waiting_scan: real time left",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_confirm: shows who is signing in",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "rejected in the app: Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드 앱에서 로그인을 취소했어요.\n\n다시 시도"
+        },
+        {
+          "name": "expired: says so + 새 QR 코드 만들기",
+          "ok": true,
+          "detail": "번호를 보거나 저장하는 일은 없어요.\n\n디스코드는 개인 계정 자동화를 이용약관으로 막고 있어서, 드물게 계정이 제한될 수 있어요.\n\nQR 코드 유효 시간이 지났어요. 새 코드를 만들어 주세요.\n\n새 QR 코드 만들기"
+        },
+        {
+          "name": "cancel: back to 로그인 시작",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "captcha: friendly Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드가 추가 보안 확인(캡차)을 요구해 로그인을 끝내지 못했어요. 잠시 후 다시 시도해 주세요.\n\n다시 시도"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: discord is connected (account = the Discord profile)",
+          "ok": true,
+          "detail": "{\"provider\":\"discord\",\"status\":\"connected\",\"accountLabel\":\"앨리스\",\"credentialId\":\"7c45c5ad-adfa-4e1c-80b3-ae4742750bea\",\"lastError\":null,\"connectedAt\":1794423858550,\"updatedAt\":1794423858550}"
+        },
+        {
+          "name": "vault: one sealed token credential, never the token itself",
+          "ok": true,
+          "detail": "{\"id\":\"7c45c5ad-adfa-4e1c-80b3-ae4742750bea\",\"service\":\"discord\",\"serviceName\":\"디스코드\",\"label\":\"디스코드 (alice_dc)\",\"kind\":\"token\",\"hint\":\"alice_dc\",\"keepFor\":\"30d\",\"expiresAt\":1797015858548,\"expired\":fal"
+        },
+        {
+          "name": "phone: type=tel autocomplete=tel",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 코드 받기 is disabled until a number is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone invalid: Korean hint, still on the phone screen",
+          "ok": true,
+          "detail": "전화번호를 다시 확인해 주세요. 예: 010-1234-5678"
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: the number is shown masked only (010-****-6789)",
+          "ok": true,
+          "detail": "텔레그램\n연결 중\n확인 기다리는 중\n\n텔레그램 앱으로 010-****-6789 계정의 로그인 코드 5자리를 보냈어요.\n\n로그인 코드 5자리\n\n휴대폰이나 컴퓨터의 텔레그램 앱에서 ‘Telegram’ 공식 계정이 보낸 메시지를 열어 보세요.\n\n확인\n처음부터 다시"
+        },
+        {
+          "name": "code: says it went to the Telegram app, 5 digits",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code, numeric",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "wrong code: Korean message, same step",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 텔레그램 앱에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "2FA: password field (current-password) with the person's hint",
+          "ok": true,
+          "detail": "텔레그램\n확인 기다리는 중\n\n2단계 인증을 켠 계정이에요. 텔레그램 2단계 인증 비밀번호를 입력해 주세요.\n\n2단계 인증 비밀번호\n\n힌트: 강아지 이름\n\n로그인\n처음부터 다시"
+        },
+        {
+          "name": "wrong password: Korean message, same step",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: telegram is connected (account = Alice Kim)",
+          "ok": true,
+          "detail": "{\"provider\":\"telegram\",\"status\":\"connected\",\"accountLabel\":\"Alice Kim\",\"credentialId\":\"4f16f419-5c15-46e5-8120-5f545132e37c\",\"lastError\":null,\"connectedAt\":1794423870103,\"updatedAt\":1794423870103}"
+        },
+        {
+          "name": "vault: a sealed session credential; the phone number is nowhere in it",
+          "ok": true,
+          "detail": "[{\"id\":\"4f16f419-5c15-46e5-8120-5f545132e37c\",\"service\":\"telegram\",\"serviceName\":\"텔레그램\",\"label\":\"텔레그램 (Alice Kim)\",\"kind\":\"token\",\"hint\":\"Alice Kim\",\"keepFor\":\"30d\",\"expiresAt\":1797015870102,\"expired\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "chromium-light-01-list-telegram-preparing.png",
+        "chromium-light-02-list-advanced-open.png",
+        "chromium-light-03-discord-intro.png",
+        "chromium-light-04-discord-starting.png",
+        "chromium-light-05-discord-waiting-scan.png",
+        "chromium-light-06-discord-waiting-confirm.png",
+        "chromium-light-07-discord-rejected.png",
+        "chromium-light-08-discord-expired.png",
+        "chromium-light-09-discord-captcha.png",
+        "chromium-light-10-discord-connected.png",
+        "chromium-light-11-telegram-phone.png",
+        "chromium-light-12-telegram-phone-invalid.png",
+        "chromium-light-13-telegram-phone-filled.png",
+        "chromium-light-14-telegram-sending-code.png",
+        "chromium-light-15-telegram-code.png",
+        "chromium-light-16-telegram-code-wrong.png",
+        "chromium-light-17-telegram-password.png",
+        "chromium-light-18-telegram-password-wrong.png",
+        "chromium-light-19-telegram-connected.png"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "list: no row says 토큰으로 연결",
+          "ok": true,
+          "detail": "연결된 앱 및 서비스\n\n메신저를 연결하면 모시가 대신 대화를 읽고, 내가 허락한 메시지만 보내요.\n\n연결할 수 있는 메신저\n카카오톡\n계정으로 로그인\n슬랙\n이메일 코드로 로그인\n디스코드\n앱에서 승인해 로그인\n텔레그램\n준비 중이에요\n라인\n계정으로 로그인\n인스타그램\n계정으로 로그인\nMicrosoft Teams\n회사 계정으로 로그인\nWebex\n계정으로 로그인\n고급"
+        },
+        {
+          "name": "list: telegram is 준비 중이에요 without api_id (row disabled)",
+          "ok": true,
+          "detail": "텔레그램\n준비 중이에요"
+        },
+        {
+          "name": "list: discord says it signs in through the app",
+          "ok": true,
+          "detail": "디스코드\n앱에서 승인해 로그인"
+        },
+        {
+          "name": "list: bot rows are folded away",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "list: 고급 · 직접 만든 봇 연결 holds the three bots",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "discord intro: no token input, says no password/token is typed",
+          "ok": true,
+          "detail": "디스코드\n연결 전\n\n디스코드 앱에서 ‘로그인’만 누르면 연결돼요. 비밀번호나 토큰은 입력하지 않아요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수 없는 일\n허락 없이 메시지 보내기\n비밀번호 원문 보기\n친구 추가·삭제나 설정 바꾸기\n\n"
+        },
+        {
+          "name": "discord intro: ToS caution shown",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: primary is a link to https://discord.com/ra/…",
+          "ok": true,
+          "detail": "https://discord.com/ra/FAKEfingerprint-0123456789abcdefghijklmnopq"
+        },
+        {
+          "name": "waiting_scan: link says 디스코드 앱에서 로그인 승인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: target=_blank rel=noopener",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: QR is a data:image/svg+xml image that loads under the CSP",
+          "ok": true,
+          "detail": "{\"src\":\"data:image/svg+xml;base64,\",\"w\":150,\"complete\":true}"
+        },
+        {
+          "name": "waiting_scan: real time left",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_confirm: shows who is signing in",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "rejected in the app: Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드 앱에서 로그인을 취소했어요.\n\n다시 시도"
+        },
+        {
+          "name": "expired: says so + 새 QR 코드 만들기",
+          "ok": true,
+          "detail": "번호를 보거나 저장하는 일은 없어요.\n\n디스코드는 개인 계정 자동화를 이용약관으로 막고 있어서, 드물게 계정이 제한될 수 있어요.\n\nQR 코드 유효 시간이 지났어요. 새 코드를 만들어 주세요.\n\n새 QR 코드 만들기"
+        },
+        {
+          "name": "cancel: back to 로그인 시작",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "captcha: friendly Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드가 추가 보안 확인(캡차)을 요구해 로그인을 끝내지 못했어요. 잠시 후 다시 시도해 주세요.\n\n다시 시도"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: discord is connected (account = the Discord profile)",
+          "ok": true,
+          "detail": "{\"provider\":\"discord\",\"status\":\"connected\",\"accountLabel\":\"앨리스\",\"credentialId\":\"348bfbb2-1572-4e67-8f77-19a8e408cb6c\",\"lastError\":null,\"connectedAt\":1794423892041,\"updatedAt\":1794423892041}"
+        },
+        {
+          "name": "vault: one sealed token credential, never the token itself",
+          "ok": true,
+          "detail": "{\"id\":\"348bfbb2-1572-4e67-8f77-19a8e408cb6c\",\"service\":\"discord\",\"serviceName\":\"디스코드\",\"label\":\"디스코드 (alice_dc)\",\"kind\":\"token\",\"hint\":\"alice_dc\",\"keepFor\":\"30d\",\"expiresAt\":1797015892040,\"expired\":fal"
+        },
+        {
+          "name": "phone: type=tel autocomplete=tel",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 코드 받기 is disabled until a number is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone invalid: Korean hint, still on the phone screen",
+          "ok": true,
+          "detail": "전화번호를 다시 확인해 주세요. 예: 010-1234-5678"
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: the number is shown masked only (010-****-6789)",
+          "ok": true,
+          "detail": "텔레그램\n연결 중\n확인 기다리는 중\n\n텔레그램 앱으로 010-****-6789 계정의 로그인 코드 5자리를 보냈어요.\n\n로그인 코드 5자리\n\n휴대폰이나 컴퓨터의 텔레그램 앱에서 ‘Telegram’ 공식 계정이 보낸 메시지를 열어 보세요.\n\n확인\n처음부터 다시"
+        },
+        {
+          "name": "code: says it went to the Telegram app, 5 digits",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code, numeric",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "wrong code: Korean message, same step",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 텔레그램 앱에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "2FA: password field (current-password) with the person's hint",
+          "ok": true,
+          "detail": "텔레그램\n확인 기다리는 중\n\n2단계 인증을 켠 계정이에요. 텔레그램 2단계 인증 비밀번호를 입력해 주세요.\n\n2단계 인증 비밀번호\n\n힌트: 강아지 이름\n\n로그인\n처음부터 다시"
+        },
+        {
+          "name": "wrong password: Korean message, same step",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: telegram is connected (account = Alice Kim)",
+          "ok": true,
+          "detail": "{\"provider\":\"telegram\",\"status\":\"connected\",\"accountLabel\":\"Alice Kim\",\"credentialId\":\"5ff7bde4-ed37-4983-9dc5-bc7eba3a5a3a\",\"lastError\":null,\"connectedAt\":1794423903401,\"updatedAt\":1794423903401}"
+        },
+        {
+          "name": "vault: a sealed session credential; the phone number is nowhere in it",
+          "ok": true,
+          "detail": "[{\"id\":\"5ff7bde4-ed37-4983-9dc5-bc7eba3a5a3a\",\"service\":\"telegram\",\"serviceName\":\"텔레그램\",\"label\":\"텔레그램 (Alice Kim)\",\"kind\":\"token\",\"hint\":\"Alice Kim\",\"keepFor\":\"30d\",\"expiresAt\":1797015903399,\"expired\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "chromium-dark-01-list-telegram-preparing.png",
+        "chromium-dark-02-list-advanced-open.png",
+        "chromium-dark-03-discord-intro.png",
+        "chromium-dark-04-discord-starting.png",
+        "chromium-dark-05-discord-waiting-scan.png",
+        "chromium-dark-06-discord-waiting-confirm.png",
+        "chromium-dark-07-discord-rejected.png",
+        "chromium-dark-08-discord-expired.png",
+        "chromium-dark-09-discord-captcha.png",
+        "chromium-dark-10-discord-connected.png",
+        "chromium-dark-11-telegram-phone.png",
+        "chromium-dark-12-telegram-phone-invalid.png",
+        "chromium-dark-13-telegram-phone-filled.png",
+        "chromium-dark-14-telegram-sending-code.png",
+        "chromium-dark-15-telegram-code.png",
+        "chromium-dark-16-telegram-code-wrong.png",
+        "chromium-dark-17-telegram-password.png",
+        "chromium-dark-18-telegram-password-wrong.png",
+        "chromium-dark-19-telegram-connected.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "list: no row says 토큰으로 연결",
+          "ok": true,
+          "detail": "연결된 앱 및 서비스\n\n메신저를 연결하면 모시가 대신 대화를 읽고, 내가 허락한 메시지만 보내요.\n\n연결할 수 있는 메신저\n카카오톡\n계정으로 로그인\n슬랙\n이메일 코드로 로그인\n디스코드\n앱에서 승인해 로그인\n텔레그램\n준비 중이에요\n라인\n계정으로 로그인\n인스타그램\n계정으로 로그인\nMicrosoft Teams\n회사 계정으로 로그인\nWebex\n계정으로 로그인\n고급"
+        },
+        {
+          "name": "list: telegram is 준비 중이에요 without api_id (row disabled)",
+          "ok": true,
+          "detail": "텔레그램\n준비 중이에요"
+        },
+        {
+          "name": "list: discord says it signs in through the app",
+          "ok": true,
+          "detail": "디스코드\n앱에서 승인해 로그인"
+        },
+        {
+          "name": "list: bot rows are folded away",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "list: 고급 · 직접 만든 봇 연결 holds the three bots",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "discord intro: no token input, says no password/token is typed",
+          "ok": true,
+          "detail": "디스코드\n연결 전\n\n디스코드 앱에서 ‘로그인’만 누르면 연결돼요. 비밀번호나 토큰은 입력하지 않아요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수 없는 일\n허락 없이 메시지 보내기\n비밀번호 원문 보기\n친구 추가·삭제나 설정 바꾸기\n\n"
+        },
+        {
+          "name": "discord intro: ToS caution shown",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: primary is a link to https://discord.com/ra/…",
+          "ok": true,
+          "detail": "https://discord.com/ra/FAKEfingerprint-0123456789abcdefghijklmnopq"
+        },
+        {
+          "name": "waiting_scan: link says 디스코드 앱에서 로그인 승인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: target=_blank rel=noopener",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: QR is a data:image/svg+xml image that loads under the CSP",
+          "ok": true,
+          "detail": "{\"src\":\"data:image/svg+xml;base64,\",\"w\":150,\"complete\":true}"
+        },
+        {
+          "name": "waiting_scan: real time left",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_confirm: shows who is signing in",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "rejected in the app: Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드 앱에서 로그인을 취소했어요.\n\n다시 시도"
+        },
+        {
+          "name": "expired: says so + 새 QR 코드 만들기",
+          "ok": true,
+          "detail": "번호를 보거나 저장하는 일은 없어요.\n\n디스코드는 개인 계정 자동화를 이용약관으로 막고 있어서, 드물게 계정이 제한될 수 있어요.\n\nQR 코드 유효 시간이 지났어요. 새 코드를 만들어 주세요.\n\n새 QR 코드 만들기"
+        },
+        {
+          "name": "cancel: back to 로그인 시작",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "captcha: friendly Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드가 추가 보안 확인(캡차)을 요구해 로그인을 끝내지 못했어요. 잠시 후 다시 시도해 주세요.\n\n다시 시도"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: discord is connected (account = the Discord profile)",
+          "ok": true,
+          "detail": "{\"provider\":\"discord\",\"status\":\"connected\",\"accountLabel\":\"앨리스\",\"credentialId\":\"bf2b03ed-c25e-4815-92e6-2624fcc04f9a\",\"lastError\":null,\"connectedAt\":1794423936229,\"updatedAt\":1794423936229}"
+        },
+        {
+          "name": "vault: one sealed token credential, never the token itself",
+          "ok": true,
+          "detail": "{\"id\":\"bf2b03ed-c25e-4815-92e6-2624fcc04f9a\",\"service\":\"discord\",\"serviceName\":\"디스코드\",\"label\":\"디스코드 (alice_dc)\",\"kind\":\"token\",\"hint\":\"alice_dc\",\"keepFor\":\"30d\",\"expiresAt\":1797015936228,\"expired\":fal"
+        },
+        {
+          "name": "phone: type=tel autocomplete=tel",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 코드 받기 is disabled until a number is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone invalid: Korean hint, still on the phone screen",
+          "ok": true,
+          "detail": "전화번호를 다시 확인해 주세요. 예: 010-1234-5678"
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: the number is shown masked only (010-****-6789)",
+          "ok": true,
+          "detail": "텔레그램\n연결 중\n확인 기다리는 중\n\n텔레그램 앱으로 010-****-6789 계정의 로그인 코드 5자리를 보냈어요.\n\n로그인 코드 5자리\n\n휴대폰이나 컴퓨터의 텔레그램 앱에서 ‘Telegram’ 공식 계정이 보낸 메시지를 열어 보세요.\n\n확인\n처음부터 다시"
+        },
+        {
+          "name": "code: says it went to the Telegram app, 5 digits",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code, numeric",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "wrong code: Korean message, same step",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 텔레그램 앱에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "2FA: password field (current-password) with the person's hint",
+          "ok": true,
+          "detail": "텔레그램\n확인 기다리는 중\n\n2단계 인증을 켠 계정이에요. 텔레그램 2단계 인증 비밀번호를 입력해 주세요.\n\n2단계 인증 비밀번호\n\n힌트: 강아지 이름\n\n로그인\n처음부터 다시"
+        },
+        {
+          "name": "wrong password: Korean message, same step",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: telegram is connected (account = Alice Kim)",
+          "ok": true,
+          "detail": "{\"provider\":\"telegram\",\"status\":\"connected\",\"accountLabel\":\"Alice Kim\",\"credentialId\":\"5cc18f07-3e5e-4d47-b537-5c8a47025f11\",\"lastError\":null,\"connectedAt\":1794423947955,\"updatedAt\":1794423947955}"
+        },
+        {
+          "name": "vault: a sealed session credential; the phone number is nowhere in it",
+          "ok": true,
+          "detail": "[{\"id\":\"5cc18f07-3e5e-4d47-b537-5c8a47025f11\",\"service\":\"telegram\",\"serviceName\":\"텔레그램\",\"label\":\"텔레그램 (Alice Kim)\",\"kind\":\"token\",\"hint\":\"Alice Kim\",\"keepFor\":\"30d\",\"expiresAt\":1797015947954,\"expired\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "webkit-light-01-list-telegram-preparing.png",
+        "webkit-light-02-list-advanced-open.png",
+        "webkit-light-03-discord-intro.png",
+        "webkit-light-04-discord-starting.png",
+        "webkit-light-05-discord-waiting-scan.png",
+        "webkit-light-06-discord-waiting-confirm.png",
+        "webkit-light-07-discord-rejected.png",
+        "webkit-light-08-discord-expired.png",
+        "webkit-light-09-discord-captcha.png",
+        "webkit-light-10-discord-connected.png",
+        "webkit-light-11-telegram-phone.png",
+        "webkit-light-12-telegram-phone-invalid.png",
+        "webkit-light-13-telegram-phone-filled.png",
+        "webkit-light-14-telegram-sending-code.png",
+        "webkit-light-15-telegram-code.png",
+        "webkit-light-16-telegram-code-wrong.png",
+        "webkit-light-17-telegram-password.png",
+        "webkit-light-18-telegram-password-wrong.png",
+        "webkit-light-19-telegram-connected.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "list: no row says 토큰으로 연결",
+          "ok": true,
+          "detail": "연결된 앱 및 서비스\n\n메신저를 연결하면 모시가 대신 대화를 읽고, 내가 허락한 메시지만 보내요.\n\n연결할 수 있는 메신저\n카카오톡\n계정으로 로그인\n슬랙\n이메일 코드로 로그인\n디스코드\n앱에서 승인해 로그인\n텔레그램\n준비 중이에요\n라인\n계정으로 로그인\n인스타그램\n계정으로 로그인\nMicrosoft Teams\n회사 계정으로 로그인\nWebex\n계정으로 로그인\n고급"
+        },
+        {
+          "name": "list: telegram is 준비 중이에요 without api_id (row disabled)",
+          "ok": true,
+          "detail": "텔레그램\n준비 중이에요"
+        },
+        {
+          "name": "list: discord says it signs in through the app",
+          "ok": true,
+          "detail": "디스코드\n앱에서 승인해 로그인"
+        },
+        {
+          "name": "list: bot rows are folded away",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "list: 고급 · 직접 만든 봇 연결 holds the three bots",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "discord intro: no token input, says no password/token is typed",
+          "ok": true,
+          "detail": "디스코드\n연결 전\n\n디스코드 앱에서 ‘로그인’만 누르면 연결돼요. 비밀번호나 토큰은 입력하지 않아요.\n\n모시가 할 수 있는 일\n대화방 목록 보기\n대화 읽기\n허락받은 메시지 보내기\n대화 검색하기\n할 수 없는 일\n허락 없이 메시지 보내기\n비밀번호 원문 보기\n친구 추가·삭제나 설정 바꾸기\n\n"
+        },
+        {
+          "name": "discord intro: ToS caution shown",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: primary is a link to https://discord.com/ra/…",
+          "ok": true,
+          "detail": "https://discord.com/ra/FAKEfingerprint-0123456789abcdefghijklmnopq"
+        },
+        {
+          "name": "waiting_scan: link says 디스코드 앱에서 로그인 승인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: target=_blank rel=noopener",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_scan: QR is a data:image/svg+xml image that loads under the CSP",
+          "ok": true,
+          "detail": "{\"src\":\"data:image/svg+xml;base64,\",\"w\":150,\"complete\":true}"
+        },
+        {
+          "name": "waiting_scan: real time left",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "waiting_confirm: shows who is signing in",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "rejected in the app: Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드 앱에서 로그인을 취소했어요.\n\n다시 시도"
+        },
+        {
+          "name": "expired: says so + 새 QR 코드 만들기",
+          "ok": true,
+          "detail": "번호를 보거나 저장하는 일은 없어요.\n\n디스코드는 개인 계정 자동화를 이용약관으로 막고 있어서, 드물게 계정이 제한될 수 있어요.\n\nQR 코드 유효 시간이 지났어요. 새 코드를 만들어 주세요.\n\n새 QR 코드 만들기"
+        },
+        {
+          "name": "cancel: back to 로그인 시작",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "captcha: friendly Korean reason + 다시 시도",
+          "ok": true,
+          "detail": "디스코드가 추가 보안 확인(캡차)을 요구해 로그인을 끝내지 못했어요. 잠시 후 다시 시도해 주세요.\n\n다시 시도"
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: discord is connected (account = the Discord profile)",
+          "ok": true,
+          "detail": "{\"provider\":\"discord\",\"status\":\"connected\",\"accountLabel\":\"앨리스\",\"credentialId\":\"7a94c0b0-414a-41a8-95d2-d4a2766b0296\",\"lastError\":null,\"connectedAt\":1794423970163,\"updatedAt\":1794423970163}"
+        },
+        {
+          "name": "vault: one sealed token credential, never the token itself",
+          "ok": true,
+          "detail": "{\"id\":\"7a94c0b0-414a-41a8-95d2-d4a2766b0296\",\"service\":\"discord\",\"serviceName\":\"디스코드\",\"label\":\"디스코드 (alice_dc)\",\"kind\":\"token\",\"hint\":\"alice_dc\",\"keepFor\":\"30d\",\"expiresAt\":1797015970162,\"expired\":fal"
+        },
+        {
+          "name": "phone: type=tel autocomplete=tel",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 코드 받기 is disabled until a number is typed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone invalid: Korean hint, still on the phone screen",
+          "ok": true,
+          "detail": "전화번호를 다시 확인해 주세요. 예: 010-1234-5678"
+        },
+        {
+          "name": "progress: 코드 보내는 중 in the button",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: the number is shown masked only (010-****-6789)",
+          "ok": true,
+          "detail": "텔레그램\n연결 중\n확인 기다리는 중\n\n텔레그램 앱으로 010-****-6789 계정의 로그인 코드 5자리를 보냈어요.\n\n로그인 코드 5자리\n\n휴대폰이나 컴퓨터의 텔레그램 앱에서 ‘Telegram’ 공식 계정이 보낸 메시지를 열어 보세요.\n\n확인\n처음부터 다시"
+        },
+        {
+          "name": "code: says it went to the Telegram app, 5 digits",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "code: one-time-code, numeric",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "wrong code: Korean message, same step",
+          "ok": true,
+          "detail": "코드가 맞지 않아요. 텔레그램 앱에 온 코드를 다시 확인해 주세요."
+        },
+        {
+          "name": "2FA: password field (current-password) with the person's hint",
+          "ok": true,
+          "detail": "텔레그램\n확인 기다리는 중\n\n2단계 인증을 켠 계정이에요. 텔레그램 2단계 인증 비밀번호를 입력해 주세요.\n\n2단계 인증 비밀번호\n\n힌트: 강아지 이름\n\n로그인\n처음부터 다시"
+        },
+        {
+          "name": "wrong password: Korean message, same step",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connected: the pill says 연결됨",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "server: telegram is connected (account = Alice Kim)",
+          "ok": true,
+          "detail": "{\"provider\":\"telegram\",\"status\":\"connected\",\"accountLabel\":\"Alice Kim\",\"credentialId\":\"b5b084f9-a0bd-4ab2-b7f5-675e2155e6c6\",\"lastError\":null,\"connectedAt\":1794423981999,\"updatedAt\":1794423981999}"
+        },
+        {
+          "name": "vault: a sealed session credential; the phone number is nowhere in it",
+          "ok": true,
+          "detail": "[{\"id\":\"b5b084f9-a0bd-4ab2-b7f5-675e2155e6c6\",\"service\":\"telegram\",\"serviceName\":\"텔레그램\",\"label\":\"텔레그램 (Alice Kim)\",\"kind\":\"token\",\"hint\":\"Alice Kim\",\"keepFor\":\"30d\",\"expiresAt\":1797015981998,\"expired\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "screenshots": [
+        "webkit-dark-01-list-telegram-preparing.png",
+        "webkit-dark-02-list-advanced-open.png",
+        "webkit-dark-03-discord-intro.png",
+        "webkit-dark-04-discord-starting.png",
+        "webkit-dark-05-discord-waiting-scan.png",
+        "webkit-dark-06-discord-waiting-confirm.png",
+        "webkit-dark-07-discord-rejected.png",
+        "webkit-dark-08-discord-expired.png",
+        "webkit-dark-09-discord-captcha.png",
+        "webkit-dark-10-discord-connected.png",
+        "webkit-dark-11-telegram-phone.png",
+        "webkit-dark-12-telegram-phone-invalid.png",
+        "webkit-dark-13-telegram-phone-filled.png",
+        "webkit-dark-14-telegram-sending-code.png",
+        "webkit-dark-15-telegram-code.png",
+        "webkit-dark-16-telegram-code-wrong.png",
+        "webkit-dark-17-telegram-password.png",
+        "webkit-dark-18-telegram-password-wrong.png",
+        "webkit-dark-19-telegram-connected.png"
+      ]
+    }
+  ],
+  "serverLog": {
+    "lines": 478,
+    "relaySteps": 212,
+    "leaks": []
+  }
+}

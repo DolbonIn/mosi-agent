@@ -1,0 +1,285 @@
+<!doctype html>
+<!--
+  모시 draft · chat · A (composer) · 입력 중: 보내기와 통화 사이에 숨 쉴 틈
+  draft-a, 2026-11-12, impeccable de-slop pass. Static mock: app tokens only (apps/mobile/src/styles/tokens.css by
+  relative path), synthetic fixture data (docs/design/impeccable/capture.mjs), no network. ?theme=light|dark.
+  Glyphs are inlined from apps/mobile/src/ui/Icon.tsx. Rationale: notes.md in this folder.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: chat · A · composer</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+:root { --accent-fill: #0071e3; }
+.kit-phone { font-family: var(--font-text); }
+/* the app's composer placeholder is --label-2 (chat.css .composer-field::placeholder); the kit's --label-3 is 1.9:1 */
+.k-composer-field:not([data-filled]) { color: var(--label-2); }
+
+/* scroller: content runs under the floating chrome and thins out at both edges (app/Screen.css .screen-scroll) */
+.d-scroll {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+  position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  padding: calc(var(--edge-top) + 12px) var(--gutter) 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+/* threads are bottom-anchored like the real list: the newest line rests just above the composer */
+.d-thread { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--edge-bottom) + 24px - var(--peek, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* user bubble: neutral 8 % ink, 20 px with the 8 px tail on the speaker's side (DESIGN Shapes) */
+.d-me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: var(--r-group) var(--r-group) 8px var(--r-group); background: color-mix(in srgb, var(--label) 8%, var(--surface)); color: var(--label); font-size: var(--t-body); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* paper: flat. Light separates by value (#fff on #f5f5f7), dark by a hairline (DESIGN Flat Paper) */
+.d-paper { background: var(--surface); color: var(--label); }
+:root[data-theme="dark"] .d-paper { box-shadow: inset 0 0 0 1px var(--separator); }
+
+/* assistant reply as paper (variant A): the tail corner is back (critique chat P2-1) and the radius is the card's */
+.d-asst { align-self: flex-start; max-width: 100%; padding: 12px 16px; border-radius: 8px var(--r-card) var(--r-card) var(--r-card); font-size: var(--t-body); line-height: 1.55; }
+/* assistant reply as plain text on the page (variant B, DESIGN "plain text for conversation") */
+.d-say { font-size: var(--t-body); line-height: 1.55; color: var(--label); padding: 0 4px; }
+.d-turn { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.d-turn-head { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: -8px 0 -6px; padding: 0 4px; align-self: flex-start; font-size: var(--t-subhead); color: var(--label-2); }
+.d-turn-head .avatar { flex: none; }
+
+/* folded tool steps "N단계 · 1분 33초 ⌄" (chat.css .tools-pill) */
+.d-steps { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -6px 0; padding: 0 10px 0 8px; font-size: var(--t-subhead); color: var(--label-2); }
+
+/* one chat card = one paper object; inside it only rows, hairlines and text (no tiles, no recessed panels) */
+.d-card { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 16px; border-radius: var(--r-card); word-break: keep-all; }
+.d-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; text-wrap: balance; }
+.d-sub { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); }
+.d-foot { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.d-hair { height: 0; border-top: 0.5px solid var(--separator); }
+.d-glyph { flex: none; color: var(--label-2); }
+.nowrap { white-space: nowrap; }
+
+/* buttons: capsules (height / 2); one blue per screen = --accent-fill; everything else neutral */
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; color: var(--label); }
+.d-btn-lg { min-height: 52px; }
+.d-btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+.d-btn-neutral { background: var(--fill); color: var(--label); }
+.d-btn-plain { background: none; color: var(--label); }
+.d-btn-block { display: flex; width: 100%; }
+
+/* receipt: status pill with icon + words (kept: CH-4), label colour for AA */
+.d-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.d-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--fill); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+
+/* new-below dot on the current tab (variant B of chat): tapping the current tab jumps to the latest, iOS-style */
+
+/* event notes: plain centred footnote text on the page, no pill (GT-1, CH-3) */
+.d-note { align-self: center; max-width: 92%; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); text-wrap: balance; }
+.d-note + .d-note { margin-top: -6px; }
+
+/* ── chat A ── */
+.brand-k { display: inline-grid; place-items: center; flex: none; overflow: hidden; background: #fee500; vertical-align: middle; }
+.brand-k > svg { display: block; width: 100%; height: 100%; }
+
+/* results (A): rows without tiles; the hairline spans the text column only (critique Minor) */
+.res-list { list-style: none; display: flex; flex-direction: column; }
+.res-row { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 8px 0; }
+.res-row + .res-row { border-top: 0.5px solid var(--separator); }
+.res-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.res-body b { font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.res-body span { font-size: var(--t-footnote); line-height: 1.4; color: var(--label-2); }
+.res-chev { flex: none; color: var(--label-3); }
+/* results (B): what you get on the left in Ink, when on the right in a column you can scan down */
+.resb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.resb-list { list-style: none; display: flex; flex-direction: column; margin-top: -4px; }
+.resb-row { display: grid; grid-template-columns: minmax(0, 1fr) 16px; column-gap: 10px; align-items: center; min-height: 64px; padding: 10px 0; }
+.resb-row + .resb-row { border-top: 0.5px solid var(--separator); }
+.resb-row b { display: block; font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.resb-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 3px; }
+.resb-what { min-width: 0; font-size: var(--t-subhead); line-height: 1.4; color: var(--label); }
+.resb-when { flex: none; font-size: var(--t-footnote); line-height: 1.4; color: var(--label-2); white-space: nowrap; }
+
+/* messenger (A): HEAD's MessengerThreadCard, collapsed, on flat paper */
+.mt-head { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mt-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; text-wrap: balance; }
+.mt-meta { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.mt-meta .brand-k { margin-right: 6px; vertical-align: -3px; }
+.mt-seg { white-space: nowrap; }
+.mt-hls { list-style: none; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mt-hl { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.mt-name { padding: 0 2px; font-size: var(--t-footnote); font-weight: 600; line-height: 1.35; color: var(--label); }
+.mt-line { display: flex; align-items: flex-end; gap: 6px; min-width: 0; max-width: 100%; }
+.mt-bubble { min-width: 0; padding: 8px 12px; border-radius: var(--r-group); border-top-left-radius: var(--r-plate); background: var(--fill); color: var(--label); font-size: var(--t-subhead); line-height: 1.45; }
+.mt-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; overflow-wrap: anywhere; word-break: keep-all; }
+.mt-time { flex: none; padding-bottom: 2px; font-size: var(--t-footnote); line-height: 1.2; color: var(--label-2); white-space: nowrap; }
+.mt-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; margin: -6px -8px -10px; border-radius: var(--r-control); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+/* messenger (B): the collapsed card is a digest (rows: who · when, then the words); the room keeps its bubbles */
+.mtb-list { list-style: none; display: flex; flex-direction: column; margin-top: -2px; }
+.mtb-row { display: flex; flex-direction: column; gap: 3px; padding: 10px 0; min-width: 0; }
+.mtb-row + .mtb-row { border-top: 0.5px solid var(--separator); }
+.mtb-who { display: flex; align-items: baseline; gap: 8px; font-size: var(--t-footnote); line-height: 1.35; color: var(--label-2); }
+.mtb-who b { font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+.mtb-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font-size: var(--t-callout); line-height: 1.5; color: var(--label); overflow-wrap: anywhere; word-break: keep-all; }
+.at { font-weight: 600; }
+.mtb-toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; margin: -12px 0 -8px; padding-top: 4px; border-top: 0.5px solid var(--separator); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+.mtb-toggle svg { color: var(--label-2); }
+
+
+/* messenger, expanded (HEAD Room): avatar initial, name (+ open-chat tag once), bubble, time on the run's last bubble */
+.mt-open { --mt-ink-2: color-mix(in srgb, var(--label) 74%, transparent); --mt-rule: color-mix(in srgb, var(--label) 14%, transparent); }
+:root[data-theme="dark"] .mt-open { --mt-ink-2: color-mix(in srgb, var(--label) 78%, transparent); --mt-rule: color-mix(in srgb, var(--label) 18%, transparent); }
+.mt-roster { margin-top: 2px; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); overflow-wrap: anywhere; }
+.mt-room { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding-top: 4px; border-top: 1px solid var(--separator); }
+.mt-list { list-style: none; display: flex; flex-direction: column; min-width: 0; }
+.mt-row { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 8px; align-items: start; margin-top: 14px; min-width: 0; }
+.mt-row.is-me { grid-template-columns: minmax(0, 1fr); }
+.mt-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.mt-row.is-me .mt-col { align-items: flex-end; }
+.mt-row.is-me .mt-line { flex-direction: row-reverse; max-width: 88%; }
+.mt-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--fill-2); color: var(--label); font-size: var(--t-footnote); font-weight: 600; line-height: 1; }
+.mt-tag { font-weight: 400; color: var(--label-2); }
+.mt-room .mt-bubble { display: flex; flex-direction: column; gap: 6px; max-width: 100%; }
+.mt-room .mt-bubble.is-me { border-top-left-radius: var(--r-group); border-top-right-radius: var(--r-plate); }
+.mt-room .mt-text { display: block; overflow: visible; white-space: pre-wrap; }
+.mt-bubble.is-media { background: transparent; box-shadow: inset 0 0 0 1px var(--separator); }
+.mt-bubble.is-deleted { color: var(--label-2); }
+.mt-bubble.is-deleted .mt-media { font-weight: 400; }
+.mt-media { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-weight: 500; overflow-wrap: anywhere; }
+.mt-media > svg { flex: none; }
+.mt-quote { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding-bottom: 6px; border-bottom: 1px solid var(--mt-rule); font-size: var(--t-footnote); line-height: 1.4; color: var(--mt-ink-2); }
+.mt-quote-who { font-weight: 600; }
+.mt-quote-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; word-break: keep-all; }
+.mt-link { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.mt-date { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; font-size: var(--t-footnote); line-height: 1.4; color: var(--label-2); white-space: nowrap; }
+.mt-date::before, .mt-date::after { content: ""; flex: 1; height: 1px; background: var(--separator); }
+.mt-system { align-self: center; max-width: 92%; margin: 14px 0 0; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); word-break: keep-all; }
+/* --mt-me under the one-accent palette (blue for action, the agent's hue for the agent, everything else neutral):
+   A = a value step (mine on --fill-2, peers on --fill); B = a line (mine on paper with a hairline, peers filled) */
+.mt-open-A .mt-bubble.is-me { background: var(--fill-2); }
+.mt-open-B .mt-bubble.is-me { background: transparent; box-shadow: inset 0 0 0 1px var(--fill-3); }
+.mt-open-B .mt-bubble.is-media { background: var(--fill); box-shadow: none; }
+/* a deleted message on a fill: the bubble's secondary ink (≥4.5:1 on --fill), since Slate on --fill is 4.4:1 */
+.mt-open-B .mt-bubble.is-deleted { color: var(--mt-ink-2); }
+/* B: a long message stops at 8 lines with 전체 보기 (the room stays scannable; KakaoTalk does the same past ~500 chars) */
+.mt-open-B .mt-text.is-long { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; overflow: hidden; }
+.mt-more { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; margin: -6px 0 -6px; font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+.mt-more svg { color: var(--label-2); }
+.mt-open-B .at-a { font-weight: 600; }
+
+/* credential: TextField filled (ui/TextField.css values), hint under the password, SegmentedControl sm */
+.cr-head { display: flex; align-items: center; gap: 10px; }
+.cr-reason { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); text-wrap: pretty; }
+.cr-form { display: flex; flex-direction: column; gap: 14px; }
+.tf { display: flex; flex-direction: column; }
+.tf-label { padding: 0 4px 6px; font-size: var(--t-footnote); line-height: 1.4; color: var(--label-2); }
+.tf-box { display: flex; align-items: center; min-height: 52px; padding: 0 4px 0 14px; border-radius: var(--r-field); background: var(--fill); }
+.tf-input { flex: 1 1 auto; min-width: 0; font-size: 17px; line-height: 1.3; color: var(--label); white-space: nowrap; }
+.tf-input.ph { color: var(--placeholder); }
+.tf-eye { flex: none; display: grid; place-items: center; width: 44px; height: 44px; color: var(--label-2); }
+.tf-hint { padding: 8px 4px 0; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 3px; border-radius: var(--r-control); background: var(--fill); }
+.seg span { display: flex; align-items: center; justify-content: center; min-height: 38px; border-radius: calc(var(--r-control) - 3px); font-size: var(--t-footnote); font-weight: 500; color: var(--label); white-space: nowrap; }
+.seg span[data-on] { background: var(--surface); box-shadow: 0 3px 8px rgb(0 0 0 / 0.12), 0 1px 1px rgb(0 0 0 / 0.04); font-weight: 600; }
+:root[data-theme="dark"] .seg span[data-on] { background: var(--thumb-raised); box-shadow: 0 3px 8px rgb(0 0 0 / 0.3); }
+/* credential (B): one grouped field (inset hairline), keep-for as one sentence with a default (critique Q5) */
+.crb-group { border-radius: var(--r-field); background: var(--fill); }
+.crb-row { position: relative; display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; align-items: center; min-height: 52px; padding: 0 4px 0 14px; }
+.crb-row + .crb-row::before { content: ""; position: absolute; top: 0; left: 14px; right: 0; border-top: 0.5px solid var(--separator); }
+.crb-row label { font-size: var(--t-subhead); line-height: 1.3; color: var(--label); }
+.crb-row .tf-input { padding-right: 10px; }
+.crb-keep { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -6px 0; }
+.crb-keep p { font-size: var(--t-subhead); line-height: 1.4; color: var(--label); }
+.crb-keep button { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 2px 0 12px; font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+.crb-keep button svg { color: var(--label-2); }
+
+/* thread context (composer): artifact row, schedule row, approval head (same as the meeting / phone drafts) */
+.art { display: flex; align-items: center; gap: 12px; }
+.art > svg:first-child { flex: none; align-self: flex-start; margin-top: 2px; }
+.art-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.art-body b { font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.art-chev { flex: none; color: var(--label-3); }
+.sched { display: flex; align-items: center; gap: 12px; }
+.sched-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sched-when { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-footnote); color: var(--label-2); }
+.tgl { flex: none; position: relative; width: 51px; height: 31px; border-radius: 999px; background: var(--accent); }
+.tgl::after { content: ""; position: absolute; top: 2px; right: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08); }
+.ph-head { display: flex; align-items: flex-start; gap: 8px; }
+.ph-head > svg { margin-top: 3px; }
+.ph-num { margin-top: -6px; font-size: var(--t-body); line-height: 1.4; color: var(--label); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.phb-num { font-family: var(--font-display); font-size: var(--t-title2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ph-script { padding-left: 12px; font-size: var(--t-callout); line-height: 1.55; color: var(--label); text-indent: -0.42em; }
+
+/* composer, focused with two lines typed */
+.cmp-field { white-space: normal; overflow: visible; padding: 8px 4px; line-height: 1.45; word-break: keep-all; text-wrap: pretty; }
+.caret { display: inline-block; width: 2px; height: 1.2em; margin-left: 1px; vertical-align: -0.22em; border-radius: 1px; background: var(--accent); }
+.cmp-send { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
+
+</style>
+</head>
+<body>
+<div class="kit-phone">
+
+<main class="d-scroll" aria-label="대화" style="--edge-bottom:calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 78px)">
+  <div class="d-thread" style="--peek:64px;gap:12px">
+    <section class="d-card d-paper" aria-label="회의록"><div class="art"><svg class="d-glyph" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h6.5L18.5 8.5v10.25a1.75 1.75 0 0 1-1.75 1.75H7.25A1.75 1.75 0 0 1 5.5 18.75V5A1.5 1.5 0 0 1 7 3.5Z"/><path d="M13.5 3.5v5h5M8.75 12.75h6.5M8.75 16.25h4.5"/></svg><div class="art-body"><b>11월 12일 주간회의 회의록</b><span class="d-foot tnum">문서 · 참석 4명 · 42분 · 정한 것 2 · 할 일 2</span></div><svg class="art-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></svg></div></section>
+    <div class="d-me">매일 아침 7시에 날씨랑 뉴스 브리핑해줘</div>
+    <div class="d-steps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.25 12.25 2.5 2.5 5-5.25"/></svg><span class="tnum">1단계 · 3초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+    <div class="d-asst d-paper">매일 아침 7시에 브리핑을 보내 드릴게요.</div>
+    <section class="d-card d-paper" aria-label="예약"><div class="sched"><div class="sched-body"><b class="d-title">아침 브리핑</b><span class="sched-when tnum"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>매일 오전 7:00</span></div><span class="tgl" role="switch" aria-checked="true" aria-label="아침 브리핑 켜짐"></span></div></section>
+    <div class="d-me">연세바른치과에 내일 3시 예약 되는지 전화해서 물어봐 줘</div>
+    <div class="d-steps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.25 12.25 2.5 2.5 5-5.25"/></svg><span class="tnum">1단계 · 1초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+    <section class="d-card d-paper" aria-label="전화 확인"><div class="ph-head"><svg class="d-glyph" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.25h2.6c.4 0 .75.27.85.66l.8 3.1c.1.4-.02.82-.32 1.1l-1.48 1.4a12.2 12.2 0 0 0 4.44 4.44l1.4-1.48c.28-.3.7-.42 1.1-.32l3.1.8c.39.1.66.45.66.85v2.6c0 .9-.73 1.6-1.62 1.6A15.75 15.75 0 0 1 5 5.87c0-.9.71-1.62 1.6-1.62Z"/><path d="M15.25 3.75h5v5M20.25 3.75 14.5 9.5"/></svg><h3 class="d-title">연세바른치과에 전화할까요?</h3></div><p class="ph-num">02-1234-1234</p><p class="ph-script">“안녕하세요, 하늘 님 대신 연락드렸어요. 내일 오후 3시에 진료 예약이 가능한지 여쭤봐도 될까요?”</p></section>
+  </div>
+</main>
+<header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.75h14M5 15.25h14"/></svg></button>
+    <button class="k-title" aria-label="깽이 프로필"><i data-avatar data-size="30"></i>깽이</button>
+    
+  </header>
+<div class="k-bottom">
+    <div class="glass k-composer" data-text><span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="k-composer-field cmp-field" data-filled>내일 오전에 비 오면 우산 챙기라고 알려 줘<i class="caret" aria-hidden="true"></i></span><span class="cmp-send" role="button" aria-label="보내기"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.509" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5"/></svg></span><span class="k-composer-icon" style="margin-left:6px" aria-label="깽이와 통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.25h2.6c.4 0 .75.27.85.66l.8 3.1c.1.4-.02.82-.32 1.1l-1.48 1.4a12.2 12.2 0 0 0 4.44 4.44l1.4-1.48c.28-.3.7-.42 1.1-.32l3.1.8c.39.1.66.45.66.85v2.6c0 .9-.73 1.6-1.62 1.6A15.75 15.75 0 0 1 5 5.87c0-.9.71-1.62 1.6-1.62Z"/></svg></span></div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.75c4.56 0 8.25 2.98 8.25 6.65s-3.69 6.65-8.25 6.65c-.86 0-1.68-.1-2.46-.3L5.25 19.5l1-3.55C4.69 14.74 3.75 13.15 3.75 11.4c0-3.67 3.69-6.65 8.25-6.65Z"/></svg>채팅</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2.05 4.75-4.75 2.05 2.05-4.75 4.75-2.05Z"/></svg>둘러보기</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="5" width="16.5" height="4.25" rx="1.3"/><path d="M5.25 9.25v8A1.75 1.75 0 0 0 7 19h10a1.75 1.75 0 0 0 1.75-1.75v-8M10 12.75h4"/></svg>보관함</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.25" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "채팅",
+  "variant": "A",
+  "title": "입력 중: 보내기와 통화 사이에 숨 쉴 틈",
+  "rationale": [
+    "보내기와 통화 사이 2px → 8px: 아주 다른 두 동작이 붙어 있지 않게 (비평 Minor). 보내기 원은 HEAD와 같은 System Blue(FOUNDATION: 글리프만 있는 원), '전화 걸기'의 --accent-fill은 HEAD에서 이미 고쳐짐",
+    "입력창 반경 --r-composer는 HEAD에서 이미 토큰(R.composer), 두 줄이 되어도 같은 모양",
+    "위 카드: 회의록 판 삭제 (P1-2, IT-9). '문서'를 메타 줄로, 예약 시계 판 삭제는 HEAD에서 이미",
+    "전화 승인: 알약·판 없음과 중립 취소는 HEAD와 같음. 전체 번호를 제목 아래 한 줄로 (HEAD도 card.call로 같은 답)",
+    "유리 3개, 깽이 답에 꼬리; 탭 바는 입력 중에도 그대로 (P1-1, GL-1, RH-3, P2-1)"
+  ],
+  "motion": [
+    "§3 content swap: 글자가 생기면 마이크 → 보내기, 지우면 되돌아옴",
+    "§8.4 보내기 ↔ 정지 morph, 첫 토큰 타임라인",
+    "§8.8 아래 크롬 고정: 포커스·입력 중에도 탭 바 크기·위치 그대로 (최소화 기각)",
+    "입력창은 줄 수만큼 위로 자라요 (layout morph), 탭 바는 움직이지 않음",
+    "§3 press: 보내기 lift & swell"
+  ],
+  "fixes": [
+    "P1-1",
+    "P1-2",
+    "P2-1",
+    "slop:IT-9",
+    "slop:GL-1",
+    "slop:RH-3"
+  ],
+  "compare": [
+    "chromium-light-17-composer-focused-typed.jpg",
+    "chromium-dark-17-composer-focused-typed.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

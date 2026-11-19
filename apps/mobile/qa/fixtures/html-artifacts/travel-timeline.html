@@ -1,0 +1,67 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.trip{text-wrap:pretty}
+.trip h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.sub{margin-top:2px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.day h3{display:flex;align-items:baseline;gap:8px;margin-top:18px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:17px;font-weight:600}
+.day h3 span{font-size:14px;font-weight:400;color:var(--text-2);font-variant-numeric:tabular-nums}
+.tl{list-style:none;position:relative;margin-top:12px}
+.tl::before{content:"";position:absolute;left:55px;top:8px;bottom:8px;border-left:1.5px solid var(--line)}
+.st{display:grid;grid-template-columns:44px 24px minmax(0,1fr);padding-bottom:14px}
+.st:last-child{padding-bottom:0}
+.st time{font-size:14px;line-height:1.6;color:var(--text-2);font-variant-numeric:tabular-nums;padding-top:1px}
+.dot{position:relative;z-index:1;justify-self:center;width:11px;height:11px;margin-top:7px;border-radius:50%;background:var(--bg);border:2.5px solid var(--accent)}
+.st b{display:block;font-size:16px;font-weight:600;line-height:1.5}
+.st p{font-size:14px;line-height:1.5;color:var(--text-2)}
+.move{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:1px 8px;border-radius:999px;background:var(--surface);font-size:13px;line-height:1.6;color:var(--text-2)}
+.move svg{flex:none}
+.src{margin-top:20px}
+.src h3{font-size:15px;font-weight:600;color:var(--text-2);padding-bottom:4px}
+.src ul{list-style:none}
+.src a{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:8px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--text-2)}
+.src li:last-child a{padding-bottom:0}
+.src a div{min-width:0}
+.src b{display:block;font-size:15px;font-weight:600;line-height:1.4;color:var(--accent)}
+.src a span{display:block;font-size:13px;line-height:1.45}
+.src svg{flex:none;color:var(--text-3)}
+</style>
+<section class="trip">
+  <h2>제주 2박 3일</h2>
+  <p class="sub">11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림</p>
+
+  <section class="day">
+    <h3>1일차 <span>11월 21일 토</span></h3>
+    <ol class="tl">
+      <li class="st"><time>10:20</time><i class="dot"></i><div><b>제주공항 도착</b><p>렌터카는 공항 셔틀로 5분 거리예요</p></div></li>
+      <li class="st"><time>11:30</time><i class="dot"></i><div><b>애월 해안도로</b><p>바다 보이는 카페에서 브런치</p><span class="move"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M5 16h14M5 16v2M19 16v2"/><circle cx="8" cy="13.5" r="1"/><circle cx="16" cy="13.5" r="1"/></svg>차로 35분</span></div></li>
+      <li class="st"><time>14:00</time><i class="dot"></i><div><b>협재 해수욕장</b><p>바람이 세면 한림공원으로 바꿔요</p></div></li>
+      <li class="st"><time>18:30</time><i class="dot"></i><div><b>숙소 체크인</b><p>한림 · 저녁은 근처 고기국수</p></div></li>
+    </ol>
+  </section>
+
+  <section class="day">
+    <h3>2일차 <span>11월 22일 일</span></h3>
+    <ol class="tl">
+      <li class="st"><time>06:40</time><i class="dot"></i><div><b>성산일출봉</b><p>일출 07:12 · 정상까지 25분</p><span class="move"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M5 16h14M5 16v2M19 16v2"/><circle cx="8" cy="13.5" r="1"/><circle cx="16" cy="13.5" r="1"/></svg>새벽 출발, 차로 70분</span></div></li>
+      <li class="st"><time>10:00</time><i class="dot"></i><div><b>섭지코지</b><p>산책로 한 바퀴 40분</p></div></li>
+      <li class="st"><time>13:00</time><i class="dot"></i><div><b>세화 해변</b><p>점심 후 해변 산책</p></div></li>
+    </ol>
+  </section>
+
+  <section class="day">
+    <h3>3일차 <span>11월 23일 월</span></h3>
+    <ol class="tl">
+      <li class="st"><time>10:00</time><i class="dot"></i><div><b>동문시장</b><p>기념품과 귤 택배 보내기</p></div></li>
+      <li class="st"><time>13:30</time><i class="dot"></i><div><b>렌터카 반납</b><p>연료는 출발할 때만큼 채워요</p></div></li>
+      <li class="st"><time>15:40</time><i class="dot"></i><div><b>제주공항 출발</b><p>1시간 전까지 도착해요</p></div></li>
+    </ol>
+  </section>
+
+  <section class="src">
+    <h3>출처</h3>
+    <ul>
+      <li><a href="https://www.visitjeju.net/kr"><div><b>비짓제주</b><span>장소 정보와 운영 시간</span></div><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a></li>
+      <li><a href="https://astro.kasi.re.kr/life/pageView/9"><div><b>한국천문연구원 일출일몰시각</b><span>성산 일출 시각</span></div><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a></li>
+    </ul>
+  </section>
+</section>

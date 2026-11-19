@@ -1,0 +1,56 @@
+{
+ "items": [
+  {
+   "rank": 1,
+   "title": "\"AI 3대 강국\"…기업가치 1조 스타트업 20곳 키운다",
+   "description": "정부가 'AI 유니콘 확보'를 국가의 AI 경쟁력을 끌어올리는 핵심 과제로 인식했다. AI 유니콘은 기업가치 1조원 돌파 이력이 있는 비상장 기업을 말한다. 11일 중소벤처기업부(중기부)는 국가인공지능전략위원회...",
+   "link": "https://n.news.naver.com/mnews/article/003/0014315741?sid=101",
+   "original_link": "https://www.newsis.com/view/NISX20261111_0003863508",
+   "pub_date": "Wed, 11 Nov 2026 14:00:00 +0900",
+   "pub_date_iso": "2026-11-11T05:00:00.000Z",
+   "source": "naver-openapi"
+  },
+  {
+   "rank": 2,
+   "title": "한국 디지털·AI 경쟁력 세계 10위…전년보다 8단계 상승",
+   "description": "디지털·인공지능(AI) 경쟁력 평가에서 70개국 중 10위에 올라 전년보다 8단계 상승했다. 기술인프라와... 과학기술정보통신부는 스위스 국제경영개발원(IMD)이 발표한 '2026년 세계 디지털·AI 경쟁력'(WDAIR) 평가 결과...",
+   "link": "https://n.news.naver.com/mnews/article/001/0016434626?sid=105",
+   "original_link": "https://www.yna.co.kr/view/AKR20261110131300017?input=1195m",
+   "pub_date": "Wed, 11 Nov 2026 08:01:00 +0900",
+   "pub_date_iso": "2026-11-10T23:01:00.000Z",
+   "source": "naver-openapi"
+  },
+  {
+   "rank": 3,
+   "title": "한국, 디지털·AI 경쟁력 세계 10위… 8단계 ‘껑충’",
+   "description": "한국이 스위스 국제경영개발원(IMD)의 세계 디지털·인공지능(AI) 경쟁력 평가에서 지난해보다 8단계... 과학기술정보통신부는 IMD가 발표한 ‘2026년 세계 디지털·AI 경쟁력(WDAIR)’ 평가에서 한국이 조사 대상...",
+   "link": "https://n.news.naver.com/mnews/article/005/0001884524?sid=101",
+   "original_link": "https://www.kmib.co.kr/article/20261111501485",
+   "pub_date": "Wed, 11 Nov 2026 16:54:00 +0900",
+   "pub_date_iso": "2026-11-11T07:54:00.000Z",
+   "source": "naver-openapi"
+  }
+ ],
+ "query": {
+  "q": "AI",
+  "display": 5,
+  "start": 1,
+  "sort": "sim"
+ },
+ "meta": {
+  "query": "AI",
+  "extraction": "naver-openapi",
+  "item_count": 5,
+  "total": 7391636,
+  "start": 1,
+  "display": 5,
+  "last_build_date": "Wed, 11 Nov 2026 18:42:31 +0900",
+  "sort": "sim"
+ },
+ "upstream": {
+  "url": "https://openapi.naver.com/v1/search/news.json?query=AI&display=5&start=1&sort=sim",
+  "status_code": 200,
+  "content_type": "application/json; charset=UTF-8",
+  "provider": "naver-search-api"
+ }
+}

@@ -1,0 +1,62 @@
+/*
+ * Wallpaper (MOTION-SPEC §0 "Wallpaper"): the calm surface behind every screen. CSS only, static, zero cost at rest:
+ * `--bg` plus ONE soft light from above, tinted by the agent's colour (`--wp-hue`, set by WallpaperHost) mixed far
+ * toward a neutral (`--wp-light-mix`). three/palette.ts is the JS twin the legibility veil reads — keep the numbers in
+ * step (qa/wallpaper.test.ts checks them).
+ * Nothing moves at rest. The light re-tints on the camera curve only when the agent's colour changes.
+ */
+.wallpaper {
+  --wp-light: var(--wp-light-neutral);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
+}
+.wallpaper[data-tint] {
+  --wp-light: color-mix(in oklab, hsl(var(--wp-hue) 80% 58%) var(--wp-light-mix), var(--wp-light-neutral));
+}
+
+/* the light: a wide ellipse centred on the top edge (rx 150 % of the width, ry 46 % of the height), fading to the base
+   on a raised cosine — no edge anywhere */
+.wallpaper-light {
+  position: absolute;
+  inset: 0;
+  background-color: var(--wp-light);
+  -webkit-mask-image: radial-gradient(150% 46% at 50% 0%, #000 0%, rgb(0 0 0 / 0.905) 20%, rgb(0 0 0 / 0.655) 40%, rgb(0 0 0 / 0.345) 60%, rgb(0 0 0 / 0.095) 80%, transparent 100%);
+  mask-image: radial-gradient(150% 46% at 50% 0%, #000 0%, rgb(0 0 0 / 0.905) 20%, rgb(0 0 0 / 0.655) 40%, rgb(0 0 0 / 0.345) 60%, rgb(0 0 0 / 0.095) 80%, transparent 100%);
+}
+/* dither against banding (1-level steps show in dark gradients on OLED): a static tile of mid-grey fractal grain at
+   alpha 0–.024 (± ~1 level), only over the light's region; the flat base below it stays flat */
+.wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .04 -.008'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 128px 128px;
+  -webkit-mask-image: radial-gradient(160% 54% at 50% 0%, #000 75%, transparent 100%);
+  mask-image: radial-gradient(160% 54% at 50% 0%, #000 75%, transparent 100%);
+}
+
+/* re-tint only when the agent's colour changes (WallpaperHost sets data-tint-anim for one camera duration) */
+.wallpaper[data-tint-anim] .wallpaper-light {
+  transition: background-color var(--dur-camera) var(--ease-camera);
+}
+:root[data-motion="reduce"] .wallpaper-light,
+:root[data-theme-swap] .wallpaper-light {
+  transition: none !important;
+}
+
+/* reduced transparency / increased contrast / forced colours: the plain surface (the opaque top-edge band of those
+   modes then meets the same flat --bg — no seam) */
+:root[data-transparency="reduce"] .wallpaper-light,
+:root[data-transparency="reduce"] .wallpaper::after,
+:root[data-contrast="more"] .wallpaper-light,
+:root[data-contrast="more"] .wallpaper::after {
+  display: none;
+}
+@media (forced-colors: active) {
+  .wallpaper-light,
+  .wallpaper::after {
+    display: none;
+  }
+}

@@ -1,0 +1,29 @@
+node_modules/
+dist/
+build/
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+.vite/
+coverage/
+.run/
+.data/
+
+# large QA artefacts (kept locally, not in git)
+docs/qa/**/*.png
+docs/qa/**/*.json.gz
+docs/demo/*.mp4
+
+# design review captures (regenerate: docs/design/impeccable/capture.mjs, docs/design/drafts/_kit/render.mjs)
+docs/design/impeccable/shots/*.jpg
+docs/design/drafts/**/png/
+docs/design/drafts/.serve.pid
+docs/design/drafts/_viewer-shots/
+docs/design/drafts/.picks.log
+docs/design/drafts/picks.json
+docs/design/drafts/picks.json.*.tmp
+docs/qa/foundation/deslop/before/
+docs/qa/foundation/deslop/after/

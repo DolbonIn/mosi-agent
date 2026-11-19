@@ -1,0 +1,136 @@
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.stage[data-frame="device"] {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 24px;
+  background: #e6e6eb;
+}
+:root[data-theme="dark"] .stage[data-frame="device"] {
+  background: #141418;
+}
+/* while the drawer has the main card scaled + rounded, the bar groups' shared blur steps aside (same Chromium issue);
+   the faces keep their tint and the card is dimmed */
+:root[data-overlay~="drawer"] .main-card .blur-layer {
+  display: none;
+}
+.device {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--surface-2);
+  contain: layout paint;
+}
+.device-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.stage[data-frame="device"] .device-wrap {
+  --stage-bg: #e6e6eb;
+  width: 402px;
+  height: min(874px, calc(100dvh - 48px));
+  min-height: 700px;
+  border-radius: var(--r-device);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.08),
+    0 40px 100px rgb(0 0 0 / 0.18);
+}
+:root[data-theme="dark"] .stage[data-frame="device"] .device-wrap {
+  --stage-bg: #141418;
+}
+/* The device's rounded corners are PAINTED (stage colour outside a r55 rounded rect), not clipped: a rounded overflow
+   clip / clip-path / mask on an ancestor makes Chromium ignore the clip-path of the bar groups' backdrop-filter. */
+.device-corners {
+  position: absolute;
+  z-index: 100;
+  inset: 0;
+  border-radius: var(--r-device);
+  box-shadow: 0 0 0 80px var(--stage-bg);
+  pointer-events: none;
+}
+.stage[data-frame="device"] .device {
+  /* simulated hardware: status bar + island above, home indicator below */
+  --safe-top: 54px;
+  --safe-bottom: 20px;
+  --chrome-top: max(var(--safe-top), 52px);
+  --tabbar-bottom: max(calc(var(--safe-bottom) + 4px), 18px);
+}
+.main-card {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  transform-origin: 0% 50%;
+  background: var(--bg);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.06);
+}
+.app-shell {
+  position: absolute;
+  inset: 0;
+}
+.app-shell .nav-root {
+  touch-action: pan-y;
+}
+.main-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: var(--scrim);
+}
+.overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+.overlay-layer > * {
+  pointer-events: auto;
+}
+.overlay-layer > .banner-anchor {
+  pointer-events: none;
+}
+.home-indicator {
+  position: absolute;
+  z-index: 70;
+  left: 50%;
+  bottom: 8px;
+  width: 134px;
+  height: 5px;
+  margin-left: -67px;
+  border-radius: var(--r-capsule);
+  background: var(--label);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.status-bar {
+  position: absolute;
+  z-index: 48;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 30px 0 46px;
+  color: var(--label);
+  pointer-events: none;
+}
+.status-time {
+  font-size: 17px; /* hardware chrome: does not follow the app's text scale */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.status-glyphs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

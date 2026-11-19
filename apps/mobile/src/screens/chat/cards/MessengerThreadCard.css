@@ -1,0 +1,345 @@
+/*
+ * Messenger read card → a small chat room (MessengerThreadCard.tsx). Paper card, no inner panels (the room is set off
+ * by one hairline, not a recessed box), no icon tile in the head. Bubbles: others on --fill, mine one value step on
+ * --fill-2 (chat A: one accent for action, the agent's hue for the agent, everything else neutral; the side, not a
+ * colour, says it is me). Text on a bubble is always Ink; the one secondary tone used on a bubble
+ * (--mt-ink-2, quoted replies) is ≥ 4.5:1 on both bubble fills in both themes. Times, names' tags, dates and system
+ * lines sit on paper in Slate (≥ 4.5:1). Hangul: keep-all; anything unbreakable (URLs, ids-like strings) may wrap
+ * anywhere, and every flex/grid child that holds text has min-width 0 so a column can never collapse to 2–3 glyphs.
+ */
+.mt-card {
+  --mt-peer: var(--fill);
+  --mt-me: var(--fill-2);
+  --mt-ink-2: color-mix(in srgb, var(--label) 74%, transparent);
+  --mt-rule: color-mix(in srgb, var(--label) 14%, transparent);
+  gap: 12px;
+}
+:root[data-theme="dark"] .mt-card {
+  --mt-ink-2: color-mix(in srgb, var(--label) 78%, transparent);
+  --mt-rule: color-mix(in srgb, var(--label) 18%, transparent);
+}
+
+/* ── head ── */
+.mt-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mt-title {
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.mt-meta,
+.mt-roster {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+.mt-roster {
+  margin-top: 2px;
+}
+.mt-seg {
+  white-space: nowrap;
+}
+.mt-brand {
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+/* ── shared message parts ── */
+.mt-name {
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--label);
+  padding: 0 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mt-tag {
+  font-weight: 400;
+  color: var(--label-2);
+}
+.mt-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+.is-me > .mt-line,
+.mt-row.is-me .mt-line {
+  flex-direction: row-reverse;
+  max-width: 88%;
+}
+.mt-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--r-group);
+  background: var(--mt-peer);
+  color: var(--label);
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+}
+.mt-bubble.is-me {
+  background: var(--mt-me);
+}
+.mt-bubble.is-peer.is-first {
+  border-top-left-radius: var(--r-plate);
+}
+.mt-bubble.is-me.is-first {
+  border-top-right-radius: var(--r-plate);
+}
+/* media / emoticon / deleted: an outline on paper instead of a fill */
+.mt-bubble.is-media {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+/* a deleted message is a trace, not content: Slate on paper */
+.mt-bubble.is-deleted {
+  color: var(--label-2);
+}
+.mt-bubble.is-deleted .mt-media {
+  font-weight: 400;
+}
+:root[data-contrast="more"] .mt-bubble {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.mt-text {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+.mt-text.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+.mt-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.mt-media {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.mt-media > svg {
+  flex: none;
+}
+.mt-quote {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--mt-rule);
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--mt-ink-2);
+}
+.mt-quote-who {
+  font-weight: 600;
+}
+.mt-quote-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+.mt-time {
+  flex: none;
+  padding-bottom: 2px;
+  font-size: var(--t-footnote);
+  line-height: 1.2;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+
+/* ── collapsed: the messages that matter ── */
+.mt-hls {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.mt-hl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.mt-hl.is-me {
+  align-items: flex-end;
+}
+.mt-empty {
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}
+
+/* ── expanded: the room ── */
+.mt-room {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--separator);
+}
+.mt-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mt-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: start;
+  margin-top: 4px;
+  min-width: 0;
+}
+.mt-row.is-first {
+  margin-top: 14px;
+}
+.mt-row.is-me {
+  grid-template-columns: minmax(0, 1fr);
+}
+.mt-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.mt-row.is-me .mt-col {
+  align-items: flex-end;
+}
+.mt-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-capsule);
+  background: var(--fill-2);
+  color: var(--label);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  line-height: 1;
+}
+.mt-avatar:empty {
+  height: 0;
+  background: none;
+}
+.mt-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.mt-date::before,
+.mt-date::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--separator);
+}
+.mt-list > .mt-date:first-child {
+  margin-top: 10px;
+}
+.mt-system {
+  align-self: center;
+  max-width: 92%;
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+/* ── controls (≥ 44 px) ── */
+.mt-older,
+.mt-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  border-radius: var(--r-control);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.mt-older {
+  align-self: center;
+  margin-top: 6px;
+  padding: 0 16px;
+}
+.mt-toggle {
+  align-self: stretch;
+  margin: -6px -8px -10px;
+}
+.mt-older:active,
+.mt-toggle:active {
+  background: var(--press-tint);
+}
+@media (hover: hover) {
+  .mt-older:hover,
+  .mt-toggle:hover {
+    background: var(--hover-tint);
+  }
+}
+.mt-older:focus-visible,
+.mt-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.mt-chev {
+  display: inline-flex;
+}
+
+/* opening (MessengerThreadCard.tsx): the body grows from the highlights' band to the whole room, bottom-aligned, so
+   the latest messages stay where the highlights were and the rows above come in under the rising top edge. Only that
+   edge cuts (the sides paint as they do at rest), and with `clip`, not `hidden`: a hidden body is a scroll container,
+   and WebKit snaps its contents to whole pixels, so the rows stepped 1 px against the toggle mid-growth */
+.mt-body[data-growing] {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow-y: clip;
+}
+.mt-body[data-growing] > .mt-room {
+  flex: none;
+}

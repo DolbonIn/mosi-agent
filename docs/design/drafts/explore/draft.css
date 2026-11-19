@@ -1,0 +1,120 @@
+/*
+ * draft-b shared layer for the de-slop mocks. Loaded AFTER the app's real CSS (tokens, base, glass, Wallpaper,
+ * ui/List, ui/LargeTitle, screens/more/more.css) and ../_kit/kit.css. Two kinds of rules live here:
+ *   1. mock plumbing (the scroller, top-bar title swap, the disclosure panel), mirroring app/Screen.css and TopBar;
+ *   2. proposed de-slop rules shared by every draft-b screen (none of them redefines a token).
+ * No new colour, radius, type size or curve: tokens only (--accent-fill, --placeholder, --r-plate now live in
+ * tokens.css). --section is DESIGN.md's 24 px page-section rhythm, not yet a token.
+ */
+:root {
+  --section: 24px;
+}
+
+/* ── the scroller: app/Screen.css .screen-scroll geometry and its scroll-edge mask, verbatim ─────────────────── */
+.d-scroll {
+  --top-clear: calc(var(--chrome-top) + var(--topbar-h) + 12px);
+  --bottom-clear: calc(var(--tabbar-bottom) + var(--tabbar-h) + 24px);
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h));
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: var(--top-clear) var(--gutter) var(--bottom-clear);
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+.d-scroll::-webkit-scrollbar {
+  display: none;
+}
+.d-scroll.has-composer {
+  --bottom-clear: calc(var(--tabbar-bottom) + var(--tabbar-h) + 12px + 56px + 24px);
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+}
+.d-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section);
+}
+
+/* ── top bar: the capsule swaps the agent for the page title once the large title is under the bar ───────────── */
+.d-cap {
+  display: grid;
+}
+.d-cap > * {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition:
+    opacity var(--dur-morph) var(--ease-morph),
+    transform var(--dur-morph) var(--ease-morph),
+    filter var(--dur-morph) var(--ease-morph);
+}
+.d-cap-title {
+  opacity: 0;
+  transform: scale(0.96);
+  filter: blur(6px);
+}
+.is-scrolled .d-cap-agent {
+  opacity: 0;
+  transform: scale(0.96);
+  filter: blur(6px);
+}
+.is-scrolled .d-cap-title {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.k-capsule .avatar {
+  flex: none;
+}
+
+/* Flat Paper: ui/List.css already dropped the list-card shadow (light = value, dark = inset hairline), so the
+   drafts inherit it from the real file instead of overriding it here. */
+
+/* ── disclosure: a row that opens more rows in the same group (height on the morph spring, chevron on snap) ──── */
+.d-disclosure-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-morph) var(--ease-morph);
+}
+.d-disclosure-panel > div {
+  min-height: 0;
+  overflow: hidden;
+}
+[aria-expanded="true"] + .d-disclosure-panel,
+:has(> [data-disclosure][aria-expanded="true"]) + .d-disclosure-panel /* the toggle wrapped in its heading */ {
+  grid-template-rows: 1fr;
+}
+.d-disclosure-panel .list-row .list-row-main::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+.d-chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+[aria-expanded="true"] .d-chev svg {
+  transform: rotate(180deg);
+}
+:root[data-no-anim] *,
+:root[data-no-anim] *::before,
+:root[data-no-anim] *::after {
+  transition: none !important;
+}
+
+/* brand tiles sit in the List lead slot; the slot's own radius must not clip the tile's (it is the same 8 px) */
+.list-row-lead .brand-icon {
+  display: grid;
+}

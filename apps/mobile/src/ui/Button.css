@@ -1,0 +1,169 @@
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  flex: none;
+  transition: background-color var(--dur-fade) var(--ease-fade), color var(--dur-fade) var(--ease-fade);
+}
+.btn[data-size="md"] {
+  padding: 0 18px;
+  font-size: var(--t-subhead);
+}
+.btn[data-size="sm"] {
+  padding: 0 14px;
+  font-size: var(--t-footnote);
+}
+/* ≥44px hit area for small buttons */
+.btn[data-size="sm"]::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+.btn-full {
+  display: flex;
+  width: 100%;
+  /* no effect at full width; centres the circle while loading / success shrinks the button to its height */
+  margin-inline: auto;
+}
+.btn[data-variant="circle"],
+.btn[data-state="loading"],
+.btn[data-state="success"] {
+  padding: 0;
+}
+.btn-swap {
+  align-items: center;
+  justify-items: center;
+}
+.btn-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* tones */
+/* text on blue sits on the deeper fill (#0071e3, white 4.7:1); #0a84ff stays for tint / selection / active tab */
+.btn[data-tone="primary"] {
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+.btn[data-tone="secondary"] {
+  background-color: var(--fill);
+  color: var(--label);
+}
+.btn[data-tone="destructive"] {
+  background-color: var(--danger-fill);
+  color: var(--danger-on-fill); /* deeper red on the red wash: ≥4.5:1 (plain --danger is 4.2:1 there) */
+}
+/* neutral (§8.1 one accent per screen): fill + label in every state, success included */
+.btn[data-tone="neutral"] {
+  background-color: var(--fill);
+  color: var(--label);
+}
+.btn[data-variant="plain"][data-tone="neutral"] {
+  background-color: transparent;
+  color: var(--label);
+}
+/* FAB (`elevated`): no lift and no paper-coloured disc (SH-3, Flat Paper) — it keeps its tone's fill, so it reads on
+   paper by value; a control that truly floats over content belongs on glass */
+/* Stop: a rounded square in the label colour of the button */
+.btn-stop {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3.5px; /* glyph geometry (stop.fill), not a surface corner */
+  background: currentColor;
+}
+.btn[data-size="lg"] .btn-stop {
+  width: 14px;
+  height: 14px;
+}
+/* hold-to-confirm fill (linear while held, rewinds on snap). It deepens a fill that carries white words (primary, the
+   destructive second stage) so they stay ≥4.5:1 under it — a white wash took them to 3.3–4.35:1 — and lightens the
+   other fills in dark, where darker would not read. */
+.btn-hold {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform-origin: 0 50%;
+  background: rgb(0 0 0 / 0.16);
+  pointer-events: none;
+}
+:root[data-theme="dark"] .btn-hold {
+  background: rgb(255 255 255 / 0.22);
+}
+:root .btn[data-tone="primary"] .btn-hold,
+:root .btn[data-tone="destructive"][data-confirming] .btn-hold {
+  background: rgb(0 0 0 / 0.22);
+}
+/* step two of the two-step tap: the question is stated with the destructive weight — on the solid red, so its white
+   words stay ≥4.5:1 in dark too (--danger there is a light red for text on dark) */
+.btn[data-tone="destructive"][data-confirming] {
+  background-color: var(--danger-solid);
+  color: #fff;
+}
+.btn[data-tone="glass"] {
+  color: var(--label);
+}
+.btn[data-tone="glass"][data-state="success"] {
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+.btn[data-variant="plain"] {
+  background-color: transparent;
+  color: var(--accent-text);
+  padding: 0 12px;
+}
+.btn[data-variant="plain"][data-tone="destructive"] {
+  color: var(--danger);
+}
+.btn[data-tone="secondary"][data-state="success"],
+.btn[data-tone="destructive"][data-state="success"] {
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+/* opaque press: fill darkens 6 % (lift is the scale from usePress) */
+.btn:not([data-tone="glass"])[data-pressed="true"] {
+  background-image: linear-gradient(rgb(0 0 0 / 0.06) 0 0);
+}
+:root[data-theme="dark"] .btn:not([data-tone="glass"])[data-pressed="true"] {
+  background-image: linear-gradient(rgb(255 255 255 / 0.08) 0 0);
+}
+.btn[data-variant="plain"][data-pressed="true"] {
+  background-image: linear-gradient(var(--press-tint) 0 0);
+}
+.btn:disabled,
+.btn[aria-disabled="true"]:not([aria-busy="true"]) {
+  opacity: 0.4;
+  cursor: default;
+}
+.btn[aria-busy="true"] {
+  cursor: progress;
+}
+.btn:focus-visible {
+  outline-offset: 3px;
+}
+
+/* activity ring */
+.btn-ring {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+.btn-ring[data-loop] svg {
+  animation: btn-spin 0.9s linear infinite;
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

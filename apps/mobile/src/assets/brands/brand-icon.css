@@ -1,0 +1,64 @@
+/* Brand app icons (BrandIcon.tsx). Tile colours are the brands' own and do not change with the theme. */
+.brand-icon {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  vertical-align: middle;
+}
+.brand-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-icon--kakaotalk {
+  background: #fee500;
+}
+.brand-icon--discord {
+  background: #5865f2;
+}
+.brand-icon--telegram {
+  background: linear-gradient(180deg, #2aabee 0%, #229ed9 100%);
+}
+.brand-icon--line {
+  background: #06c755;
+}
+.brand-icon--whatsapp {
+  background: #25d366;
+}
+/* the official IG gradient (yellow → orange → pink → purple), matched to the brand pack's gradient glyph */
+.brand-icon--instagram {
+  background:
+    radial-gradient(120% 110% at 0% 0%, #6a1cf5 0%, rgb(118 56 250 / 0.55) 28%, rgb(118 56 250 / 0) 52%),
+    radial-gradient(150% 135% at 28% 108%, #fdd84a 0%, #f9c845 9%, #f0853a 26%, #eb4c4f 41%, #ea3482 56%, #e133b8 70%, #c42ad8 86%, #a326de 100%);
+}
+
+/* white tiles: a hairline keeps them from melting into white paper */
+.brand-icon--slack,
+.brand-icon--teams,
+.brand-icon--webex {
+  background: #fff;
+}
+.brand-icon--slack::after,
+.brand-icon--teams::after,
+.brand-icon--webex::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.16);
+  pointer-events: none;
+}
+:root[data-contrast="more"] .brand-icon--slack::after,
+:root[data-contrast="more"] .brand-icon--teams::after,
+:root[data-contrast="more"] .brand-icon--webex::after {
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.35);
+}
+:root[data-theme="dark"] .brand-icon--slack::after,
+:root[data-theme="dark"] .brand-icon--teams::after,
+:root[data-theme="dark"] .brand-icon--webex::after {
+  box-shadow: none;
+}

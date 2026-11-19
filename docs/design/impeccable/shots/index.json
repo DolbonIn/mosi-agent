@@ -1,0 +1,1440 @@
+{
+  "at": "2026-11-11T21:10:57.619Z",
+  "viewport": "390x844@2x",
+  "shots": [
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "onboarding",
+      "file": "chromium-dark-01-onboarding.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "signup-step1",
+      "file": "chromium-dark-02-signup-step1.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "signup-step2",
+      "file": "chromium-dark-03-signup-step2.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "login-sheet",
+      "file": "chromium-dark-04-login-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-welcome",
+      "file": "chromium-dark-05-chat-welcome.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "empty",
+      "name": "chat-welcome-briefing",
+      "file": "chromium-dark-06-chat-welcome-briefing.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "empty",
+      "name": "chat-empty-thread",
+      "file": "chromium-dark-07-chat-empty-thread.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "phone",
+      "name": "chat-cards-latest-phone-approval",
+      "file": "chromium-dark-08-chat-cards-latest-phone-approval.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-weather-card",
+      "file": "chromium-dark-09-chat-weather-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-results-card",
+      "file": "chromium-dark-10-chat-results-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "chat-messenger-card",
+      "file": "chromium-dark-11-chat-messenger-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "chat-messenger-open",
+      "file": "chromium-dark-11b-chat-messenger-open.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-credential-card",
+      "file": "chromium-dark-12-chat-credential-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meet-approved",
+      "file": "chromium-dark-13-chat-meet-approved.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meeting-events",
+      "file": "chromium-dark-14-chat-meeting-events.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meeting-summary-artifact",
+      "file": "chromium-dark-15-chat-meeting-summary-artifact.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "chat-schedule-card",
+      "file": "chromium-dark-16-chat-schedule-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "composer-focused-typed",
+      "file": "chromium-dark-17-composer-focused-typed.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "call",
+      "name": "call-overlay",
+      "file": "chromium-dark-18-call-overlay.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "call",
+      "name": "call-minimised-island",
+      "file": "chromium-dark-19-call-minimised-island.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "drawer",
+      "name": "drawer",
+      "file": "chromium-dark-20-drawer.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "drawer",
+      "name": "drawer-search",
+      "file": "chromium-dark-21-drawer-search.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "explore",
+      "file": "chromium-dark-22-explore.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "explore-scrolled",
+      "file": "chromium-dark-23-explore-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "predelegate-sheet",
+      "file": "chromium-dark-24-predelegate-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "archive-artifacts",
+      "file": "chromium-dark-25-archive-artifacts.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "artifact-sheet-document",
+      "file": "chromium-dark-26-artifact-sheet-document.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "artifact-sheet-dashboard",
+      "file": "chromium-dark-27-artifact-sheet-dashboard.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "archive-media-empty",
+      "file": "chromium-dark-28-archive-media-empty.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile",
+      "file": "chromium-dark-29-profile.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile-scrolled",
+      "file": "chromium-dark-30-profile-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile-bottom",
+      "file": "chromium-dark-31-profile-bottom.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "tickets-sheet",
+      "file": "chromium-dark-32-tickets-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "privacy-sheet",
+      "file": "chromium-dark-33-privacy-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "agent-settings",
+      "file": "chromium-dark-34-agent-settings.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "agent-settings-scrolled",
+      "file": "chromium-dark-35-agent-settings-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "account",
+      "file": "chromium-dark-36-account.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "phone",
+      "name": "phone-sheet",
+      "file": "chromium-dark-37-phone-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connections",
+      "file": "chromium-dark-38-connections.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connections-scrolled",
+      "file": "chromium-dark-39-connections-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connect-sheet-kakaotalk",
+      "file": "chromium-dark-40-connect-sheet-kakaotalk.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "schedules",
+      "file": "chromium-dark-41-schedules.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "schedule-sheet",
+      "file": "chromium-dark-42-schedule-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "payment",
+      "name": "payment",
+      "file": "chromium-dark-43-payment.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "friends",
+      "name": "friends",
+      "file": "chromium-dark-44-friends.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "friends",
+      "name": "invite-sheet",
+      "file": "chromium-dark-45-invite-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-notifications",
+      "file": "chromium-dark-46-settings-notifications.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-privacy",
+      "file": "chromium-dark-47-settings-privacy.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-display",
+      "file": "chromium-dark-48-settings-display.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "vault",
+      "file": "chromium-dark-49-vault.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "vault-access-log",
+      "file": "chromium-dark-50-vault-access-log.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "onboarding",
+      "file": "chromium-light-01-onboarding.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "signup-step1",
+      "file": "chromium-light-02-signup-step1.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "signup-step2",
+      "file": "chromium-light-03-signup-step2.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "login-sheet",
+      "file": "chromium-light-04-login-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-welcome",
+      "file": "chromium-light-05-chat-welcome.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "empty",
+      "name": "chat-welcome-briefing",
+      "file": "chromium-light-06-chat-welcome-briefing.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "empty",
+      "name": "chat-empty-thread",
+      "file": "chromium-light-07-chat-empty-thread.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "phone",
+      "name": "chat-cards-latest-phone-approval",
+      "file": "chromium-light-08-chat-cards-latest-phone-approval.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-weather-card",
+      "file": "chromium-light-09-chat-weather-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-results-card",
+      "file": "chromium-light-10-chat-results-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "connections",
+      "name": "chat-messenger-card",
+      "file": "chromium-light-11-chat-messenger-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "connections",
+      "name": "chat-messenger-open",
+      "file": "chromium-light-11b-chat-messenger-open.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-credential-card",
+      "file": "chromium-light-12-chat-credential-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meet-approved",
+      "file": "chromium-light-13-chat-meet-approved.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meeting-events",
+      "file": "chromium-light-14-chat-meeting-events.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meeting-summary-artifact",
+      "file": "chromium-light-15-chat-meeting-summary-artifact.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "chat-schedule-card",
+      "file": "chromium-light-16-chat-schedule-card.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "chat",
+      "name": "composer-focused-typed",
+      "file": "chromium-light-17-composer-focused-typed.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "call",
+      "name": "call-overlay",
+      "file": "chromium-light-18-call-overlay.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "call",
+      "name": "call-minimised-island",
+      "file": "chromium-light-19-call-minimised-island.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "drawer",
+      "name": "drawer",
+      "file": "chromium-light-20-drawer.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "drawer",
+      "name": "drawer-search",
+      "file": "chromium-light-21-drawer-search.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "explore",
+      "name": "explore",
+      "file": "chromium-light-22-explore.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "explore",
+      "name": "explore-scrolled",
+      "file": "chromium-light-23-explore-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "explore",
+      "name": "predelegate-sheet",
+      "file": "chromium-light-24-predelegate-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "archive",
+      "name": "archive-artifacts",
+      "file": "chromium-light-25-archive-artifacts.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "archive",
+      "name": "artifact-sheet-document",
+      "file": "chromium-light-26-artifact-sheet-document.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "archive",
+      "name": "artifact-sheet-dashboard",
+      "file": "chromium-light-27-artifact-sheet-dashboard.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "archive",
+      "name": "archive-media-empty",
+      "file": "chromium-light-28-archive-media-empty.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile",
+      "file": "chromium-light-29-profile.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile-scrolled",
+      "file": "chromium-light-30-profile-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile-bottom",
+      "file": "chromium-light-31-profile-bottom.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "tickets-sheet",
+      "file": "chromium-light-32-tickets-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "privacy-sheet",
+      "file": "chromium-light-33-privacy-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "agent-settings",
+      "file": "chromium-light-34-agent-settings.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "agent-settings-scrolled",
+      "file": "chromium-light-35-agent-settings-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "profile",
+      "name": "account",
+      "file": "chromium-light-36-account.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "phone",
+      "name": "phone-sheet",
+      "file": "chromium-light-37-phone-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connections",
+      "file": "chromium-light-38-connections.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connections-scrolled",
+      "file": "chromium-light-39-connections-scrolled.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connect-sheet-kakaotalk",
+      "file": "chromium-light-40-connect-sheet-kakaotalk.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "schedules",
+      "file": "chromium-light-41-schedules.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "schedule-sheet",
+      "file": "chromium-light-42-schedule-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "payment",
+      "name": "payment",
+      "file": "chromium-light-43-payment.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "friends",
+      "name": "friends",
+      "file": "chromium-light-44-friends.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "friends",
+      "name": "invite-sheet",
+      "file": "chromium-light-45-invite-sheet.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-notifications",
+      "file": "chromium-light-46-settings-notifications.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-privacy",
+      "file": "chromium-light-47-settings-privacy.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-display",
+      "file": "chromium-light-48-settings-display.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "vault",
+      "file": "chromium-light-49-vault.jpg"
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "feature": "settings",
+      "name": "vault-access-log",
+      "file": "chromium-light-50-vault-access-log.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "onboarding",
+      "file": "webkit-dark-01-onboarding.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "signup-step1",
+      "file": "webkit-dark-02-signup-step1.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "signup-step2",
+      "file": "webkit-dark-03-signup-step2.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "onboarding",
+      "name": "login-sheet",
+      "file": "webkit-dark-04-login-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-welcome",
+      "file": "webkit-dark-05-chat-welcome.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "empty",
+      "name": "chat-welcome-briefing",
+      "file": "webkit-dark-06-chat-welcome-briefing.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "empty",
+      "name": "chat-empty-thread",
+      "file": "webkit-dark-07-chat-empty-thread.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "phone",
+      "name": "chat-cards-latest-phone-approval",
+      "file": "webkit-dark-08-chat-cards-latest-phone-approval.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-weather-card",
+      "file": "webkit-dark-09-chat-weather-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-results-card",
+      "file": "webkit-dark-10-chat-results-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "chat-messenger-card",
+      "file": "webkit-dark-11-chat-messenger-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "chat-messenger-open",
+      "file": "webkit-dark-11b-chat-messenger-open.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "chat-credential-card",
+      "file": "webkit-dark-12-chat-credential-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meet-approved",
+      "file": "webkit-dark-13-chat-meet-approved.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meeting-events",
+      "file": "webkit-dark-14-chat-meeting-events.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "meet",
+      "name": "chat-meeting-summary-artifact",
+      "file": "webkit-dark-15-chat-meeting-summary-artifact.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "chat-schedule-card",
+      "file": "webkit-dark-16-chat-schedule-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "chat",
+      "name": "composer-focused-typed",
+      "file": "webkit-dark-17-composer-focused-typed.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "call",
+      "name": "call-overlay",
+      "file": "webkit-dark-18-call-overlay.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "call",
+      "name": "call-minimised-island",
+      "file": "webkit-dark-19-call-minimised-island.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "drawer",
+      "name": "drawer",
+      "file": "webkit-dark-20-drawer.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "drawer",
+      "name": "drawer-search",
+      "file": "webkit-dark-21-drawer-search.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "explore",
+      "file": "webkit-dark-22-explore.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "explore-scrolled",
+      "file": "webkit-dark-23-explore-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "explore",
+      "name": "predelegate-sheet",
+      "file": "webkit-dark-24-predelegate-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "archive-artifacts",
+      "file": "webkit-dark-25-archive-artifacts.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "artifact-sheet-document",
+      "file": "webkit-dark-26-artifact-sheet-document.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "artifact-sheet-dashboard",
+      "file": "webkit-dark-27-artifact-sheet-dashboard.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "archive",
+      "name": "archive-media-empty",
+      "file": "webkit-dark-28-archive-media-empty.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile",
+      "file": "webkit-dark-29-profile.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile-scrolled",
+      "file": "webkit-dark-30-profile-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "profile-bottom",
+      "file": "webkit-dark-31-profile-bottom.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "tickets-sheet",
+      "file": "webkit-dark-32-tickets-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "privacy-sheet",
+      "file": "webkit-dark-33-privacy-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "agent-settings",
+      "file": "webkit-dark-34-agent-settings.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "agent-settings-scrolled",
+      "file": "webkit-dark-35-agent-settings-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "profile",
+      "name": "account",
+      "file": "webkit-dark-36-account.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "phone",
+      "name": "phone-sheet",
+      "file": "webkit-dark-37-phone-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connections",
+      "file": "webkit-dark-38-connections.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connections-scrolled",
+      "file": "webkit-dark-39-connections-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "connections",
+      "name": "connect-sheet-kakaotalk",
+      "file": "webkit-dark-40-connect-sheet-kakaotalk.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "schedules",
+      "file": "webkit-dark-41-schedules.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "schedules",
+      "name": "schedule-sheet",
+      "file": "webkit-dark-42-schedule-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "payment",
+      "name": "payment",
+      "file": "webkit-dark-43-payment.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "friends",
+      "name": "friends",
+      "file": "webkit-dark-44-friends.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "friends",
+      "name": "invite-sheet",
+      "file": "webkit-dark-45-invite-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-notifications",
+      "file": "webkit-dark-46-settings-notifications.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-privacy",
+      "file": "webkit-dark-47-settings-privacy.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "settings-display",
+      "file": "webkit-dark-48-settings-display.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "vault",
+      "file": "webkit-dark-49-vault.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "feature": "settings",
+      "name": "vault-access-log",
+      "file": "webkit-dark-50-vault-access-log.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "onboarding",
+      "file": "webkit-light-01-onboarding.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "signup-step1",
+      "file": "webkit-light-02-signup-step1.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "signup-step2",
+      "file": "webkit-light-03-signup-step2.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "onboarding",
+      "name": "login-sheet",
+      "file": "webkit-light-04-login-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-welcome",
+      "file": "webkit-light-05-chat-welcome.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "empty",
+      "name": "chat-welcome-briefing",
+      "file": "webkit-light-06-chat-welcome-briefing.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "empty",
+      "name": "chat-empty-thread",
+      "file": "webkit-light-07-chat-empty-thread.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "phone",
+      "name": "chat-cards-latest-phone-approval",
+      "file": "webkit-light-08-chat-cards-latest-phone-approval.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-weather-card",
+      "file": "webkit-light-09-chat-weather-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-results-card",
+      "file": "webkit-light-10-chat-results-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "connections",
+      "name": "chat-messenger-card",
+      "file": "webkit-light-11-chat-messenger-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "connections",
+      "name": "chat-messenger-open",
+      "file": "webkit-light-11b-chat-messenger-open.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "chat",
+      "name": "chat-credential-card",
+      "file": "webkit-light-12-chat-credential-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meet-approved",
+      "file": "webkit-light-13-chat-meet-approved.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meeting-events",
+      "file": "webkit-light-14-chat-meeting-events.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "meet",
+      "name": "chat-meeting-summary-artifact",
+      "file": "webkit-light-15-chat-meeting-summary-artifact.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "chat-schedule-card",
+      "file": "webkit-light-16-chat-schedule-card.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "chat",
+      "name": "composer-focused-typed",
+      "file": "webkit-light-17-composer-focused-typed.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "call",
+      "name": "call-overlay",
+      "file": "webkit-light-18-call-overlay.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "call",
+      "name": "call-minimised-island",
+      "file": "webkit-light-19-call-minimised-island.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "drawer",
+      "name": "drawer",
+      "file": "webkit-light-20-drawer.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "drawer",
+      "name": "drawer-search",
+      "file": "webkit-light-21-drawer-search.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "explore",
+      "name": "explore",
+      "file": "webkit-light-22-explore.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "explore",
+      "name": "explore-scrolled",
+      "file": "webkit-light-23-explore-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "explore",
+      "name": "predelegate-sheet",
+      "file": "webkit-light-24-predelegate-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "archive",
+      "name": "archive-artifacts",
+      "file": "webkit-light-25-archive-artifacts.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "archive",
+      "name": "artifact-sheet-document",
+      "file": "webkit-light-26-artifact-sheet-document.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "archive",
+      "name": "artifact-sheet-dashboard",
+      "file": "webkit-light-27-artifact-sheet-dashboard.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "archive",
+      "name": "archive-media-empty",
+      "file": "webkit-light-28-archive-media-empty.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile",
+      "file": "webkit-light-29-profile.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile-scrolled",
+      "file": "webkit-light-30-profile-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "profile-bottom",
+      "file": "webkit-light-31-profile-bottom.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "tickets-sheet",
+      "file": "webkit-light-32-tickets-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "privacy-sheet",
+      "file": "webkit-light-33-privacy-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "agent-settings",
+      "file": "webkit-light-34-agent-settings.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "agent-settings-scrolled",
+      "file": "webkit-light-35-agent-settings-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "profile",
+      "name": "account",
+      "file": "webkit-light-36-account.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "phone",
+      "name": "phone-sheet",
+      "file": "webkit-light-37-phone-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connections",
+      "file": "webkit-light-38-connections.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connections-scrolled",
+      "file": "webkit-light-39-connections-scrolled.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "connections",
+      "name": "connect-sheet-kakaotalk",
+      "file": "webkit-light-40-connect-sheet-kakaotalk.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "schedules",
+      "file": "webkit-light-41-schedules.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "schedules",
+      "name": "schedule-sheet",
+      "file": "webkit-light-42-schedule-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "payment",
+      "name": "payment",
+      "file": "webkit-light-43-payment.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "friends",
+      "name": "friends",
+      "file": "webkit-light-44-friends.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "friends",
+      "name": "invite-sheet",
+      "file": "webkit-light-45-invite-sheet.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-notifications",
+      "file": "webkit-light-46-settings-notifications.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-privacy",
+      "file": "webkit-light-47-settings-privacy.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "settings-display",
+      "file": "webkit-light-48-settings-display.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "vault",
+      "file": "webkit-light-49-vault.jpg"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "feature": "settings",
+      "name": "vault-access-log",
+      "file": "webkit-light-50-vault-access-log.jpg"
+    }
+  ],
+  "errors": {
+    "chromium-light": [],
+    "chromium-dark": [],
+    "webkit-light": [],
+    "webkit-dark": []
+  }
+}

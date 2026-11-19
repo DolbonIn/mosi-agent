@@ -1,0 +1,10 @@
+{
+  "name": "@pickle/qa",
+  "private": true,
+  "type": "module",
+  "scripts": { "e2e:api": "bun e2e-api.ts" },
+  "dependencies": {
+    "@pickle/protocol": "workspace:*",
+    "@pickle/vault": "workspace:*"
+  }
+}

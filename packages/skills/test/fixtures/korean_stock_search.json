@@ -1,0 +1,52 @@
+{
+ "items": [
+  {
+   "market": "KOSPI",
+   "code": "005930",
+   "standard_code": "KR7005930003",
+   "short_code": "005930",
+   "name": "삼성전자보통주",
+   "name_ko": "삼성전자보통주",
+   "short_name": "삼성전자",
+   "name_abbr": "삼성전자",
+   "english_name": "SamsungElectronics",
+   "name_en": "SamsungElectronics",
+   "listed_at": "1975-06-11",
+   "market_name": "KOSPI",
+   "security_group": "주권",
+   "section_type": null,
+   "sector_type": null,
+   "stock_certificate_type": "보통주",
+   "stock_kind": "보통주",
+   "par_value": 100,
+   "listed_shares": 5846278608
+  },
+  {
+   "market": "KOSPI",
+   "code": "005935",
+   "standard_code": "KR7005931001",
+   "short_code": "005935",
+   "name": "삼성전자1우선주",
+   "name_ko": "삼성전자1우선주",
+   "short_name": "삼성전자우",
+   "name_abbr": "삼성전자우",
+   "english_name": "SamsungElectronics(1P)",
+   "name_en": "SamsungElectronics(1P)",
+   "listed_at": "1989-09-25",
+   "market_name": "KOSPI",
+   "security_group": "주권",
+   "section_type": null,
+   "sector_type": null,
+   "stock_certificate_type": "구형우선주",
+   "stock_kind": "구형우선주",
+   "par_value": 100,
+   "listed_shares": 802371203
+  }
+ ],
+ "query": {
+  "q": "삼성전자",
+  "bas_dd": "20261110",
+  "market": null,
+  "limit": 5
+ }
+}

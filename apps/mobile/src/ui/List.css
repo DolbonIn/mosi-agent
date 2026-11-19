@@ -1,0 +1,191 @@
+/* Inset grouped list (ui/List.tsx) */
+.list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list-header {
+  padding: 0 16px 8px;
+}
+.list-section-title {
+  font-family: var(--font-text);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.list-footer {
+  padding: 8px 16px 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+.list-card {
+  background: var(--surface);
+  border-radius: var(--r-group);
+  overflow: hidden;
+}
+/* flat paper: value in light, a hairline in dark / increased contrast (same as .paper) */
+:root[data-theme="dark"] .list-card,
+:root[data-contrast="more"] .list-card {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+/* a list placed on paper merges into it: one edge, never a card in a card */
+:root[data-theme="dark"] .paper .list-card,
+:root[data-contrast="more"] .paper .list-card {
+  box-shadow: none;
+}
+
+.list-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding-left: 16px;
+  text-align: left;
+  color: var(--label);
+  background: transparent;
+  font-size: var(--t-body);
+  line-height: 1.35;
+}
+.list-row.is-clickable {
+  cursor: pointer;
+}
+/* press: a flat tint at once, no geometry */
+.list-row.is-clickable:active:not(:disabled) {
+  background: var(--press-tint);
+}
+@media (hover: hover) and (pointer: fine) {
+  .list-row.is-clickable:hover:not(:disabled):not(:active) {
+    background: var(--hover-tint);
+  }
+}
+/* keyboard focus: highlight the whole row, not a ring around it */
+.list-row:focus-visible {
+  outline: none;
+  background: var(--accent-wash);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.list-row:first-child:focus-visible {
+  border-radius: var(--r-group) var(--r-group) 0 0;
+}
+.list-row:last-child:focus-visible {
+  border-radius: 0 0 var(--r-group) var(--r-group);
+}
+.list-row:only-child:focus-visible {
+  border-radius: var(--r-group);
+}
+.list-row.is-disabled {
+  cursor: default;
+}
+.list-row.is-disabled .list-row-plate,
+.list-row.is-disabled .list-row-lead,
+.list-row.is-disabled .list-row-main {
+  opacity: 0.4;
+}
+
+.list-row-plate {
+  flex: none;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-plate);
+  background: var(--fill);
+  color: var(--label);
+}
+.list-row-plate.is-tinted {
+  color: #fff;
+}
+/* `leading`: the plate's slot (same size, so titles and the separator inset line up with plated rows) */
+.list-row-lead {
+  flex: none;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: var(--r-plate);
+}
+.list-row-lead > :is(svg, img) {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.list-row-main {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 10px 0;
+}
+/* hairline separator, inset to the text start, running to the group's edge */
+.list-row + .list-row .list-row-main::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+
+.list-row-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.list-row-title {
+  display: inline-block;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.list-row.is-destructive .list-row-title {
+  color: var(--danger);
+}
+.list-row-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.list-row-detail {
+  flex: none;
+  max-width: 45%;
+  color: var(--label-2);
+  font-size: var(--t-body);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-row-accessory {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.list-row-chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--label-3);
+  margin-right: -2px;
+}
+
+.list-section {
+  display: flex;
+  flex-direction: column;
+}

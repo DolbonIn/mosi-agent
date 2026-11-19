@@ -1,0 +1,696 @@
+/*
+ * 일정 drafts (draft-c): draft-local layout shared by A.html and B.html. Tokens only: every colour, radius,
+ * type step and curve is a var() from apps/mobile/src/styles/tokens.css (the filled-button blue is --accent-fill, in
+ * tokens since 95c51d3: white on #0071E3 = 4.7:1, slop GT-4).
+ */
+
+/* ── scroll edge (app/Screen.css): content thins out under the floating bars ── */
+.d-masked {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+.d-scroll {
+  padding-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 24px);
+}
+
+/* ── page rhythm: large title, then sections 24 px apart (DESIGN Layout) ── */
+.d-large {
+  padding: 4px 4px 14px;
+  font-family: var(--font-display);
+  font-size: var(--t-large);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  color: var(--label);
+}
+.d-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.d-section {
+  display: flex;
+  flex-direction: column;
+}
+/* section headings are real h2 (critique: SectionLabel rendered h3 straight after the h1) */
+.d-h2 {
+  padding: 0 16px 8px;
+  font-family: var(--font-text);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.d-foot {
+  padding: 8px 16px 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+/* ── paper: flat, separated from --bg by value (DESIGN Flat Paper); one radius for every container ── */
+.d-paper {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--r-group);
+  overflow: hidden;
+}
+.d-pad {
+  padding: 16px;
+}
+
+/* ── rows (ui/List geometry: ≥54 px, 16 px gutter, hairline inset to the text start) ── */
+.d-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding: 10px 14px 10px 16px;
+  text-align: left;
+  font: inherit;
+  font-size: var(--t-body);
+  line-height: 1.35;
+  color: var(--label);
+}
+.d-row + .d-row::before,
+.d-rule::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--sep, 16px);
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+.d-rule {
+  position: relative;
+}
+/* in-flow glyph (no plate): 20 px in --label-2, inside a 24 px column; rows that carry one move the hairline to the text */
+.d-glyph {
+  flex: none;
+  width: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+}
+.d-has-glyph .d-row {
+  --sep: 52px;
+}
+.d-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.d-title {
+  font-weight: 400;
+}
+.d-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.d-detail {
+  flex: none;
+  max-width: 55%;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.d-chev {
+  flex: none;
+  color: var(--label-3);
+  margin-right: -2px;
+}
+
+/* press: a flat tint, same frame, no geometry (ui/List .list-row:active) */
+.d-press {
+  cursor: pointer;
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.d-press:active {
+  background-color: var(--press-tint);
+  transition-duration: 0ms;
+}
+
+/* ── quota: bar on the label colour (ProgressBar tone="label"), number rolls (Odometer) ── */
+.d-quota-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.d-quota-title {
+  flex: 1 1 auto;
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.d-quota-pct {
+  flex: none;
+  font-size: var(--t-body);
+  color: var(--label-2);
+}
+.d-quota-pct b {
+  font-weight: 600;
+  color: var(--label);
+}
+.d-quota-sub {
+  margin-top: 2px;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.d-bar {
+  position: relative;
+  height: 8px;
+  margin-top: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--fill);
+}
+.d-bar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--v, 0) * 100%);
+  border-radius: inherit;
+  background: var(--label);
+  /* MOTION-SPEC §6.6: the bar fills on morph (and drains to 0 on morph after a ticket) */
+  transition: width var(--dur-morph) var(--ease-morph);
+}
+
+/* ── agent ── */
+.d-agent {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 14px 16px 16px;
+}
+.d-agent .avatar {
+  flex: none;
+}
+.d-agent-name {
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.d-agent-persona {
+  margin-top: 2px;
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+}
+
+/* ── buttons: capsules; one filled blue per screen ── */
+.d-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.d-btn--lg {
+  min-height: 52px;
+  padding: 0 20px;
+}
+.d-btn--full {
+  width: 100%;
+}
+.d-btn--primary {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+/* disabled: no blue at all, so blue always means "this does something" (critique minor, One Voice Rule) */
+.d-btn--primary:disabled {
+  background: var(--fill);
+  color: var(--label-3);
+  cursor: default;
+}
+.d-btn--neutral {
+  background: var(--fill);
+  color: var(--label);
+}
+
+/* ── sheet (ui/Sheet.css geometry: 8 px from the edges, r38, 10 px inner padding, grabber 38×5) ── */
+.d-scrim {
+  position: absolute;
+  z-index: 40;
+  inset: 0;
+  background: var(--scrim);
+}
+.d-sheet {
+  --r: var(--r-sheet);
+  position: absolute;
+  z-index: 41;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 10px;
+}
+.d-sheet-head {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  min-height: 52px;
+  padding-top: 8px;
+}
+.d-grabber {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 38px;
+  height: 5px;
+  margin-left: -19px;
+  border-radius: 999px;
+  background: var(--fill-3);
+}
+.d-sheet-title {
+  grid-column: 2;
+  text-align: center;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.d-sheet-close {
+  grid-column: 3;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+}
+.d-sheet-close > span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--fill);
+}
+.d-sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 8px 12px;
+}
+
+/* ticket sheet */
+.d-now-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--t-body);
+}
+.d-now-head b {
+  font-weight: 600;
+}
+.d-kinds {
+  display: flex;
+  flex-direction: column;
+}
+.d-kinds .d-h2 {
+  padding: 0 0 4px;
+}
+.d-kinds .d-row {
+  padding-left: 0;
+  padding-right: 0;
+  --sep: 0px;
+}
+.d-kinds .d-row[aria-disabled="true"] .d-main {
+  opacity: 0.4;
+}
+.d-radio {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--fill-3);
+  color: var(--on-accent);
+}
+.d-kinds .d-row[aria-disabled="true"] .d-radio {
+  opacity: 0.4;
+}
+.d-note {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.d-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.d-cta .d-note {
+  text-align: center;
+}
+
+/* state switch (draft-state.js): ?state=sheet shows the sheet, ?state=scrolled scrolls to the bottom */
+.d-sheet-layer {
+  display: none;
+}
+:root[data-state="sheet"] .d-sheet-layer {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .d-bar > i,
+  .d-press {
+    transition: none;
+  }
+}
+
+/* ── buttons that look like paper or rows ── */
+button.d-paper,
+button.d-row {
+  display: flex;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+button.d-paper {
+  font-size: var(--t-body);
+}
+.d-usage-empty {
+  margin-top: 6px;
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+}
+.d-conns {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.d-conns-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.d-conns-head .d-chev {
+  align-self: center;
+}
+.d-conns-hint {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+}
+.d-radio[data-on] {
+  background: var(--accent);
+  box-shadow: none;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* B: the agent as a row, the quota as a row (bar under the title) */
+.d-agent.d-row {
+  padding: 14px 14px 14px 16px;
+  gap: 14px;
+}
+.d-quota-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.d-quota-row .d-quota-head {
+  display: flex;
+  align-items: baseline;
+}
+.d-quota-row .d-quota-head .d-title {
+  flex: 1 1 auto;
+}
+.d-quota-row .d-bar {
+  margin-top: 10px;
+}
+.d-quota-row .d-quota-sub {
+  margin-top: 8px;
+}
+
+/* ════ schedules ═══════════════════════════════════════════════════════════════════════ */
+
+/* toggle (ui/Toggle.css geometry: 51×31 track, 27 px knob, ≥44 px hit area; knob rides lead, track fills on snap) */
+.d-toggle {
+  position: relative;
+  flex: none;
+  width: 51px;
+  height: 31px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  transition: background-color var(--dur-snap) var(--ease-snap);
+}
+.d-toggle::before {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
+}
+.d-toggle > i {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.04), 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08);
+  transition: transform var(--dur-lead) var(--ease-lead);
+}
+:root[data-theme="dark"] .d-toggle > i {
+  background: #f5f5f7;
+}
+.d-toggle[aria-checked="true"] {
+  background: var(--accent);
+}
+.d-toggle[aria-checked="true"] > i {
+  transform: translateX(20px);
+}
+.d-toggle:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.d-row .d-toggle {
+  margin-left: 4px;
+}
+.d-row.is-disabled .d-main {
+  opacity: 0.4;
+}
+
+/* destructive capsule: red words on the neutral fill (detector: red on --danger-fill was 4.2:1) */
+.d-btn--danger {
+  background: var(--fill);
+  color: var(--danger);
+}
+
+
+/* a schedule row: the row opens the sheet, the switch sits beside it (iOS Alarms shape) */
+.d-sched .d-title {
+  font-weight: 600;
+}
+.d-sched[data-off] .d-title,
+.d-sched[data-off] .d-when {
+  color: var(--label-2);
+}
+.d-sched .d-sub {
+  margin-top: 1px;
+}
+/* B: the time is the name of an alarm-like row */
+.d-when {
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.d-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* the way to add one: say where it goes */
+.d-new {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.d-new .d-note {
+  padding: 0 4px;
+}
+/* B: example sentences are rows that fill the composer (empty-thread draft A pattern) */
+.d-prompt {
+  color: var(--label);
+}
+.d-prompt .d-chev {
+  color: var(--label-2);
+}
+
+/* sheet: facts are label/value rows, the instruction is quoted text, delete is compact */
+.d-facts {
+  display: flex;
+  flex-direction: column;
+}
+.d-fact {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 0;
+  font-size: var(--t-body);
+  line-height: 1.4;
+}
+.d-fact + .d-fact::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+.d-fact dt {
+  color: var(--label-2);
+}
+.d-fact dd {
+  text-align: right;
+}
+.d-asked .d-h2 {
+  padding: 0 0 6px;
+}
+.d-quote {
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--label);
+}
+.d-danger-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .d-toggle,
+  .d-toggle > i {
+    transition: none;
+  }
+}
+
+/* ════ schedules: the card in the conversation (?state=chat, critique shot 16) ═══════════ */
+.d-on-list,
+.d-on-chat {
+  display: contents;
+}
+.d-on-chat,
+:root[data-state="chat"] .d-on-list {
+  display: none;
+}
+:root[data-state="chat"] .d-on-chat {
+  display: contents;
+}
+/* thread geometry follows the chat draft (docs/design/drafts/chat): bottom-anchored above the composer */
+.d-thread {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px + 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.d-me {
+  align-self: flex-end;
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: var(--r-group) var(--r-group) 8px var(--r-group);
+  background: color-mix(in srgb, var(--label) 8%, var(--surface));
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+.d-asst {
+  align-self: flex-start;
+  padding: 12px 16px;
+  border-radius: 8px var(--r-card) var(--r-card) var(--r-card);
+  background: var(--surface);
+  font-size: var(--t-body);
+  line-height: 1.55;
+}
+.d-steps {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: -6px 0;
+  padding: 0 10px 0 8px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}
+.d-steps > span {
+  display: inline-flex;
+}
+/* the schedule card: title / rule + the switch, nothing more (no tile) */
+.d-ccard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.d-ccard .d-main {
+  flex: 1 1 auto;
+}
+/* the sheet grows out of its row, so the 모닝콜 row is empty while it is open (MOTION-SPEC §3 Sheet, as in 현재 42) */
+:root[data-state="sheet"] .d-paper > .d-sched:first-child > * {
+  visibility: hidden;
+}
+
+/* Flat Paper (app ui/Card.css .paper, ui/List.css .list-card since 95c51d3): light separates paper by value, dark and
+   increased contrast by one inset hairline. Paper placed inside paper merges into it (never a card in a card). */
+:root[data-theme="dark"] .d-paper,
+:root[data-theme="dark"] .d-asst,
+:root[data-theme="dark"] .d-ccard,
+:root[data-contrast="more"] .d-paper,
+:root[data-contrast="more"] .d-asst,
+:root[data-contrast="more"] .d-ccard {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+:root[data-theme="dark"] .d-paper .d-paper,
+:root[data-contrast="more"] .d-paper .d-paper {
+  box-shadow: none;
+}

@@ -1,0 +1,140 @@
+{
+  "feature": "voice-call",
+  "title": "음성 통화: 통화 카드와 줄인 섬",
+  "critique": "../../impeccable/critique/voice-call.md",
+  "score": "28/40",
+  "current": [
+    "chromium-light-18-call-overlay.jpg",
+    "chromium-dark-18-call-overlay.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "같은 화면, 소음 네 개 덜기",
+      "summary": "배치는 그대로 두고 조용할 때의 소음만 걷어냈어요: 캐릭터 아래 레벨 대시와 '말씀하시면 깽이가 들어요' 삭제, 섬의 '-----'는 4px 점 다섯 개로. 토글 이름은 '음소거'·'스피커'로 고정하고 상태는 채움과 aria-pressed로, 켜짐 채움은 88%로 낮춤. 종료 빨강은 테마와 무관하게 #d70015, 버튼 64px.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "P2-3",
+        "P3-1",
+        "critique:Q1",
+        "critique:Q3",
+        "critique:Q4"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "island",
+          "name": "줄인 통화 (섬)",
+          "html": "A-island.html",
+          "shots": {
+            "light": "A-island-light.jpg",
+            "dark": "A-island-dark.jpg"
+          },
+          "current": [
+            "chromium-light-19-call-minimised-island.jpg",
+            "chromium-dark-19-call-minimised-island.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P2-3",
+            "P3-1",
+            "slop:RQ-2",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "island-expanded",
+          "name": "섬을 길게 눌러 펼침 (음소거·종료)",
+          "html": "A-island-expanded.html",
+          "shots": {
+            "light": "A-island-expanded-light.jpg",
+            "dark": "A-island-expanded-dark.jpg"
+          },
+          "current": [
+            "chromium-light-19-call-minimised-island.jpg",
+            "chromium-dark-19-call-minimised-island.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P2-3",
+            "P3-1",
+            "slop:RQ-2",
+            "critique:Q2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "캐릭터가 얼굴, 이름은 그 아래",
+      "summary": "A의 수정에 더해 이름과 상태를 캐릭터 바로 아래로 내렸어요. 목소리에 반응하는 얼굴과 '듣고 있어요'가 한 자리에 있고, 위쪽은 줄이기 셰브런과 섬(타이머)만 남아요. 캐릭터와 자막 사이 빈 검정이 줄어요. 자막 칸은 시작 정렬·한 크기 그대로.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "P2-3",
+        "P3-1",
+        "critique:Q1",
+        "critique:Q3",
+        "critique:Q4"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "island",
+          "name": "줄인 통화 (섬)",
+          "html": "B-island.html",
+          "shots": {
+            "light": "B-island-light.jpg",
+            "dark": "B-island-dark.jpg"
+          },
+          "current": [
+            "chromium-light-19-call-minimised-island.jpg",
+            "chromium-dark-19-call-minimised-island.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P2-3",
+            "P3-1",
+            "slop:RQ-2",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "island-expanded",
+          "name": "섬을 길게 눌러 펼침 (음소거·종료)",
+          "html": "B-island-expanded.html",
+          "shots": {
+            "light": "B-island-expanded-light.jpg",
+            "dark": "B-island-expanded-dark.jpg"
+          },
+          "current": [
+            "chromium-light-19-call-minimised-island.jpg",
+            "chromium-dark-19-call-minimised-island.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "P2-3",
+            "P3-1",
+            "slop:RQ-2",
+            "critique:Q2"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로: §3 droplet(입력창 통화 버튼 → 섬 → 통화 카드로 자람, 줄이면 거꾸로), §8.3 레벨은 실제 값만(캐릭터 진폭 + 섬 점 다섯 개, 쉴 때 4px 점 바닥), §8.11 캐릭터 호흡 3.2초·2% 이하(줄인 모션에서 정지), §3 content swap(상태 글자만 바뀜), 자막은 시작 정렬·한 크기로 마지막 줄만 늘어남(출시됨). 섬을 길게 누르면 펼쳐지는 것도 새 모션이 아니에요: 섬이 카드로 자랄 때 쓰는 morph 스프링을 그대로 쓰고, 바깥을 누르거나 4초 뒤 같은 스프링으로 접혀요"
+}

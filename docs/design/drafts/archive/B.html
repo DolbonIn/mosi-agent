@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>보관함 · B 한 묶음의 기록</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/LargeTitle.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Card.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/SegmentedControl.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/EmptyState.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Button.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Sheet.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/BarChart.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/more.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/archive/archive.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+<style>
+/* one file, four resting states: list (A.html), doc / dash sheet, media (A-<state>.html) */
+  .btn[data-size="sm"] { height: 36px; border-radius: var(--r-capsule); }
+  .btn[data-size="md"] { height: 44px; border-radius: var(--r-capsule); }
+  .btn-label { display: inline-flex; align-items: center; gap: 6px; }
+  .seg-item { font-size: var(--t-subhead); font-weight: 500; color: var(--label); }
+  .seg-thumb { width: calc(50% - 3px); border-radius: 19px; transform: translateX(3px); }
+  .seg-item.d-seg-docs { font-weight: 600; }
+  :root[data-state="media"] .seg-thumb { transform: translateX(calc(100% + 3px)); }
+  :root[data-state="media"] .seg-item.d-seg-docs { font-weight: 500; }
+  :root[data-state="media"] .seg-item.d-seg-media { font-weight: 600; }
+  .d-panel[data-panel="media"],
+  :root[data-state="media"] .d-panel[data-panel="docs"] { display: none; }
+  :root[data-state="media"] .d-panel[data-panel="media"] { display: block; }
+  .d-sheet { display: none; }
+  :root[data-state="doc"] .d-sheet[data-for="doc"],
+  :root[data-state="dash"] .d-sheet[data-for="dash"] { display: block; }
+  .sheet-panel { --r: var(--r-sheet); }
+
+  /* P1 card head: no kind plate; the title leads, the kind stays a word in the meta line */
+  .arc-card__meta { margin-top: 2px; }
+  .arc-card__preview { margin-top: 8px; }
+
+  /* P2 document: title → meta → record → share/copy → delete; the task list sits on the sheet paper */
+  .arc-doc { gap: 18px; }
+  .md-tasks,
+  :root[data-theme="dark"] .md-tasks {
+    background: none;
+    border-radius: 0;
+    box-shadow: inset 0 1px 0 var(--separator), inset 0 -1px 0 var(--separator);
+  }
+  .md-task { padding: 11px 2px; }
+  .arc-doc__actions { margin-top: 6px; }
+
+  /* P2 dashboard: no panel backgrounds; sections flush on the sheet paper, separated by a hairline */
+  .dash { gap: var(--section); }
+  .d-flat,
+  :root[data-theme="dark"] .d-flat {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+  }
+  .dash-block.d-flat { padding-top: 16px; box-shadow: inset 0 1px 0 var(--separator); }
+  .dash-stat__value { font-variant-numeric: tabular-nums; }
+  .d-block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .d-caption { font-size: var(--t-subhead); font-weight: 400; color: var(--label-2); }
+  /* amounts in their own right-aligned tabular column */
+  .d-amounts li { display: flex; justify-content: space-between; gap: 12px; }
+  .d-amounts li > .tnum { flex: none; text-align: right; }
+
+  /* P2 media empty: one action (no FAB while empty), copy that names both real paths */
+  .d-panel[data-panel="media"] .empty-state { padding-top: 56px; }
+
+  /* B list: one inset group of rows (Flat Paper), the record's own words first, kind and age last */
+  .d-arows { list-style: none; overflow: hidden; }
+  .d-arows > li + li .d-arow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 0;
+    height: 1px;
+    background: var(--separator);
+    transform: scaleY(0.5);
+    transform-origin: top;
+  }
+  .d-arow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    padding: 14px 16px 14px;
+    text-align: left;
+    color: var(--label);
+  }
+  .d-arow:active { background: var(--press-tint); }
+  .d-arow-title {
+    font-size: var(--t-body);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .d-arow-preview {
+    font-size: var(--t-subhead);
+    line-height: 1.5;
+    color: var(--label-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .d-arow-meta {
+    margin-top: 3px;
+    font-size: var(--t-footnote);
+    line-height: 1.35;
+    color: var(--label-2);
+  }
+  /* B sheets read like the record: the title is its heading, from the left, meta under it */
+  .d-sheet .sheet-title {
+    grid-column: 1 / 3;
+    grid-row: 1;
+    text-align: left;
+    padding: 0 8px 0 14px;
+    font-family: var(--font-display);
+    font-size: var(--t-title2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  .d-sheet .sheet-close { grid-column: 3; grid-row: 1; }
+  .d-sheet .sheet-head { padding-top: 18px; }
+  .arc-doc__meta { justify-content: flex-start; margin-top: 0; }
+  .d-sheet .arc-doc { gap: 16px; }
+  .arc-doc__actions { display: flex; justify-content: flex-start; }
+  .arc-doc__danger { align-items: flex-start; }
+  /* B dashboard as a ledger: every amount in one right column, no hero number, no accent at rest */
+  .d-total li { padding-top: 0; align-items: flex-start; font-size: var(--t-body); font-weight: 600; }
+  .d-total .d-sub { display: block; margin-top: 2px; font-size: var(--t-footnote); font-weight: 400; color: var(--label-2); }
+  .d-total-v { font-size: var(--t-title3); }
+  .barchart-slot { flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 6px; }
+  .d-bar-v { font-size: var(--t-footnote); line-height: 1.2; color: var(--label-2); text-align: center; }
+</style>
+</head>
+<body>
+<div class="kit-phone">
+  <main class="d-scroll">
+    <header class="large-title">
+      <div class="large-title-row"><h1 class="large-title-text">보관함</h1></div>
+    </header>
+    <div class="arc-seg">
+      <div class="seg" data-size="md" role="tablist" aria-label="보관함 종류" style="height: 44px; border-radius: 22px">
+        <span class="seg-thumb" aria-hidden="true"></span>
+        <button type="button" data-seg class="seg-item d-seg-docs" role="tab">문서</button>
+        <button type="button" data-seg class="seg-item d-seg-media" role="tab">사진·파일</button>
+      </div>
+    </div>
+    <div class="arc-panels">
+      <div class="d-panel" data-panel="docs" role="tabpanel">
+      <ul class="paper d-arows" aria-label="문서 3개" style="--paper-r: var(--r-group); --paper-pad: 0px">
+        <li><button type="button" class="d-arow">
+          <span class="d-arow-title">11월 12일 주간회의 회의록</span>
+          <span class="d-arow-preview">참석: 수아, 지현, 민호, 다은 · 42분 · 출시일은 12월 2일로 확정 · 랜딩 페이지는 시안 B</span>
+          <span class="d-arow-meta">문서 · <span class="tnum">어제 수정</span></span>
+        </button></li>
+        <li><button type="button" class="d-arow">
+          <span class="d-arow-title">11월 지출 정리</span>
+          <span class="d-arow-preview">이번 달 지출 1,284,000원 · 지난달보다 8% 적어요 · 많이 쓴 곳 배달의민족</span>
+          <span class="d-arow-meta">요약 · <span class="tnum">어제 수정</span></span>
+        </button></li>
+        <li><button type="button" class="d-arow">
+          <span class="d-arow-title">이사 준비 체크리스트</span>
+          <span class="d-arow-preview">6개 중 0개 완료 · 이사 업체 견적 3곳 · 전입신고 날짜 정하기</span>
+          <span class="d-arow-meta">체크리스트 · <span class="tnum">3일 전 수정</span></span>
+        </button></li>
+      </ul>
+      </div>
+      <div class="d-panel" data-panel="media" role="tabpanel">
+      <div class="empty-state">
+        
+        <h2 class="empty-state__title">아직 올린 사진이나 파일이 없어요</h2>
+        <p class="empty-state__body">여기에서 올리거나 대화에서 + 버튼으로 보내면 여기에 모여요.</p>
+        <div class="empty-state__action"><button type="button" class="btn" data-tone="secondary" data-size="md"><span class="btn-label"><i data-glyph="plus" data-size="19"></i><span>사진이나 파일 올리기</span></span></button></div>
+      </div>
+      </div>
+    </div>
+  </main>
+
+  <header class="k-topbar">
+    <span class="k-circle glass" aria-label="메뉴"><i data-glyph="menu" data-size="24" data-weight="medium"></i></span>
+    <span class="k-title d-cap"><span class="d-cap-title">보관함</span></span>
+    
+  </header>
+
+  <nav class="k-bottom">
+    <div class="k-tabbar glass" data-text>
+      <span class="k-tab"><i data-glyph="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-glyph="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab" data-on><i data-glyph="archive" data-size="24" data-weight="medium"></i>보관함</span>
+      <span class="k-tab"><i data-glyph="person" data-size="24"></i>나의 모시</span>
+    </div>
+  </nav>
+
+  <!-- 26 · document sheet -->
+  <div class="sheet-root d-sheet" data-for="doc">
+    <div class="sheet-scrim"></div>
+    <div class="sheet-panel glass" data-sheet role="dialog" aria-labelledby="t-doc">
+      <div class="sheet-head">
+        <div class="sheet-grabber"></div>
+        <h2 class="sheet-title" id="t-doc">11월 12일 주간회의 회의록</h2>
+        <button type="button" class="sheet-close" aria-label="닫기"><span class="sheet-close-plate"><i data-glyph="close" data-size="16" data-weight="semibold"></i></span></button>
+      </div>
+      <div class="sheet-body">
+        <div class="arc-doc">
+          <p class="arc-doc__meta"><span>문서</span><span aria-hidden="true">·</span><span class="tnum">어제 수정</span></p>
+          <div class="arc-doc__body">
+            <div class="md">
+              <p class="md-p">참석: 수아, 지현, 민호, 다은 · 42분</p>
+              <h3 class="md-h md-h2">정한 것</h3>
+              <ul class="md-list md-ul"><li>출시일은 <strong>12월 2일</strong>로 확정</li><li>랜딩 페이지는 시안 B</li></ul>
+              <h3 class="md-h md-h2">할 일</h3>
+              <ul class="md-tasks" aria-label="할 일 2개 중 0개 완료">
+                <li class="md-task"><span class="md-task__box" aria-hidden="true"></span><span class="md-task__text">수아: 랜딩 문구 (금)</span></li>
+                <li class="md-task"><span class="md-task__box" aria-hidden="true"></span><span class="md-task__text">지현: 앱 스토어 스크린샷 5장</span></li>
+              </ul>
+              <h3 class="md-h md-h2">메모</h3>
+              <p class="md-p">지난주 베타 피드백 중 "알림이 너무 많다"는 의견이 6건 있었어요. 알림 묶음 보내기를 다음 스프린트에 넣기로 했어요.</p>
+            </div>
+          </div>
+          <div class="arc-doc__actions">
+            <button type="button" class="btn" data-tone="secondary" data-size="sm"><span class="btn-label"><i data-glyph="share" data-size="16"></i><span>공유하기</span></span></button>
+            <button type="button" class="btn" data-tone="secondary" data-size="sm"><span class="btn-label"><i data-glyph="copy" data-size="16"></i><span>복사하기</span></span></button>
+          </div>
+          <div class="arc-doc__danger">
+            <button type="button" class="btn" data-tone="destructive" data-size="md"><span class="btn-label"><span>보관함에서 지우기</span></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 27 · dashboard sheet -->
+  <div class="sheet-root d-sheet" data-for="dash">
+    <div class="sheet-scrim"></div>
+    <div class="sheet-panel glass" data-sheet role="dialog" aria-labelledby="t-dash">
+      <div class="sheet-head">
+        <div class="sheet-grabber"></div>
+        <h2 class="sheet-title" id="t-dash">11월 지출 정리</h2>
+        <button type="button" class="sheet-close" aria-label="닫기"><span class="sheet-close-plate"><i data-glyph="close" data-size="16" data-weight="semibold"></i></span></button>
+      </div>
+      <div class="sheet-body">
+        <div class="arc-doc">
+          <p class="arc-doc__meta"><span>요약</span><span aria-hidden="true">·</span><span class="tnum">어제 수정</span></p>
+          <div class="arc-doc__body">
+            <div class="dash d-ledger">
+              <ul class="dash-list d-amounts d-total">
+                <li><span>이번 달 지출<span class="d-sub">지난달보다 8% 적어요</span></span><span class="tnum d-total-v">1,284,000원</span></li>
+              </ul>
+              <section class="dash-block d-flat" aria-label="주별 지출">
+                <h3 class="dash-block__title d-block-head"><span>주별 지출</span><span class="d-caption">단위 원</span></h3>
+              <div class="barchart">
+                <div class="barchart-plot" style="height: 140px"><div class="barchart-bars" style="gap: 8px" aria-hidden="true">
+                <div class="barchart-slot"><span class="d-bar-v tnum">268,000</span><span class="barchart-bar" style="height: 51%"></span></div>
+                <div class="barchart-slot"><span class="d-bar-v tnum">412,000</span><span class="barchart-bar" style="height: 78%"></span></div>
+                <div class="barchart-slot"><span class="d-bar-v tnum">292,000</span><span class="barchart-bar" style="height: 55%"></span></div>
+                <div class="barchart-slot"><span class="d-bar-v tnum">312,000</span><span class="barchart-bar" style="height: 59%"></span></div>
+                </div></div>
+                <div class="barchart-axis" aria-hidden="true" style="gap: 8px">
+                <span class="barchart-tick tnum">1주</span>
+                <span class="barchart-tick tnum">2주</span>
+                <span class="barchart-tick tnum">3주</span>
+                <span class="barchart-tick tnum">4주</span>
+                </div>
+              </div>
+              </section>
+              <section class="dash-block d-flat" aria-label="많이 쓴 곳">
+                <h3 class="dash-block__title">많이 쓴 곳</h3>
+                <ul class="dash-list d-amounts">
+                <li><span>배달의민족</span><span class="tnum">182,000원</span></li>
+                <li><span>쿠팡</span><span class="tnum">164,500원</span></li>
+                <li><span>카카오T</span><span class="tnum">88,300원</span></li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="arc-doc__actions">
+            <button type="button" class="btn" data-tone="secondary" data-size="sm"><span class="btn-label"><i data-glyph="share" data-size="16"></i><span>공유하기</span></span></button>
+            <button type="button" class="btn" data-tone="secondary" data-size="sm"><span class="btn-label"><i data-glyph="copy" data-size="16"></i><span>복사하기</span></span></button>
+          </div>
+          <div class="arc-doc__danger">
+            <button type="button" class="btn" data-tone="destructive" data-size="md"><span class="btn-label"><span>보관함에서 지우기</span></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">{
+  "feature": "archive",
+  "variant": "B",
+  "title": "한 묶음의 기록",
+  "rationale": [
+    "카드 세 장 대신 한 묶음의 행: 제목 → 내용 미리보기 → '문서 · 어제 수정'",
+    "미리보기 규칙은 A와 같음(' · ', 제목 중복 제거, 체크리스트 진행 수)",
+    "시트 제목이 기록의 제목: 왼쪽 정렬 title2, 그 아래 종류·날짜",
+    "요약 시트는 장부처럼: 모든 금액이 오른쪽 한 줄, 막대 위에 금액, 쉬는 동안 강조색 없음",
+    "'대시보드' → '요약', 빈 사진·파일은 글리프 없이 문장과 행동 하나"
+  ],
+  "motion": [
+    "세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3)",
+    "카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source)",
+    "막대 첫 노출 상승 + 숫자 Odometer (§3)",
+    "지우기 두 번 누르기 확인 → 카드 접힘 (§3)",
+    "올리기 시트는 버튼에서 morph (§3)"
+  ],
+  "fixes": [
+    "P1-1",
+    "P2-1",
+    "P2-2",
+    "P2-3",
+    "P2-4",
+    "slop:IT-14",
+    "slop:CL-2",
+    "slop:RH-1",
+    "slop:GL-2",
+    "critique:Q1"
+  ],
+  "compare": [
+    "chromium-light-25-archive-artifacts.jpg",
+    "chromium-light-27-artifact-sheet-dashboard.jpg"
+  ]
+}</script>
+<script src="glyphs.js"></script>
+<script src="draft.js"></script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

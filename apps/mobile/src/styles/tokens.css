@@ -1,0 +1,191 @@
+/*
+ * 모시 (repo: pickle-clone) design tokens — docs/design/MOTION-SPEC.md §0–§2.
+ * Light first; dark via [data-theme="dark"] on <html> (tier.ts resolves system/light/dark before first paint).
+ * Every colour, radius, type step and spring the app uses lives here. Components never hard-code a hex.
+ */
+:root {
+  color-scheme: light;
+
+  /* ── colour ─────────────────────────────────────────────── */
+  --bg: #f5f5f7;
+  --label: #1d1d1f;
+  --label-2: #6e6e73; /* ≥4.5:1 on --surface and --bg */
+  --label-3: rgb(60 60 67 / 0.36); /* placeholders, disabled glyphs (never body text) */
+  --surface: #ffffff; /* paper */
+  --surface-2: #f2f2f7; /* recessed paper (inside a card) */
+  --surface-opaque: #f7f7f9; /* reduced-transparency twin of glass */
+  --fill: rgb(118 118 128 / 0.12);
+  --fill-2: rgb(118 118 128 / 0.2);
+  --fill-3: rgb(118 118 128 / 0.28);
+  --separator: rgb(60 60 67 / 0.16);
+  --accent: #0a84ff; /* ONLY on / active / selected / the one primary action */
+  --accent-text: #0071e3; /* accent as text on white (4.6:1) */
+  --accent-fill: #0071e3; /* accent behind text (primary button, selected chip / row): white 4.7:1. #0a84ff stays for
+                             tint, selection marks and the active tab */
+  --placeholder: #86868b; /* field placeholders ≈3:1 on paper (label-3 is 2:1); fields always carry a visible label */
+  --danger-on-fill: #c00012; /* red label on --danger-fill: ≥5:1 (--danger is 4.2:1 there) */
+  --thumb-raised: var(--surface); /* segmented-control thumb */
+  --on-accent: #ffffff;
+  --accent-wash: rgb(10 132 255 / 0.12);
+  --danger: #d70015; /* error text/icons (system red, AA on white) */
+  /* a filled destructive control with white words (ConfirmButton's second stage): the same deep red in both themes —
+     white on it is 5.38:1 (dark --danger #ff6961 would be 2.82:1). Not redefined under [data-theme="dark"]. */
+  --danger-solid: #d70015;
+  --danger-fill: rgb(255 59 48 / 0.12);
+  --island: #000000; /* the ONLY pure-black element */
+  --island-label: #f5f5f7;
+  --call-end: #d70015; /* end-call red on the island and the call card, both themes (always black): label 4.9:1 */
+  --press-tint: rgb(120 120 128 / 0.16);
+  --hover-tint: rgb(120 120 128 / 0.08);
+  --scrim: rgb(0 0 0 / 0.28);
+  --pointer: rgb(142 142 147 / 0.45);
+  --droplet: rgb(118 118 128 / 0.12); /* tab selection: the --fill grey pill riding the bar glass (iOS 26); the 86 %
+                                          white pill vanished on the near-white wallpaper */
+  --droplet-solid: rgb(235 235 236); /* the lens clone's opaque backing: that pill over the bar glass */
+  --accent-on-droplet: #005bb8; /* the active tab label / icon on the droplet: 5.34:1 on #e7e7ea, still 4.63:1 on
+                                    #d8d8dc (qa/foundation.spec asserts the worst case over list and thread scrolls) */
+
+  /* wallpaper: --bg + one soft light from above (three/Wallpaper.css; three/palette.ts mirrors these) */
+  --wp-light-neutral: #ffffff; /* the light with no agent colour */
+  --wp-light-mix: 10%; /* the agent colour's share of the light (oklab) */
+
+  /* ── glass ──────────────────────────────────────────────── */
+  --glass-rgb: 255 255 255;
+  --glass-tint: 0.14; /* shape-only glass */
+  --glass-tint-text: 0.56; /* glass that carries labels */
+  --glass-tint-sheet: 1; /* sheets / dialogs: opaque — no backdrop blur there (WebKit skips it on scrolling dialogs), so any alpha lets sharp text behind show through */
+  --glass-filter: blur(18px) saturate(190%) brightness(1.04);
+  --glass-filter-clear: blur(6px) saturate(150%) brightness(1.02);
+  --glass-shadow: 0 10px 30px rgb(0 0 0 / 0.12);
+  --rim-hi: 0.95; /* top-left specular */
+  --rim-lo: 0.5; /* bottom-right counter-highlight */
+  --lens-band-hi: rgb(255 255 255 / 0.95);
+  --lens-band-lo: rgb(255 255 255 / 0.6);
+  --veil-rgb: 255 255 255; /* adaptive legibility veil (light theme lifts, dark theme dims) */
+
+  /* ── radii (concentric: inner = outer − padding) ─────────── */
+  --r-device: 55px;
+  --r-sheet: 38px; /* − 10 → 28 */
+  --r-sheet-inner: 28px;
+  --r-card: 24px; /* − 12 → 12 */
+  --r-tile: 12px;
+  --r-group: 20px;
+  --r-tabbar: 34px; /* − 6 → 28 droplet */
+  --r-droplet: 28px;
+  --r-composer: 28px; /* − 6 → 22 send circle */
+  --r-control: 22px; /* 44px capsule */
+  --r-field: 14px;
+  --r-plate: 8px; /* 30px list plate / leading slot */
+  --r-banner: 36px; /* banner glass; its 44px controls: 36 − 14 = 22 */
+  --r-capsule: 999px; /* any pill or circle (= height / 2) */
+
+  /* ── type ───────────────────────────────────────────────── */
+  --font-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", "Pretendard Variable",
+    Pretendard, "Noto Sans KR", "Malgun Gothic", Inter, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Apple SD Gothic Neo", "Pretendard Variable",
+    Pretendard, "Noto Sans KR", "Malgun Gothic", Inter, system-ui, sans-serif;
+  --text-scale: 1;
+  /* rem = 16px × --text-scale (html font-size) */
+  --t-large: 2.125rem; /* 34 */
+  --t-title1: 1.75rem; /* 28 */
+  --t-title2: 1.375rem; /* 22 */
+  --t-title3: 1.25rem; /* 20 */
+  --t-body: 1.0625rem; /* 17 */
+  --t-callout: 1rem; /* 16 — inputs never below this */
+  --t-subhead: 0.9375rem; /* 15 */
+  --t-footnote: 0.8125rem; /* 13 — the floor for any text */
+
+  /* ── layout ─────────────────────────────────────────────── */
+  --gutter: 16px;
+  --safe-top: max(env(safe-area-inset-top, 0px), 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --chrome-top: max(var(--safe-top), 52px); /* top bar y (leaves room for the island) */
+  --topbar-h: 48px;
+  --tabbar-h: 68px;
+  --tabbar-bottom: max(calc(var(--safe-bottom) + 4px), 18px);
+  --kb: 0px; /* keyboard height from visualViewport (Shell) */
+
+  /* ── springs (MOTION-SPEC §2, closed form sampled into linear(); durations = settle time) ── */
+  --ease-morph: linear(0, 0.0222, 0.0781, 0.1545, 0.2416, 0.3325, 0.4221, 0.507, 0.5853, 0.6558, 0.718, 0.7721, 0.8183, 0.8573, 0.8897, 0.9164, 0.938, 0.9552, 0.9688, 0.9793, 0.9874, 0.9933, 0.9977, 1.0007, 1.0028, 1.004, 1.0047, 1.005, 1.005, 1.0048, 1.0044, 1.004, 1.0035, 1.0031, 1.0026, 1.0022, 1.0019, 1.0015, 1.0012, 1);
+  --dur-morph: 628ms;
+  --ease-press: linear(0, 0.019, 0.0683, 0.1382, 0.2207, 0.3095, 0.3997, 0.4876, 0.5708, 0.6474, 0.7165, 0.7775, 0.8303, 0.8753, 0.9129, 0.9437, 0.9683, 0.9876, 1.0022, 1.0129, 1.0202, 1.0249, 1.0275, 1.0284, 1.028, 1.0267, 1.0248, 1.0225, 1.02, 1.0174, 1.0149, 1.0125, 1.0103, 1.0083, 1.0066, 1.005, 1.0037, 1.0026, 1.0017, 1);
+  --dur-press: 318ms;
+  --ease-snap: linear(0, 0.0203, 0.0714, 0.1415, 0.2219, 0.3062, 0.3898, 0.47, 0.5446, 0.6126, 0.6736, 0.7275, 0.7745, 0.815, 0.8496, 0.8788, 0.9033, 0.9236, 0.9403, 0.9539, 0.9649, 0.9738, 0.9808, 0.9862, 0.9905, 0.9937, 0.9962, 0.998, 0.9993, 1.0002, 1.0008, 1.0012, 1.0014, 1.0015, 1.0015, 1.0015, 1.0014, 1.0013, 1.0011, 1);
+  --dur-snap: 400ms;
+  --ease-camera: linear(0, 0.024, 0.0823, 0.1594, 0.2448, 0.3316, 0.4153, 0.4934, 0.5646, 0.6283, 0.6845, 0.7335, 0.7759, 0.8122, 0.8432, 0.8695, 0.8916, 0.9103, 0.9258, 0.9388, 0.9497, 0.9586, 0.9661, 0.9722, 0.9773, 0.9814, 0.9848, 0.9876, 0.9899, 0.9918, 0.9933, 0.9946, 0.9956, 0.9964, 0.9971, 0.9977, 0.9981, 0.9985, 0.9988, 1);
+  --dur-camera: 882ms;
+  --ease-lead: var(--ease-morph);
+  --dur-lead: 391ms;
+  --ease-trail: var(--ease-morph);
+  --dur-trail: 586ms;
+  --ease-fade: var(--ease-camera);
+  --dur-fade: 353ms;
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* the 120 ms content-swap exit only */
+  --dur-exit: 120ms;
+}
+
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-morph: cubic-bezier(0.22, 0.9, 0.32, 1);
+    --ease-press: cubic-bezier(0.3, 1.25, 0.5, 1);
+    --ease-snap: cubic-bezier(0.25, 0.9, 0.35, 1);
+    --ease-camera: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* ── dark ─────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0a0a0c;
+  --label: #f5f5f7;
+  --label-2: #a1a1a6;
+  --label-3: rgb(235 235 245 / 0.32);
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-opaque: #1c1c1e;
+  --fill: rgb(118 118 128 / 0.24);
+  --fill-2: rgb(118 118 128 / 0.32);
+  --fill-3: rgb(118 118 128 / 0.4);
+  --separator: rgb(84 84 88 / 0.6);
+  --accent-text: #5aacff; /* ≥4.5:1 on the tab droplet (#409cff was 3.9:1); 5.8–7.1:1 on dark paper */
+  --accent-fill: #0071e3; /* white 4.7:1 in dark too */
+  --placeholder: #7c7c80; /* ≈3.4–4:1 on dark paper */
+  --danger-on-fill: #ff7b73; /* ≥4.5:1 on --danger-fill over surface-2 */
+  --thumb-raised: #636366;
+  --accent-wash: rgb(10 132 255 / 0.2);
+  --danger: #ff6961;
+  --danger-fill: rgb(255 69 58 / 0.18);
+  --press-tint: rgb(235 235 245 / 0.12);
+  --hover-tint: rgb(235 235 245 / 0.06);
+  --scrim: rgb(0 0 0 / 0.5);
+  --pointer: rgb(142 142 147 / 0.5);
+  --droplet: rgb(118 118 128 / 0.42);
+  --droplet-solid: rgb(70 70 74);
+  --accent-on-droplet: #8cc4ff; /* 5.98:1 on #3c3c41, still 4.80:1 on #4a4a50 (the pill brightens as content passes
+                                    under the bar); --accent-text (#5aacff) is 4.1–4.5 there */
+  --wp-light-neutral: #141417;
+  --wp-light-mix: 12%;
+  --glass-rgb: 28 28 30;
+  --glass-tint: 0.42;
+  --glass-tint-text: 0.6;
+  --glass-tint-sheet: 1;
+  --glass-filter: blur(18px) saturate(170%) brightness(0.96);
+  --glass-shadow: 0 10px 30px rgb(0 0 0 / 0.32);
+  --rim-hi: 0.42;
+  --rim-lo: 0.2;
+  --lens-band-hi: rgb(255 255 255 / 0.22);
+  --lens-band-lo: rgb(255 255 255 / 0.12);
+  --veil-rgb: 0 0 0;
+}
+
+/* increased contrast */
+:root[data-contrast="more"] {
+  --label-2: #3a3a3c;
+  --separator: rgb(60 60 67 / 0.4);
+  --glass-tint: 0.92;
+  --glass-tint-text: 0.92;
+}
+:root[data-theme="dark"][data-contrast="more"] {
+  --label-2: #d1d1d6;
+  --separator: rgb(235 235 245 / 0.4);
+}

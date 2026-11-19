@@ -1,0 +1,131 @@
+.bottom-chrome {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: var(--tabbar-bottom);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  pointer-events: none;
+}
+.bottom-chrome {
+  --composer-inset-start: 12px; /* the composer's left edge (kept for the slot's children; static since §8.8 went) */
+}
+.chrome-slot {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 0 0;
+  pointer-events: none;
+}
+.chrome-slot > * {
+  margin-inline-start: var(--composer-inset-start);
+}
+.chrome-slot:empty {
+  display: none;
+}
+.chrome-slot > * {
+  pointer-events: auto;
+}
+.tabbar {
+  position: relative;
+  margin: 0 16px;
+  height: var(--tabbar-h);
+  pointer-events: auto;
+  align-self: stretch;
+  overflow: clip;
+}
+.tab-droplet {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  height: calc(var(--tabbar-h) - 12px);
+  background: var(--droplet);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  z-index: 1;
+  transform-origin: 50% 50%;
+}
+.tab-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--tabbar-h);
+  z-index: 2;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 6px;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  border-radius: var(--r-droplet);
+  color: var(--label);
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item[data-on] {
+  color: var(--accent-on-droplet); /* text on the droplet, not on paper: its own ≥4.5:1 token */
+}
+.tab-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  transform-origin: 50% 70%;
+}
+.tab-label {
+  font-size: 0.8125rem; /* 13 */
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.tab-item[data-on] .tab-label {
+  font-weight: 600;
+}
+.tab-item:focus-visible {
+  outline-offset: -3px;
+}
+
+/* liquid-glass-js droplet lens (appended to <body> by the library): calm its default chrome to our material rules */
+.lqg-lens.lqg-tab,
+.lqg-glass.lqg-tab {
+  opacity: 0;
+  transition: opacity var(--dur-fade) var(--ease-fade);
+  pointer-events: none !important;
+}
+.lqg-tab[data-active] {
+  opacity: 1;
+}
+.lqg-glass.lqg-tab {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: transparent !important;
+  will-change: auto !important;
+  box-shadow:
+    inset 1px 1px 0 rgb(255 255 255 / 0.7),
+    inset -1px -1px 0 rgb(255 255 255 / 0.25),
+    0 6px 16px rgb(0 0 0 / 0.1) !important;
+}
+.lqg-lens-inner > .tab-row {
+  background: var(--droplet-solid);
+  /* extend the opaque backing past the row so displaced samples at the rim never hit transparency (colour fringes) */
+  box-shadow: 0 0 0 40px var(--droplet-solid);
+}
+/* hidden under an overlay: opacity too, not only visibility — the lens paints through an SVG filter, and Chrome draws a
+   filter's output for a visibility:hidden element (a ring over an open sheet when a resize wakes the lens); no fade */
+html[data-overlay] .lqg-tab,
+html[data-theme-swap] .lqg-tab {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
+}

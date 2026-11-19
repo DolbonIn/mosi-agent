@@ -1,0 +1,198 @@
+<!doctype html>
+<!--
+  모시 draft · chat · B · 말은 글자로, 기록은 종이로
+  draft-a, 2026-11-12, impeccable de-slop pass. Static mock: app tokens only (apps/mobile/src/styles/tokens.css by
+  relative path), synthetic fixture data (docs/design/impeccable/capture.mjs), no network. ?theme=light|dark.
+  Glyphs are inlined from apps/mobile/src/ui/Icon.tsx. Rationale: notes.md in this folder.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: chat · B</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+:root { --accent-fill: #0071e3; }
+.kit-phone { font-family: var(--font-text); }
+/* the app's composer placeholder is --label-2 (chat.css .composer-field::placeholder); the kit's --label-3 is 1.9:1 */
+.k-composer-field:not([data-filled]) { color: var(--label-2); }
+
+/* scroller: content runs under the floating chrome and thins out at both edges (app/Screen.css .screen-scroll) */
+.d-scroll {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+  position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  padding: calc(var(--edge-top) + 12px) var(--gutter) 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+/* threads are bottom-anchored like the real list: the newest line rests just above the composer */
+.d-thread { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--edge-bottom) + 24px - var(--peek, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* user bubble: neutral 8 % ink, 20 px with the 8 px tail on the speaker's side (DESIGN Shapes) */
+.d-me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: var(--r-group) var(--r-group) 8px var(--r-group); background: color-mix(in srgb, var(--label) 8%, var(--surface)); color: var(--label); font-size: var(--t-body); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* paper: flat. Light separates by value (#fff on #f5f5f7), dark by a hairline (DESIGN Flat Paper) */
+.d-paper { background: var(--surface); color: var(--label); }
+:root[data-theme="dark"] .d-paper { box-shadow: inset 0 0 0 1px var(--separator); }
+
+/* assistant reply as paper (variant A): the tail corner is back (critique chat P2-1) and the radius is the card's */
+.d-asst { align-self: flex-start; max-width: 100%; padding: 12px 16px; border-radius: 8px var(--r-card) var(--r-card) var(--r-card); font-size: var(--t-body); line-height: 1.55; }
+/* assistant reply as plain text on the page (variant B, DESIGN "plain text for conversation") */
+.d-say { font-size: var(--t-body); line-height: 1.55; color: var(--label); padding: 0 4px; }
+.d-turn { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.d-turn-head { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: -8px 0 -6px; padding: 0 4px; align-self: flex-start; font-size: var(--t-subhead); color: var(--label-2); }
+.d-turn-head .avatar { flex: none; }
+
+/* folded tool steps "N단계 · 1분 33초 ⌄" (chat.css .tools-pill) */
+.d-steps { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -6px 0; padding: 0 10px 0 8px; font-size: var(--t-subhead); color: var(--label-2); }
+
+/* one chat card = one paper object; inside it only rows, hairlines and text (no tiles, no recessed panels) */
+.d-card { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 16px; border-radius: var(--r-card); word-break: keep-all; }
+.d-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; text-wrap: balance; }
+.d-sub { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); }
+.d-foot { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.d-hair { height: 0; border-top: 0.5px solid var(--separator); }
+.d-glyph { flex: none; color: var(--label-2); }
+.nowrap { white-space: nowrap; }
+
+/* buttons: capsules (height / 2); one blue per screen = --accent-fill; everything else neutral */
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; color: var(--label); }
+.d-btn-lg { min-height: 52px; }
+.d-btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+.d-btn-neutral { background: var(--fill); color: var(--label); }
+.d-btn-plain { background: none; color: var(--label); }
+.d-btn-block { display: flex; width: 100%; }
+
+/* receipt: status pill with icon + words (kept: CH-4), label colour for AA */
+.d-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.d-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--fill); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+
+/* new-below dot on the current tab (variant B of chat): tapping the current tab jumps to the latest, iOS-style */
+
+/* event notes: plain centred footnote text on the page, no pill (GT-1, CH-3) */
+.d-note { align-self: center; max-width: 92%; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); text-wrap: balance; }
+.d-note + .d-note { margin-top: -6px; }
+
+/* ── chat B ── */
+.wx-hours { list-style: none; display: flex; justify-content: space-between; padding-top: 12px; border-top: 0.5px solid var(--separator); }
+.wx-hours li { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 44px; color: var(--label); }
+.wx-hours .t, .wx-hours .p { font-size: var(--t-footnote); line-height: 1.2; min-height: 1.2em; color: var(--label-2); }
+.wx-hours b { font-size: var(--t-subhead); font-weight: 600; line-height: 1.3; }
+.wx-temp { font-family: var(--font-display); font-size: var(--t-large); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+.res-list { list-style: none; display: flex; flex-direction: column; }
+.res-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 8px 0; }
+.res-row + .res-row { border-top: 0.5px solid var(--separator); }
+.res-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.res-body b { font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.res-body span { font-size: var(--t-footnote); line-height: 1.4; color: var(--label-2); }
+.res-chev { flex: none; color: var(--label-3); }
+
+.d-thread { --peek: 324px; gap: 16px; }
+.wxb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.wxb-head b { font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+.wxb-now { display: flex; align-items: center; gap: 12px; }
+.wxb-now > svg { flex: none; color: var(--label); }
+.wxb-cond { display: flex; flex-direction: column; margin-left: auto; text-align: right; font-size: var(--t-subhead); line-height: 1.4; }
+.wxb-cond span:last-child { font-size: var(--t-footnote); color: var(--label-2); }
+.resb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+/* jump control: only when something arrived; opaque paper capsule, not a 4th glass shape (critique chat P1-1) */
+.d-jump { position: absolute; z-index: 15; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px + 10px); display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--separator); font-size: var(--t-subhead); font-weight: 600; color: var(--label); white-space: nowrap; }
+
+</style>
+</head>
+<body>
+<div class="kit-phone">
+
+<main class="d-scroll" aria-label="대화">
+  <div class="d-thread">
+    <div class="d-me">오늘 서울 날씨 알려줘</div>
+    <div class="d-turn">
+      <div class="d-turn-head"><i data-avatar data-size="22"></i><span class="tnum">2단계 · 1분 33초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+      <p class="d-say">지금 서울은 맑고 9도예요. 오후엔 13도까지 올라가고, 저녁부터 바람이 조금 불어요. 미세먼지는 보통이에요.</p>
+      <section class="d-card d-paper" aria-label="날씨">
+        <div class="wxb-head"><b>서울 중구</b><span class="d-foot">기상청</span></div>
+        <div class="wxb-now">
+          <span class="wx-temp tnum">9°</span><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.75"/><path d="M12 2.75v1.5M12 19.75v1.5M2.75 12h1.5M19.75 12h1.5M5.46 5.46l1.06 1.06M17.48 17.48l1.06 1.06M5.46 18.54l1.06-1.06M17.48 6.52l1.06-1.06"/></svg>
+          <div class="wxb-cond"><span>맑음</span><span class="tnum">최고 13° · 최저 4°</span></div>
+        </div>
+        <ol class="wx-hours" aria-label="시간대별 예보"><li><span class="t tnum">12시</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.75"/><path d="M12 2.75v1.5M12 19.75v1.5M2.75 12h1.5M19.75 12h1.5M5.46 5.46l1.06 1.06M17.48 17.48l1.06 1.06M5.46 18.54l1.06-1.06M17.48 6.52l1.06-1.06"/></svg><b class="tnum">11°</b><span class="p tnum"></span></li><li><span class="t tnum">15시</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.75"/><path d="M12 2.75v1.5M12 19.75v1.5M2.75 12h1.5M19.75 12h1.5M5.46 5.46l1.06 1.06M17.48 17.48l1.06 1.06M5.46 18.54l1.06-1.06M17.48 6.52l1.06-1.06"/></svg><b class="tnum">13°</b><span class="p tnum"></span></li><li><span class="t tnum">18시</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 6.6 11.2a3.65 3.65 0 0 0 .9 7.3Z"/></svg><b class="tnum">10°</b><span class="p tnum">10%</span></li><li><span class="t tnum">21시</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 6.6 11.2a3.65 3.65 0 0 0 .9 7.3Z"/></svg><b class="tnum">7°</b><span class="p tnum">20%</span></li><li><span class="t tnum">0시</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.25 14.6A7.75 7.75 0 0 1 9.4 4.75a7.75 7.75 0 1 0 9.85 9.85Z"/></svg><b class="tnum">5°</b><span class="p tnum"></span></li></ol>
+      </section>
+    </div>
+    <div class="d-me">내가 지금 신청할 수 있는 정부 지원사업 찾아줘</div>
+    <div class="d-turn">
+      <div class="d-turn-head"><i data-avatar data-size="22"></i><span class="tnum">1단계 · 3초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div>
+      <p class="d-say">조건에 맞는 지원사업을 3개 찾았어요. 청년 월세 지원은 이번 달 말에 마감이라 먼저 보시는 게 좋아요.</p>
+      <section class="d-card d-paper" aria-label="지원사업">
+        <div class="resb-head"><h3 class="d-title">신청할 수 있는 지원사업</h3><span class="d-foot">정부24</span></div>
+        <ul class="res-list"><li class="res-row"><div class="res-body"><b>청년 월세 한시 특별지원</b><span class="tnum">월 최대 20만 원 · 12개월 · 11월 30일 마감</span></div><svg class="res-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></svg></li><li class="res-row"><div class="res-body"><b>국민내일배움카드</b><span class="tnum">훈련비 최대 500만 원 · 상시</span></div><svg class="res-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></svg></li><li class="res-row"><div class="res-body"><b>청년도약계좌</b><span class="tnum">정부 기여금 월 최대 3.3만 원 · 12월 신청</span></div><svg class="res-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></svg></li></ul>
+      </section>
+    </div>
+  </div>
+</main>
+<button class="d-jump"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.509" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v13.5M6.5 13 12 18.5l5.5-5.5"/></svg>새 메시지</button>
+<header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.75h14M5 15.25h14"/></svg></button>
+    <button class="k-title" aria-label="깽이 프로필"><i data-avatar data-size="30"></i>깽이</button>
+    
+  </header>
+<div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></span>
+      <span class="k-composer-icon" aria-label="깽이와 통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.25v3.5M8 7v10M12 4.5v15M16 8v8M20 10.25v3.5"/></svg></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.75c4.56 0 8.25 2.98 8.25 6.65s-3.69 6.65-8.25 6.65c-.86 0-1.68-.1-2.46-.3L5.25 19.5l1-3.55C4.69 14.74 3.75 13.15 3.75 11.4c0-3.67 3.69-6.65 8.25-6.65Z"/></svg>채팅</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2.05 4.75-4.75 2.05 2.05-4.75 4.75-2.05Z"/></svg>둘러보기</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="5" width="16.5" height="4.25" rx="1.3"/><path d="M5.25 9.25v8A1.75 1.75 0 0 0 7 19h10a1.75 1.75 0 0 0 1.75-1.75v-8M10 12.75h4"/></svg>보관함</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.25" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "채팅",
+  "variant": "B",
+  "title": "말은 글자로, 기록은 종이로: 한 턴에 종이 한 장",
+  "rationale": [
+    "깽이의 말은 말풍선 없이 바탕 위 글자로, 카드만 종이: 한 턴에 종이 한 장 (NC-1, DESIGN 'plain text for conversation')",
+    "턴 머리에 깽이 아바타 점 + 'N단계 · 시간': 체크 아이콘 대신 앱의 유일한 캐릭터가 '누가 했는지'를 말함",
+    "출처(기상청·정부24)를 카드 머리 오른쪽에: 가장 제품다운 사실을 각주에서 올림, 알약 없이 글자만",
+    "날씨: 기온이 주인공, 판 없는 해 글리프, 다섯 열 예보; 결과: 타일 없는 행 + 셰브런(HEAD와 같음)",
+    "새 메시지는 A와 같은 불투명 종이 캡슐 '새 메시지', 새 답이 왔을 때만(유리는 3개 그대로). 입력창 통화 버튼은 파형으로 카드의 '전화 걸기'와 구분 (P1-1, Jordan)"
+  ],
+  "motion": [
+    "§3 press: 카드·행·버튼 lift & swell (줄어들지 않음)",
+    "§8.5 툴 칩 → 'N단계 · 시간' 접힘 morph",
+    "§3 content swap: 시간대 열·결과 행이 들어올 때 snap",
+    "§8.4 첫 토큰 타임라인 · 보내기→정지 morph",
+    "§8.2 돌아올 때 재등장 없음 (그대로)"
+  ],
+  "fixes": [
+    "P1-1",
+    "P1-2",
+    "P2-1",
+    "slop:NC-1",
+    "slop:GL-1",
+    "slop:RH-3",
+    "slop:IT-4",
+    "slop:NC-2",
+    "critique:Q1",
+    "critique:Q2",
+    "critique:Q4"
+  ],
+  "compare": [
+    "chromium-light-09-chat-weather-card.jpg",
+    "chromium-dark-09-chat-weather-card.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

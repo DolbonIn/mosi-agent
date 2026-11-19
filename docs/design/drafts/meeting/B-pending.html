@@ -1,0 +1,191 @@
+<!doctype html>
+<!--
+  모시 draft · meeting · B (pending) · 참여 확인: 같은 카드의 첫 상태
+  draft-a, 2026-11-12, impeccable de-slop pass. Static mock: app tokens only (apps/mobile/src/styles/tokens.css by
+  relative path), synthetic fixture data (docs/design/impeccable/capture.mjs), no network. ?theme=light|dark.
+  Glyphs are inlined from apps/mobile/src/ui/Icon.tsx. Rationale: notes.md in this folder.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: meeting · B · pending</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+:root { --accent-fill: #0071e3; }
+.kit-phone { font-family: var(--font-text); }
+/* the app's composer placeholder is --label-2 (chat.css .composer-field::placeholder); the kit's --label-3 is 1.9:1 */
+.k-composer-field:not([data-filled]) { color: var(--label-2); }
+
+/* scroller: content runs under the floating chrome and thins out at both edges (app/Screen.css .screen-scroll) */
+.d-scroll {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+  position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  padding: calc(var(--edge-top) + 12px) var(--gutter) 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+/* threads are bottom-anchored like the real list: the newest line rests just above the composer */
+.d-thread { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--edge-bottom) + 24px - var(--peek, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* user bubble: neutral 8 % ink, 20 px with the 8 px tail on the speaker's side (DESIGN Shapes) */
+.d-me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: var(--r-group) var(--r-group) 8px var(--r-group); background: color-mix(in srgb, var(--label) 8%, var(--surface)); color: var(--label); font-size: var(--t-body); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* paper: flat. Light separates by value (#fff on #f5f5f7), dark by a hairline (DESIGN Flat Paper) */
+.d-paper { background: var(--surface); color: var(--label); }
+:root[data-theme="dark"] .d-paper { box-shadow: inset 0 0 0 1px var(--separator); }
+
+/* assistant reply as paper (variant A): the tail corner is back (critique chat P2-1) and the radius is the card's */
+.d-asst { align-self: flex-start; max-width: 100%; padding: 12px 16px; border-radius: 8px var(--r-card) var(--r-card) var(--r-card); font-size: var(--t-body); line-height: 1.55; }
+/* assistant reply as plain text on the page (variant B, DESIGN "plain text for conversation") */
+.d-say { font-size: var(--t-body); line-height: 1.55; color: var(--label); padding: 0 4px; }
+.d-turn { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.d-turn-head { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: -8px 0 -6px; padding: 0 4px; align-self: flex-start; font-size: var(--t-subhead); color: var(--label-2); }
+.d-turn-head .avatar { flex: none; }
+
+/* folded tool steps "N단계 · 1분 33초 ⌄" (chat.css .tools-pill) */
+.d-steps { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -6px 0; padding: 0 10px 0 8px; font-size: var(--t-subhead); color: var(--label-2); }
+
+/* one chat card = one paper object; inside it only rows, hairlines and text (no tiles, no recessed panels) */
+.d-card { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 16px; border-radius: var(--r-card); word-break: keep-all; }
+.d-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; text-wrap: balance; }
+.d-sub { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); }
+.d-foot { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.d-hair { height: 0; border-top: 0.5px solid var(--separator); }
+.d-glyph { flex: none; color: var(--label-2); }
+.nowrap { white-space: nowrap; }
+
+/* buttons: capsules (height / 2); one blue per screen = --accent-fill; everything else neutral */
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; color: var(--label); }
+.d-btn-lg { min-height: 52px; }
+.d-btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+.d-btn-neutral { background: var(--fill); color: var(--label); }
+.d-btn-plain { background: none; color: var(--label); }
+.d-btn-block { display: flex; width: 100%; }
+
+/* receipt: status pill with icon + words (kept: CH-4), label colour for AA */
+.d-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.d-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--fill); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+
+/* new-below dot on the current tab (variant B of chat): tapping the current tab jumps to the latest, iOS-style */
+
+/* event notes: plain centred footnote text on the page, no pill (GT-1, CH-3) */
+.d-note { align-self: center; max-width: 92%; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); text-wrap: balance; }
+.d-note + .d-note { margin-top: -6px; }
+
+/* ── meeting B ── */
+.mt-head { display: flex; align-items: flex-start; gap: 8px; }
+.mt-head > svg { margin-top: 3px; }
+.mt-code { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mt-meta { margin-top: -8px; font-size: var(--t-subhead); line-height: 1.45; color: var(--label-2); }
+.mt-actions { display: flex; gap: 8px; }
+.mt-actions > * { flex: 1 1 0; }
+.mt-exit { align-self: center; }
+.mt-live { display: flex; flex-direction: column; gap: 8px; }
+.mt-live-head { display: flex; align-items: center; gap: 8px; font-size: var(--t-body); font-weight: 600; line-height: 1.4; }
+.mt-live-head .avatar { flex: none; }
+/* messenger rows sit on the card itself, hairlines between, no recessed panel (NC-3) */
+.mc-list { list-style: none; display: flex; flex-direction: column; }
+.mc-list li { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; padding: 8px 0; font-size: var(--t-subhead); line-height: 1.45; }
+.mc-list li + li { border-top: 0.5px solid var(--separator); }
+.mc-list b { font-weight: 600; }
+.mc-list time { font-size: var(--t-footnote); color: var(--label-2); padding-top: 1px; }
+/* meeting summary: real hierarchy (more space above a heading than below), the thread's own 4 px rhythm */
+.md { font-size: var(--t-body); line-height: 1.55; color: var(--label); }
+.md h2 { font-family: var(--font-display); font-size: var(--t-title2); font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; }
+.md h3 { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; margin-top: 16px; }
+.md h2 + h3 { margin-top: 12px; }
+.md ul { list-style: none; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+.md li { position: relative; padding-left: 18px; }
+.md li::before { content: ""; position: absolute; left: 6px; top: 0.72em; width: 5px; height: 5px; border-radius: 50%; background: var(--label-2); }
+/* artifact row: inline glyph, title, meta with the kind as a word; no plate, no kicker */
+.art { display: flex; align-items: center; gap: 12px; }
+.art > svg:first-child { flex: none; align-self: flex-start; margin-top: 2px; }
+.art-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.art-body b { font-size: var(--t-body); font-weight: 600; line-height: 1.35; }
+.art-chev { flex: none; color: var(--label-3); }
+/* schedule card (context below the summary): clock inline in the meta, toggle on = the on state */
+.sched { display: flex; align-items: center; gap: 12px; }
+.sched-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sched-when { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-footnote); color: var(--label-2); }
+.tgl { flex: none; position: relative; width: 51px; height: 31px; border-radius: 999px; background: var(--accent); }
+.tgl::after { content: ""; position: absolute; top: 2px; right: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08); }
+
+</style>
+</head>
+<body>
+<div class="kit-phone">
+
+<main class="d-scroll" aria-label="대화">
+  <div class="d-thread" style="--peek:0px;gap:16px">
+    <div class="d-me">슬랙 오늘 나한테 온 것만 정리해 줘</div>
+    <div class="d-turn"><div class="d-turn-head"><i data-avatar data-size="22"></i><span class="tnum">1단계 · 3초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div><p class="d-say">오늘 나를 언급한 메시지는 2개예요. 디자인 리뷰가 4시로 당겨졌어요.</p><section class="d-card d-paper" aria-label="슬랙 메시지">
+      <div class="mt-head"><svg class="d-glyph" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 4.25v15.5M14.5 4.25v15.5M4.25 9.5h15.5M4.25 14.5h15.5"/></svg><h3 class="d-title">슬랙 · #design</h3></div>
+      <ul class="mc-list">
+        <li><b>지현</b><span>@하늘 오늘 디자인 리뷰 4시로 당겨도 될까요?</span><time class="tnum">오후 11:19</time></li>
+        <li><b>민호</b><span>@하늘 시안 B 피드백 남겨 뒀어요</span><time class="tnum">오후 11:49</time></li>
+      </ul>
+    </section></div>
+    <div class="d-me">이 회의 들어가서 받아 적어 줘 https://meet.google.com/rak-mnpq-kud</div>
+    <div class="d-turn"><div class="d-turn-head"><i data-avatar data-size="22"></i><span class="tnum">1단계 · 3초</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></svg></div><section class="d-card d-paper" aria-label="회의 참여 확인"><div class="mt-head"><svg class="d-glyph" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.75" r="3.1"/><path d="M3.5 19.25a5.5 5.5 0 0 1 11 0"/><circle cx="16.6" cy="9.25" r="2.5"/><path d="M15.6 13.9a4.75 4.75 0 0 1 4.9 4.85"/></svg><h3 class="d-title">회의 참여</h3></div>
+      <p class="mt-meta">Google Meet · <span class="mt-code">rak-mnpq-kud</span></p><p class="d-sub">깽이가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI 비서라고 먼저 알려요.</p><div class="mt-actions"><button class="d-btn d-btn-neutral">취소</button><button class="d-btn d-btn-primary">참여 승인</button></div></section></div>
+  </div>
+</main>
+<header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.75h14M5 15.25h14"/></svg></button>
+    <button class="k-title" aria-label="깽이 프로필"><i data-avatar data-size="30"></i>깽이</button>
+    
+  </header>
+<div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></span>
+      <span class="k-composer-icon" aria-label="깽이와 통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.25v3.5M8 7v10M12 4.5v15M16 8v8M20 10.25v3.5"/></svg></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.75c4.56 0 8.25 2.98 8.25 6.65s-3.69 6.65-8.25 6.65c-.86 0-1.68-.1-2.46-.3L5.25 19.5l1-3.55C4.69 14.74 3.75 13.15 3.75 11.4c0-3.67 3.69-6.65 8.25-6.65Z"/></svg>채팅</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2.05 4.75-4.75 2.05 2.05-4.75 4.75-2.05Z"/></svg>둘러보기</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="5" width="16.5" height="4.25" rx="1.3"/><path d="M5.25 9.25v8A1.75 1.75 0 0 0 7 19h10a1.75 1.75 0 0 0 1.75-1.75v-8M10 12.75h4"/></svg>보관함</span>
+      <span class="k-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.25" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "회의 참여",
+  "variant": "B · pending",
+  "motion": [
+    "§3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음)",
+    "§3 content swap: 카드 안 상태 줄만 120ms exit → morph enter",
+    "§3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크",
+    "§3 press: 버튼 lift & swell",
+    "§8.2 돌아올 때 재등장 없음"
+  ],
+  "compare": [
+    "chromium-light-13-chat-meet-approved.jpg",
+    "chromium-dark-13-chat-meet-approved.jpg"
+  ],
+  "title": "참여 확인: 같은 카드의 첫 상태",
+  "rationale": [
+    "회의 하나 = 카드 하나: 승인 카드가 그 자리에서 '회의에 들어와 있어요' → '끝나서 나왔어요'로 모양을 바꿈. 알림 줄 3개가 카드 상태 줄 하나로 (P2-1)",
+    "회의 중 상태 줄에 깽이 아바타 점 + '회의에서 내보내기' 전폭 중립 버튼: 지금 회의에 누가 있는지와 빠져나오는 길이 한곳에 (비평 Q3). 버튼 자체는 HEAD MeetLive에도 있음",
+    "'회의 참여'·'참여 승인'은 HEAD와 같은 말, 메타 한 줄 'Google Meet · rak-mnpq-kud'(전체 코드)",
+    "승인 기록은 카드 바닥 한 줄 각주로 접힘: 시간 + '이 기기의 키로 확인했어요'",
+    "요약은 말풍선 없는 글자 + 위계(제목2, 머리 위 16 · 아래 4), 회의록은 판 없는 행 (P2-2, IT-9)"
+  ],
+  "fixes": [
+    "slop:NC-1",
+    "slop:GL-1",
+    "slop:RH-3"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

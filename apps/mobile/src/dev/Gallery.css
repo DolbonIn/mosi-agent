@@ -1,0 +1,161 @@
+.gal-section {
+  margin-top: 22px;
+}
+.gal-h {
+  padding: 0 6px 8px;
+  font-size: var(--t-title3);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--label);
+}
+.gal-note {
+  padding: 0 6px 8px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.gal-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.gal-row-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gal-label {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.gal-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.gal-odo {
+  font-size: var(--t-title2);
+  font-weight: 700;
+  min-width: 120px;
+}
+.gal-blob {
+  display: grid;
+  place-items: center;
+  padding-top: 12px;
+}
+.gal-glass-row {
+  display: flex;
+  gap: 10px;
+  padding: 18px 12px;
+  border-radius: var(--r-tile); /* card r24 − 12 inset */
+  /* the app's wallpaper (three/Wallpaper.css): --bg plus the neutral light from above, so the demo shows glass over
+     what it really sits on */
+  background:
+    radial-gradient(150% 120% at 50% 0%, var(--wp-light-neutral), transparent 100%),
+    var(--bg);
+}
+.gal-glass {
+  flex: 1;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: var(--label);
+}
+.gal-swap {
+  min-width: 0;
+  flex: 1;
+  font-size: var(--t-body);
+  font-weight: 600;
+}
+.gal-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.gal-tiles > * {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gal-icons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.gal-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 2px;
+  border-radius: var(--r-tile);
+  background: var(--surface-2);
+  color: var(--label);
+  min-width: 0;
+}
+.gal-icon-name {
+  font-size: 0.6875rem;
+  color: var(--label-2);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* demo composer in the bottom chrome slot (tab bar minimise demo) */
+.gal-composer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 2px 0 6px;
+}
+.gal-composer-field {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+  color: var(--label-2);
+  font-size: var(--t-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gal-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  font-size: var(--t-subhead);
+  color: var(--label);
+}
+
+/* thread demo (QA backdrop for the tab label): bubbles and cards straight on the page, as in chat */
+.gal-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gal-bubble {
+  align-self: flex-end;
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: var(--r-group);
+  background: var(--fill);
+  color: var(--label);
+  font-size: var(--t-body);
+  line-height: 1.45;
+}
+.gal-asst {
+  max-width: 92%;
+  color: var(--label);
+  font-size: var(--t-body);
+  line-height: 1.55;
+}
+.gal-card-body {
+  margin: 0 0 14px;
+  color: var(--label);
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+}

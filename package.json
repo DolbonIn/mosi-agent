@@ -1,0 +1,25 @@
+{
+  "name": "pickle-clone",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "qa"
+  ],
+  "scripts": {
+    "dev": "bun run --filter './apps/mobile' dev",
+    "build": "bun run --filter './apps/mobile' build",
+    "server": "bun run --filter './apps/server' start",
+    "test": "bun test packages apps/server",
+    "server:live": "bun --env-file=$HOME/.config/pickle-clone/secrets.env run apps/server/src/index.ts",
+    "typecheck": "bunx tsc -p apps/mobile --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "^24.0.0",
+    "@types/bun": "latest",
+    "playwright": "1.62.1"
+  }
+}

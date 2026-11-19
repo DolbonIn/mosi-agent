@@ -1,0 +1,198 @@
+{
+ "chromium": {
+  "chat-scroll-focus": {
+   "frames": 92,
+   "badFrames": 0,
+   "firstBad": null,
+   "bar": [
+    16,
+    758,
+    374,
+    826
+   ],
+   "comp": [
+    12,
+    692,
+    378,
+    748
+   ]
+  },
+  "drawer-close": {
+   "surfaceUntil": 154,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 73,
+   "shownAt": 10,
+   "fullAt": 10,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "archive-sheet-close": {
+   "surfaceUntil": 126,
+   "hitFrom": 6,
+   "coveredUntil": null,
+   "maxCover": 0.032,
+   "frames": 74,
+   "shownAt": 6,
+   "fullAt": 6,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "explore-predelegate-close": {
+   "surfaceUntil": 120,
+   "hitFrom": 16,
+   "coveredUntil": 120,
+   "maxCover": 1,
+   "frames": 73,
+   "shownAt": 16,
+   "fullAt": 16,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-chat": {
+   "surfaceUntil": null,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 43,
+   "shownAt": 63,
+   "fullAt": 63,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-archive": {
+   "surfaceUntil": null,
+   "hitFrom": 64,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 43,
+   "shownAt": 64,
+   "fullAt": 64,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "profile-push-back": {
+   "surfaceUntil": null,
+   "hitFrom": 110,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 72,
+   "shownAt": 110,
+   "fullAt": 110,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "pageErrors": []
+ },
+ "webkit": {
+  "chat-scroll-focus": {
+   "frames": 95,
+   "badFrames": 0,
+   "firstBad": null,
+   "bar": [
+    16,
+    758,
+    374,
+    826
+   ],
+   "comp": [
+    12,
+    692,
+    378,
+    748
+   ]
+  },
+  "drawer-close": {
+   "surfaceUntil": 155,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 75,
+   "shownAt": 15,
+   "fullAt": 15,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "archive-sheet-close": {
+   "surfaceUntil": 114,
+   "hitFrom": 12,
+   "coveredUntil": null,
+   "maxCover": 0.032,
+   "frames": 72,
+   "shownAt": 12,
+   "fullAt": 12,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "explore-predelegate-close": {
+   "surfaceUntil": 118,
+   "hitFrom": 23,
+   "coveredUntil": 118,
+   "maxCover": 1,
+   "frames": 61,
+   "shownAt": 23,
+   "fullAt": 23,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-chat": {
+   "surfaceUntil": null,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 46,
+   "shownAt": 106,
+   "fullAt": 106,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-archive": {
+   "surfaceUntil": null,
+   "hitFrom": 110,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 48,
+   "shownAt": 110,
+   "fullAt": 110,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "profile-push-back": {
+   "surfaceUntil": null,
+   "hitFrom": 127,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 70,
+   "shownAt": 127,
+   "fullAt": 127,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "pageErrors": []
+ }
+}

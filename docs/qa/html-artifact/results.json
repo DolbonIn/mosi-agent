@@ -1,0 +1,2758 @@
+{
+  "at": "2026-11-15T01:14:13.127Z",
+  "api": "http://127.0.0.1:8812",
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-78Piz2zoeDFfgTt8K_p4IzcY'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"light\",\"light\"],\"app\":{\"theme\":\"light\",\"surface\":\"#fff\",\"label\":\"#1d1d1f\",\"accent\":\"#0071e3\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#fff\",\"--surface\":\"#f2f2f7\",\"--text\":\"#1d1d1f\",\"--text-2\":\"#6e6e73\",\"--text-3\":\"#3c3c435c\",\"--line\":\"#3c3c4329\",\"--accent\":\"#0071e3\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#d70015\",\"--success\":\"#1e7d34\",\"--fill\":\"#7676801f\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"Pret"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(255, 255, 255) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "579 vs content 579"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: the card grows to its height on the spring",
+          "ok": true,
+          "detail": "268,309,338,376"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1216)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%) · rgb(255, 255, 255)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%)\",\"surface\":\"rgb(255, 255, 255)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: the sheet morphs out of the card (starts clipped to the card's width, the card hidden under it)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(0px 7.81px round 24.33px)\",\"card\":\"0\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":358,\"h\":94}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1157,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1157 vs 1157"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 37 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[8,36,32,35,37,30,32,35,32,35,32,35],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "8,36,32,35,37,30,32,35,32,35,32,35"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "theme: the OS goes dark → the frame follows without reloading",
+          "ok": true,
+          "detail": "{\"app\":{\"theme\":\"dark\",\"surface\":\"#1c1c1e\"},\"inner\":{\"mark\":1,\"theme\":\"dark\",\"scheme\":\"dark\",\"bg\":\"#1c1c1e\"}}"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844},\"mid\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "579 vs 579"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "579 → 579"
+        },
+        {
+          "name": "placeholder: no layout shift when the page arrives (Chrome layout-shift)",
+          "ok": true,
+          "detail": "0.0000"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1157}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1151 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 869 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1615 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 1.92 · span.ip 1.96 14px \"112.169\"; span.no 1.96 13px \"1\"; span.ip 1.96 12px \"(211.234\"; span.ip 1.92 12px \"(112.169\"; span.no 1.96 13px \"2\"; span.ip 1.96 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 1.96 · div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 4.21 · th.hl 4.21 13px \"아이폰 17\""
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 4.21 · p.kicker 4.21 13px \"동네 사람들과 \"; b. 4.21 14px \"물품\"; b. 4.21 14px \"먹거리\""
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.21 · span.chg down 4.21 14px \"-0.91%\""
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.21 · div.svc 4.21 13px \"CJ대한통운\""
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 4.21 · div.pick 4.21 13.5px \"추천: 아이폰·\"; div.pick 4.21 13.5px \"추천: 갤럭시 \"; div.pick 4.21 13.5px \"추천: 큰 화면\"; div.pick 4.21 13.5px \"추천: 예산 지\"; div.pick 4.21 13.5px \"추천: 휴대성·\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg=''. Eith",
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'nonce-JUCf3A7pQCmbg4W68_iv-eYk''. Either the 'unsafe-inline' keywo",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been block",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp-bg.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been bl"
+      ],
+      "overflow": [],
+      "screenshots": 39
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-DNHRvbUYa7lM7tHK0IgmrWLS'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"dark\",\"dark\"],\"app\":{\"theme\":\"dark\",\"surface\":\"#1c1c1e\",\"label\":\"#f5f5f7\",\"accent\":\"#5aacff\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#1c1c1e\",\"--surface\":\"#2c2c2e\",\"--text\":\"#f5f5f7\",\"--text-2\":\"#a1a1a6\",\"--text-3\":\"#ebebf552\",\"--line\":\"#54545899\",\"--accent\":\"#5aacff\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#ff6961\",\"--success\":\"#30d158\",\"--fill\":\"#7676803d\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"P"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(28, 28, 30) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "579 vs content 579"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: the card grows to its height on the spring",
+          "ok": true,
+          "detail": "269,307,341,379"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1216)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(28, 28, 30) 62%) · rgb(28, 28, 30)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(28, 28, 30) 62%)\",\"surface\":\"rgb(28, 28, 30)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: the sheet morphs out of the card (starts clipped to the card's width, the card hidden under it)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(0px 7.87px round 24.23px)\",\"card\":\"0\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":358,\"h\":94}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1157,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1157 vs 1157"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 43 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[20,33,33,33,33,33,33,34,34,32,35,33],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "20,33,33,33,33,33,33,34,34,32,35,33"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844},\"mid\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "579 vs 579"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "579 → 579"
+        },
+        {
+          "name": "placeholder: no layout shift when the page arrives (Chrome layout-shift)",
+          "ok": true,
+          "detail": "0.0000"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1157}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1151 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 869 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1615 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 2.56 · span.ip 2.65 14px \"112.169\"; span.no 2.65 13px \"1\"; span.ip 2.65 12px \"(211.234\"; span.ip 2.56 12px \"(112.169\"; span.no 2.65 13px \"2\"; span.ip 2.65 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 2.65 · div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.94"
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 5.42"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg=''. Eith",
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'nonce-0oYfDLQnftcaDKhny5wkLxRs''. Either the 'unsafe-inline' keywo",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been block",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp-bg.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been bl"
+      ],
+      "overflow": [],
+      "screenshots": 38
+    },
+    {
+      "engine": "chromium",
+      "variant": "reduced",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-NZ9aEY3yPXh662Ol0QtzFAn_'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"light\",\"light\"],\"app\":{\"theme\":\"light\",\"surface\":\"#fff\",\"label\":\"#1d1d1f\",\"accent\":\"#0071e3\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#fff\",\"--surface\":\"#f2f2f7\",\"--text\":\"#1d1d1f\",\"--text-2\":\"#6e6e73\",\"--text-3\":\"#3c3c435c\",\"--line\":\"#3c3c4329\",\"--accent\":\"#0071e3\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#d70015\",\"--success\":\"#1e7d34\",\"--fill\":\"#7676801f\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"Pret"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(255, 255, 255) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "579 vs content 579"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: under reduced motion the card takes its height at once",
+          "ok": true,
+          "detail": "591,591,591,591"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1216)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%) · rgb(255, 255, 255)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%)\",\"surface\":\"rgb(255, 255, 255)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: under reduced motion the sheet is simply there (no morph, the card stays)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(-40px round 78px)\",\"card\":\"\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":454,\"h\":174}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1157,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1157 vs 1157"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 64 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[6,34,33,36,31,35,31,33,33,33,33,34],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "6,34,33,36,31,35,31,33,33,33,33,34"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844},\"mid\":{\"h\":531,\"w\":358,\"top\":143,\"frameH\":531,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "579 vs 579"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "579 → 579"
+        },
+        {
+          "name": "placeholder: no layout shift when the page arrives (Chrome layout-shift)",
+          "ok": true,
+          "detail": "0.0000"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1157}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1151 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 869 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1615 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 1.92 · span.ip 1.96 14px \"112.169\"; span.no 1.96 13px \"1\"; span.ip 1.96 12px \"(211.234\"; span.ip 1.92 12px \"(112.169\"; span.no 1.96 13px \"2\"; span.ip 1.96 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 1.96 · div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 4.21 · th.hl 4.21 13px \"아이폰 17\""
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 4.21 · p.kicker 4.21 13px \"동네 사람들과 \"; b. 4.21 14px \"물품\"; b. 4.21 14px \"먹거리\""
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.21 · span.chg down 4.21 14px \"-0.91%\""
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.21 · div.svc 4.21 13px \"CJ대한통운\""
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 4.21 · div.pick 4.21 13.5px \"추천: 아이폰·\"; div.pick 4.21 13.5px \"추천: 갤럭시 \"; div.pick 4.21 13.5px \"추천: 큰 화면\"; div.pick 4.21 13.5px \"추천: 예산 지\"; div.pick 4.21 13.5px \"추천: 휴대성·\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg=''. Eith",
+        "Executing inline script violates the following Content Security Policy directive 'script-src 'nonce-xPLEjTxViYedSNsWQaMw82PD''. Either the 'unsafe-inline' keywo",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been block",
+        "Loading the image 'http://127.0.0.1:5193/qa-remote/csp-bg.png' violates the following Content Security Policy directive: \"img-src data:\". The action has been bl"
+      ],
+      "overflow": [],
+      "screenshots": 38
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-zZoGbPY1-So70Gib2R8I-Pc3'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"light\",\"light\"],\"app\":{\"theme\":\"light\",\"surface\":\"#fff\",\"label\":\"#1d1d1f\",\"accent\":\"#0071e3\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#fff\",\"--surface\":\"#f2f2f7\",\"--text\":\"#1d1d1f\",\"--text-2\":\"#6e6e73\",\"--text-3\":\"#3c3c435c\",\"--line\":\"#3c3c4329\",\"--accent\":\"#0071e3\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#d70015\",\"--success\":\"#1e7d34\",\"--fill\":\"#7676801f\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"Pret"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(255, 255, 255) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "573 vs content 573"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: the card grows to its height on the spring",
+          "ok": true,
+          "detail": "232,255,287,319"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1214)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%) · rgb(255, 255, 255)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%)\",\"surface\":\"rgb(255, 255, 255)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: the sheet morphs out of the card (starts clipped to the card's width, the card hidden under it)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(0px 7.57px round 24.76px)\",\"card\":\"0\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":359,\"h\":784}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1155,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1155 vs 1155"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 88 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[21,34,31,37,30,33,35,33,34,32,34,35],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "21,34,31,37,30,33,35,33,34,32,34,35"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "theme: the OS goes dark → the frame follows without reloading",
+          "ok": true,
+          "detail": "{\"app\":{\"theme\":\"dark\",\"surface\":\"#1c1c1e\"},\"inner\":{\"mark\":1,\"theme\":\"dark\",\"scheme\":\"dark\",\"bg\":\"#1c1c1e\"}}"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844},\"mid\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "573 vs 573"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "573 → 573"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1155}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1168 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 868 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1612 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 1.92 · span.ip 1.96 14px \"112.169\"; span.no 1.96 13px \"1\"; span.ip 1.96 12px \"(211.234\"; span.ip 1.92 12px \"(112.169\"; span.no 1.96 13px \"2\"; span.ip 1.96 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 1.96 · div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 4.21 · th.hl 4.21 13px \"아이폰 17\""
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 4.21 · p.kicker 4.21 13px \"동네 사람들과 \"; b. 4.21 14px \"물품\"; b. 4.21 14px \"먹거리\""
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.21 · span.chg down 4.21 14px \"-0.91%\""
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.21 · div.svc 4.21 13px \"CJ대한통운\""
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 4.21 · div.pick 4.21 13.5px \"추천: 아이폰·\"; div.pick 4.21 13.5px \"추천: 갤럭시 \"; div.pick 4.21 13.5px \"추천: 큰 화면\"; div.pick 4.21 13.5px \"추천: 예산 지\"; div.pick 4.21 13.5px \"추천: 휴대성·\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Blocked a frame at \"http://127.0.0.1:5193\" from accessing a frame at \"null\".  The frame being accessed is sandboxed and lacks the \"allow-same-origin\" flag.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp.png because it does not appear in the img-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp-bg.png because it does not appear in the img-src directive of the Content Security Policy."
+      ],
+      "overflow": [],
+      "screenshots": 39
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's dark values",
+          "ok": true,
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-kTQt1GCAh6y_RKF0NdpZijKr'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"dark\",\"dark\"],\"app\":{\"theme\":\"dark\",\"surface\":\"#1c1c1e\",\"label\":\"#f5f5f7\",\"accent\":\"#5aacff\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#1c1c1e\",\"--surface\":\"#2c2c2e\",\"--text\":\"#f5f5f7\",\"--text-2\":\"#a1a1a6\",\"--text-3\":\"#ebebf552\",\"--line\":\"#54545899\",\"--accent\":\"#5aacff\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#ff6961\",\"--success\":\"#30d158\",\"--fill\":\"#7676803d\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"P"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(28, 28, 30) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "573 vs content 573"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: the card grows to its height on the spring",
+          "ok": true,
+          "detail": "237,264,297,328"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1214)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(28, 28, 30) 62%) · rgb(28, 28, 30)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(28, 28, 30) 62%)\",\"surface\":\"rgb(28, 28, 30)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: the sheet morphs out of the card (starts clipped to the card's width, the card hidden under it)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(0px 7.4px round 25.049999px)\",\"card\":\"0\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":359,\"h\":784}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1155,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1155 vs 1155"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 118 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[17,32,35,32,34,33,34,32,35,33,33,37],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "17,32,35,32,34,33,34,32,35,33,33,37"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844},\"mid\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "573 vs 573"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "573 → 573"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1155}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1168 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 868 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1612 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 2.56 · span.ip 2.65 14px \"112.169\"; span.no 2.65 13px \"1\"; span.ip 2.65 12px \"(211.234\"; span.ip 2.56 12px \"(112.169\"; span.no 2.65 13px \"2\"; span.ip 2.65 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 2.65 · div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\"; div.none 2.65 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.94"
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 5.42"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 5.42"
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Blocked a frame at \"http://127.0.0.1:5193\" from accessing a frame at \"null\".  The frame being accessed is sandboxed and lacks the \"allow-same-origin\" flag.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp.png because it does not appear in the img-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp-bg.png because it does not appear in the img-src directive of the Content Security Policy."
+      ],
+      "overflow": [],
+      "screenshots": 38
+    },
+    {
+      "engine": "webkit",
+      "variant": "reduced",
+      "checks": [
+        {
+          "name": "inline: dc-thread — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: week-schedule — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: product-compare — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.7"
+        },
+        {
+          "name": "inline: travel-timeline — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: directory-list — every text clears AA contrast with the app's light values",
+          "ok": true,
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "inline: the frame is sandbox=\"allow-scripts\" and nothing more",
+          "ok": true,
+          "detail": "allow-scripts"
+        },
+        {
+          "name": "inline: the app cannot reach into the frame (opaque origin: contentDocument is null)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "inline: the frame's title is the artifact's title",
+          "ok": true,
+          "detail": "무선 이어폰 3종 비교"
+        },
+        {
+          "name": "inline: the CSP meta is the first thing in head, as specified",
+          "ok": true,
+          "detail": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'nonce-VFTH2aA_ylOWUwKnR8eQyhQT'; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "name": "inline: one script, carrying this document's nonce",
+          "ok": true,
+          "detail": "1 script(s)"
+        },
+        {
+          "name": "inline: the app CSP allows that script by its hash (the frame inherits the app's policy)",
+          "ok": true,
+          "detail": "'sha256-5D2GO55Sz20lamMo8t1bqtAMksFG0LOs/O+/V3piQVg='"
+        },
+        {
+          "name": "inline: the frame stays about:srcdoc",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "inline: base type — 16–17 px, line-height 1.5–1.7, keep-all, the system Korean face",
+          "ok": true,
+          "detail": "16px · 1.60 · keep-all"
+        },
+        {
+          "name": "inline: the theme is the app's (data-theme, color-scheme, --bg/--text/--accent = app tokens)",
+          "ok": true,
+          "detail": "{\"inner\":[\"light\",\"light\"],\"app\":{\"theme\":\"light\",\"surface\":\"#fff\",\"label\":\"#1d1d1f\",\"accent\":\"#0071e3\"}}"
+        },
+        {
+          "name": "inline: every guide variable is defined in the frame (values recorded)",
+          "ok": true,
+          "detail": "{\"--bg\":\"#fff\",\"--surface\":\"#f2f2f7\",\"--text\":\"#1d1d1f\",\"--text-2\":\"#6e6e73\",\"--text-3\":\"#3c3c435c\",\"--line\":\"#3c3c4329\",\"--accent\":\"#0071e3\",\"--accent-fill\":\"#0071e3\",\"--on-accent\":\"#fff\",\"--danger\":\"#d70015\",\"--success\":\"#1e7d34\",\"--fill\":\"#7676801f\",\"--radius\":\"12px\",\"--radius-sm\":\"8px\",\"--space\":\"16px\",\"--space-sm\":\"8px\",\"--font\":\"-apple-system,BlinkMacSystemFont,\\\"Apple SD Gothic Neo\\\",\\\"Pret"
+        },
+        {
+          "name": "inline: a table already alone in the page's own scroll box is not boxed again",
+          "ok": true,
+          "detail": "scroll · 0 m-scroll"
+        },
+        {
+          "name": "inline: the card is solid paper (opaque, no backdrop blur)",
+          "ok": true,
+          "detail": "rgb(255, 255, 255) · none"
+        },
+        {
+          "name": "inline: the card is the full width of the turn",
+          "ok": true,
+          "detail": "358 of 358"
+        },
+        {
+          "name": "inline: a page shorter than the cap: the card is exactly its height, no fade, no 전체 화면",
+          "ok": true,
+          "detail": "573 vs content 573"
+        },
+        {
+          "name": "inline: only our script is in the frame",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "name": "links: a tap inside a row link asks first — 외부 사이트 열기 · host, then the whole URL",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: 열기 is a target=_blank noopener noreferrer link to that URL; focus moves to the bar",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · hana-clinic.example.com\",\"url\":\"https://hana-clinic.example.com/reserve\",\"href\":\"https://hana-clinic.example.com/reserve\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":553,\"bottom\":682,\"left\":16,\"width\":358,\"seen\":true}"
+        },
+        {
+          "name": "links: the bar is seen whole where the tap was — the card's width, just above the composer, 열기 uncovered (this card runs on under the composer)",
+          "ok": true,
+          "detail": "{\"bar\":[553,682,16,358,true],\"card\":[16,358,856],\"composer\":692}"
+        },
+        {
+          "name": "links: 취소 and 열기 are at least 44 pt tall, both capsules (radius = half the height)",
+          "ok": true,
+          "detail": "44,44 · r 22,22"
+        },
+        {
+          "name": "links: nothing navigated (page and frame), no window opened",
+          "ok": true,
+          "detail": "http://127.0.0.1:5193/ · about:srcdoc · 0 popup(s)"
+        },
+        {
+          "name": "links: Esc dismisses the bar",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "links: a tap on a badge or on the chevron finds its row link; 취소 dismisses",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · sora-medical.example.com\",true,\"외부 사이트 열기 · midori-naika.example.com\"]"
+        },
+        {
+          "name": "links: 열기 opens the URL in a new tab (stubbed), the app stays and the bar goes",
+          "ok": true,
+          "detail": "https://midori-naika.example.com/reserve · http://127.0.0.1:5193/"
+        },
+        {
+          "name": "links: a second tap while the bar is up re-asks for that link, focus on the bar again",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · hana-clinic.example.com\",true]"
+        },
+        {
+          "name": "cap: under reduced motion the card takes its height at once",
+          "ok": true,
+          "detail": "591,591,591,591"
+        },
+        {
+          "name": "cap: a page taller than 70% of the screen stops at 70%",
+          "ok": true,
+          "detail": "591 (cap 591, content 1214)"
+        },
+        {
+          "name": "cap: the bottom fades into --bg (the card's paper) under 전체 화면",
+          "ok": true,
+          "detail": "linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%) · rgb(255, 255, 255)"
+        },
+        {
+          "name": "cap: 전체 화면 is 44 pt, named for the page, on top (not under the composer)",
+          "ok": true,
+          "detail": "{\"fade\":\"linear-gradient(rgba(0, 0, 0, 0), rgb(255, 255, 255) 62%)\",\"surface\":\"rgb(255, 255, 255)\",\"label\":\"전체 화면\",\"aria\":\"제주 2박 3일 전체 화면으로 보기\",\"h\":44,\"w\":91,\"onTop\":true}"
+        },
+        {
+          "name": "full: under reduced motion the sheet is simply there (no morph, the card stays)",
+          "ok": true,
+          "detail": "{\"clip\":\"inset(-40px round 78px)\",\"card\":\"\",\"cardW\":358,\"cardH\":591,\"panelW\":374,\"vis\":{\"w\":454,\"h\":864}}"
+        },
+        {
+          "name": "full: the sheet carries the page's title and the same sandboxed frame",
+          "ok": true,
+          "detail": "{\"title\":\"제주 2박 3일\",\"sandbox\":\"allow-scripts\",\"frameH\":1155,\"label\":\"제주 2박 3일\"}"
+        },
+        {
+          "name": "full: the whole page at its own height (the sheet scrolls, not the frame)",
+          "ok": true,
+          "detail": "1155 vs 1155"
+        },
+        {
+          "name": "full: the title is said once (the sheet's bar; the page's own first heading repeating it is left out)",
+          "ok": true,
+          "detail": "제주 2박 3일 11월 21일(토)  → 11월 21일(토) – 23일(월) "
+        },
+        {
+          "name": "full: each frame gets its own nonce",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "full: a link in the sheet asks in a bar inside the sheet's view",
+          "ok": true,
+          "detail": "{\"bar\":{\"host\":\"외부 사이트 열기 · www.visitjeju.net\",\"url\":\"https://www.visitjeju.net/kr\",\"href\":\"https://www.visitjeju.net/kr\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"focus\":true,\"label\":\"링크 열기\",\"btns\":[44,44],\"radii\":[22,22],\"top\":677,\"bottom\":806,\"left\":22,\"width\":346,\"seen\":true},\"body\":{\"top\":114,\"bottom\":826}}"
+        },
+        {
+          "name": "full: Esc closes the bar, not the sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "full: closing gives the card back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "long: 60 rows in the sheet at their full height",
+          "ok": true,
+          "detail": "5843 vs 5843 · ready in 118 ms"
+        },
+        {
+          "name": "long: the sheet scrolls to the last row, and that row asks like the first",
+          "ok": true,
+          "detail": "{\"steps\":{\"gaps\":[14,35,33,34,33,32,35,33,33,34,31,36],\"end\":5040,\"max\":5147},\"host\":\"외부 사이트 열기 · hoshi-naika.example.com\"}"
+        },
+        {
+          "name": "long: two frames per scroll step stay under 100 ms",
+          "ok": true,
+          "detail": "14,35,33,34,33,32,35,33,33,34,31,36"
+        },
+        {
+          "name": "wheel: scrolling over the card scrolls the chat (the frame never traps it)",
+          "ok": true,
+          "detail": "964 → 464"
+        },
+        {
+          "name": "security: the page still renders its own content",
+          "ok": true,
+          "detail": "보안 점검 페이지"
+        },
+        {
+          "name": "security: no model script ran (<script>, onerror, svg onload, javascript:, mXSS)",
+          "ok": true,
+          "detail": "null · 1 script(s)"
+        },
+        {
+          "name": "security: no on* handler survived",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: meta refresh, base, link, form, iframe, object, embed are gone",
+          "ok": true,
+          "detail": " · metas Content-Security-Policy,utf-8,viewport"
+        },
+        {
+          "name": "security: only https links keep an href (javascript:, data:, #, http:, mailto:, tel: lose it)",
+          "ok": true,
+          "detail": "{\"qa-js\":null,\"qa-data\":null,\"qa-hash\":null,\"qa-http\":null,\"qa-mail\":null,\"qa-tel\":null,\"qa-idn\":\"https://аррӏе.com/login\",\"qa-area\":\"https://example.com/area\"}"
+        },
+        {
+          "name": "security: remote images become their alt text; data: images stay",
+          "ok": true,
+          "detail": "{\"noimg\":[\"원격 이미지\"],\"imgs\":1}"
+        },
+        {
+          "name": "security: no remote url() / @import / image-set left in CSS",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: 100vh cannot grow the frame (vh is the app's viewport)",
+          "ok": true,
+          "detail": "120"
+        },
+        {
+          "name": "security: autofocus does not steal focus",
+          "ok": true,
+          "detail": "body"
+        },
+        {
+          "name": "security: after 1.5 s the frame is still about:srcdoc (meta refresh dead)",
+          "ok": true,
+          "detail": "about:srcdoc"
+        },
+        {
+          "name": "security: submit and every non-https link do nothing (no bar, no navigation)",
+          "ok": true,
+          "detail": "0 bar(s) · about:srcdoc"
+        },
+        {
+          "name": "security: a look-alike domain shows as xn-- punycode (host and URL)",
+          "ok": true,
+          "detail": "[\"외부 사이트 열기 · xn--80ak6aa92e.com\",\"https://xn--80ak6aa92e.com/login\"]"
+        },
+        {
+          "name": "security: an image-map <area> link is caught like <a> (asks, never navigates the frame)",
+          "ok": true,
+          "detail": "https://example.com/area"
+        },
+        {
+          "name": "security: past the sanitiser, the CSP still refuses a script and remote loads",
+          "ok": true,
+          "detail": "null"
+        },
+        {
+          "name": "security: nothing asked for /qa-remote (no browser request from the page; the CSP probe's attempts never reached the server)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "security: forged messages change nothing (wrong window, wrong channel, non-numbers, non-https links)",
+          "ok": true,
+          "detail": "{\"before\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844},\"mid\":{\"h\":542,\"w\":358,\"top\":132,\"frameH\":542,\"vh\":844}}"
+        },
+        {
+          "name": "security: a huge height is clamped (frame ≤ 20000 px, card ≤ 70%)",
+          "ok": true,
+          "detail": "{\"h\":591,\"w\":358,\"top\":83,\"frameH\":20000,\"vh\":844}"
+        },
+        {
+          "name": "big: over 150 KB → a Korean error, no frame",
+          "ok": true,
+          "detail": "{\"text\":\"내용이 너무 커서 여기에 보여 드릴 수 없어요.\",\"frames\":0}"
+        },
+        {
+          "name": "placeholder: while loading, the card holds the height it had (skeleton, aria-busy)",
+          "ok": true,
+          "detail": "573 vs 573"
+        },
+        {
+          "name": "placeholder: the page lands in the same box (no jump)",
+          "ok": true,
+          "detail": "573 → 573"
+        },
+        {
+          "name": "archive: 문서 lists the pages with meta '페이지 · …'",
+          "ok": true,
+          "detail": "페이지 · 1시간 전 수정 | 페이지 · 2시간 전 수정 | 페이지 · 3시간 전 수정 | 페이지 · 4시간 전 수정 | 페이지 · 5시간 전 수정"
+        },
+        {
+          "name": "archive: previews are the page's words (no tags, no CSS, not the title again)",
+          "ok": true,
+          "detail": "프로그래밍 갤러리 · 디시인사이드 · 전체글 · 개념글 · 공지 · [질 | 11월 16일(월) – 22일(일) · 일정 7개 · 월 16 · 09: | 가격은 11월 15일 온라인 최저가 기준이에요 · 하루 S2 노을 Air | 11월 21일(토) – 23일(월) · 렌터카 · 숙소 한림 · 1일차  | 초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준 · 2,75"
+        },
+        {
+          "name": "archive: the document sheet draws the same sandboxed frame at full height",
+          "ok": true,
+          "detail": "{\"sandbox\":\"allow-scripts\",\"title\":\"제주 2박 3일\",\"h\":1155}"
+        },
+        {
+          "name": "archive: the sheet says the title once",
+          "ok": true,
+          "detail": "11월 21일(토) – 23일(월) · 렌터카 · 숙소"
+        },
+        {
+          "name": "archive: links there ask too",
+          "ok": true,
+          "detail": "외부 사이트 열기 · astro.kasi.re.kr"
+        },
+        {
+          "name": "llm: 01-dc-thread draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1071 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 02-dc-running draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1190 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 03-week-edit draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 777 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 04-phone-compare draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1168 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 05-flea-poster draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 528 · card 528 · width 358/358"
+        },
+        {
+          "name": "llm: 06-market-card draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 868 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07-delivery draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 732 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 07's tracking link asks with its host and the whole URL, & intact (the query string is not mangled)",
+          "ok": true,
+          "detail": "{\"host\":\"외부 사이트 열기 · trace.cjlogistics.com\",\"url\":\"https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&utm_source=mosi_app&utm_medium=push&utm_campaign=delivery_tracking_notice_20261115\",\"fits\":true,\"seen\":true,\"in\":\"sheet\"}"
+        },
+        {
+          "name": "llm: 08-busan-trip draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1417 · card 591 · width 358/358"
+        },
+        {
+          "name": "llm: 09-laptops draws in the card, nothing sideways",
+          "ok": true,
+          "detail": "content 1612 · card 591 · width 358/358"
+        }
+      ],
+      "notes": [
+        {
+          "name": "llm: 01-dc-thread contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 02-dc-running contrast (the model's colours)",
+          "detail": "worst 1.92 · span.ip 1.96 14px \"112.169\"; span.no 1.96 13px \"1\"; span.ip 1.96 12px \"(211.234\"; span.ip 1.92 12px \"(112.169\"; span.no 1.96 13px \"2\"; span.ip 1.96 12px \"(58.124)\""
+        },
+        {
+          "name": "llm: 03-week-edit contrast (the model's colours)",
+          "detail": "worst 1.96 · div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\"; div.none 1.96 15px \"일정 없음\""
+        },
+        {
+          "name": "llm: 04-phone-compare contrast (the model's colours)",
+          "detail": "worst 4.21 · th.hl 4.21 13px \"아이폰 17\""
+        },
+        {
+          "name": "llm: 05-flea-poster contrast (the model's colours)",
+          "detail": "worst 4.21 · p.kicker 4.21 13px \"동네 사람들과 \"; b. 4.21 14px \"물품\"; b. 4.21 14px \"먹거리\""
+        },
+        {
+          "name": "llm: 06-market-card contrast (the model's colours)",
+          "detail": "worst 4.21 · span.chg down 4.21 14px \"-0.91%\""
+        },
+        {
+          "name": "llm: 07-delivery contrast (the model's colours)",
+          "detail": "worst 4.21 · div.svc 4.21 13px \"CJ대한통운\""
+        },
+        {
+          "name": "llm: 08-busan-trip contrast (the model's colours)",
+          "detail": "worst 4.54"
+        },
+        {
+          "name": "llm: 09-laptops contrast (the model's colours)",
+          "detail": "worst 4.21 · div.pick 4.21 13.5px \"추천: 아이폰·\"; div.pick 4.21 13.5px \"추천: 갤럭시 \"; div.pick 4.21 13.5px \"추천: 큰 화면\"; div.pick 4.21 13.5px \"추천: 예산 지\"; div.pick 4.21 13.5px \"추천: 휴대성·\""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "expectedErrors": [
+        "Blocked a frame at \"http://127.0.0.1:5193\" from accessing a frame at \"null\".  The frame being accessed is sandboxed and lacks the \"allow-same-origin\" flag.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to execute a script because its hash, its nonce, or 'unsafe-inline' does not appear in the script-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp.png because it does not appear in the img-src directive of the Content Security Policy.",
+        "Refused to load http://127.0.0.1:5193/qa-remote/csp-bg.png because it does not appear in the img-src directive of the Content Security Policy."
+      ],
+      "overflow": [],
+      "screenshots": 38
+    }
+  ]
+}

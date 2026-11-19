@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>둘러보기 · B 추천은 나에게, 전체는 한 번 더</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/LargeTitle.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Button.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Sheet.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/more.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/explore/explore.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+<style>
+/* ── shared by A and B ── */
+  /* Flat Paper: the template group separates from the wallpaper by value; dark keeps the List.css hairline */
+  .tpl-list {
+    box-shadow: none;
+  }
+  :root[data-theme="dark"] .tpl-list,
+  :root[data-contrast="more"] .tpl-list {
+    box-shadow: inset 0 0 0 1px var(--separator);
+  }
+  /* P2 wall: two lines of description are enough; the sheet restates the rest */
+  .tpl-desc {
+    -webkit-line-clamp: 2;
+  }
+  .tpl-row {
+    align-items: center;
+  }
+  .tpl-count {
+    margin-top: 2px;
+  }
+  /* sheet state: the screen stays at rest under a modal sheet (scrim), one file per resting state */
+  .d-sheet {
+    display: none;
+  }
+  :root[data-state="sheet"] .d-sheet {
+    display: block;
+  }
+  .sheet-panel {
+    --r: var(--r-sheet);
+  }
+  .pre-body {
+    gap: 22px;
+  }
+  /* P2 sheet: steps are plain numbered lines on the sheet (the unused .pre-step-no style), no tile, no panel */
+  .d-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 4px;
+  }
+  .d-steps li {
+    display: flex;
+    gap: 10px;
+    font-size: var(--t-subhead);
+    line-height: 1.5;
+  }
+  .d-steps .pre-step-no {
+    text-align: left;
+    line-height: 1.5;
+    font-size: var(--t-subhead);
+  }
+  .d-step-title {
+    font-weight: 500;
+    color: var(--label);
+  }
+  .d-step-sub {
+    display: block;
+    font-size: var(--t-footnote);
+    color: var(--label-2);
+  }
+  /* P1 call-demo: the missing prerequisite is a row on the sheet itself, with a hairline, never a recessed panel */
+  .d-need {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 4px;
+    box-shadow: inset 0 -1px 0 var(--separator), inset 0 1px 0 var(--separator);
+  }
+  .d-need > [data-glyph] {
+    flex: none;
+    color: var(--label-2);
+  }
+  .d-need-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .d-need-title {
+    font-size: var(--t-subhead);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .d-need-sub {
+    font-size: var(--t-footnote);
+    line-height: 1.4;
+    color: var(--label-2);
+  }
+  .btn-sm {
+    flex: none;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--r-capsule);
+  }
+  .btn-lg {
+    height: 52px;
+    border-radius: var(--r-capsule);
+  }
+  /* NC-6: the two hero-metric tiles become one meta line */
+  .d-facts {
+    font-size: var(--t-footnote);
+    line-height: 1.4;
+    color: var(--label-2);
+    padding: 0 4px;
+  }
+  .more-note {
+    padding: 0 4px;
+  }
+
+  /* ── B: a text rail, 추천 = for me, 전체 = the catalogue ── */
+  /* IT-12: categories are choices, so they are words; the neutral droplet still travels on two edges (lead/trail) */
+  .d-seg {
+    position: relative;
+    margin: 0 calc(var(--gutter) * -1);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  .d-seg::-webkit-scrollbar {
+    display: none;
+  }
+  .d-seg-track {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    width: max-content;
+    padding: 0 var(--gutter);
+  }
+  .d-seg-item {
+    position: relative;
+    z-index: 1;
+    height: 40px;
+    padding: 0 15px;
+    border-radius: var(--r-capsule);
+    font-size: var(--t-subhead);
+    font-weight: 500;
+    color: var(--label-2);
+    white-space: nowrap;
+  }
+  .d-seg-item[data-on] {
+    color: var(--label);
+    font-weight: 700;
+  }
+  .d-seg-droplet {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: var(--gutter);
+    height: 40px;
+    width: var(--w, 56px);
+    border-radius: var(--r-capsule);
+    background: var(--surface);
+    pointer-events: none;
+  }
+  :root[data-theme="dark"] .d-seg-droplet {
+    background: var(--fill-3);
+  }
+  :root[data-contrast="more"] .d-seg-droplet {
+    box-shadow: inset 0 0 0 2px var(--label);
+  }
+  /* the agent signs its own suggestions with its avatar dot (not sparkles) */
+  .d-h-agent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tpl-list > li + li .tpl-row::before {
+    left: 16px;
+  }
+  .d-all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 12px 0 16px;
+    font-size: var(--t-body);
+    font-weight: 600;
+    color: var(--label);
+  }
+  .d-all .tnum {
+    color: var(--label-2);
+    font-weight: 500;
+  }
+  .d-all-r {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .d-all-r [data-glyph] {
+    color: var(--label-3, var(--label-2));
+    opacity: 0.7;
+  }
+  .tpl-list > li + li .d-all::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 0;
+    height: 1px;
+    background: var(--separator);
+    transform: scaleY(0.5);
+    transform-origin: top;
+  }
+  .tpl-list > li {
+    position: relative;
+  }
+  /* B sheet: a sentence-length title reads from the left; what is missing and what it costs sit next to the CTA */
+  .d-sheet .sheet-title {
+    grid-column: 1 / 3;
+    grid-row: 1;
+    text-align: left;
+    padding: 0 8px 0 10px;
+    font-size: var(--t-title3, 20px);
+    line-height: 1.35;
+  }
+  .d-sheet .sheet-close {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+  .d-sheet .sheet-head {
+    align-items: start;
+    padding-top: 18px;
+  }
+  .pre-footer .d-need {
+    box-shadow: none;
+    padding: 0 4px 4px;
+    min-height: 0;
+  }
+  .pre-footer .d-facts {
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="kit-phone">
+  <main class="d-scroll">
+    <header class="large-title">
+      <div class="large-title-row"><h1 class="large-title-text">둘러보기</h1></div>
+    </header>
+    <div class="d-stack">
+      <div class="d-seg" role="tablist" aria-label="카테고리">
+        <div class="d-seg-track">
+        <span class="d-seg-droplet" aria-hidden="true" style="--w: 59px"></span>
+        <button type="button" class="d-seg-item" role="tab" data-on aria-selected="true">추천</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">전체</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">혜택</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">쇼핑</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">여행</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">사람</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">문화</button>
+        <button type="button" class="d-seg-item" role="tab" aria-selected="false">집·생활</button>
+        </div>
+      </div>
+      <section aria-labelledby="ex-suggest">
+        <h2 class="explore-h d-h-agent" id="ex-suggest"><i data-avatar data-size="18"></i>깽이의 제안</h2>
+      <ul class="tpl-list" aria-label="깽이의 제안">
+        <li><button type="button" class="tpl-row" data-tpl="morning-briefing"><span class="tpl-main"><span class="tpl-title">매일 아침 7시 모닝 브리핑 보내 드릴게요</span><span class="tpl-desc">날씨·미세먼지·주요 뉴스·오늘 일정을 매일 아침 7시에 한 번에 정리해 먼저 보내 드려요.</span></span><span class="tpl-chevron" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+        <li><button type="button" class="tpl-row" data-tpl="connect-kakao"><span class="tpl-main"><span class="tpl-title">카카오톡을 연결하면 놓친 대화를 대신 정리해 드릴게요</span><span class="tpl-desc">카카오톡을 연결해 두면 깽이에게 안 읽은 대화 요약이나 답장을 맡길 수 있어요.</span><span class="tpl-count"><i data-glyph="link" data-size="15" data-weight="medium"></i>연결하면 바로 쓸 수 있어요</span></span><span class="tpl-chevron" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+        <li><button type="button" class="tpl-row" data-tpl="suggest-wakeup"><span class="tpl-main"><span class="tpl-title">일어나야 하는 시간에 맞춰 지은님께 모닝콜 브리핑을 보내 드릴게요</span><span class="tpl-desc">매일 일어날 시간에 먼저 말을 걸어 날씨와 오늘 할 일을 챙겨 드려요.</span></span><span class="tpl-chevron" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+      </ul>
+      </section>
+      <section aria-labelledby="ex-all">
+        <h2 class="explore-h" id="ex-all">맡길 수 있는 일</h2>
+      <ul class="tpl-list" aria-label="맡길 수 있는 일">
+        <li><button type="button" class="tpl-row" data-tpl="call-demo"><span class="tpl-main"><span class="tpl-title">제 전화, 먼저 한번 받아 보실래요?</span><span class="tpl-desc">지금 바로 전화를 걸어요. 다른 사람에게 걸 때 어떻게 들리는지 직접 들어 보세요.</span></span><span class="tpl-chevron" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+        <li><button type="button" class="tpl-row" data-tpl="news-briefing"><span class="tpl-main"><span class="tpl-title">오늘 주요 뉴스 브리핑해 드릴게요</span><span class="tpl-desc">오늘 꼭 알아야 할 뉴스를 분야별로 골라 세 줄씩 요약해 드려요.</span></span><span class="tpl-chevron" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+        <li><button type="button" class="d-all">맡길 수 있는 일 전체<span class="d-all-r"><span class="tnum">23개</span><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span></button></li>
+      </ul>
+      </section>
+    </div>
+  </main>
+
+  <header class="k-topbar">
+    <span class="k-circle glass" aria-label="메뉴"><i data-glyph="menu" data-size="24" data-weight="medium"></i></span>
+    <span class="k-title d-cap"><span class="d-cap-title">둘러보기</span></span>
+    
+  </header>
+
+  <nav class="k-bottom">
+    <div class="k-tabbar glass" data-text>
+      <span class="k-tab"><i data-glyph="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab" data-on><i data-glyph="compass" data-size="24" data-weight="medium"></i>둘러보기</span>
+      <span class="k-tab"><i data-glyph="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-glyph="person" data-size="24"></i>나의 모시</span>
+    </div>
+  </nav>
+
+  <!-- 24 · pre-delegate sheet (call-demo) -->
+  <div class="sheet-root d-sheet">
+    <div class="sheet-scrim"></div>
+    <div class="sheet-panel glass" data-sheet role="dialog" aria-labelledby="pre-title">
+      <div class="sheet-head">
+        <div class="sheet-grabber"></div>
+        <h2 class="sheet-title" id="pre-title">제 전화, 먼저 한번 받아 보실래요?</h2>
+        <button type="button" class="sheet-close" aria-label="닫기"><span class="sheet-close-plate"><i data-glyph="close" data-size="16" data-weight="semibold"></i></span></button>
+      </div>
+      <div class="sheet-body">
+        <div class="more-sheet pre-body" data-template="call-demo">
+          <p class="more-sheet-lead">지금 바로 전화를 걸어요. 다른 사람에게 걸 때 어떻게 들리는지 직접 들어 보세요.</p>
+          <section class="more-sheet-group" aria-labelledby="pre-steps">
+            <h3 class="more-label" id="pre-steps">깽이가 이렇게 해요</h3>
+            <ol class="d-steps">
+              <li><span class="pre-step-no tnum">1</span><span><span class="d-step-title">내 휴대폰으로 전화 걸기</span><span class="d-step-sub">걸기 전에 한 번 더 승인받아요</span></span></li>
+            </ol>
+          </section>
+          <p class="more-note"><i data-glyph="phone" data-size="15" data-weight="medium"></i><span>승인하면 바로 전화가 와요. 통화 내용은 이 대화에 남아요.</span></p>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <div class="pre-footer">
+          <div class="d-need" data-need="phone"><i data-glyph="phone" data-size="20" data-weight="medium"></i><span class="d-need-main"><span class="d-need-title">내 전화번호</span><span class="d-need-sub">인증해야 전화를 받을 수 있어요</span></span></div>
+          <p class="d-facts tnum">약 1분 · 한도 약 2% · 오늘 100% 남음</p>
+          <button type="button" class="btn btn-full btn-lg" data-tone="primary" data-size="lg"><span class="btn-label">인증하고 받아 보기</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">{
+  "feature": "explore",
+  "variant": "B",
+  "title": "추천은 나에게, 전체는 한 번 더",
+  "rationale": [
+    "카테고리는 고르는 말이라 글자로: 추천 · 전체 · 혜택 … 무채색 드롭렛이 그대로 두 모서리로 이동",
+    "추천 = 깽이가 나에게 고른 제안 3개 + 처음 해 볼 일 2개, 23개 전체는 '전체'와 마지막 행으로 한 번 더",
+    "만든 숫자 없음: 보이는 숫자는 실제 목록 개수(23개)와 한도뿐",
+    "행은 제목이 이끌고 글리프도 타일도 없음; '깽이의 제안'은 반짝이 대신 깽이 얼굴로 서명",
+    "위임 시트: 왼쪽 정렬 제목, 번호 단계, 없는 준비물·비용 한 줄을 주 버튼 '인증하고 받아 보기' 바로 위에"
+  ],
+  "motion": [
+    "큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge)",
+    "카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3)",
+    "카테고리 바꿈 = 방향 있는 content swap (§3)",
+    "행 → 위임 시트 shared-element morph (§8.9)",
+    "맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)"
+  ],
+  "fixes": [
+    "P1-2",
+    "P2-1",
+    "P2-2",
+    "P2-3",
+    "slop:IT-11",
+    "slop:IT-12",
+    "slop:IT-13",
+    "slop:NC-6",
+    "slop:RH-3",
+    "slop:RH-1",
+    "slop:GL-2",
+    "critique:Q1",
+    "critique:Q3"
+  ],
+  "compare": [
+    "chromium-light-22-explore.jpg",
+    "chromium-light-24-predelegate-sheet.jpg"
+  ]
+}</script>
+<script src="glyphs.js"></script>
+<script src="draft.js"></script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

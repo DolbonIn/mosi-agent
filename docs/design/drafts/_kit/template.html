@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  Draft template. Copy it to docs/design/drafts/<feature>/<variant>.html (one file per variant and state), then:
+    node docs/design/drafts/_kit/render.mjs <feature>
+  Rules: use only the app's tokens (var(--…)); no new colours, radii, type sizes or curves. Korean 해요체, no emoji.
+  ≤3 glass shapes. Paper is flat (no shadow). Fill in #kit-meta below: it feeds the note under the phone and the gallery.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: feature · variant</title>
+<!-- the app's real CSS, by relative path from docs/design/drafts/<feature>/ -->
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+  /* draft-local layout only; every value is a token */
+</style>
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen has-composer">
+    <!-- content (paper) goes here -->
+  </main>
+
+  <!-- function layer: 3 glass shapes (menu circle, composer, tab bar); the title is text on the edge -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><i data-icon="menu" data-weight="medium"></i></button>
+    <div class="k-title"><i data-avatar data-size="30"></i>깽이</div>
+  </header>
+  <div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><i data-icon="plus"></i></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><i data-icon="mic"></i></span>
+      <span class="k-composer-icon"><i data-icon="phone"></i></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "기능 이름",
+  "variant": "A",
+  "title": "한 줄 요약",
+  "rationale": ["1", "2", "3", "4", "5"],
+  "motion": ["유지하는 모션 (MOTION-SPEC §)"],
+  "fixes": ["slop-inventory / critique ids"],
+  "compare": ["chromium-light-NN-name.jpg"]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

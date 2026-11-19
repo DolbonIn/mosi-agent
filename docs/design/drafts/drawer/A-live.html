@@ -1,0 +1,212 @@
+<!doctype html>
+<!--
+  모시 draft · drawer · A (live) · 판 없는 목록, 상태를 말하는 행 · 회의 중인 대화
+  draft-a, 2026-11-12, impeccable de-slop pass. Static mock: app tokens only (apps/mobile/src/styles/tokens.css by
+  relative path), synthetic fixture data (docs/design/impeccable/capture.mjs), no network. ?theme=light|dark.
+  Glyphs are inlined from apps/mobile/src/ui/Icon.tsx. Rationale: notes.md in this folder.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: drawer · A · live</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<style>
+:root { --accent-fill: #0071e3; }
+.kit-phone { font-family: var(--font-text); }
+/* the app's composer placeholder is --label-2 (chat.css .composer-field::placeholder); the kit's --label-3 is 1.9:1 */
+.k-composer-field:not([data-filled]) { color: var(--label-2); }
+
+/* scroller: content runs under the floating chrome and thins out at both edges (app/Screen.css .screen-scroll) */
+.d-scroll {
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+  position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  padding: calc(var(--edge-top) + 12px) var(--gutter) 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent calc(var(--edge-top) - 4px), #000 calc(var(--edge-top) + 12px), #000 calc(100% - var(--edge-bottom) - 12px), transparent calc(100% - var(--edge-bottom) + 8px));
+}
+/* threads are bottom-anchored like the real list: the newest line rests just above the composer */
+.d-thread { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--edge-bottom) + 24px - var(--peek, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* user bubble: neutral 8 % ink, 20 px with the 8 px tail on the speaker's side (DESIGN Shapes) */
+.d-me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: var(--r-group) var(--r-group) 8px var(--r-group); background: color-mix(in srgb, var(--label) 8%, var(--surface)); color: var(--label); font-size: var(--t-body); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* paper: flat. Light separates by value (#fff on #f5f5f7), dark by a hairline (DESIGN Flat Paper) */
+.d-paper { background: var(--surface); color: var(--label); }
+:root[data-theme="dark"] .d-paper { box-shadow: inset 0 0 0 1px var(--separator); }
+
+/* assistant reply as paper (variant A): the tail corner is back (critique chat P2-1) and the radius is the card's */
+.d-asst { align-self: flex-start; max-width: 100%; padding: 12px 16px; border-radius: 8px var(--r-card) var(--r-card) var(--r-card); font-size: var(--t-body); line-height: 1.55; }
+/* assistant reply as plain text on the page (variant B, DESIGN "plain text for conversation") */
+.d-say { font-size: var(--t-body); line-height: 1.55; color: var(--label); padding: 0 4px; }
+.d-turn { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.d-turn-head { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: -8px 0 -6px; padding: 0 4px; align-self: flex-start; font-size: var(--t-subhead); color: var(--label-2); }
+.d-turn-head .avatar { flex: none; }
+
+/* folded tool steps "N단계 · 1분 33초 ⌄" (chat.css .tools-pill) */
+.d-steps { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -6px 0; padding: 0 10px 0 8px; font-size: var(--t-subhead); color: var(--label-2); }
+
+/* one chat card = one paper object; inside it only rows, hairlines and text (no tiles, no recessed panels) */
+.d-card { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 16px; border-radius: var(--r-card); word-break: keep-all; }
+.d-title { font-family: var(--font-text); font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; line-height: 1.4; text-wrap: balance; }
+.d-sub { font-size: var(--t-subhead); line-height: 1.5; color: var(--label); }
+.d-foot { font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); }
+.d-hair { height: 0; border-top: 0.5px solid var(--separator); }
+.d-glyph { flex: none; color: var(--label-2); }
+.nowrap { white-space: nowrap; }
+
+/* buttons: capsules (height / 2); one blue per screen = --accent-fill; everything else neutral */
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: var(--t-body); font-weight: 600; letter-spacing: -0.01em; color: var(--label); }
+.d-btn-lg { min-height: 52px; }
+.d-btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+.d-btn-neutral { background: var(--fill); color: var(--label); }
+.d-btn-plain { background: none; color: var(--label); }
+.d-btn-block { display: flex; width: 100%; }
+
+/* receipt: status pill with icon + words (kept: CH-4), label colour for AA */
+.d-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.d-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--fill); font-size: var(--t-subhead); font-weight: 600; color: var(--label); }
+
+/* new-below dot on the current tab (variant B of chat): tapping the current tab jumps to the latest, iOS-style */
+
+/* event notes: plain centred footnote text on the page, no pill (GT-1, CH-3) */
+.d-note { align-self: center; max-width: 92%; text-align: center; font-size: var(--t-footnote); line-height: 1.45; color: var(--label-2); text-wrap: balance; }
+.d-note + .d-note { margin-top: -6px; }
+
+/* ── drawer A ── */
+.kit-phone > .wallpaper { display: none; }
+.kit-phone { background: var(--surface-2); }
+.dr { position: absolute; inset: 0 auto 0 0; width: 320px; z-index: 1; display: flex; flex-direction: column; gap: 14px;
+  padding: calc(var(--chrome-top) + 4px) 12px calc(var(--safe-bottom) + 16px); background: var(--surface-2); color: var(--label); }
+/* the main card, pushed right, .96 and dimmed (Drawer.tsx §8.10) */
+.dr-card { position: absolute; z-index: 2; top: 17px; left: 318px; width: 374px; height: 810px; border-radius: 48px; overflow: hidden; background: var(--bg); }
+.dr-card .k-circle { position: absolute; top: 50px; left: 12px; }
+.dr-card-body { position: absolute; top: 112px; left: 16px; width: 342px; display: flex; flex-direction: column; gap: 12px; }
+.dr-card-scrim { position: absolute; inset: 0; background: rgb(0 0 0 / 0.2); }
+html[data-theme="dark"] .dr-card-scrim { background: rgb(0 0 0 / 0.45); }
+/* head (A): avatar + name, centred; the "나만의 AI 에이전트" line is gone */
+.dr-head { display: flex; align-items: center; gap: 12px; padding: 4px 8px 6px; }
+.dr-name { font-family: var(--font-display); font-size: var(--t-title3); font-weight: 700; letter-spacing: -0.015em; }
+.dr-search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 22px; background: var(--fill); color: var(--label); font-size: var(--t-callout); }
+.dr-search svg { color: var(--label-2); flex: none; }
+.dr-search[data-live] { background: var(--surface); }
+html[data-theme="dark"] .dr-search[data-live] { box-shadow: inset 0 0 0 0.5px var(--separator); }
+.dr-search-q { flex: 1 1 auto; min-width: 0; letter-spacing: 0.04em; }
+.dr-search-q[data-empty] { color: var(--label-2); letter-spacing: 0; }
+/* idle, it is a button on a fill, so its words are --label (label-2 on --fill is 4.0:1, drawer.css:21) */
+.dr-search:not([data-live]) .dr-search-q[data-empty] { color: var(--label); }
+.dr-caret { display: inline-block; width: 2px; height: 20px; margin-left: 1px; vertical-align: -4px; background: var(--accent); border-radius: 1px; }
+.dr-clear { flex: none; width: 20px; height: 20px; border-radius: 10px; display: grid; place-items: center; background: var(--label-3); color: var(--surface); }
+.dr-spot { display: flex; align-items: center; gap: 4px; }
+.dr-spot > :first-child { flex: 1 1 auto; min-width: 0; }
+.dr-cancel { flex: none; min-height: 44px; padding: 0 8px; font-size: var(--t-callout); color: var(--label); }
+.dr-nav { display: flex; flex-direction: column; gap: 2px; }
+.dr-item { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-radius: var(--r-field); font-size: var(--t-body); color: var(--label); }
+.dr-item > svg { color: var(--label-2); flex: none; }
+.dr-item[data-on] { background: var(--fill); font-weight: 600; }
+.dr-item[data-on] > svg { color: var(--label); }
+.dr-sec { display: flex; flex-direction: column; gap: 2px; }
+.dr-sec-head { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding-left: 12px; }
+.dr-h { font-size: var(--t-footnote); font-weight: 600; color: var(--label-2); }
+.dr-textbtn { min-height: 44px; padding: 0 12px; font-size: var(--t-footnote); font-weight: 600; color: var(--label-2); }
+.dr-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+/* time sits on the title line only; the subtitle runs the full width under both (no early wrap) */
+.dr-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; column-gap: 12px; align-items: start; min-height: 56px; padding: 9px 10px 9px 12px; border-radius: var(--r-field); color: var(--label); }
+.dr-row .dr-row-body { display: contents; }
+.dr-row > .dr-row-glyph { grid-column: 1; grid-row: 1 / span 2; }
+.dr-row-title { grid-column: 2; grid-row: 1; }
+.dr-row-time { grid-column: 3; grid-row: 1; }
+.dr-row-sub { grid-column: 2 / 4; grid-row: 2; }
+.dr-row-chev { grid-column: 3; grid-row: 1 / span 2; }
+.dr-row[data-chev] .dr-row-sub { grid-column: 2; }
+.dr-row[data-on] { background: var(--fill); }
+.dr-row-glyph { display: grid; place-items: center; height: 20px; color: var(--label-2); }
+.dr-row-body { display: flex; flex-direction: column; min-width: 0; }
+.dr-row-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--t-subhead); font-weight: 600; line-height: 1.35; }
+.dr-row-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dr-unread { flex: none; width: 8px; height: 8px; border-radius: 4px; background: var(--accent); }
+.dr-row-sub { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--t-footnote); line-height: 1.35; color: var(--label-2); }
+.dr-row-sub span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* A only (B's "지금 하는 일" section says it): a quiet --fill pill with --label words, no glyph (the row glyph already names the kind) */
+.dr-badge { flex: none; display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 9px; background: var(--fill); color: var(--label); font-weight: 600; }
+.dr-row-time { font-size: var(--t-footnote); line-height: 1.35; color: var(--label-2); margin-top: 1px; }
+/* search hits on a phone: no slab, no fill (coarse pointer has no cursor); the match carries the signal.
+   A: --accent-text 700 on the --surface panel (4.7:1 light). B: on the drawer paper accent would be 4.2:1, so the
+   title goes regular and the match --label 700, the way iOS Spotlight bolds what you typed. */
+.dr-row mark { background: none; color: var(--accent-text); font-weight: 700; }
+.dr-hits .dr-row-title { font-weight: 400; }
+.dr-hits .dr-row mark { color: var(--label); }
+.dr-row-chev { align-self: center; color: var(--label-3); }
+.dr-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-top: auto; padding-top: 12px; box-shadow: 0 -0.5px 0 var(--separator); }
+.dr-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; border-radius: var(--r-field); color: var(--label-2); font-size: var(--t-footnote); }
+/* A: search results / recents on the paper under the field, flat */
+.dr-panel { border-radius: var(--r-card); background: var(--surface); padding: 6px; }
+html[data-theme="dark"] .dr-panel { box-shadow: inset 0 0 0 0.5px var(--separator); }
+.dr-panel .dr-sec-head { min-height: 32px; }
+/* B: the subtitle is a sentence; two lines like a message preview */
+.dr[data-v="B"] .dr-row-sub { align-items: flex-start; }
+.dr[data-v="B"] .dr-row-sub span:last-child { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dr[data-v="B"] .dr-badge { margin-top: 0; }
+.dr-none { padding: 8px 12px; font-size: var(--t-footnote); color: var(--label-2); }
+
+</style>
+</head>
+<body>
+<div class="kit-phone">
+<aside class="dr" data-v="A" aria-label="서랍"><div class="dr-head"><i data-avatar data-size="44"></i><span class="dr-name">깽이</span></div><div class="dr-search" role="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.5"/><path d="m15.6 15.6 4.4 4.4"/></svg><span class="dr-search-q" data-empty>대화 검색</span></div><nav class="dr-nav" aria-label="대화">
+    <a class="dr-item" data-on aria-current="page" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.509" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.75c4.56 0 8.25 2.98 8.25 6.65s-3.69 6.65-8.25 6.65c-.86 0-1.68-.1-2.46-.3L5.25 19.5l1-3.55C4.69 14.74 3.75 13.15 3.75 11.4c0-3.67 3.69-6.65 8.25-6.65Z"/></svg>기본 채팅</a>
+    <a class="dr-item" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.75" r="3.1"/><path d="M3.5 19.25a5.5 5.5 0 0 1 11 0"/><circle cx="16.6" cy="9.25" r="2.5"/><path d="M15.6 13.9a4.75 4.75 0 0 1 4.9 4.85"/></svg>친구</a>
+  </nav><section class="dr-sec"><div class="dr-sec-head"><h2 class="dr-h">추가 대화</h2><button class="dr-textbtn" aria-pressed="false">보관한 대화</button></div><ul class="dr-list"><li><a class="dr-row" href="#"><span class="dr-row-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.75" r="3.1"/><path d="M3.5 19.25a5.5 5.5 0 0 1 11 0"/><circle cx="16.6" cy="9.25" r="2.5"/><path d="M15.6 13.9a4.75 4.75 0 0 1 4.9 4.85"/></svg></span><span class="dr-row-body"><span class="dr-row-title"><span>11월 12일 주간회의</span></span><span class="dr-row-sub"><b class="dr-badge">회의 중</b><span>받아 적는 중</span></span></span><span class="dr-row-time tnum">방금</span></a></li><li><a class="dr-row" href="#"><span class="dr-row-glyph"><i data-avatar data-size="24" data-hue="212"></i></span><span class="dr-row-body"><span class="dr-row-title"><span>깽이와 진우님의 모시</span><i class="dr-unread" aria-label="읽지 않음"></i></span><span class="dr-row-sub"><span>친구가 되었어요</span></span></span><span class="dr-row-time tnum">1분 전</span></a></li><li><a class="dr-row" href="#"><span class="dr-row-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.25h2.6c.4 0 .75.27.85.66l.8 3.1c.1.4-.02.82-.32 1.1l-1.48 1.4a12.2 12.2 0 0 0 4.44 4.44l1.4-1.48c.28-.3.7-.42 1.1-.32l3.1.8c.39.1.66.45.66.85v2.6c0 .9-.73 1.6-1.62 1.6A15.75 15.75 0 0 1 5 5.87c0-.9.71-1.62 1.6-1.62Z"/><path d="M15.25 3.75h5v5M20.25 3.75 14.5 9.5"/></svg></span><span class="dr-row-body"><span class="dr-row-title"><span>연세바른치과에 전화</span><i class="dr-unread" aria-label="읽지 않음"></i></span><span class="dr-row-sub"><span>전화를 걸었어요</span></span></span><span class="dr-row-time tnum">2분 전</span></a></li><li><a class="dr-row" href="#"><span class="dr-row-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h6.5L18.5 8.5v10.25a1.75 1.75 0 0 1-1.75 1.75H7.25A1.75 1.75 0 0 1 5.5 18.75V5A1.5 1.5 0 0 1 7 3.5Z"/><path d="M13.5 3.5v5h5M8.75 12.75h6.5M8.75 16.25h4.5"/></svg></span><span class="dr-row-body"><span class="dr-row-title"><span>이사 준비</span></span><span class="dr-row-sub"><span>체크리스트를 만들었어요</span></span></span><span class="dr-row-time tnum">22시간 전</span></a></li><li><a class="dr-row" href="#"><span class="dr-row-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><span class="dr-row-body"><span class="dr-row-title"><span>아침 브리핑</span></span><span class="dr-row-sub"><span>매일 오전 7:00</span></span></span><span class="dr-row-time tnum">어제</span></a></li></ul></section><nav class="dr-tabs" aria-label="다른 화면">
+    <a class="dr-tab" href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2.05 4.75-4.75 2.05 2.05-4.75 4.75-2.05Z"/></svg>둘러보기</a>
+    <a class="dr-tab" href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="5" width="16.5" height="4.25" rx="1.3"/><path d="M5.25 9.25v8A1.75 1.75 0 0 0 7 19h10a1.75 1.75 0 0 0 1.75-1.75v-8M10 12.75h4"/></svg>보관함</a>
+    <a class="dr-tab" href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.909" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.25" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>나의 모시</a>
+  </nav></aside>
+<div class="dr-card" aria-hidden="true">
+  <span class="glass k-circle" data-text><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.182" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.75h14M5 15.25h14"/></svg></span>
+  <div class="dr-card-body">
+    <div class="d-asst d-paper">매일 아침 7시에 브리핑을 보내 드릴게요.</div>
+    <section class="d-card d-paper"><b class="d-title">아침 브리핑</b><span class="d-foot">매일 오전 7:00</span></section>
+    <div class="d-me" style="align-self:flex-end">연세바른치과에 내일 3시 예약 되는지 전화해서 물어봐 줘</div>
+    <section class="d-card d-paper"><b class="d-title">연세바른치과에 전화했어요</b><span class="d-foot">02-1234-1234 · 오전 9:39</span></section>
+  </div>
+  <div class="dr-card-scrim"></div>
+</div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "서랍",
+  "variant": "A · live",
+  "title": "판 없는 목록, 상태를 말하는 행 · 회의 중인 대화",
+  "rationale": [
+    "행의 32px 흰 판 삭제: 20px 글리프 --label-2를 제목 첫 줄에, 친구 대화는 상대 모시 아바타 24px (P2-2, IT-10)",
+    "글리프 바로잡기: 회의는 people(서버가 이미 보냄), 할 일은 doc (P2-2). sparkles는 HEAD에서 이미 checklist로",
+    "부제는 종류가 아니라 일어난 일: '전화를 걸었어요', '회의를 요약했어요'; 회의 대화방 제목은 회의 이름 (P2-1)",
+    "보관 토글은 보관함 탭과 같은 글리프 대신 글자 버튼 '보관한 대화' (P2-2)",
+    "'나만의 AI 에이전트'는 HEAD에서 이미 없어짐, 이름을 가운데로; '연세바른치과에'는 HEAD 서버와 같음 (Minor)"
+  ],
+  "motion": [
+    "§8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1",
+    "§3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent",
+    "§3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐",
+    "§3 press: 행 누름 tint (줄어들지 않음)",
+    "§8.2 돌아올 때 재등장 없음"
+  ],
+  "fixes": [
+    "P2-1",
+    "slop:IT-10",
+    "critique:Q2"
+  ],
+  "compare": [
+    "chromium-light-20-drawer.jpg",
+    "chromium-dark-20-drawer.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

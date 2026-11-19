@@ -1,0 +1,126 @@
+/* The banner rests just below the top bar (it drops there from the island), so 뒤로 / 메뉴 and the title stay usable:
+   14 + 44 + 14 = 72 tall, like the undo toast */
+.banner-anchor {
+  position: absolute;
+  z-index: 60;
+  top: calc(var(--chrome-top) + var(--topbar-h) + 8px);
+  pointer-events: none;
+}
+.banner {
+  position: relative;
+  min-height: 72px;
+  padding: 14px 18px 14px 14px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.banner-ink {
+  position: absolute;
+  inset: 0;
+  z-index: 3 !important;
+  background: var(--island);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.banner-content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.banner-content[data-action] {
+  grid-template-columns: 44px 1fr auto;
+}
+/* errors: the ink that the shape contracts into is red (it lands on the island as a dot) */
+.banner[data-tone="error"] .banner-ink {
+  background: #ff3b30;
+}
+.banner[data-tone="error"] .banner-icon {
+  background: var(--danger-fill);
+  color: var(--danger);
+}
+/* neutral action (one accent per screen): fill + label, concentric with the banner (r36 − 14 → r22 at 44 tall) */
+.banner-action {
+  height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  margin-right: -4px;
+  border-radius: calc(var(--r-banner) - 14px);
+  background: var(--fill);
+  color: var(--label);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform var(--dur-press, 0.12s) var(--ease-press, ease-out);
+}
+.banner-action:active {
+  transform: scale(0.96);
+}
+/* concentric: banner r36 − 14 padding → r22 (a circle at 44) */
+.banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: calc(var(--r-banner) - 14px);
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  color: var(--label);
+}
+.banner-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.banner-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.banner-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.banner-meta {
+  flex: none;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.banner-body {
+  font-size: var(--t-subhead);
+  color: var(--label);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+  /* two lines at most, also when a tied box wraps inside: the clamp counts such a box as one line. copy()'s clamp keeps
+     ties to 10 em, narrower than this line at 130 %; this height is the stop if a wide Latin word gets past that */
+  max-height: 2.7em;
+}
+
+/* undo toast (island.undo): at the bottom, above the composer / tab bar; no island band, so the content starts at the
+   edge — 14 + 44 + 14 = 72 tall, r36 concentric with the 44px icon and action (r22) like the banner */
+/* under the sheets (.sheet-root, z 40, same overlay layer): an open sheet covers the toast instead of losing its taps */
+.toast-anchor {
+  position: absolute;
+  z-index: 30;
+}
+.toast {
+  position: relative;
+  padding: 14px 18px 14px 14px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}

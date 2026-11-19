@@ -1,0 +1,29 @@
+{
+ "station_code": "1018683",
+ "station_name": "서울시(한강대교)",
+ "agency_name": "기후에너지환경부",
+ "address": "서울특별시 동작구 노량진동 한강대교",
+ "observed_at": "2026-11-11T18:30:00+09:00",
+ "observed_at_raw": "202611111830",
+ "water_level": {
+  "value_m": 0.59,
+  "unit": "m"
+ },
+ "flow_rate": {
+  "value_cms": 243.33,
+  "unit": "m^3/s"
+ },
+ "thresholds": {
+  "interest_level_m": 3.9,
+  "warning_level_m": 8.5,
+  "alarm_level_m": 10.5,
+  "serious_level_m": 13.3,
+  "plan_flood_level_m": 13.3
+ },
+ "special_report_station": true,
+ "source": {
+  "provider": "hrfco",
+  "hydro_type": "waterlevel",
+  "time_type": "10M"
+ }
+}

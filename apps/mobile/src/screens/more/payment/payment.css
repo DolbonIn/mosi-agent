@@ -1,0 +1,39 @@
+/* 결제 수단 */
+/* an em measure wraps the one-sentence body the same in Chrome and WebKit (28ch resolved ~260 vs ~195 px), so the
+   three rows end above the tab bar in both (payment P3-1) */
+.pay-empty .empty-state__body {
+  max-width: 17em;
+}
+.pay-how {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pay-how > .more-label {
+  padding: 0 16px;
+}
+.paper.pay-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pay-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pay-step__title {
+  font-family: var(--font-text);
+  letter-spacing: inherit;
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.pay-step__body {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+}

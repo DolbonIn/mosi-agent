@@ -1,0 +1,31 @@
+.large-title {
+  position: relative;
+  padding: 4px 4px 14px;
+}
+.large-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.large-title-text {
+  font-family: var(--font-display);
+  font-size: var(--t-large);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  color: var(--label);
+}
+.large-title-sub {
+  margin-top: 4px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}
+.large-title-sentinel {
+  position: absolute;
+  left: 0;
+  bottom: 22px;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}

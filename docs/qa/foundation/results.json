@@ -1,0 +1,2426 @@
+{
+  "when": "2026-11-16T07:57:57.451Z",
+  "runs": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "wallpaper": "css",
+      "lensInDom": 1,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/chromium-light-00-top.png",
+        "docs/qa/foundation/chromium-light-01-buttons.png",
+        "docs/qa/foundation/chromium-light-02-segmented.png",
+        "docs/qa/foundation/chromium-light-03-controls.png",
+        "docs/qa/foundation/chromium-light-04-list.png",
+        "docs/qa/foundation/chromium-light-05-fields.png",
+        "docs/qa/foundation/chromium-light-06-data.png",
+        "docs/qa/foundation/chromium-light-07-avatars.png",
+        "docs/qa/foundation/chromium-light-08-island.png",
+        "docs/qa/foundation/chromium-light-09-sheet.png",
+        "docs/qa/foundation/chromium-light-10-spotlight.png",
+        "docs/qa/foundation/chromium-light-11-glass.png",
+        "docs/qa/foundation/chromium-light-12-swap.png",
+        "docs/qa/foundation/chromium-light-13-cards.png",
+        "docs/qa/foundation/chromium-light-14-thread.png",
+        "docs/qa/foundation/chromium-light-15-icons.png",
+        "docs/qa/foundation/chromium-light-s1-island-tool.png",
+        "docs/qa/foundation/chromium-light-s1b-island-stalled.png",
+        "docs/qa/foundation/chromium-light-s2-island-done.png",
+        "docs/qa/foundation/chromium-light-s2b-island-error.png",
+        "docs/qa/foundation/chromium-light-s3-call-expanded.png",
+        "docs/qa/foundation/chromium-light-s4-banner.png",
+        "docs/qa/foundation/chromium-light-s4b-banner-undo.png",
+        "docs/qa/foundation/chromium-light-s4c-banner-error.png",
+        "docs/qa/foundation/chromium-light-s4d-error-dot.png",
+        "docs/qa/foundation/chromium-light-s8a-composer.png",
+        "docs/qa/foundation/chromium-light-s8b-composer-scrolled.png",
+        "docs/qa/foundation/chromium-light-s9a-confirm-step2.png",
+        "docs/qa/foundation/chromium-light-s9b-confirm-holding.png",
+        "docs/qa/foundation/chromium-light-s9c-confirm-destructive.png",
+        "docs/qa/foundation/chromium-light-s5-sheet.png",
+        "docs/qa/foundation/chromium-light-s5b-sheet-long-title.png",
+        "docs/qa/foundation/chromium-light-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/chromium-light-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/chromium-light-s5e-sheet-end.png",
+        "docs/qa/foundation/chromium-light-s6-drawer.png",
+        "docs/qa/foundation/chromium-light-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.35,
+        "label": "#005bb8",
+        "on": "#e0e9ef",
+        "at": "thread mid",
+        "dropletVsBar": 1.149,
+        "bySurface": {
+          "page": {
+            "ratio": 5.43,
+            "at": "page top",
+            "on": "#e4eaef"
+          },
+          "list": {
+            "ratio": 5.6,
+            "at": "list bottom",
+            "on": "#edecef"
+          },
+          "thread": {
+            "ratio": 5.35,
+            "at": "thread mid",
+            "on": "#e0e9ef"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.43,
+            "worstBg": "#e4eaef",
+            "medianBg": "#eaeef0",
+            "dropletVsBar": 1.168
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list top",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.63,
+            "worstBg": "#ededef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.66,
+            "worstBg": "#eceeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.6,
+            "worstBg": "#edecef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.35,
+            "worstBg": "#e0e9ef",
+            "medianBg": "#ecedef",
+            "dropletVsBar": 1.149
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.59,
+            "worstBg": "#ececef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.63,
+            "worstBg": "#ededef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": -97,
+        "travelLast": 0,
+        "settleMs": 333,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8817,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.56,
+          "contrast": 8.24,
+          "plainContrast": 16.55
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.29,
+          "contrast": 1.71,
+          "plainContrast": 16.83
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "wallpaper": "css",
+      "lensInDom": 1,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/chromium-dark-00-top.png",
+        "docs/qa/foundation/chromium-dark-01-buttons.png",
+        "docs/qa/foundation/chromium-dark-02-segmented.png",
+        "docs/qa/foundation/chromium-dark-03-controls.png",
+        "docs/qa/foundation/chromium-dark-04-list.png",
+        "docs/qa/foundation/chromium-dark-05-fields.png",
+        "docs/qa/foundation/chromium-dark-06-data.png",
+        "docs/qa/foundation/chromium-dark-07-avatars.png",
+        "docs/qa/foundation/chromium-dark-08-island.png",
+        "docs/qa/foundation/chromium-dark-09-sheet.png",
+        "docs/qa/foundation/chromium-dark-10-spotlight.png",
+        "docs/qa/foundation/chromium-dark-11-glass.png",
+        "docs/qa/foundation/chromium-dark-12-swap.png",
+        "docs/qa/foundation/chromium-dark-13-cards.png",
+        "docs/qa/foundation/chromium-dark-14-thread.png",
+        "docs/qa/foundation/chromium-dark-15-icons.png",
+        "docs/qa/foundation/chromium-dark-s1-island-tool.png",
+        "docs/qa/foundation/chromium-dark-s1b-island-stalled.png",
+        "docs/qa/foundation/chromium-dark-s2-island-done.png",
+        "docs/qa/foundation/chromium-dark-s2b-island-error.png",
+        "docs/qa/foundation/chromium-dark-s3-call-expanded.png",
+        "docs/qa/foundation/chromium-dark-s4-banner.png",
+        "docs/qa/foundation/chromium-dark-s4b-banner-undo.png",
+        "docs/qa/foundation/chromium-dark-s4c-banner-error.png",
+        "docs/qa/foundation/chromium-dark-s4d-error-dot.png",
+        "docs/qa/foundation/chromium-dark-s8a-composer.png",
+        "docs/qa/foundation/chromium-dark-s8b-composer-scrolled.png",
+        "docs/qa/foundation/chromium-dark-s9a-confirm-step2.png",
+        "docs/qa/foundation/chromium-dark-s9b-confirm-holding.png",
+        "docs/qa/foundation/chromium-dark-s9c-confirm-destructive.png",
+        "docs/qa/foundation/chromium-dark-s5-sheet.png",
+        "docs/qa/foundation/chromium-dark-s5b-sheet-long-title.png",
+        "docs/qa/foundation/chromium-dark-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/chromium-dark-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/chromium-dark-s5e-sheet-end.png",
+        "docs/qa/foundation/chromium-dark-s6-drawer.png",
+        "docs/qa/foundation/chromium-dark-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.83,
+        "label": "#8cc4ff",
+        "on": "#3b3e47",
+        "at": "thread mid",
+        "dropletVsBar": 1.681,
+        "bySurface": {
+          "page": {
+            "ratio": 5.89,
+            "at": "page top",
+            "on": "#3c3d45"
+          },
+          "list": {
+            "ratio": 5.88,
+            "at": "list top",
+            "on": "#3d3d43"
+          },
+          "thread": {
+            "ratio": 5.83,
+            "at": "thread mid",
+            "on": "#3b3e47"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.89,
+            "worstBg": "#3c3d45",
+            "medianBg": "#3b3c42",
+            "dropletVsBar": 1.702
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "list top",
+            "ratio": 5.88,
+            "worstBg": "#3d3d43",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.88,
+            "worstBg": "#3d3d43",
+            "medianBg": "#3b3b42",
+            "dropletVsBar": 1.683
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.88,
+            "worstBg": "#3d3d43",
+            "medianBg": "#3c3b41",
+            "dropletVsBar": 1.686
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.83,
+            "worstBg": "#3b3e47",
+            "medianBg": "#3b3c43",
+            "dropletVsBar": 1.681
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.88,
+            "worstBg": "#3d3d43",
+            "medianBg": "#3b3b42",
+            "dropletVsBar": 1.683
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3b3b41",
+            "dropletVsBar": 1.681
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": -97,
+        "travelLast": 0,
+        "settleMs": 333,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8816,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.31,
+          "contrast": 9.88,
+          "plainContrast": 15.29
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.07,
+          "contrast": 2.25,
+          "plainContrast": 15.63
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "variant": "reduced",
+      "wallpaper": "css",
+      "lensInDom": 0,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/chromium-reduced-00-top.png",
+        "docs/qa/foundation/chromium-reduced-01-buttons.png",
+        "docs/qa/foundation/chromium-reduced-02-segmented.png",
+        "docs/qa/foundation/chromium-reduced-03-controls.png",
+        "docs/qa/foundation/chromium-reduced-04-list.png",
+        "docs/qa/foundation/chromium-reduced-05-fields.png",
+        "docs/qa/foundation/chromium-reduced-06-data.png",
+        "docs/qa/foundation/chromium-reduced-07-avatars.png",
+        "docs/qa/foundation/chromium-reduced-08-island.png",
+        "docs/qa/foundation/chromium-reduced-09-sheet.png",
+        "docs/qa/foundation/chromium-reduced-10-spotlight.png",
+        "docs/qa/foundation/chromium-reduced-11-glass.png",
+        "docs/qa/foundation/chromium-reduced-12-swap.png",
+        "docs/qa/foundation/chromium-reduced-13-cards.png",
+        "docs/qa/foundation/chromium-reduced-14-thread.png",
+        "docs/qa/foundation/chromium-reduced-15-icons.png",
+        "docs/qa/foundation/chromium-reduced-s1-island-tool.png",
+        "docs/qa/foundation/chromium-reduced-s1b-island-stalled.png",
+        "docs/qa/foundation/chromium-reduced-s2-island-done.png",
+        "docs/qa/foundation/chromium-reduced-s2b-island-error.png",
+        "docs/qa/foundation/chromium-reduced-s3-call-expanded.png",
+        "docs/qa/foundation/chromium-reduced-s4-banner.png",
+        "docs/qa/foundation/chromium-reduced-s4b-banner-undo.png",
+        "docs/qa/foundation/chromium-reduced-s4c-banner-error.png",
+        "docs/qa/foundation/chromium-reduced-s4d-error-dot.png",
+        "docs/qa/foundation/chromium-reduced-s8a-composer.png",
+        "docs/qa/foundation/chromium-reduced-s8b-composer-scrolled.png",
+        "docs/qa/foundation/chromium-reduced-s9a-confirm-step2.png",
+        "docs/qa/foundation/chromium-reduced-s9b-confirm-holding.png",
+        "docs/qa/foundation/chromium-reduced-s9c-confirm-destructive.png",
+        "docs/qa/foundation/chromium-reduced-s5-sheet.png",
+        "docs/qa/foundation/chromium-reduced-s5b-sheet-long-title.png",
+        "docs/qa/foundation/chromium-reduced-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/chromium-reduced-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/chromium-reduced-s5e-sheet-end.png",
+        "docs/qa/foundation/chromium-reduced-s6-drawer.png",
+        "docs/qa/foundation/chromium-reduced-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.35,
+        "label": "#005bb8",
+        "on": "#e0e9ef",
+        "at": "thread mid",
+        "dropletVsBar": 1.149,
+        "bySurface": {
+          "page": {
+            "ratio": 5.43,
+            "at": "page top",
+            "on": "#e4eaef"
+          },
+          "list": {
+            "ratio": 5.6,
+            "at": "list bottom",
+            "on": "#edecef"
+          },
+          "thread": {
+            "ratio": 5.35,
+            "at": "thread mid",
+            "on": "#e0e9ef"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.43,
+            "worstBg": "#e4eaef",
+            "medianBg": "#eaeef0",
+            "dropletVsBar": 1.168
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list top",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.63,
+            "worstBg": "#ededef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.66,
+            "worstBg": "#eceeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.6,
+            "worstBg": "#edecef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.68,
+            "worstBg": "#eeeeef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.35,
+            "worstBg": "#e0e9ef",
+            "medianBg": "#ecedef",
+            "dropletVsBar": 1.149
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.59,
+            "worstBg": "#ececef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.63,
+            "worstBg": "#ededef",
+            "medianBg": "#eeeeef",
+            "dropletVsBar": 1.159
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": 0,
+        "travelLast": 0,
+        "settleMs": 268,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8149,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.56,
+          "contrast": 8.24,
+          "plainContrast": 16.55
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.29,
+          "contrast": 1.71,
+          "plainContrast": 16.83
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    },
+    {
+      "desktop": true,
+      "engine": "chromium",
+      "scheme": "light",
+      "frame": "device",
+      "errors": [],
+      "shot": "docs/qa/foundation/chromium-desktop-light.png",
+      "sawIslandButton": true
+    },
+    {
+      "desktop": true,
+      "engine": "chromium",
+      "scheme": "dark",
+      "frame": "device",
+      "errors": [],
+      "shot": "docs/qa/foundation/chromium-desktop-dark.png",
+      "sawIslandButton": true
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "wallpaper": "css",
+      "lensInDom": 1,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/webkit-light-00-top.png",
+        "docs/qa/foundation/webkit-light-01-buttons.png",
+        "docs/qa/foundation/webkit-light-02-segmented.png",
+        "docs/qa/foundation/webkit-light-03-controls.png",
+        "docs/qa/foundation/webkit-light-04-list.png",
+        "docs/qa/foundation/webkit-light-05-fields.png",
+        "docs/qa/foundation/webkit-light-06-data.png",
+        "docs/qa/foundation/webkit-light-07-avatars.png",
+        "docs/qa/foundation/webkit-light-08-island.png",
+        "docs/qa/foundation/webkit-light-09-sheet.png",
+        "docs/qa/foundation/webkit-light-10-spotlight.png",
+        "docs/qa/foundation/webkit-light-11-glass.png",
+        "docs/qa/foundation/webkit-light-12-swap.png",
+        "docs/qa/foundation/webkit-light-13-cards.png",
+        "docs/qa/foundation/webkit-light-14-thread.png",
+        "docs/qa/foundation/webkit-light-15-icons.png",
+        "docs/qa/foundation/webkit-light-s1-island-tool.png",
+        "docs/qa/foundation/webkit-light-s1b-island-stalled.png",
+        "docs/qa/foundation/webkit-light-s2-island-done.png",
+        "docs/qa/foundation/webkit-light-s2b-island-error.png",
+        "docs/qa/foundation/webkit-light-s3-call-expanded.png",
+        "docs/qa/foundation/webkit-light-s4-banner.png",
+        "docs/qa/foundation/webkit-light-s4b-banner-undo.png",
+        "docs/qa/foundation/webkit-light-s4c-banner-error.png",
+        "docs/qa/foundation/webkit-light-s4d-error-dot.png",
+        "docs/qa/foundation/webkit-light-s8a-composer.png",
+        "docs/qa/foundation/webkit-light-s8b-composer-scrolled.png",
+        "docs/qa/foundation/webkit-light-s9a-confirm-step2.png",
+        "docs/qa/foundation/webkit-light-s9b-confirm-holding.png",
+        "docs/qa/foundation/webkit-light-s9c-confirm-destructive.png",
+        "docs/qa/foundation/webkit-light-s5-sheet.png",
+        "docs/qa/foundation/webkit-light-s5b-sheet-long-title.png",
+        "docs/qa/foundation/webkit-light-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/webkit-light-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/webkit-light-s5e-sheet-end.png",
+        "docs/qa/foundation/webkit-light-s6-drawer.png",
+        "docs/qa/foundation/webkit-light-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.29,
+        "label": "#005bb8",
+        "on": "#e6e6ea",
+        "at": "page top",
+        "dropletVsBar": 1.153,
+        "bySurface": {
+          "page": {
+            "ratio": 5.29,
+            "at": "page top",
+            "on": "#e6e6ea"
+          },
+          "list": {
+            "ratio": 5.29,
+            "at": "list top",
+            "on": "#e6e6ea"
+          },
+          "thread": {
+            "ratio": 5.29,
+            "at": "thread top",
+            "on": "#e6e6ea"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": -97,
+        "travelLast": 0,
+        "settleMs": 335,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8809,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -1.2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.55,
+          "contrast": 5.73,
+          "plainContrast": 15.71
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.22,
+          "contrast": 1.45,
+          "plainContrast": 16.07
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "wallpaper": "css",
+      "lensInDom": 1,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/webkit-dark-00-top.png",
+        "docs/qa/foundation/webkit-dark-01-buttons.png",
+        "docs/qa/foundation/webkit-dark-02-segmented.png",
+        "docs/qa/foundation/webkit-dark-03-controls.png",
+        "docs/qa/foundation/webkit-dark-04-list.png",
+        "docs/qa/foundation/webkit-dark-05-fields.png",
+        "docs/qa/foundation/webkit-dark-06-data.png",
+        "docs/qa/foundation/webkit-dark-07-avatars.png",
+        "docs/qa/foundation/webkit-dark-08-island.png",
+        "docs/qa/foundation/webkit-dark-09-sheet.png",
+        "docs/qa/foundation/webkit-dark-10-spotlight.png",
+        "docs/qa/foundation/webkit-dark-11-glass.png",
+        "docs/qa/foundation/webkit-dark-12-swap.png",
+        "docs/qa/foundation/webkit-dark-13-cards.png",
+        "docs/qa/foundation/webkit-dark-14-thread.png",
+        "docs/qa/foundation/webkit-dark-15-icons.png",
+        "docs/qa/foundation/webkit-dark-s1-island-tool.png",
+        "docs/qa/foundation/webkit-dark-s1b-island-stalled.png",
+        "docs/qa/foundation/webkit-dark-s2-island-done.png",
+        "docs/qa/foundation/webkit-dark-s2b-island-error.png",
+        "docs/qa/foundation/webkit-dark-s3-call-expanded.png",
+        "docs/qa/foundation/webkit-dark-s4-banner.png",
+        "docs/qa/foundation/webkit-dark-s4b-banner-undo.png",
+        "docs/qa/foundation/webkit-dark-s4c-banner-error.png",
+        "docs/qa/foundation/webkit-dark-s4d-error-dot.png",
+        "docs/qa/foundation/webkit-dark-s8a-composer.png",
+        "docs/qa/foundation/webkit-dark-s8b-composer-scrolled.png",
+        "docs/qa/foundation/webkit-dark-s9a-confirm-step2.png",
+        "docs/qa/foundation/webkit-dark-s9b-confirm-holding.png",
+        "docs/qa/foundation/webkit-dark-s9c-confirm-destructive.png",
+        "docs/qa/foundation/webkit-dark-s5-sheet.png",
+        "docs/qa/foundation/webkit-dark-s5b-sheet-long-title.png",
+        "docs/qa/foundation/webkit-dark-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/webkit-dark-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/webkit-dark-s5e-sheet-end.png",
+        "docs/qa/foundation/webkit-dark-s6-drawer.png",
+        "docs/qa/foundation/webkit-dark-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.89,
+        "label": "#8cc4ff",
+        "on": "#3d3d42",
+        "at": "page top",
+        "dropletVsBar": 1.708,
+        "bySurface": {
+          "page": {
+            "ratio": 5.89,
+            "at": "page top",
+            "on": "#3d3d42"
+          },
+          "list": {
+            "ratio": 5.89,
+            "at": "list top",
+            "on": "#3d3d42"
+          },
+          "thread": {
+            "ratio": 5.89,
+            "at": "thread top",
+            "on": "#3d3d42"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "list top",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.89,
+            "worstBg": "#3d3d42",
+            "medianBg": "#3c3c42",
+            "dropletVsBar": 1.708
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": -97,
+        "travelLast": 0,
+        "settleMs": 334,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8809,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -1.2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.29,
+          "contrast": 7.69,
+          "plainContrast": 14.41
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.05,
+          "contrast": 1.72,
+          "plainContrast": 14.95
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    },
+    {
+      "engine": "webkit",
+      "variant": "reduced",
+      "wallpaper": "css",
+      "lensInDom": 0,
+      "errors": [],
+      "shots": [
+        "docs/qa/foundation/webkit-reduced-00-top.png",
+        "docs/qa/foundation/webkit-reduced-01-buttons.png",
+        "docs/qa/foundation/webkit-reduced-02-segmented.png",
+        "docs/qa/foundation/webkit-reduced-03-controls.png",
+        "docs/qa/foundation/webkit-reduced-04-list.png",
+        "docs/qa/foundation/webkit-reduced-05-fields.png",
+        "docs/qa/foundation/webkit-reduced-06-data.png",
+        "docs/qa/foundation/webkit-reduced-07-avatars.png",
+        "docs/qa/foundation/webkit-reduced-08-island.png",
+        "docs/qa/foundation/webkit-reduced-09-sheet.png",
+        "docs/qa/foundation/webkit-reduced-10-spotlight.png",
+        "docs/qa/foundation/webkit-reduced-11-glass.png",
+        "docs/qa/foundation/webkit-reduced-12-swap.png",
+        "docs/qa/foundation/webkit-reduced-13-cards.png",
+        "docs/qa/foundation/webkit-reduced-14-thread.png",
+        "docs/qa/foundation/webkit-reduced-15-icons.png",
+        "docs/qa/foundation/webkit-reduced-s1-island-tool.png",
+        "docs/qa/foundation/webkit-reduced-s1b-island-stalled.png",
+        "docs/qa/foundation/webkit-reduced-s2-island-done.png",
+        "docs/qa/foundation/webkit-reduced-s2b-island-error.png",
+        "docs/qa/foundation/webkit-reduced-s3-call-expanded.png",
+        "docs/qa/foundation/webkit-reduced-s4-banner.png",
+        "docs/qa/foundation/webkit-reduced-s4b-banner-undo.png",
+        "docs/qa/foundation/webkit-reduced-s4c-banner-error.png",
+        "docs/qa/foundation/webkit-reduced-s4d-error-dot.png",
+        "docs/qa/foundation/webkit-reduced-s8a-composer.png",
+        "docs/qa/foundation/webkit-reduced-s8b-composer-scrolled.png",
+        "docs/qa/foundation/webkit-reduced-s9a-confirm-step2.png",
+        "docs/qa/foundation/webkit-reduced-s9b-confirm-holding.png",
+        "docs/qa/foundation/webkit-reduced-s9c-confirm-destructive.png",
+        "docs/qa/foundation/webkit-reduced-s5-sheet.png",
+        "docs/qa/foundation/webkit-reduced-s5b-sheet-long-title.png",
+        "docs/qa/foundation/webkit-reduced-s5c-sheet-scrolled.png",
+        "docs/qa/foundation/webkit-reduced-s5d-sheet-scrolled-contrast.png",
+        "docs/qa/foundation/webkit-reduced-s5e-sheet-end.png",
+        "docs/qa/foundation/webkit-reduced-s6-drawer.png",
+        "docs/qa/foundation/webkit-reduced-s7-tab-profile.png"
+      ],
+      "overflows": [
+        {
+          "at": "top",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "buttons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "segmented",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "controls",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "list",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "fields",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "data",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "avatars",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "island",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "spotlight",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "glass",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "swap",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "cards",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "thread",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "icons",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        },
+        {
+          "at": "sheet-long-title",
+          "doc": 0,
+          "scroller": 0,
+          "offenders": []
+        }
+      ],
+      "tabLabel": {
+        "ratio": 5.29,
+        "label": "#005bb8",
+        "on": "#e6e6ea",
+        "at": "page top",
+        "dropletVsBar": 1.153,
+        "bySurface": {
+          "page": {
+            "ratio": 5.29,
+            "at": "page top",
+            "on": "#e6e6ea"
+          },
+          "list": {
+            "ratio": 5.29,
+            "at": "list top",
+            "on": "#e6e6ea"
+          },
+          "thread": {
+            "ratio": 5.29,
+            "at": "thread top",
+            "on": "#e6e6ea"
+          }
+        },
+        "clamped": [],
+        "perScroll": [
+          {
+            "at": "page top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "page bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list ¼",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list mid",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list ¾",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "list bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread top",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread ¼",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread mid",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread ¾",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          },
+          {
+            "at": "thread bottom",
+            "ratio": 5.29,
+            "worstBg": "#e6e6ea",
+            "medianBg": "#e6e6ea",
+            "dropletVsBar": 1.153
+          }
+        ]
+      },
+      "dangerConfirm": {
+        "bg": "rgb(215, 0, 21)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 5.38,
+        "held": 7.88
+      },
+      "primaryConfirm": {
+        "bg": "rgb(0, 113, 227)",
+        "fg": "rgb(255, 255, 255)",
+        "ratio": 4.7,
+        "held": 6.92
+      },
+      "banner": {
+        "travelFirst": 0,
+        "travelLast": 0,
+        "settleMs": 266,
+        "travelOk": true,
+        "textOverBarMax": 0,
+        "textClearOfBar": true,
+        "menuHittable": true,
+        "belowBar": true,
+        "gap": 8,
+        "menuOpened": true,
+        "leftOnMenu": true,
+        "tabLanded": true,
+        "leftOnOutside": true,
+        "heldWithMouseOnContent": true,
+        "cappedWithMouseResting": true,
+        "cappedAfterMs": 8137,
+        "capOk": true,
+        "ok": true
+      },
+      "sheetHead": {
+        "lines": 2,
+        "headPx": 66,
+        "titlePastHeadPx": -1.2,
+        "bodyScrolls": true,
+        "ok": true
+      },
+      "sheetEdge": {
+        "firstRowInk": 1,
+        "top": {
+          "scrolled": false,
+          "more": true,
+          "clearedAgain": true
+        },
+        "headAt": 80,
+        "headEdge": {
+          "k": 0.55,
+          "contrast": 5.73,
+          "plainContrast": 15.71
+        },
+        "footAt": 94,
+        "footEdge": {
+          "k": 0.22,
+          "contrast": 1.45,
+          "plainContrast": 16.07
+        },
+        "mid": {
+          "scrolled": true,
+          "more": true
+        },
+        "endAt": 244,
+        "lastRowInk": 1,
+        "end": {
+          "scrolled": true,
+          "more": false
+        },
+        "reducedT": {
+          "mask": "linear-gradient(rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 12px, rgb(0, 0, 0) calc(100% - 12px), rgba(0, 0, 0, 0) 100%)",
+          "lines": "none"
+        },
+        "contrast": {
+          "mask": "none",
+          "lines": "head+footer"
+        },
+        "ok": true
+      }
+    }
+  ],
+  "motion": [
+    {
+      "engine": "chromium",
+      "gl": "off",
+      "wallpaper": "css",
+      "errors": [],
+      "afterLoad": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "afterTabs": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "transition": {
+        "newOpacityAt50ms": 0.2,
+        "at50ms": 52,
+        "newOpacityMaxBy80ms": 0.29,
+        "firstFrameMs": 10,
+        "behindTapRamp": 0.01,
+        "behindAt": 152,
+        "opaqueAt": 202,
+        "oldPageEverVisible": false,
+        "maxBlurFraction": 0.008,
+        "frames": 43,
+        "ok": true,
+        "revisitMinOpacity": 1,
+        "revisitOldEverVisible": false
+      },
+      "closes": {
+        "sheet": {
+          "lastSurfaceMs": 125,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 44,
+          "ok": true
+        },
+        "presentSheet": {
+          "lastSurfaceMs": 123,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 44,
+          "ok": true
+        },
+        "drawer": {
+          "lastSurfaceMs": 161,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 43,
+          "ok": true
+        },
+        "agent": {
+          "lastSurfaceMs": 127,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 43,
+          "ok": true
+        },
+        "ok": true
+      },
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "gl": "force",
+      "wallpaper": "css",
+      "errors": [],
+      "afterLoad": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "afterTabs": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "transition": {
+        "newOpacityAt50ms": 0.23,
+        "at50ms": 55,
+        "newOpacityMaxBy80ms": 0.3,
+        "firstFrameMs": 15,
+        "behindTapRamp": 0.01,
+        "behindAt": 155,
+        "opaqueAt": 208,
+        "oldPageEverVisible": false,
+        "maxBlurFraction": 0.008,
+        "frames": 43,
+        "ok": true,
+        "revisitMinOpacity": 1,
+        "revisitOldEverVisible": false
+      },
+      "closes": {
+        "sheet": {
+          "lastSurfaceMs": 127,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 44,
+          "ok": true
+        },
+        "presentSheet": {
+          "lastSurfaceMs": 124,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 43,
+          "ok": true
+        },
+        "drawer": {
+          "lastSurfaceMs": 143,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 43,
+          "ok": true
+        },
+        "agent": {
+          "lastSurfaceMs": 126,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 43,
+          "ok": true
+        },
+        "ok": true
+      },
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "gl": "off",
+      "wallpaper": "css",
+      "errors": [],
+      "afterLoad": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "afterTabs": {
+        "animations": 0,
+        "animationsAfter1s": 0,
+        "animationList": [],
+        "rafPerSec": 0,
+        "rafStacks": []
+      },
+      "transition": {
+        "newOpacityAt50ms": 0.21,
+        "at50ms": 68,
+        "newOpacityMaxBy80ms": 0.21,
+        "firstFrameMs": 37,
+        "behindTapRamp": 0,
+        "behindAt": 135,
+        "opaqueAt": 201,
+        "oldPageEverVisible": false,
+        "maxBlurFraction": 0.008,
+        "frames": 40,
+        "ok": true,
+        "revisitMinOpacity": 1,
+        "revisitOldEverVisible": false
+      },
+      "closes": {
+        "sheet": {
+          "lastSurfaceMs": 121,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 42,
+          "ok": true
+        },
+        "presentSheet": {
+          "lastSurfaceMs": 123,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 42,
+          "ok": true
+        },
+        "drawer": {
+          "lastSurfaceMs": 149,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 44,
+          "ok": true
+        },
+        "agent": {
+          "lastSurfaceMs": 117,
+          "minSourceOpacity": 1,
+          "sourceHitAfter200": true,
+          "firstMiss": null,
+          "frames": 41,
+          "ok": true
+        },
+        "ok": true
+      },
+      "ok": true
+    }
+  ],
+  "perf": [
+    {
+      "engine": "chromium",
+      "throttle": 1,
+      "wallpaper": "css",
+      "errors": [],
+      "frames": 290,
+      "droppedEstimate": 0,
+      "worstGapMs": 17,
+      "p95GapMs": 16.8,
+      "longTasksObserved": [],
+      "traceLongTasksMs": [],
+      "trace": "docs/qa/foundation/perf-trace-chromium.json.gz"
+    },
+    {
+      "engine": "chromium",
+      "throttle": 4,
+      "wallpaper": "css",
+      "errors": [],
+      "frames": 299,
+      "droppedEstimate": 5,
+      "worstGapMs": 50,
+      "p95GapMs": 16.8,
+      "longTasksObserved": [],
+      "traceLongTasksMs": [],
+      "trace": "docs/qa/foundation/perf-trace-chromium-x4.json.gz"
+    },
+    {
+      "engine": "webkit",
+      "throttle": 1,
+      "wallpaper": "css",
+      "errors": [],
+      "frames": 261,
+      "droppedEstimate": 6,
+      "worstGapMs": 51,
+      "p95GapMs": 19,
+      "longTasksObserved": [],
+      "traceLongTasksMs": null,
+      "trace": null
+    }
+  ],
+  "toastCall": [
+    {
+      "engine": "chromium",
+      "ok": true,
+      "errors": [],
+      "a": {
+        "up": true,
+        "open": true,
+        "present": 1,
+        "inert": true,
+        "ax": 0,
+        "stops": [
+          "call",
+          "call",
+          "call",
+          "body",
+          "모시와 통화 중",
+          "call",
+          "call",
+          "call",
+          "call",
+          "모시와 통화 중",
+          "call",
+          "call"
+        ],
+        "tabToToast": 0,
+        "ok": true
+      },
+      "b": {
+        "up": true,
+        "open": true,
+        "gone": true,
+        "cardStillOpen": true,
+        "life": 5479,
+        "cardAt": 864,
+        "bound": 6264,
+        "ok": true
+      }
+    },
+    {
+      "engine": "webkit",
+      "ok": true,
+      "errors": [],
+      "a": {
+        "up": true,
+        "open": true,
+        "present": 1,
+        "inert": true,
+        "stops": [
+          "body",
+          "모시와 통화 중",
+          "body",
+          "모시와 통화 중",
+          "body",
+          "모시와 통화 중",
+          "body",
+          "모시와 통화 중",
+          "body",
+          "모시와 통화 중",
+          "body",
+          "모시와 통화 중"
+        ],
+        "tabToToast": 0,
+        "ok": true
+      },
+      "b": {
+        "up": true,
+        "open": true,
+        "gone": true,
+        "cardStillOpen": true,
+        "life": 5483,
+        "cardAt": 877,
+        "bound": 6277,
+        "ok": true
+      }
+    }
+  ]
+}

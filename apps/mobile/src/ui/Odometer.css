@@ -1,0 +1,31 @@
+.odo {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.odo-visual {
+  display: inline-flex;
+  align-items: flex-start;
+  height: 1.2em;
+  line-height: 1.2em;
+}
+.odo-col {
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  overflow: clip;
+}
+.odo-strip {
+  display: flex;
+  flex-direction: column;
+}
+.odo-strip > span,
+.odo-char {
+  display: block;
+  height: 1.2em;
+  line-height: 1.2em;
+  text-align: center;
+}
+.odo-char {
+  display: inline-block;
+}

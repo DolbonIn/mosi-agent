@@ -1,0 +1,96 @@
+.topbar {
+  position: absolute;
+  z-index: 20;
+  top: var(--chrome-top);
+  left: 12px;
+  right: 12px;
+  height: var(--topbar-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  pointer-events: none;
+}
+.topbar {
+  transition: opacity var(--dur-fade) var(--ease-fade);
+}
+.topbar > .glass,
+.topbar > .tb-right-slot {
+  pointer-events: auto;
+}
+.tb-circle {
+  justify-self: start;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: var(--label);
+}
+.tb-right-slot {
+  justify-self: end;
+  display: flex;
+  gap: 8px;
+}
+.tb-right-slot .tb-circle {
+  justify-self: auto;
+}
+.tb-capsule {
+  height: 48px;
+  min-width: 48px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+}
+/* the centre: plain text on the scroll edge, never a capsule (MOTION-SPEC §8.17). Only the agent button takes taps;
+   an empty centre or a title lets them through like the rest of the bar's free space. */
+.tb-center {
+  grid-column: 2;
+  max-width: var(--tb-center-max, none);
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--label);
+  white-space: nowrap;
+}
+.tb-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 48px;
+  min-width: 44px;
+  max-width: var(--tb-center-max, none);
+  padding: 0 4px;
+  color: var(--label);
+  pointer-events: auto;
+  transition: opacity var(--dur-fade) var(--ease-fade);
+}
+.tb-agent > svg {
+  flex: none;
+}
+/* a plain-text button dims while pressed (there is no glass to lift) */
+button.tb-agent:active {
+  opacity: 0.55;
+}
+.tb-name,
+.tb-title {
+  display: block; /* max-width + ellipsis need a block box (an inline span ignores them) */
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* --tb-center-max is set by TopBar from the side widths */
+.tb-title {
+  max-width: var(--tb-center-max, 260px);
+}
+/* … minus the avatar (30), the gap (7) and the button's padding (2 × 4) */
+.tb-name {
+  max-width: calc(var(--tb-center-max, 260px) - 45px);
+}

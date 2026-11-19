@@ -1,0 +1,90 @@
+{
+  "tag": "before",
+  "legacy": true,
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/before-chromium-light-collapsed.png",
+        "docs/qa/messenger/before-chromium-light-card-collapsed.png"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/before-chromium-dark-collapsed.png",
+        "docs/qa/messenger/before-chromium-dark-card-collapsed.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/before-webkit-light-collapsed.png",
+        "docs/qa/messenger/before-webkit-light-card-collapsed.png"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "collapsed: no horizontal overflow",
+          "ok": true,
+          "detail": "{\"doc\":0,\"cards\":[0,0]}"
+        },
+        {
+          "name": "no console errors",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "errors": [],
+      "shots": [
+        "docs/qa/messenger/before-webkit-dark-collapsed.png",
+        "docs/qa/messenger/before-webkit-dark-card-collapsed.png"
+      ]
+    }
+  ]
+}

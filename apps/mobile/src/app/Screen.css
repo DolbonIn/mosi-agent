@@ -1,0 +1,128 @@
+.screen-scroll {
+  --top-clear: calc(var(--chrome-top) + var(--topbar-h) + 12px);
+  --bottom-clear: calc(var(--tabbar-bottom) + var(--tabbar-h) + 24px);
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: var(--top-clear);
+  padding-bottom: var(--bottom-clear);
+  scrollbar-width: none;
+  /* scroll edge effect: content is gone under the floating bars and thins out just below/above them. The mask does the
+     hiding (WebKit's backdrop-filter does not see into a composited scroller, so the blur strip below cannot be relied
+     on to hide anything): fully transparent above the bar's bottom edge − 4 px, opaque at --top-clear, where content
+     rests, so nothing at rest is thinned. */
+  --edge-top: calc(var(--chrome-top) + var(--topbar-h));
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h));
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--edge-top) - 4px),
+    #000 calc(var(--edge-top) + 12px),
+    #000 calc(100% - var(--edge-bottom) - 12px),
+    transparent calc(100% - var(--edge-bottom) + 8px)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--edge-top) - 4px),
+    #000 calc(var(--edge-top) + 12px),
+    #000 calc(100% - var(--edge-bottom) - 12px),
+    transparent calc(100% - var(--edge-bottom) + 8px)
+  );
+}
+.screen-scroll::-webkit-scrollbar {
+  display: none;
+}
+.screen-scroll.gutter {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+.screen-scroll.has-composer {
+  --bottom-clear: calc(var(--tabbar-bottom) + var(--tabbar-h) + 12px + 56px + 24px);
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+}
+.screen-sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 8px;
+  pointer-events: none;
+  visibility: hidden;
+}
+.screen-sentinel-edge {
+  height: 24px; /* the blur strip comes on once this has scrolled out: 24 px */
+}
+/* the blur strip under the top bar: blurred to just above the bar's bottom edge, then a 28 px fade back to sharp.
+   A sibling after the scroller (above the content, below the shell's top bar at z 20). Hidden — not painted, so no
+   backdrop cost — until the list has scrolled 24 px. */
+.screen-edge {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--chrome-top) + var(--topbar-h) + 20px);
+  pointer-events: none;
+  background: color-mix(in srgb, var(--bg) 30%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-fade) var(--ease-fade),
+    visibility 0s linear var(--dur-fade);
+}
+.screen-edge[data-on] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-fade) var(--ease-fade);
+}
+/* reduced transparency / contrast: a drawn edge instead of the thinning — an opaque band to just below the bar with a
+   hairline, no mask, no blur. The mask made the scroller a stacking context; isolation keeps it one, so a z-indexed
+   row (a chart's tip, an html card) never rises over the bands. */
+:root[data-transparency="reduce"] .screen-scroll,
+:root[data-contrast="more"] .screen-scroll {
+  -webkit-mask-image: none;
+  mask-image: none;
+  isolation: isolate;
+}
+:root[data-transparency="reduce"] .screen-edge,
+:root[data-contrast="more"] .screen-edge {
+  height: calc(var(--chrome-top) + var(--topbar-h) + 6px);
+  background: var(--bg);
+  box-shadow: 0 1px 0 var(--separator);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+/* the floor: the bottom twin of that band. Opaque from the screen's bottom to 6 px above the composer (or the tab bar),
+   a hairline on top, so nothing shows in the gap between composer and tab bar, beside them or below the tab bar. Its
+   height comes from --edge-bottom: a chat screen sets it on the scroller as its composer grows, and Screen.tsx copies
+   it here. Not drawn otherwise (the mask hides the content there). */
+.screen-floor {
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h));
+  display: none;
+}
+.screen-floor.has-composer {
+  --edge-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px);
+}
+:root[data-transparency="reduce"] .screen-floor,
+:root[data-contrast="more"] .screen-floor {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--edge-bottom) + 6px);
+  pointer-events: none;
+  background: var(--bg);
+  box-shadow: 0 -1px 0 var(--separator);
+}

@@ -1,0 +1,279 @@
+{
+  "feature": "chat",
+  "title": "채팅: 스레드와 카드",
+  "critique": "../../impeccable/critique/chat.md",
+  "score": "27/40",
+  "current": [
+    "chromium-light-09-chat-weather-card.jpg",
+    "chromium-dark-09-chat-weather-card.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "조용한 카드",
+      "summary": "배치는 그대로 두고 유리 6개를 3개로, 날씨 카드의 아이콘 판과 회색 타일, 결과 행 타일, 종이 그림자를 걷어냈어요. '최신 메시지'는 새 메시지가 있을 때만 불투명 캡슐로 떠요.",
+      "fixes": [
+        "P1-1",
+        "P1-2",
+        "P2-1",
+        "slop:GL-1",
+        "slop:RH-3",
+        "slop:IT-4",
+        "slop:NC-2",
+        "critique:Q1",
+        "critique:Q4"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "results",
+          "name": "검색 결과 카드",
+          "html": "A-results.html",
+          "shots": {
+            "light": "A-results-light.jpg",
+            "dark": "A-results-dark.jpg"
+          },
+          "current": [
+            "chromium-light-10-chat-results-card.jpg",
+            "chromium-dark-10-chat-results-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "messenger",
+          "name": "카카오톡 대화",
+          "html": "A-messenger.html",
+          "shots": {
+            "light": "A-messenger-light.jpg",
+            "dark": "A-messenger-dark.jpg"
+          },
+          "current": [
+            "chromium-light-11-chat-messenger-card.jpg",
+            "chromium-dark-11-chat-messenger-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "messenger-open",
+          "name": "펼친 대화방",
+          "html": "A-messenger-open.html",
+          "shots": {
+            "light": "A-messenger-open-light.jpg",
+            "dark": "A-messenger-open-dark.jpg"
+          },
+          "current": [
+            "chromium-light-11b-chat-messenger-open.jpg",
+            "chromium-dark-11b-chat-messenger-open.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "credential",
+          "name": "로그인 정보",
+          "html": "A-credential.html",
+          "shots": {
+            "light": "A-credential-light.jpg",
+            "dark": "A-credential-dark.jpg"
+          },
+          "current": [
+            "chromium-light-12-chat-credential-card.jpg",
+            "chromium-dark-12-chat-credential-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "P2-2",
+            "slop:CP-5",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "composer",
+          "name": "입력 중",
+          "html": "A-composer.html",
+          "shots": {
+            "light": "A-composer-light.jpg",
+            "dark": "A-composer-dark.jpg"
+          },
+          "current": [
+            "chromium-light-17-composer-focused-typed.jpg",
+            "chromium-dark-17-composer-focused-typed.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P1-2",
+            "P2-1",
+            "slop:IT-9",
+            "slop:GL-1",
+            "slop:RH-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "말은 글자로, 기록은 종이로",
+      "summary": "깽이의 말은 말풍선 없이 바탕 위 글자로 두고 카드만 종이로 남겨, 한 턴에 종이가 한 장이에요. 턴 머리는 깽이 아바타와 'N단계 · 시간', 출처는 카드 머리 오른쪽. 새 메시지는 A와 같은 불투명 캡슐로, 새 답이 왔을 때만 떠요.",
+      "fixes": [
+        "P1-1",
+        "P1-2",
+        "P2-1",
+        "slop:NC-1",
+        "slop:GL-1",
+        "slop:RH-3",
+        "slop:IT-4",
+        "slop:NC-2",
+        "critique:Q1",
+        "critique:Q2",
+        "critique:Q4"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "results",
+          "name": "검색 결과 카드",
+          "html": "B-results.html",
+          "shots": {
+            "light": "B-results-light.jpg",
+            "dark": "B-results-dark.jpg"
+          },
+          "current": [
+            "chromium-light-10-chat-results-card.jpg",
+            "chromium-dark-10-chat-results-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q2",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "messenger",
+          "name": "카카오톡 대화",
+          "html": "B-messenger.html",
+          "shots": {
+            "light": "B-messenger-light.jpg",
+            "dark": "B-messenger-dark.jpg"
+          },
+          "current": [
+            "chromium-light-11-chat-messenger-card.jpg",
+            "chromium-dark-11-chat-messenger-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q2",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "messenger-open",
+          "name": "펼친 대화방",
+          "html": "B-messenger-open.html",
+          "shots": {
+            "light": "B-messenger-open-light.jpg",
+            "dark": "B-messenger-open-dark.jpg"
+          },
+          "current": [
+            "chromium-light-11b-chat-messenger-open.jpg",
+            "chromium-dark-11b-chat-messenger-open.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q2",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "credential",
+          "name": "로그인 정보",
+          "html": "B-credential.html",
+          "shots": {
+            "light": "B-credential-light.jpg",
+            "dark": "B-credential-dark.jpg"
+          },
+          "current": [
+            "chromium-light-12-chat-credential-card.jpg",
+            "chromium-dark-12-chat-credential-card.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P2-1",
+            "P2-2",
+            "slop:CP-5",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q1",
+            "critique:Q2",
+            "critique:Q5"
+          ]
+        },
+        {
+          "id": "composer",
+          "name": "입력 중",
+          "html": "B-composer.html",
+          "shots": {
+            "light": "B-composer-light.jpg",
+            "dark": "B-composer-dark.jpg"
+          },
+          "current": [
+            "chromium-light-17-composer-focused-typed.jpg",
+            "chromium-dark-17-composer-focused-typed.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P1-2",
+            "P2-1",
+            "slop:IT-9",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3",
+            "critique:Q2"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로: §3 press(lift & swell), §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph, §3 content swap(카드 안쪽 snap), §8.4 보내기↔정지 morph, §3 droplet 두 모서리 이동, §8.2 돌아올 때 재등장 없음"
+}

@@ -1,0 +1,334 @@
+{
+  "feature": "my-mosi",
+  "title": "나의 모시",
+  "critique": "../../impeccable/critique/my-mosi.md",
+  "score": "26/40",
+  "current": [
+    "chromium-light-29-profile.jpg",
+    "chromium-dark-29-profile.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "조용한 정리",
+      "summary": "배치와 상자는 그대로 두고 군더더기만 걷었어요. 티켓은 색 대신 '기본 3장 · 프리미엄 0장'으로 말하고, 아이콘 타일은 글줄 안 글리프가 되고, 그림자 없는 종이에 반경 하나, 보호 카드는 '깽이' 묶음의 행이 됐어요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-15",
+        "slop:IT-17",
+        "slop:RH-4",
+        "slop:RH-1"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "sheet",
+          "name": "티켓 시트",
+          "shots": {
+            "light": "A-sheet-light.jpg",
+            "dark": "A-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-32-tickets-sheet.jpg",
+            "chromium-dark-32-tickets-sheet.jpg"
+          ],
+          "fixes": [
+            "P2-1"
+          ]
+        },
+        {
+          "id": "mid",
+          "name": "중간 스크롤",
+          "summary": "내 계정 묶음이 맨 위에 온 중간 스크롤. 큰 제목이 바에 '나의 모시'로 접히고, 판 없는 글리프와 진짜 h2 그대로예요.",
+          "shots": {
+            "light": "A-mid-light.jpg",
+            "dark": "A-mid-dark.jpg"
+          },
+          "current": [
+            "chromium-light-30-profile-scrolled.jpg",
+            "chromium-dark-30-profile-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-15",
+            "slop:GL-3"
+          ]
+        },
+        {
+          "id": "scrolled",
+          "name": "끝까지 스크롤",
+          "shots": {
+            "light": "A-scrolled-light.jpg",
+            "dark": "A-scrolled-dark.jpg"
+          },
+          "current": [
+            "chromium-light-31-profile-bottom.jpg",
+            "chromium-dark-31-profile-bottom.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-15",
+            "slop:IT-17",
+            "slop:GL-3"
+          ]
+        },
+        {
+          "id": "privacy",
+          "name": "개인 정보 보호 시트",
+          "summary": "타일 없이 세 질문이 제목이에요. 펼치기는 평범한 행, 끝에 회색 버튼 두 개(저장된 로그인, 접근 기록).",
+          "shots": {
+            "light": "A-privacy-light.jpg",
+            "dark": "A-privacy-dark.jpg"
+          },
+          "current": [
+            "chromium-light-33-privacy-sheet.jpg",
+            "chromium-dark-33-privacy-sheet.jpg"
+          ],
+          "fixes": []
+        },
+        {
+          "id": "phone",
+          "name": "내 전화번호 시트",
+          "summary": "리드가 어떤 전화에 쓰는 번호인지 말해요. 안내 줄에 지구 글리프가 없고, 꺼진 버튼은 파랑 없이 --fill과 --label-3이에요.",
+          "shots": {
+            "light": "A-phone-light.jpg",
+            "dark": "A-phone-dark.jpg"
+          },
+          "current": [
+            "chromium-light-37-phone-sheet.jpg",
+            "chromium-dark-37-phone-sheet.jpg"
+          ],
+          "fixes": [
+            "phone-delegation:P2-2"
+          ]
+        },
+        {
+          "id": "agent",
+          "name": "깽이 설정",
+          "summary": "아바타 옆에 안내 한 줄, 이름 제목은 빠졌어요. 상단 가운데는 비고, '할 수 있는 일'은 13px 목록 머리에 개수가 붙어요.",
+          "shots": {
+            "light": "A-agent-light.jpg",
+            "dark": "A-agent-dark.jpg"
+          },
+          "current": [
+            "chromium-light-34-agent-settings.jpg",
+            "chromium-dark-34-agent-settings.jpg"
+          ],
+          "fixes": [
+            "P2-4",
+            "slop:RH-1"
+          ]
+        },
+        {
+          "id": "agent-end",
+          "name": "깽이 설정 · 할 수 있는 일",
+          "summary": "같은 화면을 할 수 있는 일까지 스크롤. 판 없는 기능 행, 분류별 h3, 서버 설명 그대로예요.",
+          "shots": {
+            "light": "A-agent-end-light.jpg",
+            "dark": "A-agent-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-35-agent-settings-scrolled.jpg",
+            "chromium-dark-35-agent-settings-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-4"
+          ]
+        },
+        {
+          "id": "account",
+          "name": "내 계정",
+          "summary": "행 판과 sparkles·번개를 뺐어요. AI 모델은 행이 아니라 모시 묶음 설명 한 줄, 로그아웃은 --fill 위 빨간 글자예요.",
+          "shots": {
+            "light": "A-account-light.jpg",
+            "dark": "A-account-dark.jpg"
+          },
+          "current": [
+            "chromium-light-36-account.jpg",
+            "chromium-dark-36-account.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-3",
+            "slop:IT-15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "하나의 목록",
+      "summary": "탭 전체를 '제목 → 묶음 → 설명' 한 문법으로 바꿨어요. 한도는 '사용량' 묶음의 첫 행, 빈 7일 기록은 설명 한 줄, 아이콘 열 대신 4행 이하의 의미별 묶음, 가운데 이름표는 스크롤했을 때만 '나의 모시'로 나와요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-15",
+        "slop:IT-17",
+        "slop:RH-4",
+        "slop:NC-8",
+        "slop:RH-1",
+        "critique:Q1"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "sheet",
+          "name": "티켓 시트",
+          "shots": {
+            "light": "B-sheet-light.jpg",
+            "dark": "B-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-32-tickets-sheet.jpg",
+            "chromium-dark-32-tickets-sheet.jpg"
+          ],
+          "fixes": [
+            "P2-1"
+          ]
+        },
+        {
+          "id": "mid",
+          "name": "중간 스크롤",
+          "summary": "같은 위치를 한 목록으로. 연결 카드도 행이라 묶음마다 제목 → 행 → 설명의 한 문법이에요.",
+          "shots": {
+            "light": "B-mid-light.jpg",
+            "dark": "B-mid-dark.jpg"
+          },
+          "current": [
+            "chromium-light-30-profile-scrolled.jpg",
+            "chromium-dark-30-profile-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-15",
+            "slop:NC-8",
+            "slop:GL-3",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "scrolled",
+          "name": "끝까지 스크롤",
+          "shots": {
+            "light": "B-scrolled-light.jpg",
+            "dark": "B-scrolled-dark.jpg"
+          },
+          "current": [
+            "chromium-light-31-profile-bottom.jpg",
+            "chromium-dark-31-profile-bottom.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-15",
+            "slop:IT-17",
+            "slop:NC-8",
+            "slop:GL-3",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "privacy",
+          "name": "개인 정보 보호 시트",
+          "summary": "바로가기가 그걸 말하는 답 아래 글자 링크로 들어가고, 시트는 펼치기 행으로 끝나요. 버튼 두 개가 펼치기와 다투지 않아요.",
+          "shots": {
+            "light": "B-privacy-light.jpg",
+            "dark": "B-privacy-dark.jpg"
+          },
+          "current": [
+            "chromium-light-33-privacy-sheet.jpg",
+            "chromium-dark-33-privacy-sheet.jpg"
+          ],
+          "fixes": []
+        },
+        {
+          "id": "phone",
+          "name": "내 전화번호 시트",
+          "summary": "리드 한 문장, 번호 칸이 시트의 주인공(크게, 자리표시자 없음). +1 안내는 버튼 바로 위예요.",
+          "shots": {
+            "light": "B-phone-light.jpg",
+            "dark": "B-phone-dark.jpg"
+          },
+          "current": [
+            "chromium-light-37-phone-sheet.jpg",
+            "chromium-dark-37-phone-sheet.jpg"
+          ],
+          "fixes": [
+            "phone-delegation:P2-2"
+          ]
+        },
+        {
+          "id": "agent",
+          "name": "깽이 설정",
+          "summary": "아바타 옆에 상태(쉬는 중 · 아직 일한 적이 없어요). 색은 고르는 순간 저장돼서 안내가 필요 없고, 이름과 성격만 저장하기를 거쳐요.",
+          "shots": {
+            "light": "B-agent-light.jpg",
+            "dark": "B-agent-dark.jpg"
+          },
+          "current": [
+            "chromium-light-34-agent-settings.jpg",
+            "chromium-dark-34-agent-settings.jpg"
+          ],
+          "fixes": [
+            "P2-4",
+            "slop:RH-1",
+            "critique:Q3",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "agent-end",
+          "name": "깽이 설정 · 할 수 있는 일",
+          "summary": "같은 위치에서 설명을 결과로 줄였어요(예: '기상청 예보로 지금 날씨와 3일 예보를 알려줘요'). 서버 쪽 변경이에요.",
+          "shots": {
+            "light": "B-agent-end-light.jpg",
+            "dark": "B-agent-end-dark.jpg"
+          },
+          "current": [
+            "chromium-light-35-agent-settings-scrolled.jpg",
+            "chromium-dark-35-agent-settings-scrolled.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-3",
+            "P2-4"
+          ]
+        },
+        {
+          "id": "account",
+          "name": "내 계정",
+          "summary": "모델 id는 계정 화면에서 빠져요. 모시 이름은 깽이 설정으로 가는 행, 로그아웃은 따로 묶인 빨간 행이에요(두 번 눌러 확인).",
+          "shots": {
+            "light": "B-account-light.jpg",
+            "dark": "B-account-dark.jpg"
+          },
+          "current": [
+            "chromium-light-36-account.jpg",
+            "chromium-dark-36-account.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-3",
+            "slop:IT-15",
+            "critique:Q2"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요: §3 Counters(% Odometer), §6.6 막대 morph 채움·티켓 뒤 0까지 빠짐(시트 막대는 사용량이 있을 때만), §3 Sheet(티켓 행에서 펼침, §8.2 닫힐 때 재등장 없음), §3 Loader→check(서버 확인 뒤), §6.6 행 → 상세 큰 제목 morph, 행 누름은 같은 프레임의 평평한 틴트. 더 그린 상태: §3 Sheet(개인 정보·전화 시트가 누른 행에서 펼침, 그 행은 비어 있음), §3 Morph(자세히 보기), §6.6 깽이·내 계정 큰 제목 morph, §3 Toggle(기능 21개), §8.6 로그아웃 두 번 누르기, §8.13(B 색 저장 실패 시 되돌림)."
+}

@@ -1,0 +1,157 @@
+{
+  "feature": "drawer",
+  "title": "서랍: 대화 목록과 검색",
+  "critique": "../../impeccable/critique/drawer.md",
+  "score": "26/40",
+  "current": [
+    "chromium-light-20-drawer.jpg",
+    "chromium-dark-20-drawer.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "판 없는 목록, 상태를 말하는 행",
+      "summary": "구조는 그대로 두고 소음을 뺐어요. 행의 32px 흰 판을 걷어 20px 글리프만 남기고(회의 people, 할 일 doc, 친구는 상대 모시 아바타), 부제는 종류 대신 일어난 일('전화를 걸었어요', '회의를 요약했어요'), 회의 대화방 제목은 회의 이름. 보관 토글은 글자 버튼 '보관한 대화', '나만의 AI 에이전트' 삭제. 검색 첫 결과는 파란 슬랩 대신 판 위 행 + 맞은 글자 --accent-text, 빈 검색은 최근 대화. 진행 중 배지는 --fill 중립 알약 + 글자만(글리프 없음).",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-10"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "search",
+          "name": "검색 ㅎㅇ",
+          "html": "A-search.html",
+          "shots": {
+            "light": "A-search-light.jpg",
+            "dark": "A-search-dark.jpg"
+          },
+          "current": [
+            "chromium-light-21-drawer-search.jpg",
+            "chromium-dark-21-drawer-search.jpg"
+          ],
+          "fixes": [
+            "P2-4",
+            "slop:IT-10"
+          ]
+        },
+        {
+          "id": "recent",
+          "name": "빈 검색: 최근 대화 (현재는 빈 화면, 소스 기준)",
+          "html": "A-recent.html",
+          "shots": {
+            "light": "A-recent-light.jpg",
+            "dark": "A-recent-dark.jpg"
+          },
+          "current": [
+            "chromium-light-21-drawer-search.jpg",
+            "chromium-dark-21-drawer-search.jpg"
+          ],
+          "fixes": [
+            "P2-3",
+            "slop:IT-10"
+          ]
+        },
+        {
+          "id": "live",
+          "name": "회의 중인 대화가 있을 때 (현재 캡처 없음)",
+          "html": "A-live.html",
+          "shots": {
+            "light": "A-live-light.jpg",
+            "dark": "A-live-dark.jpg"
+          },
+          "current": [
+            "chromium-light-20-drawer.jpg",
+            "chromium-dark-20-drawer.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "slop:IT-10",
+            "critique:Q2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "기록이 되는 서랍, 지금 하는 일이 위로",
+      "summary": "상단 바에 이미 있는 에이전트 머리를 지우고 검색부터. 부제는 그 대화에서 깽이가 한 마지막 문장(두 줄, 번호·메일·코드는 가림)이라 서랍이 기록이 돼요. 회의 중·승인 대기·통화 중인 일은 서버 상태로 맨 위 '지금 하는 일'에 고정하고 배지 없이 부제로 말해요('회의 중 · 듣고 받아 적고 있어요.'). '추가 대화' → '맡긴 일'. 검색 결과는 판 없이 같은 행으로, 제목은 보통 굵기에 맞은 글자만 굵게.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-10",
+        "critique:Q1",
+        "critique:Q3",
+        "critique:Q4"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "search",
+          "name": "검색 ㅎㅇ",
+          "html": "B-search.html",
+          "shots": {
+            "light": "B-search-light.jpg",
+            "dark": "B-search-dark.jpg"
+          },
+          "current": [
+            "chromium-light-21-drawer-search.jpg",
+            "chromium-dark-21-drawer-search.jpg"
+          ],
+          "fixes": [
+            "P2-4",
+            "slop:IT-10",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "recent",
+          "name": "빈 검색: 최근 대화 (현재는 빈 화면, 소스 기준)",
+          "html": "B-recent.html",
+          "shots": {
+            "light": "B-recent-light.jpg",
+            "dark": "B-recent-dark.jpg"
+          },
+          "current": [
+            "chromium-light-21-drawer-search.jpg",
+            "chromium-dark-21-drawer-search.jpg"
+          ],
+          "fixes": [
+            "P2-3",
+            "slop:IT-10",
+            "critique:Q4"
+          ]
+        },
+        {
+          "id": "live",
+          "name": "회의 중인 대화가 있을 때 (현재 캡처 없음)",
+          "html": "B-live.html",
+          "shots": {
+            "light": "B-live-light.jpg",
+            "dark": "B-live-dark.jpg"
+          },
+          "current": [
+            "chromium-light-20-drawer.jpg",
+            "chromium-dark-20-drawer.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "slop:IT-10",
+            "critique:Q2"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로: §8.10 서랍(카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스, 가장자리 스와이프 1:1), §3 Spotlight(검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, accent 커서는 키보드·정밀 포인터에서만), §3 list(행 layout=position, 4px 떠오름, 보관하면 접히며 빠짐 — '지금 하는 일'로 오르내릴 때도 같은 layout 이동), §3 press tint, §8.2 돌아올 때 재등장 없음"
+}

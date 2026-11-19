@@ -1,0 +1,116 @@
+{
+ "routes": [
+  {
+   "result_code": 0,
+   "result_msg": "길찾기 성공",
+   "summary": {
+    "origin": {
+     "name": "",
+     "x": 127.02799604937027,
+     "y": 37.498079420412836
+    },
+    "destination": {
+     "name": "",
+     "x": 126.97059291530633,
+     "y": 37.554692490116096
+    },
+    "waypoints": [],
+    "priority": "RECOMMEND",
+    "fare": {
+     "taxi": 18100,
+     "toll": 0
+    },
+    "distance": 10936,
+    "duration": 2642
+   },
+   "sections": [
+    {
+     "distance": 10936,
+     "duration": 2584,
+     "roads": [
+      {
+       "name": "테헤란로",
+       "distance": 134,
+       "duration": 19
+      },
+      {
+       "name": "테헤란로4길",
+       "distance": 188,
+       "duration": 99
+      },
+      {
+       "name": "강남대로84길",
+       "distance": 160,
+       "duration": 141
+      },
+      {
+       "name": "강남대로",
+       "distance": 966,
+       "duration": 552
+      },
+      {
+       "name": "사평대로",
+       "distance": 1407,
+       "duration": 346
+      },
+      {
+       "name": "사평대로",
+       "distance": 484,
+       "duration": 33
+      },
+      {
+       "name": "반포대로",
+       "distance": 53,
+       "duration": 13
+      },
+      {
+       "name": "반포대로",
+       "distance": 125,
+       "duration": 32
+      },
+      {
+       "name": "반포대로",
+       "distance": 601,
+       "duration": 154
+      },
+      {
+       "name": "반포대로",
+       "distance": 2968,
+       "duration": 261
+      },
+      {
+       "name": "녹사평대로",
+       "distance": 217,
+       "duration": 45
+      },
+      {
+       "name": "이태원로",
+       "distance": 1146,
+       "duration": 290
+      },
+      {
+       "name": "한강대로",
+       "distance": 826,
+       "duration": 235
+      },
+      {
+       "name": "한강대로77길",
+       "distance": 184,
+       "duration": 109
+      },
+      {
+       "name": "청파로",
+       "distance": 1357,
+       "duration": 218
+      },
+      {
+       "name": "",
+       "distance": 120,
+       "duration": 37
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

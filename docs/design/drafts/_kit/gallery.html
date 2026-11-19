@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모시 드래프트 갤러리</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<style>
+  body { padding: 40px 32px 80px; background: var(--bg); }
+  h1 { font-family: var(--font-display); font-size: var(--t-title1); letter-spacing: -0.02em; }
+  .g-lede { margin-top: 6px; color: var(--label-2); font-size: var(--t-subhead); max-width: 70ch; }
+  .g-feature { margin-top: 44px; }
+  .g-feature h2 { font-size: var(--t-title2); letter-spacing: -0.01em; }
+  .g-feature h2 small { font-size: var(--t-footnote); color: var(--label-2); font-weight: 500; margin-left: 6px; }
+  .g-card { margin-top: 20px; padding: 20px; background: var(--surface); border-radius: var(--r-card); }
+  .g-card header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; font-size: var(--t-footnote); color: var(--label-2); }
+  .g-card h3 { font-size: var(--t-body); color: var(--label); margin-right: auto; }
+  .g-shots { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; }
+  .g-shot { width: 260px; }
+  .g-shot img { width: 260px; height: auto; border-radius: 28px; display: block; background: var(--surface-2); }
+  .g-shot.is-now img { opacity: 0.9; outline: 1px dashed var(--separator); outline-offset: 3px; }
+  .g-shot figcaption { margin-top: 6px; font-size: var(--t-footnote); color: var(--label-2); }
+  .g-why { margin: 14px 0 0 1.2em; font-size: var(--t-subhead); line-height: 1.6; max-width: 90ch; }
+  .g-motion, .g-fixes { margin-top: 10px; font-size: var(--t-footnote); color: var(--label-2); max-width: 90ch; }
+  .g-motion strong, .g-fixes strong { color: var(--label); margin-right: 6px; }
+</style>
+</head>
+<body>
+<h1>모시 드래프트 갤러리</h1>
+<p class="g-lede">De-slop drafts, rendered by docs/design/drafts/_kit/render.mjs at 390×844 @2x in light and dark. Each draft loads the app's real tokens.css, base.css, glass.css and the wallpaper. The dashed frame is the current app, for comparison. Generated 2026-11-12 06:16 KST.</p>
+<section class="g-feature"><h2>archive <small>archive/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 판을 떼고 미리보기를 읽히게</h3>
+          <a href="../archive/A-dash.html">HTML</a> · <a href="../archive/A-dash.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/A-dash-light.png" alt=""><figcaption>A-dash-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/A-dash-dark.png" alt=""><figcaption>A-dash-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 머리의 색 판(파랑·초록·주황)을 빼고 제목이 이끌게, 종류는 '문서 · 어제 수정' 한 줄에만</li><li>미리보기를 ' · '로 끊고, 제목과 겹치는 첫 제목줄은 빼고, 체크리스트는 '6개 중 0개 완료'부터</li><li>세그먼트를 '문서 | 사진·파일'로: 아티팩트는 개발자 말</li><li>문서·요약 시트에서 오목 패널을 걷고, 공유·복사는 기록 아래로, 막대 선택값을 '4주 · 312,000원'으로 보여 줌</li><li>빈 사진·파일 화면은 행동 하나: + 버튼(FAB) 없이, 두 길을 다 말하는 문장</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 판을 떼고 미리보기를 읽히게</h3>
+          <a href="../archive/A-doc.html">HTML</a> · <a href="../archive/A-doc.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/A-doc-light.png" alt=""><figcaption>A-doc-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/A-doc-dark.png" alt=""><figcaption>A-doc-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 머리의 색 판(파랑·초록·주황)을 빼고 제목이 이끌게, 종류는 '문서 · 어제 수정' 한 줄에만</li><li>미리보기를 ' · '로 끊고, 제목과 겹치는 첫 제목줄은 빼고, 체크리스트는 '6개 중 0개 완료'부터</li><li>세그먼트를 '문서 | 사진·파일'로: 아티팩트는 개발자 말</li><li>문서·요약 시트에서 오목 패널을 걷고, 공유·복사는 기록 아래로, 막대 선택값을 '4주 · 312,000원'으로 보여 줌</li><li>빈 사진·파일 화면은 행동 하나: + 버튼(FAB) 없이, 두 길을 다 말하는 문장</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 판을 떼고 미리보기를 읽히게</h3>
+          <a href="../archive/A-media.html">HTML</a> · <a href="../archive/A-media.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/A-media-light.png" alt=""><figcaption>A-media-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/A-media-dark.png" alt=""><figcaption>A-media-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 머리의 색 판(파랑·초록·주황)을 빼고 제목이 이끌게, 종류는 '문서 · 어제 수정' 한 줄에만</li><li>미리보기를 ' · '로 끊고, 제목과 겹치는 첫 제목줄은 빼고, 체크리스트는 '6개 중 0개 완료'부터</li><li>세그먼트를 '문서 | 사진·파일'로: 아티팩트는 개발자 말</li><li>문서·요약 시트에서 오목 패널을 걷고, 공유·복사는 기록 아래로, 막대 선택값을 '4주 · 312,000원'으로 보여 줌</li><li>빈 사진·파일 화면은 행동 하나: + 버튼(FAB) 없이, 두 길을 다 말하는 문장</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 판을 떼고 미리보기를 읽히게</h3>
+          <a href="../archive/A.html">HTML</a> · <a href="../archive/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 머리의 색 판(파랑·초록·주황)을 빼고 제목이 이끌게, 종류는 '문서 · 어제 수정' 한 줄에만</li><li>미리보기를 ' · '로 끊고, 제목과 겹치는 첫 제목줄은 빼고, 체크리스트는 '6개 중 0개 완료'부터</li><li>세그먼트를 '문서 | 사진·파일'로: 아티팩트는 개발자 말</li><li>문서·요약 시트에서 오목 패널을 걷고, 공유·복사는 기록 아래로, 막대 선택값을 '4주 · 312,000원'으로 보여 줌</li><li>빈 사진·파일 화면은 행동 하나: + 버튼(FAB) 없이, 두 길을 다 말하는 문장</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 묶음의 기록</h3>
+          <a href="../archive/B-dash.html">HTML</a> · <a href="../archive/B-dash.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/B-dash-light.png" alt=""><figcaption>B-dash-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/B-dash-dark.png" alt=""><figcaption>B-dash-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 세 장 대신 한 묶음의 행: 제목 → 내용 미리보기 → '문서 · 어제 수정'</li><li>미리보기 규칙은 A와 같음(' · ', 제목 중복 제거, 체크리스트 진행 수)</li><li>시트 제목이 기록의 제목: 왼쪽 정렬 title2, 그 아래 종류·날짜</li><li>요약 시트는 장부처럼: 모든 금액이 오른쪽 한 줄, 막대 위에 금액, 쉬는 동안 강조색 없음</li><li>'대시보드' → '요약', 빈 사진·파일은 글리프 없이 문장과 행동 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 묶음의 기록</h3>
+          <a href="../archive/B-doc.html">HTML</a> · <a href="../archive/B-doc.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/B-doc-light.png" alt=""><figcaption>B-doc-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/B-doc-dark.png" alt=""><figcaption>B-doc-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 세 장 대신 한 묶음의 행: 제목 → 내용 미리보기 → '문서 · 어제 수정'</li><li>미리보기 규칙은 A와 같음(' · ', 제목 중복 제거, 체크리스트 진행 수)</li><li>시트 제목이 기록의 제목: 왼쪽 정렬 title2, 그 아래 종류·날짜</li><li>요약 시트는 장부처럼: 모든 금액이 오른쪽 한 줄, 막대 위에 금액, 쉬는 동안 강조색 없음</li><li>'대시보드' → '요약', 빈 사진·파일은 글리프 없이 문장과 행동 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 묶음의 기록</h3>
+          <a href="../archive/B-media.html">HTML</a> · <a href="../archive/B-media.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/B-media-light.png" alt=""><figcaption>B-media-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/B-media-dark.png" alt=""><figcaption>B-media-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 세 장 대신 한 묶음의 행: 제목 → 내용 미리보기 → '문서 · 어제 수정'</li><li>미리보기 규칙은 A와 같음(' · ', 제목 중복 제거, 체크리스트 진행 수)</li><li>시트 제목이 기록의 제목: 왼쪽 정렬 title2, 그 아래 종류·날짜</li><li>요약 시트는 장부처럼: 모든 금액이 오른쪽 한 줄, 막대 위에 금액, 쉬는 동안 강조색 없음</li><li>'대시보드' → '요약', 빈 사진·파일은 글리프 없이 문장과 행동 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 묶음의 기록</h3>
+          <a href="../archive/B.html">HTML</a> · <a href="../archive/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../archive/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../archive/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-25-archive-artifacts.jpg" alt=""><figcaption>현재 앱 · chromium-light-25-archive-artifacts</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-27-artifact-sheet-dashboard.jpg" alt=""><figcaption>현재 앱 · chromium-light-27-artifact-sheet-dashboard</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 세 장 대신 한 묶음의 행: 제목 → 내용 미리보기 → '문서 · 어제 수정'</li><li>미리보기 규칙은 A와 같음(' · ', 제목 중복 제거, 체크리스트 진행 수)</li><li>시트 제목이 기록의 제목: 왼쪽 정렬 title2, 그 아래 종류·날짜</li><li>요약 시트는 장부처럼: 모든 금액이 오른쪽 한 줄, 막대 위에 금액, 쉬는 동안 강조색 없음</li><li>'대시보드' → '요약', 빈 사진·파일은 글리프 없이 문장과 행동 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3) · 카드 → 시트 morph, 시트에서 카드로 돌아옴 (§3 sheet from source) · 막대 첫 노출 상승 + 숫자 Odometer (§3) · 지우기 두 번 누르기 확인 → 카드 접힘 (§3) · 올리기 시트는 버튼에서 morph (§3)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:IT-14, slop:CL-2, slop:RH-1, slop:GL-2, critique:Q1</p>
+      </article></section>
+<section class="g-feature"><h2>채팅 <small>chat/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 입력 중: 보내기와 통화 사이에 숨 쉴 틈</h3>
+          <a href="../chat/A-composer.html">HTML</a> · <a href="../chat/A-composer.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-composer-light.png" alt=""><figcaption>A-composer-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-composer-dark.png" alt=""><figcaption>A-composer-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-17-composer-focused-typed.jpg" alt=""><figcaption>현재 앱 · chromium-light-17-composer-focused-typed</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-17-composer-focused-typed.jpg" alt=""><figcaption>현재 앱 · chromium-dark-17-composer-focused-typed</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>보내기와 통화 사이 2px → 8px: 아주 다른 두 동작이 붙어 있지 않게 (비평 Minor). 보내기 원은 HEAD와 같은 System Blue(FOUNDATION: 글리프만 있는 원), '전화 걸기'의 --accent-fill은 HEAD에서 이미 고쳐짐</li><li>입력창 반경 --r-composer는 HEAD에서 이미 토큰(R.composer), 두 줄이 되어도 같은 모양</li><li>위 카드: 회의록 판 삭제 (P1-2, IT-9). '문서'를 메타 줄로, 예약 시계 판 삭제는 HEAD에서 이미</li><li>전화 승인: 알약·판 없음과 중립 취소는 HEAD와 같음. 전체 번호를 제목 아래 한 줄로 (HEAD도 card.call로 같은 답)</li><li>유리 3개, 깽이 답에 꼬리; 탭 바는 입력 중에도 그대로 (P1-1, GL-1, RH-3, P2-1)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 content swap: 글자가 생기면 마이크 → 보내기, 지우면 되돌아옴 · §8.4 보내기 ↔ 정지 morph, 첫 토큰 타임라인 · §8.8 아래 크롬 고정: 포커스·입력 중에도 탭 바 크기·위치 그대로 (최소화 기각) · 입력창은 줄 수만큼 위로 자라요 (layout morph), 탭 바는 움직이지 않음 · §3 press: 보내기 lift &amp; swell</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-1, slop:IT-9, slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 로그인 카드: 약속은 비밀번호 옆에서 한 번</h3>
+          <a href="../chat/A-credential.html">HTML</a> · <a href="../chat/A-credential.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-credential-light.png" alt=""><figcaption>A-credential-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-credential-dark.png" alt=""><figcaption>A-credential-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-12-chat-credential-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-12-chat-credential-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-12-chat-credential-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-12-chat-credential-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'이 기기에서 암호화돼요. 깽이도 볼 수 없어요.'를 비밀번호 필드 바로 아래 한 번만: 답·각주의 반복과 '모시도'(브랜드) 삭제 (P2-2, CP-5)</li><li>머리에 카카오톡 앱 마크 22px: 어느 계정의 비밀번호인지 알아보는 표시 (비평 Q1). 자물쇠 판은 HEAD에서 이미 없음</li><li>입력 누락 오류는 그 필드 아래로, 보관 기간 세그먼트는 iOS 기본이라 유지 (P2-2)</li><li>HEAD에서 이미 고쳐짐(95c51d3), 그대로 둠: placeholder --placeholder ≈3:1, '안전하게 저장' --accent-fill 흰 글자 4.7:1</li><li>유리 3개, 깽이 답에 꼬리, 캡슐 없음 (P1-1, GL-1, RH-3, P2-1)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 Loader → check: 저장 버튼 → '기기에서 암호화하는 중' → '저장했어요', 서버 201 뒤에만 · §3 morph: 저장되면 카드가 그 자리에서 '저장됨 · 7일' 영수증으로 모양을 바꿔요 (ContentSwap) · §3 two-edge: 보관 기간 선택 thumb (A) / 메뉴는 버튼에서 morph로 열림 (B) · §8.15 앱을 떠나면 입력값을 즉시 가림 (visibilitychange) · 필드 포커스 링은 즉시, 필드 자기 반경 위에</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, slop:CP-5, slop:GL-1, slop:RH-3, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 펼친 방: HEAD 그대로, 내 말풍선만 중립 한 단계</h3>
+          <a href="../chat/A-messenger-open.html">HTML</a> · <a href="../chat/A-messenger-open.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-messenger-open-light.png" alt=""><figcaption>A-messenger-open-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-messenger-open-dark.png" alt=""><figcaption>A-messenger-open-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-11b-chat-messenger-open.jpg" alt=""><figcaption>현재 앱 · chromium-light-11b-chat-messenger-open</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-11b-chat-messenger-open.jpg" alt=""><figcaption>현재 앱 · chromium-dark-11b-chat-messenger-open</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>HEAD의 펼친 방 그대로: 이니셜 원, 이름(오픈채팅 태그는 처음 한 번), 말풍선, 묶음의 마지막에 시각, 날짜 구분, 시스템 줄, 답장, 사진·파일 자리</li><li>내 말풍선의 따뜻한 틴트(#ff9f0a 15%, 어두운 테마 20%)는 파랑도 깽이 색도 아닌 세 번째 색이라 뺌: 내 쪽은 --fill-2, 상대는 --fill (색 대신 명도 한 단계)</li><li>나를 알리는 건 색이 아니라 자리: 오른쪽, 이니셜·이름 없음, 시각은 왼쪽 (색만으로 구분하지 않기)</li><li>유리 3개, 깽이 답에 꼬리, 새로 온 게 없으니 캡슐 없음 (P1-1, GL-1, RH-3, P2-1, 비평 Q4). 종이 그림자는 HEAD에서 이미 없음</li><li>펼친 상태 그대로의 스크롤 보정·접기 위치는 HEAD와 같음</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 펼치기: 방이 카드 아래 가장자리에서 morph로 드러나요 (clip-path, transform 없음), 스크롤 보정으로 '접기'는 손가락 아래 그대로 · 접기는 return: 하이라이트가 첫 프레임부터 완성 (재등장 없음), 셰브런 180° snap · '이전 대화 더 보기'도 같은 스크롤 보정 (위로 자라고 화면은 그대로) · B: '전체 보기'는 그 말풍선만 content swap으로 늘어나요 (높이 layout morph) · §3 press: 토글·말풍선 안 버튼 lift &amp; swell</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:GL-1, slop:RH-3, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 카카오톡 방: HEAD 카드 그대로, 종이와 칼럼만</h3>
+          <a href="../chat/A-messenger.html">HTML</a> · <a href="../chat/A-messenger.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-messenger-light.png" alt=""><figcaption>A-messenger-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-messenger-dark.png" alt=""><figcaption>A-messenger-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-11-chat-messenger-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-11-chat-messenger-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-11-chat-messenger-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-11-chat-messenger-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>HEAD 방 카드를 그대로: 방 이름, 앱 마크 + 메타, 중요한 메시지 1–3개를 말풍선으로, '대화 펼치기'. 옛 슬랙 카드의 판·회색 패널·'읽음' 알약은 HEAD에서 이미 없어짐(0129451)</li><li>메타 순서만: '안 읽음 7'을 앱 이름 바로 뒤로. 줄이 넘치면 덜 중요한 시간 범위가 다음 줄로 (지금은 '안 읽음 7'이 혼자 떨어짐)</li><li>16pt 한 칼럼이라 말풍선이 32pt 넓어져 줄이 짧아짐; 첫 말풍선 왼쪽 위 8px 꼬리는 --r-plate 그대로</li><li>유리 3개, 깽이 답에 꼬리 (P1-1, GL-1, RH-3, P2-1). 종이 그림자는 HEAD에서 이미 없음</li><li>'최신 메시지' 캡슐이 카톡 답을 가리던 문제: 새로 온 게 없으면 캡슐 없음 (P1-1, 비평 Q4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 펼치기: 방이 카드 아래 가장자리에서 morph로 드러나요 (clip-path, transform 없음), 스크롤 보정으로 토글은 손가락 아래 그대로 · 셰브런 180° 회전 snap, 방 opacity fade · 접기는 return: 하이라이트가 첫 프레임부터 완성 (재등장 없음) · §3 press: 토글 lift &amp; swell · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:GL-1, slop:RH-3, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 결과 카드: 타일과 알약 없이</h3>
+          <a href="../chat/A-results.html">HTML</a> · <a href="../chat/A-results.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-results-light.png" alt=""><figcaption>A-results-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-results-dark.png" alt=""><figcaption>A-results-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-10-chat-results-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-10-chat-results-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-10-chat-results-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-10-chat-results-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행은 제목 + '혜택 · 기한' + 셰브런. 36px 타일은 HEAD에서 이미 없어서 HEAD와 같은 답 (비평 Q1도 같은 답)</li><li>머리의 '정부24' 알약 → 카드 아래 '출처 · 정부24' 각주, 날씨 카드와 같은 출처 패턴 (비평 Minor). 알약 글자 4.4:1은 HEAD에서 이미 고쳐짐</li><li>구분선은 글자 칼럼 폭으로: 지금은 카드 안쪽보다 16px 넓게 삐져나옴 (비평 Minor, .res-list margin)</li><li>유리 3개(메뉴 원·입력창·탭 바), 깽이 답에 8px 꼬리 (P1-1, GL-1, RH-3, P2-1). 종이 그림자는 HEAD에서 이미 없음</li><li>아래에 내용이 더 있어도 새로 온 게 없으니 '최신 메시지' 캡슐은 없음 (P1-1, 비평 Q4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 content swap: 결과 행은 snap으로 들어와요 (y 4 → 0, 지금 그대로) · §3 press: 행 lift &amp; swell, 줄어들지 않음 · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:GL-1, slop:RH-3, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 조용한 카드: 배치는 그대로, 군더더기만 걷어냄</h3>
+          <a href="../chat/A.html">HTML</a> · <a href="../chat/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-09-chat-weather-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-09-chat-weather-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-09-chat-weather-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-09-chat-weather-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>유리 모양 6 → 3: 메뉴 원·입력창·탭 바만 유리. 가운데 이름은 캡슐 없이 글자로, '초대'는 친구·서랍으로 (P1-1, GL-1, RH-3)</li><li>'최신 메시지' 유리 캡슐은 새 메시지가 왔을 때만, 불투명 종이 캡슐 '새 메시지'로 (P1-1)</li><li>날씨: 아이콘 판 삭제, 시간대 회색 타일 5개 → 구분선 아래 평평한 다섯 열, 0시 빈칸은 달 글리프 (P1-2, IT-4, NC-2)</li><li>결과 카드: '정부24' 알약 → 아래 '출처 · 정부24' 각주로 통일 (비평 Minor). 행 타일과 종이 그림자는 HEAD에서 이미 없음</li><li>'93초' → '1분 33초', 깽이 답 말풍선에 말하는 쪽 꼬리(8px) 복구, 반경은 카드와 같은 24 (P2-1)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 press: 카드·행·버튼 lift &amp; swell (줄어들지 않음) · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph · §3 content swap: 시간대 열·결과 행이 들어올 때 snap · §8.4 첫 토큰 타임라인 · 보내기→정지 morph · §8.2 돌아올 때 재등장 없음 (그대로)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-1, slop:GL-1, slop:RH-3, slop:IT-4, slop:NC-2, critique:Q1, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 입력 중: 글을 쓰는 동안 통화 버튼은 비켜요</h3>
+          <a href="../chat/B-composer.html">HTML</a> · <a href="../chat/B-composer.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-composer-light.png" alt=""><figcaption>B-composer-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-composer-dark.png" alt=""><figcaption>B-composer-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-17-composer-focused-typed.jpg" alt=""><figcaption>현재 앱 · chromium-light-17-composer-focused-typed</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-17-composer-focused-typed.jpg" alt=""><figcaption>현재 앱 · chromium-dark-17-composer-focused-typed</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>글자가 있는 동안 통화 버튼은 morph로 접혀 비켜요: 엄지 아래 보내기 하나만, 통화를 잘못 누를 일이 없음. 지우면 돌아옴 (비평 Minor)</li><li>＋와 보내기는 마지막 줄에 붙음: 입력창이 자라도 엄지 아래 버튼이 움직이지 않음 (HIG Messages)</li><li>입력창 반경 --r-composer와 보내기 원 System Blue는 HEAD와 같음</li><li>위 카드: 회의록·예약·전화 승인은 다른 B 시안과 같음, 깽이 말은 글자·턴 머리 아바타 (P1-2, IT-9, NC-1, 비평 Q2)</li><li>유리 3개; 탭 바는 입력 중에도 그대로 (P1-1, GL-1, RH-3)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 content swap: 글자가 생기면 마이크 → 보내기, 지우면 되돌아옴 · §8.4 보내기 ↔ 정지 morph, 첫 토큰 타임라인 · §8.8 아래 크롬 고정: 포커스·입력 중에도 탭 바 크기·위치 그대로 (최소화 기각) · 입력창은 줄 수만큼 위로 자라요 (layout morph), 탭 바는 움직이지 않음 · §3 press: 보내기 lift &amp; swell</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-1, slop:IT-9, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 로그인 카드: 비밀번호를 넣는 일 하나만</h3>
+          <a href="../chat/B-credential.html">HTML</a> · <a href="../chat/B-credential.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-credential-light.png" alt=""><figcaption>B-credential-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-credential-dark.png" alt=""><figcaption>B-credential-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-12-chat-credential-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-12-chat-credential-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-12-chat-credential-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-12-chat-credential-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>두 필드를 한 묶음으로(라벨은 앞 칸, 사이 헤어라인): 모양 2개 → 1개, 카드 높이 458 → 311px</li><li>보관 기간은 기본값을 문장으로 '7일 동안 보관해요 · 바꾸기 ⌄'(메뉴): 다섯 칸 세그먼트를 카드에서 뺌 (비평 Q5)</li><li>이유 문단은 바로 위 깽이의 말과 같은 말이라 카드에서 뺌; 약속은 비밀번호 아래 한 번 (P2-2, CP-5)</li><li>'저장하고 이어서 하기' 한 번: 저장 뒤 '이어서 해 줘' 칩을 또 누르지 않아도 깽이가 이어서 해요 (색은 HEAD와 같은 --accent-fill)</li><li>깽이 말은 글자·턴 머리 아바타, 유리 3개 (NC-1, 비평 Q2, P1-1). placeholder ≈3:1은 HEAD에서 이미 고쳐짐</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 Loader → check: 저장 버튼 → '기기에서 암호화하는 중' → '저장했어요', 서버 201 뒤에만 · §3 morph: 저장되면 카드가 그 자리에서 '저장됨 · 7일' 영수증으로 모양을 바꿔요 (ContentSwap) · §3 two-edge: 보관 기간 선택 thumb (A) / 메뉴는 버튼에서 morph로 열림 (B) · §8.15 앱을 떠나면 입력값을 즉시 가림 (visibilitychange) · 필드 포커스 링은 즉시, 필드 자기 반경 위에</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, slop:CP-5, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q1, critique:Q2, critique:Q5</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 펼친 방: 내 말은 선으로, 긴 말은 여덟 줄에서</h3>
+          <a href="../chat/B-messenger-open.html">HTML</a> · <a href="../chat/B-messenger-open.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-messenger-open-light.png" alt=""><figcaption>B-messenger-open-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-messenger-open-dark.png" alt=""><figcaption>B-messenger-open-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-11b-chat-messenger-open.jpg" alt=""><figcaption>현재 앱 · chromium-light-11b-chat-messenger-open</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-11b-chat-messenger-open.jpg" alt=""><figcaption>현재 앱 · chromium-dark-11b-chat-messenger-open</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>내 말풍선은 채움 대신 선(종이 + --fill-3 테두리), 상대는 채움: 세 번째 색 없이 '내 말'과 '읽을 말'이 갈림. 사진·파일 자리는 상대 말풍선처럼 채움 + 글리프라 선은 나에게만</li><li>긴 메시지는 8줄에서 멈추고 '전체 보기 ›': 15줄짜리 말풍선 하나가 화면을 다 차지하지 않음 (카카오톡도 긴 글은 전체보기)</li><li>방 머리의 참여자 줄은 이름만 '김하늘, 해피, 초롱별, BTR-moka, 새벽별 · 6명': 오픈채팅 태그(남/68년생…)는 방 안 이름 옆에 처음 한 번만 (HEAD와 같음)</li><li>'@지우'는 굵게, 접기는 B 접힌 카드의 토글과 같은 왼쪽 정렬 행</li><li>깽이 말은 글자·턴 머리 아바타, 유리 3개, 캡슐 없음 (NC-1, 비평 Q2, P1-1, GL-1, RH-3, 비평 Q4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 펼치기: 방이 카드 아래 가장자리에서 morph로 드러나요 (clip-path, transform 없음), 스크롤 보정으로 '접기'는 손가락 아래 그대로 · 접기는 return: 하이라이트가 첫 프레임부터 완성 (재등장 없음), 셰브런 180° snap · '이전 대화 더 보기'도 같은 스크롤 보정 (위로 자라고 화면은 그대로) · B: '전체 보기'는 그 말풍선만 content swap으로 늘어나요 (높이 layout morph) · §3 press: 토글·말풍선 안 버튼 lift &amp; swell</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q2, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 카카오톡 방: 접힌 카드는 요약, 펼치면 방</h3>
+          <a href="../chat/B-messenger.html">HTML</a> · <a href="../chat/B-messenger.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-messenger-light.png" alt=""><figcaption>B-messenger-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-messenger-dark.png" alt=""><figcaption>B-messenger-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-11-chat-messenger-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-11-chat-messenger-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-11-chat-messenger-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-11-chat-messenger-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>접힌 카드는 방이 아니라 요약이라 줄로: '이름 · 시각' 한 줄, 그 아래 말 (16px, 3줄). 말풍선은 펼친 방에만 남김 (슬롭 목록 NC-3이 권한 '작성자 + 시각' 행)</li><li>시각을 이름 줄로 올려 말이 카드 폭을 다 씀: 긴 메시지가 4줄 + '…'에서 3줄로, 나를 부른 '@지우'는 굵게</li><li>'메시지 16개'는 메타에서 토글로: '메시지 16개 모두 보기 ⌄'. 메타는 '카카오톡 · 안 읽음 7 · 시간' 한 줄</li><li>깽이의 말은 말풍선 없이 글자, 턴 머리는 아바타 점: 종이는 방 카드 한 장 (NC-1, 비평 Q2)</li><li>유리 3개, 캡슐 없음 (P1-1, GL-1, RH-3, 비평 Q4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 펼치기: 방이 카드 아래 가장자리에서 morph로 드러나요 (clip-path, transform 없음), 스크롤 보정으로 토글은 손가락 아래 그대로 · 셰브런 180° 회전 snap, 방 opacity fade · 접기는 return: 하이라이트가 첫 프레임부터 완성 (재등장 없음) · §3 press: 토글 lift &amp; swell · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q2, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 결과 카드: 받는 것과 기한을 두 칸으로</h3>
+          <a href="../chat/B-results.html">HTML</a> · <a href="../chat/B-results.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-results-light.png" alt=""><figcaption>B-results-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-results-dark.png" alt=""><figcaption>B-results-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-10-chat-results-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-10-chat-results-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-10-chat-results-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-10-chat-results-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행의 둘째 줄을 두 칸으로: 왼쪽은 받는 것(월 최대 20만 원, Ink), 오른쪽은 기한(11월 30일 마감)을 한 열로 세워 위아래로 비교 (타일 삭제는 HEAD에서 이미)</li><li>출처 '정부24'는 알약 없이 카드 머리 오른쪽 글자로, B 날씨 카드와 같은 자리 (비평 Minor)</li><li>깽이의 말은 말풍선 없이 바탕 위 글자, 종이는 카드 한 장: 한 턴에 종이 한 장 (NC-1)</li><li>턴 머리는 깽이 아바타 점 + 'N단계 · 시간' (비평 Q2)</li><li>유리 3개, 새로 온 게 없으니 캡슐 없음 (P1-1, GL-1, RH-3, 비평 Q4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 content swap: 결과 행은 snap으로 들어와요 (y 4 → 0, 지금 그대로) · §3 press: 행 lift &amp; swell, 줄어들지 않음 · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q2, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 말은 글자로, 기록은 종이로: 한 턴에 종이 한 장</h3>
+          <a href="../chat/B.html">HTML</a> · <a href="../chat/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../chat/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../chat/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-09-chat-weather-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-09-chat-weather-card</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-09-chat-weather-card.jpg" alt=""><figcaption>현재 앱 · chromium-dark-09-chat-weather-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>깽이의 말은 말풍선 없이 바탕 위 글자로, 카드만 종이: 한 턴에 종이 한 장 (NC-1, DESIGN 'plain text for conversation')</li><li>턴 머리에 깽이 아바타 점 + 'N단계 · 시간': 체크 아이콘 대신 앱의 유일한 캐릭터가 '누가 했는지'를 말함</li><li>출처(기상청·정부24)를 카드 머리 오른쪽에: 가장 제품다운 사실을 각주에서 올림, 알약 없이 글자만</li><li>날씨: 기온이 주인공, 판 없는 해 글리프, 다섯 열 예보; 결과: 타일 없는 행 + 셰브런(HEAD와 같음)</li><li>새 메시지는 A와 같은 불투명 종이 캡슐 '새 메시지', 새 답이 왔을 때만(유리는 3개 그대로). 입력창 통화 버튼은 파형으로 카드의 '전화 걸기'와 구분 (P1-1, Jordan)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 press: 카드·행·버튼 lift &amp; swell (줄어들지 않음) · §8.5 툴 칩 → 'N단계 · 시간' 접힘 morph · §3 content swap: 시간대 열·결과 행이 들어올 때 snap · §8.4 첫 토큰 타임라인 · 보내기→정지 morph · §8.2 돌아올 때 재등장 없음 (그대로)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-1, slop:NC-1, slop:GL-1, slop:RH-3, slop:IT-4, slop:NC-2, critique:Q1, critique:Q2, critique:Q4</p>
+      </article></section>
+<section class="g-feature"><h2>connections <small>connections/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 앱 아이콘 그대로</h3>
+          <a href="../connections/A-end.html">HTML</a> · <a href="../connections/A-end.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-end-light.png" alt=""><figcaption>A-end-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-end-dark.png" alt=""><figcaption>A-end-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>실제 앱 아이콘(assets/brands) 30px 타일: 연결 화면은 서드파티를 식별하는 유일한 아이콘 타일 자리</li><li>부제는 로그인 방식: 카카오계정 / 이메일 코드 / 앱에서 승인 / 전화번호</li><li>봇 3종은 접힌 '고급 · 직접 만든 봇 연결'로, 첫 목록은 로그인 8개</li><li>자물쇠와 '기기에서 암호화돼요'는 빼고 비밀번호 칸 아래 한 곳에만 (시트)</li><li>Flat Paper: 목록 그룹 그림자 제거</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 앱 아이콘 그대로</h3>
+          <a href="../connections/A-sheet.html">HTML</a> · <a href="../connections/A-sheet.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-sheet-light.png" alt=""><figcaption>A-sheet-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-sheet-dark.png" alt=""><figcaption>A-sheet-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>실제 앱 아이콘(assets/brands) 30px 타일: 연결 화면은 서드파티를 식별하는 유일한 아이콘 타일 자리</li><li>부제는 로그인 방식: 카카오계정 / 이메일 코드 / 앱에서 승인 / 전화번호</li><li>봇 3종은 접힌 '고급 · 직접 만든 봇 연결'로, 첫 목록은 로그인 8개</li><li>자물쇠와 '기기에서 암호화돼요'는 빼고 비밀번호 칸 아래 한 곳에만 (시트)</li><li>Flat Paper: 목록 그룹 그림자 제거</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 지금 구조 그대로, 군더더기만</h3>
+          <a href="../connections/A-vault-full.html">HTML</a> · <a href="../connections/A-vault-full.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-full-light.png" alt=""><figcaption>A-vault-full-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-full-dark.png" alt=""><figcaption>A-vault-full-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>작업 트리의 VaultScreen 기준: 안심 문구는 로그인이 있을 때 한 번, 빈 화면 글리프는 원 없이, 빈 화면 문장에서 '안전하게' 뺌</li><li>상단 가운데 '깽이' 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li><li>빈 접근 기록은 제목과 문장만: 바로 위 세그먼트가 이미 '로그인 정보'로 가는 길</li><li>카드 머리의 '29일 남음' 알약을 '보관 기간 · 29일 남음' 라벨로 옮겨 30일이 두 번 보이지 않게</li><li>접근 기록은 레일 그대로, '완료' 알약은 빼고 거절·실패일 때만 상태를 말함, 기기 키 확인(내 승인 결정에만 붙음)은 테두리 없는 글로</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 지금 구조 그대로, 군더더기만</h3>
+          <a href="../connections/A-vault-log-full.html">HTML</a> · <a href="../connections/A-vault-log-full.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-log-full-light.png" alt=""><figcaption>A-vault-log-full-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-log-full-dark.png" alt=""><figcaption>A-vault-log-full-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>작업 트리의 VaultScreen 기준: 안심 문구는 로그인이 있을 때 한 번, 빈 화면 글리프는 원 없이, 빈 화면 문장에서 '안전하게' 뺌</li><li>상단 가운데 '깽이' 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li><li>빈 접근 기록은 제목과 문장만: 바로 위 세그먼트가 이미 '로그인 정보'로 가는 길</li><li>카드 머리의 '29일 남음' 알약을 '보관 기간 · 29일 남음' 라벨로 옮겨 30일이 두 번 보이지 않게</li><li>접근 기록은 레일 그대로, '완료' 알약은 빼고 거절·실패일 때만 상태를 말함, 기기 키 확인(내 승인 결정에만 붙음)은 테두리 없는 글로</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 지금 구조 그대로, 군더더기만</h3>
+          <a href="../connections/A-vault-log.html">HTML</a> · <a href="../connections/A-vault-log.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-log-light.png" alt=""><figcaption>A-vault-log-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-log-dark.png" alt=""><figcaption>A-vault-log-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>작업 트리의 VaultScreen 기준: 안심 문구는 로그인이 있을 때 한 번, 빈 화면 글리프는 원 없이, 빈 화면 문장에서 '안전하게' 뺌</li><li>상단 가운데 '깽이' 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li><li>빈 접근 기록은 제목과 문장만: 바로 위 세그먼트가 이미 '로그인 정보'로 가는 길</li><li>카드 머리의 '29일 남음' 알약을 '보관 기간 · 29일 남음' 라벨로 옮겨 30일이 두 번 보이지 않게</li><li>접근 기록은 레일 그대로, '완료' 알약은 빼고 거절·실패일 때만 상태를 말함, 기기 키 확인(내 승인 결정에만 붙음)은 테두리 없는 글로</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 지금 구조 그대로, 군더더기만</h3>
+          <a href="../connections/A-vault.html">HTML</a> · <a href="../connections/A-vault.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-light.png" alt=""><figcaption>A-vault-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-vault-dark.png" alt=""><figcaption>A-vault-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>작업 트리의 VaultScreen 기준: 안심 문구는 로그인이 있을 때 한 번, 빈 화면 글리프는 원 없이, 빈 화면 문장에서 '안전하게' 뺌</li><li>상단 가운데 '깽이' 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li><li>빈 접근 기록은 제목과 문장만: 바로 위 세그먼트가 이미 '로그인 정보'로 가는 길</li><li>카드 머리의 '29일 남음' 알약을 '보관 기간 · 29일 남음' 라벨로 옮겨 30일이 두 번 보이지 않게</li><li>접근 기록은 레일 그대로, '완료' 알약은 빼고 거절·실패일 때만 상태를 말함, 기기 키 확인(내 승인 결정에만 붙음)은 테두리 없는 글로</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 앱 아이콘 그대로</h3>
+          <a href="../connections/A.html">HTML</a> · <a href="../connections/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>실제 앱 아이콘(assets/brands) 30px 타일: 연결 화면은 서드파티를 식별하는 유일한 아이콘 타일 자리</li><li>부제는 로그인 방식: 카카오계정 / 이메일 코드 / 앱에서 승인 / 전화번호</li><li>봇 3종은 접힌 '고급 · 직접 만든 봇 연결'로, 첫 목록은 로그인 8개</li><li>자물쇠와 '기기에서 암호화돼요'는 빼고 비밀번호 칸 아래 한 곳에만 (시트)</li><li>Flat Paper: 목록 그룹 그림자 제거</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 일상과 업무로 나눈 목록</h3>
+          <a href="../connections/B-end.html">HTML</a> · <a href="../connections/B-end.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-end-light.png" alt=""><figcaption>B-end-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-end-dark.png" alt=""><figcaption>B-end-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 실제 앱 아이콘 · 로그인 방식 부제 · 접힌 '고급 · 직접 만든 봇 연결'은 그대로</li><li>제목은 내용대로 '메신저 연결', 연결된 게 없는데 '연결된'이라 하지 않음</li><li>안내 문장은 큰 제목의 부제로 합쳐 따로 떠 있는 노트 블록을 없앰</li><li>8개를 일상(5) · 업무(3)로 나눠 훑기 쉽게, 일상은 국내 사용 빈도순</li><li>자물쇠와 암호화 문장은 비밀번호 칸 아래 한 곳에만 (시트)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 일상과 업무로 나눈 목록</h3>
+          <a href="../connections/B-sheet.html">HTML</a> · <a href="../connections/B-sheet.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-sheet-light.png" alt=""><figcaption>B-sheet-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-sheet-dark.png" alt=""><figcaption>B-sheet-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 실제 앱 아이콘 · 로그인 방식 부제 · 접힌 '고급 · 직접 만든 봇 연결'은 그대로</li><li>제목은 내용대로 '메신저 연결', 연결된 게 없는데 '연결된'이라 하지 않음</li><li>안내 문장은 큰 제목의 부제로 합쳐 따로 떠 있는 노트 블록을 없앰</li><li>8개를 일상(5) · 업무(3)로 나눠 훑기 쉽게, 일상은 국내 사용 빈도순</li><li>자물쇠와 암호화 문장은 비밀번호 칸 아래 한 곳에만 (시트)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 목록으로</h3>
+          <a href="../connections/B-vault-full.html">HTML</a> · <a href="../connections/B-vault-full.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-full-light.png" alt=""><figcaption>B-vault-full-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-full-dark.png" alt=""><figcaption>B-vault-full-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>저장된 로그인 하나 = 묶음 하나: 누구인지, 보관 기간, 마지막 사용, 지우기 (나의 모시·연결과 같은 목록)</li><li>보관 기간 5칸 세그먼트는 행을 펼칠 때만: 카드마다 5개 선택지가 늘 보이지 않음</li><li>빈 화면은 글리프·약속 없이 제목, 한 문장, 카카오톡 행 하나 (행이 바로 연결 시트를 엶)</li><li>접근 기록은 레일 대신 행: 시간은 오른쪽 값, 거절이나 기기 키 확인(내 승인 결정에만)은 조용한 한 줄</li><li>상단 가운데 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음 · 보관 기간 행 펼침은 morph 스프링, 셰브런은 snap (연결 화면 고급 펼침과 같음)</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 목록으로</h3>
+          <a href="../connections/B-vault-log-full.html">HTML</a> · <a href="../connections/B-vault-log-full.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-log-full-light.png" alt=""><figcaption>B-vault-log-full-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-log-full-dark.png" alt=""><figcaption>B-vault-log-full-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>저장된 로그인 하나 = 묶음 하나: 누구인지, 보관 기간, 마지막 사용, 지우기 (나의 모시·연결과 같은 목록)</li><li>보관 기간 5칸 세그먼트는 행을 펼칠 때만: 카드마다 5개 선택지가 늘 보이지 않음</li><li>빈 화면은 글리프·약속 없이 제목, 한 문장, 카카오톡 행 하나 (행이 바로 연결 시트를 엶)</li><li>접근 기록은 레일 대신 행: 시간은 오른쪽 값, 거절이나 기기 키 확인(내 승인 결정에만)은 조용한 한 줄</li><li>상단 가운데 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음 · 보관 기간 행 펼침은 morph 스프링, 셰브런은 snap (연결 화면 고급 펼침과 같음)</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 목록으로</h3>
+          <a href="../connections/B-vault-log.html">HTML</a> · <a href="../connections/B-vault-log.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-log-light.png" alt=""><figcaption>B-vault-log-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-log-dark.png" alt=""><figcaption>B-vault-log-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>저장된 로그인 하나 = 묶음 하나: 누구인지, 보관 기간, 마지막 사용, 지우기 (나의 모시·연결과 같은 목록)</li><li>보관 기간 5칸 세그먼트는 행을 펼칠 때만: 카드마다 5개 선택지가 늘 보이지 않음</li><li>빈 화면은 글리프·약속 없이 제목, 한 문장, 카카오톡 행 하나 (행이 바로 연결 시트를 엶)</li><li>접근 기록은 레일 대신 행: 시간은 오른쪽 값, 거절이나 기기 키 확인(내 승인 결정에만)은 조용한 한 줄</li><li>상단 가운데 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음 · 보관 기간 행 펼침은 morph 스프링, 셰브런은 snap (연결 화면 고급 펼침과 같음)</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 한 목록으로</h3>
+          <a href="../connections/B-vault.html">HTML</a> · <a href="../connections/B-vault.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-light.png" alt=""><figcaption>B-vault-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-vault-dark.png" alt=""><figcaption>B-vault-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-49-vault.jpg" alt=""><figcaption>현재 앱 · chromium-light-49-vault</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-50-vault-access-log.jpg" alt=""><figcaption>현재 앱 · chromium-light-50-vault-access-log</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>저장된 로그인 하나 = 묶음 하나: 누구인지, 보관 기간, 마지막 사용, 지우기 (나의 모시·연결과 같은 목록)</li><li>보관 기간 5칸 세그먼트는 행을 펼칠 때만: 카드마다 5개 선택지가 늘 보이지 않음</li><li>빈 화면은 글리프·약속 없이 제목, 한 문장, 카카오톡 행 하나 (행이 바로 연결 시트를 엶)</li><li>접근 기록은 레일 대신 행: 시간은 오른쪽 값, 거절이나 기기 키 확인(내 승인 결정에만)은 조용한 한 줄</li><li>상단 가운데 캡슐 없음, 큰 제목이 세그먼트를 따라 바뀜</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 세그먼트 썸 두 모서리 이동 + 패널 방향 content swap (§3 Two-edge indicator, Content swap) · 큰 제목이 세그먼트를 따라 content swap (새 동작: 지금은 들어온 행의 제목에 고정) · 큰 제목 → 상단 맨 글자 제목 (§6.4 scroll edge) · 화면을 떠나면 계정 정보를 애니메이션 없이 바로 가림, 10초 뒤 다시 가림 (§8.15) · 로그인 지우기: 두 번 누르기·길게 누르기 확인 → 카드/묶음이 접히며 사라짐 (layout morph + EXIT) · 빈 화면은 한 번만 6 px 떠오르며 나타남 (morph), 반복 없음 · 보관 기간 행 펼침은 morph 스프링, 셰브런은 snap (연결 화면 고급 펼침과 같음)</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 일상과 업무로 나눈 목록</h3>
+          <a href="../connections/B.html">HTML</a> · <a href="../connections/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../connections/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../connections/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-38-connections.jpg" alt=""><figcaption>현재 앱 · chromium-light-38-connections</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-40-connect-sheet-kakaotalk.jpg" alt=""><figcaption>현재 앱 · chromium-light-40-connect-sheet-kakaotalk</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 실제 앱 아이콘 · 로그인 방식 부제 · 접힌 '고급 · 직접 만든 봇 연결'은 그대로</li><li>제목은 내용대로 '메신저 연결', 연결된 게 없는데 '연결된'이라 하지 않음</li><li>안내 문장은 큰 제목의 부제로 합쳐 따로 떠 있는 노트 블록을 없앰</li><li>8개를 일상(5) · 업무(3)로 나눠 훑기 쉽게, 일상은 국내 사용 빈도순</li><li>자물쇠와 암호화 문장은 비밀번호 칸 아래 한 곳에만 (시트)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 연결 시트 morph (§3 Sheet) · 큰 제목 → 상단 맨 글자 제목 content swap (§6.6) · 고급 펼침 morph + 셰브론 snap · press 평면 틴트</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:CP-5, slop:CP-9, slop:NC-5, slop:RH-1, slop:GL-2, critique:Q3</p>
+      </article></section>
+<section class="g-feature"><h2>서랍 <small>drawer/</small></h2>
+      <article class="g-card">
+        <header><h3>A · live · 판 없는 목록, 상태를 말하는 행 · 회의 중인 대화</h3>
+          <a href="../drawer/A-live.html">HTML</a> · <a href="../drawer/A-live.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/A-live-light.png" alt=""><figcaption>A-live-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/A-live-dark.png" alt=""><figcaption>A-live-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-light-20-drawer</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-dark-20-drawer</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행의 32px 흰 판 삭제: 20px 글리프 --label-2를 제목 첫 줄에, 친구 대화는 상대 모시 아바타 24px (P2-2, IT-10)</li><li>글리프 바로잡기: 회의는 people(서버가 이미 보냄), 할 일은 doc (P2-2). sparkles는 HEAD에서 이미 checklist로</li><li>부제는 종류가 아니라 일어난 일: '전화를 걸었어요', '회의를 요약했어요'; 회의 대화방 제목은 회의 이름 (P2-1)</li><li>보관 토글은 보관함 탭과 같은 글리프 대신 글자 버튼 '보관한 대화' (P2-2)</li><li>'나만의 AI 에이전트'는 HEAD에서 이미 없어짐, 이름을 가운데로; '연세바른치과에'는 HEAD 서버와 같음 (Minor)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, slop:IT-10, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · recent · 판 없는 목록, 상태를 말하는 행 · 빈 검색(최근 대화)</h3>
+          <a href="../drawer/A-recent.html">HTML</a> · <a href="../drawer/A-recent.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/A-recent-light.png" alt=""><figcaption>A-recent-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/A-recent-dark.png" alt=""><figcaption>A-recent-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-light-21-drawer-search</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-dark-21-drawer-search</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행의 32px 흰 판 삭제: 20px 글리프 --label-2를 제목 첫 줄에, 친구 대화는 상대 모시 아바타 24px (P2-2, IT-10)</li><li>글리프 바로잡기: 회의는 people(서버가 이미 보냄), 할 일은 doc (P2-2). sparkles는 HEAD에서 이미 checklist로</li><li>부제는 종류가 아니라 일어난 일: '전화를 걸었어요', '회의를 요약했어요'; 회의 대화방 제목은 회의 이름 (P2-1)</li><li>보관 토글은 보관함 탭과 같은 글리프 대신 글자 버튼 '보관한 대화' (P2-2)</li><li>'나만의 AI 에이전트'는 HEAD에서 이미 없어짐, 이름을 가운데로; '연세바른치과에'는 HEAD 서버와 같음 (Minor)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-3, slop:IT-10</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · search · 판 없는 목록, 상태를 말하는 행 · 검색 ㅎㅇ</h3>
+          <a href="../drawer/A-search.html">HTML</a> · <a href="../drawer/A-search.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/A-search-light.png" alt=""><figcaption>A-search-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/A-search-dark.png" alt=""><figcaption>A-search-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-light-21-drawer-search</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-dark-21-drawer-search</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행의 32px 흰 판 삭제: 20px 글리프 --label-2를 제목 첫 줄에, 친구 대화는 상대 모시 아바타 24px (P2-2, IT-10)</li><li>글리프 바로잡기: 회의는 people(서버가 이미 보냄), 할 일은 doc (P2-2). sparkles는 HEAD에서 이미 checklist로</li><li>부제는 종류가 아니라 일어난 일: '전화를 걸었어요', '회의를 요약했어요'; 회의 대화방 제목은 회의 이름 (P2-1)</li><li>보관 토글은 보관함 탭과 같은 글리프 대신 글자 버튼 '보관한 대화' (P2-2)</li><li>'나만의 AI 에이전트'는 HEAD에서 이미 없어짐, 이름을 가운데로; '연세바른치과에'는 HEAD 서버와 같음 (Minor)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-4, slop:IT-10</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 판 없는 목록, 상태를 말하는 행</h3>
+          <a href="../drawer/A.html">HTML</a> · <a href="../drawer/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-light-20-drawer</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-dark-20-drawer</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>행의 32px 흰 판 삭제: 20px 글리프 --label-2를 제목 첫 줄에, 친구 대화는 상대 모시 아바타 24px (P2-2, IT-10)</li><li>글리프 바로잡기: 회의는 people(서버가 이미 보냄), 할 일은 doc (P2-2). sparkles는 HEAD에서 이미 checklist로</li><li>부제는 종류가 아니라 일어난 일: '전화를 걸었어요', '회의를 요약했어요'; 회의 대화방 제목은 회의 이름 (P2-1)</li><li>보관 토글은 보관함 탭과 같은 글리프 대신 글자 버튼 '보관한 대화' (P2-2)</li><li>'나만의 AI 에이전트'는 HEAD에서 이미 없어짐, 이름을 가운데로; '연세바른치과에'는 HEAD 서버와 같음 (Minor)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-10</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · live · 기록이 되는 서랍: 지금 하는 일이 위로 · 회의 중인 대화</h3>
+          <a href="../drawer/B-live.html">HTML</a> · <a href="../drawer/B-live.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/B-live-light.png" alt=""><figcaption>B-live-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/B-live-dark.png" alt=""><figcaption>B-live-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-light-20-drawer</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-dark-20-drawer</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>에이전트 머리 삭제: 상단 바에 이미 얼굴이 있어, 그 자리를 검색과 '지금 하는 일'에 (비평 Questions)</li><li>부제는 그 대화의 깽이 마지막 문장(번호·메일·코드·금액은 앱의 다른 곳과 같이 가림): 서랍이 '기록'이 됨 (P2-1)</li><li>기다리거나 진행 중인 일(승인 대기, 회의 중, 통화 중)은 서버 상태로 '지금 하는 일'에 고정 (P2-1)</li><li>'추가 대화' → '맡긴 일', 보관 토글은 글자 버튼; 판 삭제, 회의 people·할 일 doc (P2-2)</li><li>검색 결과는 판 없이 같은 행으로, 맞은 글자는 --accent-text; 빈 검색은 최근 대화 (P2-3, P2-4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, slop:IT-10, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · recent · 기록이 되는 서랍: 지금 하는 일이 위로 · 빈 검색(최근 대화)</h3>
+          <a href="../drawer/B-recent.html">HTML</a> · <a href="../drawer/B-recent.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/B-recent-light.png" alt=""><figcaption>B-recent-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/B-recent-dark.png" alt=""><figcaption>B-recent-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-light-21-drawer-search</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-dark-21-drawer-search</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>에이전트 머리 삭제: 상단 바에 이미 얼굴이 있어, 그 자리를 검색과 '지금 하는 일'에 (비평 Questions)</li><li>부제는 그 대화의 깽이 마지막 문장(번호·메일·코드·금액은 앱의 다른 곳과 같이 가림): 서랍이 '기록'이 됨 (P2-1)</li><li>기다리거나 진행 중인 일(승인 대기, 회의 중, 통화 중)은 서버 상태로 '지금 하는 일'에 고정 (P2-1)</li><li>'추가 대화' → '맡긴 일', 보관 토글은 글자 버튼; 판 삭제, 회의 people·할 일 doc (P2-2)</li><li>검색 결과는 판 없이 같은 행으로, 맞은 글자는 --accent-text; 빈 검색은 최근 대화 (P2-3, P2-4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-3, slop:IT-10, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · search · 기록이 되는 서랍: 지금 하는 일이 위로 · 검색 ㅎㅇ</h3>
+          <a href="../drawer/B-search.html">HTML</a> · <a href="../drawer/B-search.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/B-search-light.png" alt=""><figcaption>B-search-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/B-search-dark.png" alt=""><figcaption>B-search-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-light-21-drawer-search</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-21-drawer-search.jpg" alt=""><figcaption>현재 앱 · chromium-dark-21-drawer-search</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>에이전트 머리 삭제: 상단 바에 이미 얼굴이 있어, 그 자리를 검색과 '지금 하는 일'에 (비평 Questions)</li><li>부제는 그 대화의 깽이 마지막 문장(번호·메일·코드·금액은 앱의 다른 곳과 같이 가림): 서랍이 '기록'이 됨 (P2-1)</li><li>기다리거나 진행 중인 일(승인 대기, 회의 중, 통화 중)은 서버 상태로 '지금 하는 일'에 고정 (P2-1)</li><li>'추가 대화' → '맡긴 일', 보관 토글은 글자 버튼; 판 삭제, 회의 people·할 일 doc (P2-2)</li><li>검색 결과는 판 없이 같은 행으로, 맞은 글자는 --accent-text; 빈 검색은 최근 대화 (P2-3, P2-4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-4, slop:IT-10, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 기록이 되는 서랍: 지금 하는 일이 위로</h3>
+          <a href="../drawer/B.html">HTML</a> · <a href="../drawer/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../drawer/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../drawer/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-light-20-drawer</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-20-drawer.jpg" alt=""><figcaption>현재 앱 · chromium-dark-20-drawer</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>에이전트 머리 삭제: 상단 바에 이미 얼굴이 있어, 그 자리를 검색과 '지금 하는 일'에 (비평 Questions)</li><li>부제는 그 대화의 깽이 마지막 문장(번호·메일·코드·금액은 앱의 다른 곳과 같이 가림): 서랍이 '기록'이 됨 (P2-1)</li><li>기다리거나 진행 중인 일(승인 대기, 회의 중, 통화 중)은 서버 상태로 '지금 하는 일'에 고정 (P2-1)</li><li>'추가 대화' → '맡긴 일', 보관 토글은 글자 버튼; 판 삭제, 회의 people·할 일 doc (P2-2)</li><li>검색 결과는 판 없이 같은 행으로, 맞은 글자는 --accent-text; 빈 검색은 최근 대화 (P2-3, P2-4)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.10 서랍: 카드가 오른쪽으로 밀리며 .96 + 어둡게, 서랍은 −20% 패럴랙스로 들어옴, 가장자리 스와이프 1:1 · §3 Spotlight: 검색 칸이 그 자리에서 늘어나고 결과가 아래로 펼쳐짐, ↑/↓ 커서는 키보드에서만 accent · §3 list: 행 layout=position, 들어올 때 4px 떠오름, 보관하면 접히며 빠짐 · §3 press: 행 누름 tint (줄어들지 않음) · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-10, critique:Q1, critique:Q3, critique:Q4</p>
+      </article></section>
+<section class="g-feature"><h2>빈 대화와 제안 <small>empty-thread/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 하나 고른 뒤 · 첫 할 일을 고른 바로 다음</h3>
+          <a href="../empty-thread/A-briefing.html">HTML</a> · <a href="../empty-thread/A-briefing.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-briefing-light.png" alt=""><figcaption>A-briefing-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-briefing-dark.png" alt=""><figcaption>A-briefing-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-06-chat-welcome-briefing.jpg" alt=""><figcaption>현재 앱 · chromium-light-06-chat-welcome-briefing</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>날씨 줄을 누르면 '오늘 날씨 알려 줘'가 내 말로 올라가고, 깽이가 답을 준비해요. 지금처럼 바로 보내요.</li><li>다른 세 줄은 그대로 누를 수 있어요. 날씨를 물어도 지원사업 찾기가 막히지 않아요 (critique P2-2). 답을 준비하는 동안 다른 줄을 누르면 지금 하던 일에 이어서 전달돼요.</li><li>고른 줄만 답이 올 때까지 label-2로 낮춰서 두 번 보내지 않게 해요. 회색 비활성은 쓰지 않고, 답이 오면 다시 누를 수 있어요.</li><li>컴포저의 마이크 자리는 일하는 동안 멈추기 버튼이 돼요. 앱의 SendButton과 같아요.</li><li>칩 네 개는 없고 줄이 곧 버튼이에요. 같은 일이 두 번 보이지 않아요 (CH-1, IT-1).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 누른 줄은 press 스프링으로 반응하고, 내 말풍선은 지금처럼 같은 프레임에 나타나요 · '생각하는 중'은 1초가 지나면 나타나고, 상태가 바뀌면 ContentSwap으로 바뀌어요 · 마이크와 멈추기는 SendButton의 morph로 바뀌어요 (§8.4) · 새 줄이 생겨도 목록이 다시 나타나는 애니메이션은 없어요</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-2, slop:CH-1, slop:IT-1, slop:GL-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 첫 대화 · 지금 화면에서 slop만 걷어 낸 안</h3>
+          <a href="../empty-thread/A-welcome.html">HTML</a> · <a href="../empty-thread/A-welcome.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-welcome-light.png" alt=""><figcaption>A-welcome-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-welcome-dark.png" alt=""><figcaption>A-welcome-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-05-chat-welcome.jpg" alt=""><figcaption>현재 앱 · chromium-light-05-chat-welcome</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>인사는 두 줄로 줄였어요. 무엇을 하는지는 아래 목록이 보여 주고, 암호화 안내는 비밀번호를 입력하는 자리에서만 해요 (CP-1, CP-5).</li><li>&quot;이런 일을 맡겨 보세요&quot;의 네 줄을 그대로 누를 수 있게 했어요. 같은 일을 다시 보여 주던 칩 네 개는 없앴어요 (CH-1, IT-1).</li><li>아이콘 판을 없애고 글자 크기 글리프만 label-2로 남겼어요. 지원사업 줄은 데이터베이스처럼 보이던 coins 대신 문서 글리프를 써요.</li><li>첫 화면이 한 화면 안에 들어가고, 스레드가 인사말 위에서 시작해서 인사가 먼저 보여요 (critique P1).</li><li>위쪽 글래스는 메뉴 버튼 하나예요. 이름은 캡슐 없이 글자로 두고, 초대는 서랍과 친구 화면으로 옮겼어요. 글래스는 메뉴, 컴포저, 탭바 세 개이고 종이에는 그림자가 없어요 (GL-1, RH-3, SH-1).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행을 누르면 press 스프링(0.97 + fill)이 반응해요 (§3) · 카카오톡 줄은 지금처럼 연결 화면으로 넘어가요 · 목록은 처음 한 번만 snap 스프링으로 30ms씩 나타나요. 돌아올 때 다시 나타나지 않아요 · 아바타는 가만히 있다가 최근 입력이 있을 때만 숨쉬어요 (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-3, slop:IT-1, slop:CH-1, slop:CP-1, slop:CP-5, slop:GL-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 빈 대화 · 지금 화면에서 slop만 걷어 낸 안</h3>
+          <a href="../empty-thread/A.html">HTML</a> · <a href="../empty-thread/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-07-chat-empty-thread.jpg" alt=""><figcaption>현재 앱 · chromium-light-07-chat-empty-thread</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>sparkles 타일 자리에 에이전트(56px 아바타, 움직이지 않음)를 뒀어요. 제목이 부르는 이름이 화면에 보여요 (IT-2, CP-8).</li><li>제목과 본문 문구는 지금 그대로예요. 기능과 말투는 그대로 두고 다듬기만 했어요.</li><li>가운데 쌓여 있던 회색 알약 세 개를 왼쪽 정렬 목록 하나로 바꿨어요. 칩은 고르는 자리에만 써요 (CH-2).</li><li>제안을 누르면 바로 보내지 않고 컴포저에 채워 줘서, 고친 뒤에 보낼 수 있어요 (MOTION-SPEC §6 #14).</li><li>그림자와 18px 리터럴 반경을 없앴어요. 목록은 --r-group을 쓰고 종이는 평평해요 (SH-1, RD-1).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 제안은 지금처럼 snap 스프링으로 y 4→0, 30ms 간격으로 나타나요. 처음 마운트할 때만이에요 · 행을 누르면 press 스프링이 반응해요 · 누르면 지금 있는 포커스 요청(focusSeq)으로 컴포저에 채우고, 컴포저는 morph로 커져요 · 빈 화면은 대기 상태라 아바타가 움직이지 않아요</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-2, slop:CH-2, slop:CP-8, slop:GL-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 하나 고른 뒤 · 첫 할 일을 고른 바로 다음</h3>
+          <a href="../empty-thread/B-briefing.html">HTML</a> · <a href="../empty-thread/B-briefing.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-briefing-light.png" alt=""><figcaption>B-briefing-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-briefing-dark.png" alt=""><figcaption>B-briefing-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-06-chat-welcome-briefing.jpg" alt=""><figcaption>현재 앱 · chromium-light-06-chat-welcome-briefing</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>B의 환영 화면을 그대로 이어요. 인사는 바탕 위의 글이고, 종이는 할 일 목록 하나예요 (NC-1).</li><li>깽이의 차례는 말풍선 없이 아바타와 상태 한 줄로 보여요. chat B의 'N단계 · 시간' 줄과 같은 자리이고, 답이 오면 그 아래에 글로 이어져요.</li><li>고른 줄만 답이 올 때까지 label-2로 낮춰요. 다른 세 줄은 그대로 누를 수 있어요 (critique P2-2).</li><li>컴포저의 마이크 자리는 일하는 동안 멈추기 버튼이 돼요.</li><li>크롬은 A와 같아요. 글래스 세 개, 그림자 없음, 토큰 반경만 써요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 누른 줄은 press 스프링으로 반응하고, 내 말풍선은 같은 프레임에 나타나요 · 아바타는 일하는 동안 숨쉬어요 (§8.11). 상태 글은 ContentSwap으로 바뀌어요 · 마이크와 멈추기는 SendButton의 morph로 바뀌어요 (§8.4) · 목록이 다시 나타나는 애니메이션은 없어요</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-2, slop:NC-1, slop:CH-1, slop:IT-1, slop:GL-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 첫 대화 · 한 단계 더 덜어 낸 안</h3>
+          <a href="../empty-thread/B-welcome.html">HTML</a> · <a href="../empty-thread/B-welcome.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-welcome-light.png" alt=""><figcaption>B-welcome-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-welcome-dark.png" alt=""><figcaption>B-welcome-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-05-chat-welcome.jpg" alt=""><figcaption>현재 앱 · chromium-light-05-chat-welcome</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>말풍선을 없앴어요. 에이전트의 말은 배경 위에 글자로만 두고, 화면의 종이는 할 일 목록 하나예요 (NC-1). MOTION-SPEC §6 #2의 '어시스턴트 글은 종이 위'를 바꾸는 것이라 승인이 필요해요.</li><li>인사 첫 줄을 제목 크기로 키워서 어디서부터 읽으면 되는지 분명해요. 목록 제목은 따로 두지 않고 말의 마지막 문장이 이어 줘요.</li><li>목록에는 글리프도 판도 없어요. 다른 화면으로 넘어가는 카카오톡 줄에만 chevron을 붙였어요.</li><li>같은 말은 한 번만 해요. 첫 화면에서 볼 것이 8개(행 4 + 칩 4)에서 4개로 줄었어요 (인지 부하). 각 줄은 '~하기'로 맞춰서 누르는 행동처럼 읽혀요.</li><li>크롬은 A와 같아요. 글래스 세 개, 그림자 없음, 토큰 반경만 써요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 인사, 그다음 목록 순서로 snap 스프링이 30ms씩 처음 한 번만 이어져요 · 행을 누르면 press 스프링이 반응해요 · 카카오톡 줄은 지금처럼 연결 화면으로 넘어가요 · 아바타는 대기 중 정지해요 (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-3, slop:NC-1, slop:CH-1, slop:CP-1, slop:CP-5, slop:GL-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 빈 대화 · 한 단계 더 덜어 낸 안</h3>
+          <a href="../empty-thread/B.html">HTML</a> · <a href="../empty-thread/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../empty-thread/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-07-chat-empty-thread.jpg" alt=""><figcaption>현재 앱 · chromium-light-07-chat-empty-thread</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>위쪽에는 아무것도 두지 않았어요. 조용해진 배경과 위쪽 바의 이름만 보여요.</li><li>시작 문장을 컴포저 바로 위, 엄지가 닿는 곳에 뒀어요. 말하는 자리 옆에서 고를 수 있어요.</li><li>제목은 빼고 본문 한 줄만 남겼어요. 위쪽 바에 이름이 이미 있어서 '깽이가 기다리고 있어요'와 겹쳐요 (RH-1).</li><li>제안에는 종이도 칩도 없이 줄 사이 머리카락 선만 있어요. 누르면 컴포저에 채워져요 (§6 #14).</li><li>키보드가 올라오면 시작 문장도 컴포저와 같이 올라가서(visualViewport, 지금 동작) 가려지지 않아요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작 문장은 지금처럼 snap 스프링으로 30ms씩 처음 마운트할 때만 나타나요 · 행을 누르면 press 스프링이 반응해요 · 컴포저가 키보드 위로 올라갈 때 같이 올라가요 (§6 #2) · 누르면 컴포저에 채우고 컴포저는 morph로 커져요</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-2, slop:CH-2, slop:CP-8, slop:RH-1, slop:GL-1</p>
+      </article></section>
+<section class="g-feature"><h2>explore <small>explore/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 같은 화면, 색과 숫자를 뺀</h3>
+          <a href="../explore/A-end.html">HTML</a> · <a href="../explore/A-end.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/A-end-light.png" alt=""><figcaption>A-end-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/A-end-dark.png" alt=""><figcaption>A-end-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>만든 숫자 '17,166명이 맡겼어요'를 지우고 섹션 이름을 '맡길 수 있는 일'로, 순서는 편집 순서로</li><li>'깽이의 제안'(나에게 고른 일)을 목록 위로: 추천을 고르면 제안 3개 + 전체 목록</li><li>카테고리 판은 무채색 하나(--fill + --label 글리프), 그림자 없음, 여섯째 판이 살짝 보임</li><li>행 앞 색 타일을 빼고 22 px 글리프만, 설명은 두 줄, 상단 바는 메뉴 원뿐('깽이'·'초대' 캡슐 없음)</li><li>위임 시트: 판 없이 번호 단계, 없는 준비물만 '필요한 연결'에(내 전화번호), 사실은 한 줄, 인증 전 주 버튼은 '인증하고 받아 보기' 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 같은 화면, 색과 숫자를 뺀</h3>
+          <a href="../explore/A-sheet.html">HTML</a> · <a href="../explore/A-sheet.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/A-sheet-light.png" alt=""><figcaption>A-sheet-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/A-sheet-dark.png" alt=""><figcaption>A-sheet-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>만든 숫자 '17,166명이 맡겼어요'를 지우고 섹션 이름을 '맡길 수 있는 일'로, 순서는 편집 순서로</li><li>'깽이의 제안'(나에게 고른 일)을 목록 위로: 추천을 고르면 제안 3개 + 전체 목록</li><li>카테고리 판은 무채색 하나(--fill + --label 글리프), 그림자 없음, 여섯째 판이 살짝 보임</li><li>행 앞 색 타일을 빼고 22 px 글리프만, 설명은 두 줄, 상단 바는 메뉴 원뿐('깽이'·'초대' 캡슐 없음)</li><li>위임 시트: 판 없이 번호 단계, 없는 준비물만 '필요한 연결'에(내 전화번호), 사실은 한 줄, 인증 전 주 버튼은 '인증하고 받아 보기' 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 같은 화면, 색과 숫자를 뺀</h3>
+          <a href="../explore/A.html">HTML</a> · <a href="../explore/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>만든 숫자 '17,166명이 맡겼어요'를 지우고 섹션 이름을 '맡길 수 있는 일'로, 순서는 편집 순서로</li><li>'깽이의 제안'(나에게 고른 일)을 목록 위로: 추천을 고르면 제안 3개 + 전체 목록</li><li>카테고리 판은 무채색 하나(--fill + --label 글리프), 그림자 없음, 여섯째 판이 살짝 보임</li><li>행 앞 색 타일을 빼고 22 px 글리프만, 설명은 두 줄, 상단 바는 메뉴 원뿐('깽이'·'초대' 캡슐 없음)</li><li>위임 시트: 판 없이 번호 단계, 없는 준비물만 '필요한 연결'에(내 전화번호), 사실은 한 줄, 인증 전 주 버튼은 '인증하고 받아 보기' 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 추천은 나에게, 전체는 한 번 더</h3>
+          <a href="../explore/B-end.html">HTML</a> · <a href="../explore/B-end.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/B-end-light.png" alt=""><figcaption>B-end-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/B-end-dark.png" alt=""><figcaption>B-end-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카테고리는 고르는 말이라 글자로: 추천 · 전체 · 혜택 … 무채색 드롭렛이 그대로 두 모서리로 이동</li><li>추천 = 깽이가 나에게 고른 제안 3개 + 처음 해 볼 일 2개, 23개 전체는 '전체'와 마지막 행으로 한 번 더</li><li>만든 숫자 없음: 보이는 숫자는 실제 목록 개수(23개)와 한도뿐</li><li>행은 제목이 이끌고 글리프도 타일도 없음; '깽이의 제안'은 반짝이 대신 깽이 얼굴로 서명</li><li>위임 시트: 왼쪽 정렬 제목, 번호 단계, 없는 준비물·비용 한 줄을 주 버튼 '인증하고 받아 보기' 바로 위에</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2, critique:Q1, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 추천은 나에게, 전체는 한 번 더</h3>
+          <a href="../explore/B-sheet.html">HTML</a> · <a href="../explore/B-sheet.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/B-sheet-light.png" alt=""><figcaption>B-sheet-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/B-sheet-dark.png" alt=""><figcaption>B-sheet-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카테고리는 고르는 말이라 글자로: 추천 · 전체 · 혜택 … 무채색 드롭렛이 그대로 두 모서리로 이동</li><li>추천 = 깽이가 나에게 고른 제안 3개 + 처음 해 볼 일 2개, 23개 전체는 '전체'와 마지막 행으로 한 번 더</li><li>만든 숫자 없음: 보이는 숫자는 실제 목록 개수(23개)와 한도뿐</li><li>행은 제목이 이끌고 글리프도 타일도 없음; '깽이의 제안'은 반짝이 대신 깽이 얼굴로 서명</li><li>위임 시트: 왼쪽 정렬 제목, 번호 단계, 없는 준비물·비용 한 줄을 주 버튼 '인증하고 받아 보기' 바로 위에</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2, critique:Q1, critique:Q3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 추천은 나에게, 전체는 한 번 더</h3>
+          <a href="../explore/B.html">HTML</a> · <a href="../explore/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../explore/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../explore/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-22-explore.jpg" alt=""><figcaption>현재 앱 · chromium-light-22-explore</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-24-predelegate-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-24-predelegate-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카테고리는 고르는 말이라 글자로: 추천 · 전체 · 혜택 … 무채색 드롭렛이 그대로 두 모서리로 이동</li><li>추천 = 깽이가 나에게 고른 제안 3개 + 처음 해 볼 일 2개, 23개 전체는 '전체'와 마지막 행으로 한 번 더</li><li>만든 숫자 없음: 보이는 숫자는 실제 목록 개수(23개)와 한도뿐</li><li>행은 제목이 이끌고 글리프도 타일도 없음; '깽이의 제안'은 반짝이 대신 깽이 얼굴로 서명</li><li>위임 시트: 왼쪽 정렬 제목, 번호 단계, 없는 준비물·비용 한 줄을 주 버튼 '인증하고 받아 보기' 바로 위에</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 큰 제목 → 빈 가운데에 맨 글자 제목 (§6.4 scroll edge) · 카테고리 드롭렛 두 모서리 이동 lead/trail (§6.4, §3) · 카테고리 바꿈 = 방향 있는 content swap (§3) · 행 → 위임 시트 shared-element morph (§8.9) · 맡기기 loader → check, 시트가 컴포저로 수축 (§3, §8.9)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-1, P2-2, P2-3, slop:IT-11, slop:IT-12, slop:IT-13, slop:NC-6, slop:RH-3, slop:RH-1, slop:GL-2, critique:Q1, critique:Q3</p>
+      </article></section>
+<section class="g-feature"><h2>invite-friends <small>invite-friends/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 초대는 목록 아래, 한 번만</h3>
+          <a href="../invite-friends/A-invite.html">HTML</a> · <a href="../invite-friends/A-invite.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../invite-friends/png/A-invite-light.png" alt=""><figcaption>A-invite-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../invite-friends/png/A-invite-dark.png" alt=""><figcaption>A-invite-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-44-friends.jpg" alt=""><figcaption>현재 앱 · chromium-light-44-friends</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-45-invite-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-45-invite-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>상단 바의 '초대'와 '깽이' 캡슐을 빼서 유리는 뒤로 원과 탭 바 둘: 친구 목록 아래 폭 전체의 무채색 '친구 초대하기'가 시트의 출발점</li><li>페이지 안내는 사용법만, 자물쇠 없이: '메시지에서 모시 이름을 부르거나 @로 시작하면 내 모시가 대신 답해요.'</li><li>친구 행 끝의 말풍선 대신 셰브런: 행 전체가 대화를 열고, 따로 누르는 건 '…' 하나</li><li>초대 시트: 링크 패널·타일·토큰 없이 '23시간 59분 뒤까지 · 한 번만 쓸 수 있어요' 한 줄</li><li>주 버튼은 하나(공유하기), 링크 복사는 무채색, 공개 범위 문장은 시트에 한 번 + 설정 보기</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 친구 초대하기 → 시트가 그 버튼(행)에서 morph (§3 sheet from source) · 링크 복사 loader → check + 섬 배너 (§3) · 추가 loader → check → '친구가 됐어요' (§3) · 행 → 함께 쓰는 대화 push, 큰 제목 morph (§3) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-3, P3-1, slop:RH-1, slop:RH-3, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 초대는 목록 아래, 한 번만</h3>
+          <a href="../invite-friends/A.html">HTML</a> · <a href="../invite-friends/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../invite-friends/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../invite-friends/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-44-friends.jpg" alt=""><figcaption>현재 앱 · chromium-light-44-friends</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-45-invite-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-45-invite-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>상단 바의 '초대'와 '깽이' 캡슐을 빼서 유리는 뒤로 원과 탭 바 둘: 친구 목록 아래 폭 전체의 무채색 '친구 초대하기'가 시트의 출발점</li><li>페이지 안내는 사용법만, 자물쇠 없이: '메시지에서 모시 이름을 부르거나 @로 시작하면 내 모시가 대신 답해요.'</li><li>친구 행 끝의 말풍선 대신 셰브런: 행 전체가 대화를 열고, 따로 누르는 건 '…' 하나</li><li>초대 시트: 링크 패널·타일·토큰 없이 '23시간 59분 뒤까지 · 한 번만 쓸 수 있어요' 한 줄</li><li>주 버튼은 하나(공유하기), 링크 복사는 무채색, 공개 범위 문장은 시트에 한 번 + 설정 보기</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 친구 초대하기 → 시트가 그 버튼(행)에서 morph (§3 sheet from source) · 링크 복사 loader → check + 섬 배너 (§3) · 추가 loader → check → '친구가 됐어요' (§3) · 행 → 함께 쓰는 대화 push, 큰 제목 morph (§3) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-3, P3-1, slop:RH-1, slop:RH-3, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 초대는 친구 묶음의 마지막 행</h3>
+          <a href="../invite-friends/B-invite.html">HTML</a> · <a href="../invite-friends/B-invite.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../invite-friends/png/B-invite-light.png" alt=""><figcaption>B-invite-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../invite-friends/png/B-invite-dark.png" alt=""><figcaption>B-invite-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-44-friends.jpg" alt=""><figcaption>현재 앱 · chromium-light-44-friends</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-45-invite-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-45-invite-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'친구 초대하기'가 친구 묶음의 마지막 행(iOS의 '추가' 행): 시트가 그 행에서 자라고, 상단 유리는 뒤로 원 하나</li><li>사용법 문장은 친구 목록의 캡션으로: 그 기능이 쓰이는 자리 바로 아래</li><li>친구 행은 셰브런 하나 + '…', A와 같음</li><li>초대 시트: 왼쪽 제목, 리드와 공개 범위 한 번, 만료·1회 한 줄은 '공유하기' 바로 위</li><li>주 버튼 하나, 링크 복사는 글자 버튼: 한 화면에 강조색 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 친구 초대하기 → 시트가 그 버튼(행)에서 morph (§3 sheet from source) · 링크 복사 loader → check + 섬 배너 (§3) · 추가 loader → check → '친구가 됐어요' (§3) · 행 → 함께 쓰는 대화 push, 큰 제목 morph (§3) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-3, P3-1, slop:RH-1, slop:RH-3, slop:GL-2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 초대는 친구 묶음의 마지막 행</h3>
+          <a href="../invite-friends/B.html">HTML</a> · <a href="../invite-friends/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../invite-friends/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../invite-friends/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-44-friends.jpg" alt=""><figcaption>현재 앱 · chromium-light-44-friends</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-45-invite-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-45-invite-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'친구 초대하기'가 친구 묶음의 마지막 행(iOS의 '추가' 행): 시트가 그 행에서 자라고, 상단 유리는 뒤로 원 하나</li><li>사용법 문장은 친구 목록의 캡션으로: 그 기능이 쓰이는 자리 바로 아래</li><li>친구 행은 셰브런 하나 + '…', A와 같음</li><li>초대 시트: 왼쪽 제목, 리드와 공개 범위 한 번, 만료·1회 한 줄은 '공유하기' 바로 위</li><li>주 버튼 하나, 링크 복사는 글자 버튼: 한 화면에 강조색 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 친구 초대하기 → 시트가 그 버튼(행)에서 morph (§3 sheet from source) · 링크 복사 loader → check + 섬 배너 (§3) · 추가 loader → check → '친구가 됐어요' (§3) · 행 → 함께 쓰는 대화 push, 큰 제목 morph (§3) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-3, P3-1, slop:RH-1, slop:RH-3, slop:GL-2</p>
+      </article></section>
+<section class="g-feature"><h2>회의 참여 <small>meeting/</small></h2>
+      <article class="g-card">
+        <header><h3>A · pending · 참여 확인: 회의의 말로</h3>
+          <a href="../meeting/A-pending.html">HTML</a> · <a href="../meeting/A-pending.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/A-pending-light.png" alt=""><figcaption>A-pending-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/A-pending-dark.png" alt=""><figcaption>A-pending-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-13-chat-meet-approved.jpg" alt=""><figcaption>현재 앱 · chromium-light-13-chat-meet-approved</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-13-chat-meet-approved.jpg" alt=""><figcaption>현재 앱 · chromium-dark-13-chat-meet-approved</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>승인 카드의 제목 '회의 참여'·사람 글리프·'참여 승인'은 HEAD와 같은 답. 시안은 사실 두 줄 대신 메타 한 줄 'Google Meet · rak-mnpq-kud'(주인 카드엔 전체 코드)</li><li>영수증 알약에 시간 + '이 기기의 키로 확인했어요' (글자 --label은 HEAD에서 이미)</li><li>알림은 HEAD처럼 바탕 위 각주 글자, 연속 알림 간격 6px; 실패 알림은 느낌표 + --danger + '다시 참여하기' (P2-1)</li><li>회의 중이면 마지막 알림 아래 '회의에서 내보내기' 중립 버튼 한 개: HEAD MeetLive의 버튼을 알림이 보이는 대화에도 (현재 캡처는 회의가 끝난 뒤)</li><li>요약: '회의 요약' 제목2(22), 섹션 머리는 위 16 · 아래 4, 회의록 카드는 판 없이 (P2-2, IT-9). '문서'를 메타 줄로는 HEAD에서 이미</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · summary · 요약과 회의록: 위계 복구</h3>
+          <a href="../meeting/A-summary.html">HTML</a> · <a href="../meeting/A-summary.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/A-summary-light.png" alt=""><figcaption>A-summary-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/A-summary-dark.png" alt=""><figcaption>A-summary-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-15-chat-meeting-summary-artifact.jpg" alt=""><figcaption>현재 앱 · chromium-light-15-chat-meeting-summary-artifact</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-15-chat-meeting-summary-artifact.jpg" alt=""><figcaption>현재 앱 · chromium-dark-15-chat-meeting-summary-artifact</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>승인 카드의 제목 '회의 참여'·사람 글리프·'참여 승인'은 HEAD와 같은 답. 시안은 사실 두 줄 대신 메타 한 줄 'Google Meet · rak-mnpq-kud'(주인 카드엔 전체 코드)</li><li>영수증 알약에 시간 + '이 기기의 키로 확인했어요' (글자 --label은 HEAD에서 이미)</li><li>알림은 HEAD처럼 바탕 위 각주 글자, 연속 알림 간격 6px; 실패 알림은 느낌표 + --danger + '다시 참여하기' (P2-1)</li><li>회의 중이면 마지막 알림 아래 '회의에서 내보내기' 중립 버튼 한 개: HEAD MeetLive의 버튼을 알림이 보이는 대화에도 (현재 캡처는 회의가 끝난 뒤)</li><li>요약: '회의 요약' 제목2(22), 섹션 머리는 위 16 · 아래 4, 회의록 카드는 판 없이 (P2-2, IT-9). '문서'를 메타 줄로는 HEAD에서 이미</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-9, slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 회의 중: 알림은 글자로, 내보내기는 한 번에</h3>
+          <a href="../meeting/A.html">HTML</a> · <a href="../meeting/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-14-chat-meeting-events.jpg" alt=""><figcaption>현재 앱 · chromium-light-14-chat-meeting-events</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-14-chat-meeting-events.jpg" alt=""><figcaption>현재 앱 · chromium-dark-14-chat-meeting-events</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>승인 카드의 제목 '회의 참여'·사람 글리프·'참여 승인'은 HEAD와 같은 답. 시안은 사실 두 줄 대신 메타 한 줄 'Google Meet · rak-mnpq-kud'(주인 카드엔 전체 코드)</li><li>영수증 알약에 시간 + '이 기기의 키로 확인했어요' (글자 --label은 HEAD에서 이미)</li><li>알림은 HEAD처럼 바탕 위 각주 글자, 연속 알림 간격 6px; 실패 알림은 느낌표 + --danger + '다시 참여하기' (P2-1)</li><li>회의 중이면 마지막 알림 아래 '회의에서 내보내기' 중립 버튼 한 개: HEAD MeetLive의 버튼을 알림이 보이는 대화에도 (현재 캡처는 회의가 끝난 뒤)</li><li>요약: '회의 요약' 제목2(22), 섹션 머리는 위 16 · 아래 4, 회의록 카드는 판 없이 (P2-2, IT-9). '문서'를 메타 줄로는 HEAD에서 이미</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · pending · 참여 확인: 같은 카드의 첫 상태</h3>
+          <a href="../meeting/B-pending.html">HTML</a> · <a href="../meeting/B-pending.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/B-pending-light.png" alt=""><figcaption>B-pending-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/B-pending-dark.png" alt=""><figcaption>B-pending-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-13-chat-meet-approved.jpg" alt=""><figcaption>현재 앱 · chromium-light-13-chat-meet-approved</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-13-chat-meet-approved.jpg" alt=""><figcaption>현재 앱 · chromium-dark-13-chat-meet-approved</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>회의 하나 = 카드 하나: 승인 카드가 그 자리에서 '회의에 들어와 있어요' → '끝나서 나왔어요'로 모양을 바꿈. 알림 줄 3개가 카드 상태 줄 하나로 (P2-1)</li><li>회의 중 상태 줄에 깽이 아바타 점 + '회의에서 내보내기' 전폭 중립 버튼: 지금 회의에 누가 있는지와 빠져나오는 길이 한곳에 (비평 Q3). 버튼 자체는 HEAD MeetLive에도 있음</li><li>'회의 참여'·'참여 승인'은 HEAD와 같은 말, 메타 한 줄 'Google Meet · rak-mnpq-kud'(전체 코드)</li><li>승인 기록은 카드 바닥 한 줄 각주로 접힘: 시간 + '이 기기의 키로 확인했어요'</li><li>요약은 말풍선 없는 글자 + 위계(제목2, 머리 위 16 · 아래 4), 회의록은 판 없는 행 (P2-2, IT-9)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:NC-1, slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · summary · 끝난 회의 카드 + 글자 요약</h3>
+          <a href="../meeting/B-summary.html">HTML</a> · <a href="../meeting/B-summary.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/B-summary-light.png" alt=""><figcaption>B-summary-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/B-summary-dark.png" alt=""><figcaption>B-summary-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-15-chat-meeting-summary-artifact.jpg" alt=""><figcaption>현재 앱 · chromium-light-15-chat-meeting-summary-artifact</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-15-chat-meeting-summary-artifact.jpg" alt=""><figcaption>현재 앱 · chromium-dark-15-chat-meeting-summary-artifact</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>회의 하나 = 카드 하나: 승인 카드가 그 자리에서 '회의에 들어와 있어요' → '끝나서 나왔어요'로 모양을 바꿈. 알림 줄 3개가 카드 상태 줄 하나로 (P2-1)</li><li>회의 중 상태 줄에 깽이 아바타 점 + '회의에서 내보내기' 전폭 중립 버튼: 지금 회의에 누가 있는지와 빠져나오는 길이 한곳에 (비평 Q3). 버튼 자체는 HEAD MeetLive에도 있음</li><li>'회의 참여'·'참여 승인'은 HEAD와 같은 말, 메타 한 줄 'Google Meet · rak-mnpq-kud'(전체 코드)</li><li>승인 기록은 카드 바닥 한 줄 각주로 접힘: 시간 + '이 기기의 키로 확인했어요'</li><li>요약은 말풍선 없는 글자 + 위계(제목2, 머리 위 16 · 아래 4), 회의록은 판 없는 행 (P2-2, IT-9)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-9, slop:NC-1, slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 회의는 카드 한 장: 승인 → 회의 중 → 끝남</h3>
+          <a href="../meeting/B.html">HTML</a> · <a href="../meeting/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../meeting/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../meeting/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-14-chat-meeting-events.jpg" alt=""><figcaption>현재 앱 · chromium-light-14-chat-meeting-events</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-14-chat-meeting-events.jpg" alt=""><figcaption>현재 앱 · chromium-dark-14-chat-meeting-events</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>회의 하나 = 카드 하나: 승인 카드가 그 자리에서 '회의에 들어와 있어요' → '끝나서 나왔어요'로 모양을 바꿈. 알림 줄 3개가 카드 상태 줄 하나로 (P2-1)</li><li>회의 중 상태 줄에 깽이 아바타 점 + '회의에서 내보내기' 전폭 중립 버튼: 지금 회의에 누가 있는지와 빠져나오는 길이 한곳에 (비평 Q3). 버튼 자체는 HEAD MeetLive에도 있음</li><li>'회의 참여'·'참여 승인'은 HEAD와 같은 말, 메타 한 줄 'Google Meet · rak-mnpq-kud'(전체 코드)</li><li>승인 기록은 카드 바닥 한 줄 각주로 접힘: 시간 + '이 기기의 키로 확인했어요'</li><li>요약은 말풍선 없는 글자 + 위계(제목2, 머리 위 16 · 아래 4), 회의록은 판 없는 행 (P2-2, IT-9)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 morph: 승인 카드가 같은 카드 그대로 대기 → 승인 → 회의 중 → 끝남으로 모양을 바꿈 (교차 페이드 없음) · §3 content swap: 카드 안 상태 줄만 120ms exit → morph enter · §3 Loader → check: '참여 승인'은 서버 확인 뒤에만 체크 · §3 press: 버튼 lift &amp; swell · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, slop:NC-1, slop:GL-1, slop:RH-3, critique:Q3</p>
+      </article></section>
+<section class="g-feature"><h2>나의 모시 <small>my-mosi/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 조용한 정리: 배치는 그대로, 군더더기만 걷기</h3>
+          <a href="../my-mosi/A.html">HTML</a> · <a href="../my-mosi/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../my-mosi/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../my-mosi/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-29-profile.jpg" alt=""><figcaption>현재 앱 · chromium-light-29-profile</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>티켓을 색 대신 말로 구분해요: '기본 3장 · 프리미엄 0장'. 파랑·보라 두 색이 빠지고 색만으로 구분하던 문제가 풀려요 (P1, CL-1).</li><li>행 옆 아이콘 타일을 모두 없애고, 아이콘은 20px 글리프로 글줄 안에 둬요. 행이 15개라 훑어보기용 글리프는 남겨요 (P2, IT-15).</li><li>그림자를 빼고 모든 상자를 --r-group 하나로 맞췄어요. 사용량 카드 제목도 본문 600으로 통일했어요 (P2, SH-1, RD-1).</li><li>보호 카드는 '깽이' 묶음의 마지막 행 '개인 정보 보호'로 들어가요. 안심 문구는 개인 정보 시트 한 곳에만 남아요 (P2, IT-17, CP-5).</li><li>섹션 제목은 진짜 h2이고 '내 계정' 묶음에도 보이는 제목이 생겼어요 (detector skipped-heading).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> % 숫자는 지금처럼 Odometer로 굴러요 (§3 Counters) · 막대는 morph로 차고, 티켓을 쓰면 morph로 0까지 빠져요 (§6.6) · 티켓 시트는 티켓 행에서 morph로 펼쳐지고 닫으면 행으로 접혀요 (§3 Sheet, §8.2) · 티켓 쓰기는 서버 확인 뒤에만 loader → check (§3) · 행을 누르면 제목이 상세 화면 큰 제목으로 morph (§6.6)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-15, slop:IT-17, slop:RH-4, slop:RH-1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 하나의 목록: 탭 전체를 제목 → 묶음 → 설명 한 가지 문법으로</h3>
+          <a href="../my-mosi/B.html">HTML</a> · <a href="../my-mosi/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../my-mosi/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../my-mosi/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-29-profile.jpg" alt=""><figcaption>현재 앱 · chromium-light-29-profile</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>카드 일곱 종류를 한 문법으로 바꿨어요. 모든 블록이 h2 제목, 묶음, 설명 순서예요. 눈이 상자마다 다시 배울 필요가 없어요 (P2 boxes, NC-8).</li><li>한도는 '사용량' 묶음의 첫 행이 되고, 비어 있는 7일 기록은 묶음 아래 설명 한 줄로 한 번만 말해요 (RH-4).</li><li>티켓은 '기본 3장 · 프리미엄 0장'으로 말해요. 파랑·보라가 빠져 화면의 색은 탭 표시 하나뿐이에요 (P1, CL-1).</li><li>아이콘 열을 없애고 대신 묶음을 의미별로 나눴어요. 7행이던 '깽이' 묶음이 4행 이하 묶음 셋이 돼요 (P2 plates, Cognitive Load).</li><li>가운데 이름표를 쉬는 동안 비워요. 바로 아래 행이 깽이이고, 스크롤하면 '나의 모시'가 올라와요. 유리 모양은 둘뿐이에요 (RH-1, GL-2).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> % 숫자는 Odometer로 굴러요 (§3 Counters) · 막대는 morph로 차고 티켓을 쓰면 morph로 0까지 빠져요 (§6.6) · 티켓 시트는 티켓 행에서 morph로 펼쳐져요 (§3 Sheet, §8.2) · 큰 제목이 접히면 가운데에 '나의 모시'가 content swap으로 들어와요 (§3, §6.4) · 행을 누르면 제목이 상세 화면 큰 제목으로 morph (§6.6)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, slop:IT-15, slop:IT-17, slop:RH-4, slop:NC-8, slop:RH-1, critique:Q1</p>
+      </article></section>
+<section class="g-feature"><h2>onboarding <small>onboarding/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 만난 모시가 남는 모시</h3>
+          <a href="../onboarding/A-login.html">HTML</a> · <a href="../onboarding/A-login.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-login-light.png" alt=""><figcaption>A-login-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-login-dark.png" alt=""><figcaption>A-login-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>첫 화면의 캐릭터가 가입 뒤 채팅의 그 캐릭터: 같은 색(hue) · 같은 눈(dot), 기본 빨강(hue 8) 대역 없음</li><li>가입 1·2단계와 로그인이 같은 시트 높이: 제목을 자르지 않고 내용만 바뀜</li><li>2단계 '이전 단계'는 시트 머리 왼쪽 빈칸으로, 모시 이름 칸 앞에 그 얼굴</li><li>로그인에 '비밀번호를 잊었어요'와 '처음이에요 · 시작하기'</li><li>아이디 힌트를 말로: '영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요'</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 만난 모시가 남는 모시</h3>
+          <a href="../onboarding/A-reset.html">HTML</a> · <a href="../onboarding/A-reset.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-reset-light.png" alt=""><figcaption>A-reset-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-reset-dark.png" alt=""><figcaption>A-reset-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>첫 화면의 캐릭터가 가입 뒤 채팅의 그 캐릭터: 같은 색(hue) · 같은 눈(dot), 기본 빨강(hue 8) 대역 없음</li><li>가입 1·2단계와 로그인이 같은 시트 높이: 제목을 자르지 않고 내용만 바뀜</li><li>2단계 '이전 단계'는 시트 머리 왼쪽 빈칸으로, 모시 이름 칸 앞에 그 얼굴</li><li>로그인에 '비밀번호를 잊었어요'와 '처음이에요 · 시작하기'</li><li>아이디 힌트를 말로: '영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요'</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 만난 모시가 남는 모시</h3>
+          <a href="../onboarding/A-step1.html">HTML</a> · <a href="../onboarding/A-step1.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-step1-light.png" alt=""><figcaption>A-step1-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-step1-dark.png" alt=""><figcaption>A-step1-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>첫 화면의 캐릭터가 가입 뒤 채팅의 그 캐릭터: 같은 색(hue) · 같은 눈(dot), 기본 빨강(hue 8) 대역 없음</li><li>가입 1·2단계와 로그인이 같은 시트 높이: 제목을 자르지 않고 내용만 바뀜</li><li>2단계 '이전 단계'는 시트 머리 왼쪽 빈칸으로, 모시 이름 칸 앞에 그 얼굴</li><li>로그인에 '비밀번호를 잊었어요'와 '처음이에요 · 시작하기'</li><li>아이디 힌트를 말로: '영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요'</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 만난 모시가 남는 모시</h3>
+          <a href="../onboarding/A-step2.html">HTML</a> · <a href="../onboarding/A-step2.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-step2-light.png" alt=""><figcaption>A-step2-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-step2-dark.png" alt=""><figcaption>A-step2-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>첫 화면의 캐릭터가 가입 뒤 채팅의 그 캐릭터: 같은 색(hue) · 같은 눈(dot), 기본 빨강(hue 8) 대역 없음</li><li>가입 1·2단계와 로그인이 같은 시트 높이: 제목을 자르지 않고 내용만 바뀜</li><li>2단계 '이전 단계'는 시트 머리 왼쪽 빈칸으로, 모시 이름 칸 앞에 그 얼굴</li><li>로그인에 '비밀번호를 잊었어요'와 '처음이에요 · 시작하기'</li><li>아이디 힌트를 말로: '영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요'</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 만난 모시가 남는 모시</h3>
+          <a href="../onboarding/A.html">HTML</a> · <a href="../onboarding/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>첫 화면의 캐릭터가 가입 뒤 채팅의 그 캐릭터: 같은 색(hue) · 같은 눈(dot), 기본 빨강(hue 8) 대역 없음</li><li>가입 1·2단계와 로그인이 같은 시트 높이: 제목을 자르지 않고 내용만 바뀜</li><li>2단계 '이전 단계'는 시트 머리 왼쪽 빈칸으로, 모시 이름 칸 앞에 그 얼굴</li><li>로그인에 '비밀번호를 잊었어요'와 '처음이에요 · 시작하기'</li><li>아이디 힌트를 말로: '영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요'</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11) · 시트 닫힘 returns never re-enter (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 이름 짓는 순간 무대 위에</h3>
+          <a href="../onboarding/B-login.html">HTML</a> · <a href="../onboarding/B-login.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-login-light.png" alt=""><figcaption>B-login-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-login-dark.png" alt=""><figcaption>B-login-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 수정(같은 캐릭터 · 같은 시트 높이 · 머리 왼쪽 '이전 단계' · 로그인 복구 · 아이디 힌트)은 모두 그대로</li><li>시트를 어둡게 덮지 않아요(iOS medium detent): 캐릭터가 회색으로 죽지 않고 시트 위에 남음</li><li>시트가 열리면 캐릭터가 시트 위로 올라가고(공유 요소 morph), 2단계에선 짓는 이름이 그 얼굴 아래 바로 보임</li><li>첫 화면 부제를 모시만 하는 일로: '말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요.'</li><li>브랜드 색은 캐릭터 안에만, 버튼은 --accent-fill 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 캐릭터 히어로 → 시트 위 무대: 공유 요소 morph, 제목은 fade (§3, §8.2 범위 안) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 이름 짓는 순간 무대 위에</h3>
+          <a href="../onboarding/B-reset.html">HTML</a> · <a href="../onboarding/B-reset.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-reset-light.png" alt=""><figcaption>B-reset-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-reset-dark.png" alt=""><figcaption>B-reset-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 수정(같은 캐릭터 · 같은 시트 높이 · 머리 왼쪽 '이전 단계' · 로그인 복구 · 아이디 힌트)은 모두 그대로</li><li>시트를 어둡게 덮지 않아요(iOS medium detent): 캐릭터가 회색으로 죽지 않고 시트 위에 남음</li><li>시트가 열리면 캐릭터가 시트 위로 올라가고(공유 요소 morph), 2단계에선 짓는 이름이 그 얼굴 아래 바로 보임</li><li>첫 화면 부제를 모시만 하는 일로: '말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요.'</li><li>브랜드 색은 캐릭터 안에만, 버튼은 --accent-fill 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 캐릭터 히어로 → 시트 위 무대: 공유 요소 morph, 제목은 fade (§3, §8.2 범위 안) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 이름 짓는 순간 무대 위에</h3>
+          <a href="../onboarding/B-step1.html">HTML</a> · <a href="../onboarding/B-step1.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-step1-light.png" alt=""><figcaption>B-step1-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-step1-dark.png" alt=""><figcaption>B-step1-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 수정(같은 캐릭터 · 같은 시트 높이 · 머리 왼쪽 '이전 단계' · 로그인 복구 · 아이디 힌트)은 모두 그대로</li><li>시트를 어둡게 덮지 않아요(iOS medium detent): 캐릭터가 회색으로 죽지 않고 시트 위에 남음</li><li>시트가 열리면 캐릭터가 시트 위로 올라가고(공유 요소 morph), 2단계에선 짓는 이름이 그 얼굴 아래 바로 보임</li><li>첫 화면 부제를 모시만 하는 일로: '말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요.'</li><li>브랜드 색은 캐릭터 안에만, 버튼은 --accent-fill 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 캐릭터 히어로 → 시트 위 무대: 공유 요소 morph, 제목은 fade (§3, §8.2 범위 안) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 이름 짓는 순간 무대 위에</h3>
+          <a href="../onboarding/B-step2.html">HTML</a> · <a href="../onboarding/B-step2.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-step2-light.png" alt=""><figcaption>B-step2-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-step2-dark.png" alt=""><figcaption>B-step2-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 수정(같은 캐릭터 · 같은 시트 높이 · 머리 왼쪽 '이전 단계' · 로그인 복구 · 아이디 힌트)은 모두 그대로</li><li>시트를 어둡게 덮지 않아요(iOS medium detent): 캐릭터가 회색으로 죽지 않고 시트 위에 남음</li><li>시트가 열리면 캐릭터가 시트 위로 올라가고(공유 요소 morph), 2단계에선 짓는 이름이 그 얼굴 아래 바로 보임</li><li>첫 화면 부제를 모시만 하는 일로: '말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요.'</li><li>브랜드 색은 캐릭터 안에만, 버튼은 --accent-fill 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 캐릭터 히어로 → 시트 위 무대: 공유 요소 morph, 제목은 fade (§3, §8.2 범위 안) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 이름 짓는 순간 무대 위에</h3>
+          <a href="../onboarding/B.html">HTML</a> · <a href="../onboarding/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../onboarding/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-01-onboarding.jpg" alt=""><figcaption>현재 앱 · chromium-light-01-onboarding</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-04-login-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-04-login-sheet</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>A의 수정(같은 캐릭터 · 같은 시트 높이 · 머리 왼쪽 '이전 단계' · 로그인 복구 · 아이디 힌트)은 모두 그대로</li><li>시트를 어둡게 덮지 않아요(iOS medium detent): 캐릭터가 회색으로 죽지 않고 시트 위에 남음</li><li>시트가 열리면 캐릭터가 시트 위로 올라가고(공유 요소 morph), 2단계에선 짓는 이름이 그 얼굴 아래 바로 보임</li><li>첫 화면 부제를 모시만 하는 일로: '말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요.'</li><li>브랜드 색은 캐릭터 안에만, 버튼은 --accent-fill 하나</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 시작하기 → 시트 morph (§6.1) · 캐릭터 히어로 → 시트 위 무대: 공유 요소 morph, 제목은 fade (§3, §8.2 범위 안) · 단계 사이 content swap (§3) · loader → check, 서버 확인 뒤에만 (§3) · 캐릭터 호흡 3.2 s ≤2 % (§8.11)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P3-1, critique:Q1, critique:Q2</p>
+      </article></section>
+<section class="g-feature"><h2>결제 수단 <small>payment/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 정직한 빈 상태: 판을 빼고, 약속은 셋, 버튼은 하는 일대로</h3>
+          <a href="../payment/A.html">HTML</a> · <a href="../payment/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../payment/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../payment/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-43-payment.jpg" alt=""><figcaption>현재 앱 · chromium-light-43-payment</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'아직 연결된 결제 수단이 없어요'(추가하지 않았다는 뜻)를 '결제 수단은 아직 연결할 수 없어요'로 바꿨어요. 본문은 '깽이가 대신 결제하는 일도 하지 않아요.' 한 문장이에요 (P2-1).</li><li>64px 카드 글리프 판을 뺐어요. 빈 상태 본문 폭은 17em이라 Chrome과 WebKit에서 같은 줄로 감겨요 (IT-18, P3-1).</li><li>'저장된 로그인 보기'는 하는 일대로 '로그인 정보는 어떻게 지키는지 보기'로 이름을 바꿨어요(§8.14 한 가지 행동) (P2-1).</li><li>약속은 넷과 각주에서 셋으로 줄였어요. 암호화는 한 번만 말하고, 이름은 깽이 하나예요. 각주는 2번 행 안으로 들어갔고, 순서가 아니라서 &lt;ul&gt;이에요 (P2-2).</li><li>타일과 그림자를 빼고, 평평한 종이 위에 hairline으로 나눴어요. 세 행이 모두 탭 바 위에 보여요 (P2-3, P3-1).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 큰 제목 morph로 들어오고 camera 슬라이드가 따라와요 (§6.6) · 버튼 누름은 같은 프레임의 press 틴트예요 (§3) · 돌아올 때 재등장 없음 (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:GR-R2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 첫 문장이 상태: 가운데 빈 상태 대신 왼쪽 정렬 한 단락</h3>
+          <a href="../payment/B.html">HTML</a> · <a href="../payment/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../payment/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../payment/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-43-payment.jpg" alt=""><figcaption>현재 앱 · chromium-light-43-payment</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>가운데 정렬 빈 상태 블록 대신, 큰 제목 바로 아래 '아직 연결할 수 없어요 / 깽이가 대신 결제하는 일도 하지 않아요.'가 와요. 제목이 이미 '결제 수단'이라 문장에서 되풀이하지 않아요 (P2-1).</li><li>약속 셋은 critique 문구 그대로인 문장 행이에요. 행 제목이 없어서 같은 말을 제목과 본문에서 두 번 하지 않아요 (P2-2).</li><li>'저장된 로그인 보기'는 저장된 로그인을 말하는 1번 약속 바로 아래 글자 링크예요. 왜 거기 있는지 문장이 말해 줘요 (P2-1 첫 번째 안).</li><li>타일, 판, 그림자, 각주가 모두 없어요. 화면의 모양은 종이 묶음 하나예요 (P2-3, IT-16, IT-18).</li><li>결제가 생기면 1행에 카드 행만 더하면 돼서, critique 질문 3의 '결제가 나와도 참인 가장 작은 화면'이에요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 행 → 큰 제목 morph로 들어오고 camera 슬라이드가 따라와요 (§6.6) · 링크 누름은 같은 프레임의 press 틴트, 금고로 push (§3) · 돌아올 때 재등장 없음 (§8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P3-1, slop:GR-R2, critique:Q3</p>
+      </article></section>
+<section class="g-feature"><h2>전화 대행 <small>phone-delegation/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 번호는 그대로, 말은 따로: 같은 카드에서 신호 하나</h3>
+          <a href="../phone-delegation/A.html">HTML</a> · <a href="../phone-delegation/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../phone-delegation/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../phone-delegation/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-08-chat-cards-latest-phone-approval.jpg" alt=""><figcaption>현재 앱 · chromium-light-08-chat-cards-latest-phone-approval</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-08-chat-cards-latest-phone-approval.jpg" alt=""><figcaption>현재 앱 · chromium-dark-08-chat-cards-latest-phone-approval</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>주인에게는 전체 번호 02-1234-1234를 제목 아래 한 줄로(고정폭 숫자): HEAD도 card.call로 같은 답. 현재 캡처는 픽스처에 card.call이 없어 가린 번호</li><li>전할 말은 따옴표가 바깥에 걸리는 16px 말 덩어리로, 패널·옆줄 없이: WebKit에서 여는 따옴표가 줄 끝에 남지 않음 (말 덩어리는 HEAD도 같은 답)</li><li>'이 말을 전하고 끊어요. 상대의 대답은 들을 수 없어요.' 한 줄은 HEAD와 같음</li><li>알약·아이콘 판 없음, 중립 '취소', 파랑은 '전화 걸기' 하나: HEAD와 같음. 상단 바는 채팅 시안처럼 유리 3개 (GL-1, RH-3)</li><li>'연세바른치과에 전화할까요?'('에'는 HEAD 서버에서 이미 고쳐짐), 지금 있는 제스처를 버튼 아래 보이는 안내로 '길게 누르거나, 두 번 눌러 확인해요' (비평 Sam)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.6 high-risk: 1.2초 길게 누르기 + 같은 자리 두 번 탭 (버튼 안 채움이 hold 진행) · §3 Loader → check: 서버가 받은 뒤에만 '전화를 걸었어요' 영수증으로 morph · §3 press: 버튼 lift 1.03 + 채움 6% 어둡게 (줄어들지 않음) · §3 Toggle(예약 카드): 두 모서리 knob, snap · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:GL-1, slop:RH-3</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 확인할 것부터: 번호가 주인공, 대본은 깽이의 목소리</h3>
+          <a href="../phone-delegation/B.html">HTML</a> · <a href="../phone-delegation/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../phone-delegation/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../phone-delegation/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-08-chat-cards-latest-phone-approval.jpg" alt=""><figcaption>현재 앱 · chromium-light-08-chat-cards-latest-phone-approval</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-08-chat-cards-latest-phone-approval.jpg" alt=""><figcaption>현재 앱 · chromium-dark-08-chat-cards-latest-phone-approval</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>전체 번호가 카드의 주인공(22px, 고정폭): 승인하는 사람이 대조할 단 하나의 사실을 가장 크게 (전체 번호 자체는 HEAD에도 있음)</li><li>대본 앞에 깽이 아바타 점: 상대가 듣는 건 깽이의 목소리라는 것을 글리프 하나로, 따옴표 말 덩어리 16px</li><li>'이 말을 전하고 끊어요. 상대의 대답은 들을 수 없어요.'는 HEAD와 같음</li><li>'길게 누르거나, 두 번 눌러 확인해요'를 버튼 아래 보이는 글자로: 지금은 화면 낭독기에만 있음 (비평 Sam)</li><li>알약·판 없음과 중립 취소는 HEAD와 같음; 깽이 말은 말풍선 없이, 유리 3개 (NC-1, GL-1, RH-3)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §8.6 high-risk: 1.2초 길게 누르기 + 같은 자리 두 번 탭 (버튼 안 채움이 hold 진행) · §3 Loader → check: 서버가 받은 뒤에만 '전화를 걸었어요' 영수증으로 morph · §3 press: 버튼 lift 1.03 + 채움 6% 어둡게 (줄어들지 않음) · §3 Toggle(예약 카드): 두 모서리 knob, snap · §8.2 돌아올 때 재등장 없음</p>
+        <p class="g-fixes"><strong>Fixes</strong> slop:NC-1, slop:GL-1, slop:RH-3</p>
+      </article></section>
+<section class="g-feature"><h2>일정 <small>schedules/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 두 줄 행: 타일과 중복 시간을 걷고, 만드는 길은 하나</h3>
+          <a href="../schedules/A.html">HTML</a> · <a href="../schedules/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../schedules/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../schedules/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-41-schedules.jpg" alt=""><figcaption>현재 앱 · chromium-light-41-schedules</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-42-schedule-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-42-schedule-sheet</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-16-chat-schedule-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-16-chat-schedule-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>위쪽 '+'와 '새 예약 만들기' 두 개를 '깽이에게 예약 부탁하기' 하나로 줄였어요. 어디로 가는지 이름이 말해 줘요. 유리 모양은 넷에서 둘이 돼요 (P1-1).</li><li>제목으로 추측하던 아이콘 타일(sparkles 포함)을 없앴어요. 행은 16px 여백에서 시작하고 구분선도 16px에서 시작해요 (P2-1, IT-6, CP-8).</li><li>세 줄 행은 두 줄이 돼요: 이름, 그리고 '매일 오전 7:30 · 다음은 오늘'. '다음 오늘'은 사라지고, 꺼진 행은 '꺼져 있어요'예요 (P2-2).</li><li>시트의 오목한 패널과 타일 대신 라벨과 값 행이에요. 맡긴 일은 입력창처럼 보이지 않게 따옴표 친 문장이고, 지우기는 작은 가운데 캡슐이에요 (P2-3, NC).</li><li>시트에 '깽이에게 바꿔 달라고 하기'를 넣었어요. 시간이나 내용을 바꾸려면 지우고 다시 부탁해야 했는데, 대화로 바꾸는 길을 이름으로 알려 줘요(critique 질문 1). 힌트는 에이전트 이름과 '깨워 줘' 띄어쓰기를 써요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 토글은 lead/trail knob, snap 트랙, 누르면 렌즈 (§3 Toggle) · 켜고 끄면 '다음은 오늘' ↔ '꺼져 있어요'가 content swap (§3) · 행 → 시트 morph, 닫힐 때 재등장 없음 (§3 Sheet, §8.2) · 지우기는 두 번 누르기 확인, 서버 확인 뒤 loader → check (§3, §8.6)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:GL-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 알람처럼: 시간이 행의 이름, 만드는 길은 예시 문장</h3>
+          <a href="../schedules/B.html">HTML</a> · <a href="../schedules/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../schedules/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../schedules/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-41-schedules.jpg" alt=""><figcaption>현재 앱 · chromium-light-41-schedules</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-42-schedule-sheet.jpg" alt=""><figcaption>현재 앱 · chromium-light-42-schedule-sheet</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-16-chat-schedule-card.jpg" alt=""><figcaption>현재 앱 · chromium-light-16-chat-schedule-card</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>iOS 알람처럼 시간이 행의 이름이에요(22px, tabular). 아래 줄에 '모닝콜 · 매일 · 다음은 오늘'이 붙어요. 시간은 한 번만 나와요 (P2-2).</li><li>만드는 길은 '깽이에게 부탁하기' 예시 문장 셋이에요. 누르면 대화창에 채워지기만 하고 보내지 않아서, 남이 쓴 문장이 그대로 나가는 일이 없어요 (P1-1).</li><li>타일, sparkles, 위쪽 '+'가 없어요. 유리 모양은 뒤로 원과 탭 바 둘이에요 (P2-1, GL-2, RH-2).</li><li>시트는 A와 같아요: 라벨과 값 행, 따옴표 친 맡긴 일, 작은 지우기 캡슐 (P2-3).</li><li>예시 문장은 빈 상태에 있던 앱 문구 그대로이고, 빈 대화 시안 A의 '문장 행' 패턴을 따라요.</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 토글은 lead/trail knob, snap 트랙 (§3 Toggle) · 켜고 끄면 '다음은 오늘' ↔ '꺼져 있어요'가 content swap되고 행 글자가 label-2로 바뀌어요 (§3) · 예시 문장을 누르면 press 후 대화 화면으로 가서 컴포저가 morph로 커져요 (§6 #14) · 행 → 시트 morph, 닫힐 때 재등장 없음 (§3 Sheet, §8.2)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P2-1, P2-2, P2-3, P2-4, slop:GL-2, critique:Q1</p>
+      </article></section>
+<section class="g-feature"><h2>설정 <small>settings/</small></h2>
+      <article class="g-card">
+        <header><h3>A · 순서와 확인: 보내기 전 확인을 맨 위로, 끌 때는 한 번 묻기</h3>
+          <a href="../settings/A.html">HTML</a> · <a href="../settings/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../settings/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../settings/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-47-settings-privacy.jpg" alt=""><figcaption>현재 앱 · chromium-light-47-settings-privacy</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-46-settings-notifications.jpg" alt=""><figcaption>현재 앱 · chromium-light-46-settings-notifications</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'다른 사람에게 보내기 전에 묻기'를 맨 위로 올렸어요. 끄려고 하면 시트가 '이제 깽이가 묻지 않고 보내요 · 끄기/취소'로 한 번 물어요. 다시 켤 때는 묻지 않아요 (P1-1).</li><li>행 옆 판과 미리보기 타일을 모두 뺐어요. 푸시된 화면에서는 제목이 아이콘 역할을 해요. sparkles도 함께 빠졌어요 (P2-2, IT-15, IT-16, CP-8).</li><li>미리보기는 남기되 그림 없는 두 열 글이에요. '로그인 정보 · 절대 볼 수 없어요'는 친구 묶음 아래 설명 한 줄로 옮겼어요 (P2-1, GR-R3).</li><li>화면 이름은 '정보 공개 범위' 하나로 맞췄어요. 섹션 제목은 진짜 h2예요 (detector skipped-heading).</li><li>알림 설정(보조 캡처)에서는 기기 허용을 맨 위로 올리고, '허용하기'가 화면의 유일한 채운 파랑이에요 (P1-2, P2-3).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 토글은 두 모서리 knob(lead/trail)와 snap 트랙 채움 그대로예요 (§3 Toggle) · 확인 시트는 토글에서 morph로 펼쳐지고 그 자리로 접혀요 (§3 Sheet, §8.2) · 미리보기 값은 토글과 함께 content swap으로 바뀌어요 (§3) · 저장 실패 시 토글이 되돌아가고 섬 배너가 한 번 말해요 (§8.13)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-2, P2-2, P2-3, slop:IT-15</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 말한 그대로: 미리보기를 행 안으로, 끄기 확인은 그 자리에서</h3>
+          <a href="../settings/B.html">HTML</a> · <a href="../settings/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../settings/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../settings/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-47-settings-privacy.jpg" alt=""><figcaption>현재 앱 · chromium-light-47-settings-privacy</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-46-settings-notifications.jpg" alt=""><figcaption>현재 앱 · chromium-light-46-settings-notifications</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>'보내기 전에 묻기'가 맨 위예요. 끄려고 하면 모달 대신 그 행이 morph로 자라며 '이제 깽이가 묻지 않고 보내요 · 취소/끄기'를 보여 줘요. 같은 자리에서 두 번 누르는 확인이고, 다시 켤 때는 묻지 않아요 (P1-1, §8.6).</li><li>'친구의 모시는 이렇게 봐요' 카드를 없앴어요. 각 행의 부제가 친구의 모시가 실제로 보는 내용이고, 토글과 함께 바뀌어요. 같은 말을 두 번 하지 않아요 (P2-1, GR-R3, critique 질문 4).</li><li>판, 타일, sparkles를 모두 뺐어요. 이 화면의 상자는 묶음 세 개뿐이에요 (P2-2, IT-15, IT-16, CP-8).</li><li>알림 설정(보조 캡처)은 기기 상태로 시작해요. 허용 전에는 종류별 토글을 저장된 상태 그대로 흐리게 보여 줘서, 켜져 보이는데 오지 않는 일이 없어요 (P1-2, critique 질문 2).</li><li>섹션 제목은 h2, 화면 이름은 '정보 공개 범위' 하나예요 (skipped-heading, Naming).</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> 끄기 확인은 같은 묶음이 morph로 커지고 내용은 content swap으로 들어와요 (§3 Morph, Content swap) · 토글 knob은 lead/trail 두 모서리, 트랙은 snap으로 채워져요 (§3 Toggle) · 행 부제는 토글과 함께 content swap으로 바뀌어요 (§3) · 저장 실패 시 토글이 되돌아가고 섬 배너가 말해요 (§8.13)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P1-1, P1-2, P2-2, P2-3, slop:IT-15, critique:Q4</p>
+      </article></section>
+<section class="g-feature"><h2>음성 통화 <small>voice-call/</small></h2>
+      <article class="g-card">
+        <header><h3>A · island-expanded · 줄인 통화: 길게 눌러 펼친 섬</h3>
+          <a href="../voice-call/A-island-expanded.html">HTML</a> · <a href="../voice-call/A-island-expanded.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-island-expanded-light.png" alt=""><figcaption>A-island-expanded-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-island-expanded-dark.png" alt=""><figcaption>A-island-expanded-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-light-19-call-minimised-island</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-dark-19-call-minimised-island</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>줄인 통화에서 바로 음소거 · 종료: 섬을 길게 누르면 그 자리에서 펼쳐짐(iOS 관례). 탭은 지금처럼 통화 카드를 다시 엶 (lead 결정, 비평 Casey)</li><li>펼친 섬: 아바타 44 · '깽이' · '듣고 있어요 · 00:05' · 음소거 · 종료. 빨강은 종료 하나(--call-end, 카드와 같은 토큰) (P2-2)</li><li>음소거는 이름 고정 + aria-pressed, 켜지면 섬 글자색 88% 채움(카드와 같은 규칙) (P2-3)</li><li>새 모션 없음: 섬이 카드로 자라는 morph 스프링을 그대로, 바깥을 누르거나 4초 뒤 다시 접힘</li><li>어둡게 깔지 않음: 대화는 그대로 보이고 섬만 커짐</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, slop:RQ-2, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · island · 줄인 통화: 섬의 점</h3>
+          <a href="../voice-call/A-island.html">HTML</a> · <a href="../voice-call/A-island.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-island-light.png" alt=""><figcaption>A-island-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-island-dark.png" alt=""><figcaption>A-island-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-light-19-call-minimised-island</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-dark-19-call-minimised-island</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>섬의 쉴 때 레벨: 2px 대시 '-----' → 4px 둥근 점 다섯 개, 실제 값만 (P2-1, RQ-2, MOTION §8.3)</li><li>섬은 아바타 · 타이머 · 점: 상단 바 원 위로 겹치지 않게 폭 180 (P3-1)</li><li>aria-label '깽이와 통화 중, 00:03. 눌러서 열기' (josa 적용), 누르면 통화 카드로 다시 자람</li><li>뒤에 깔린 대화는 채팅 A 시안을 그대로 따름(그 수정은 채팅 시안에서 집계)</li><li>길게 누르면 섬이 그 자리에서 펼쳐져 음소거 · 종료 (island-expanded 상태)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, slop:RQ-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>A · 조용한 통화: 같은 화면, 소음 네 개 덜기</h3>
+          <a href="../voice-call/A.html">HTML</a> · <a href="../voice-call/A.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-light.png" alt=""><figcaption>A-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/A-dark.png" alt=""><figcaption>A-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-18-call-overlay.jpg" alt=""><figcaption>현재 앱 · chromium-light-18-call-overlay</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-18-call-overlay.jpg" alt=""><figcaption>현재 앱 · chromium-dark-18-call-overlay</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>캐릭터 아래 120×4 레벨 막대(쉴 때 회색 대시) 삭제: 캐릭터가 이미 진폭을 받음 (P2-1)</li><li>'말씀하시면 깽이가 들어요' 삭제: 머리의 '듣고 있어요'와 같은 말. 음성 인식이 없을 때만 대체 안내 (P2-1)</li><li>토글 이름 고정 '음소거' · '스피커', 상태는 채움과 aria-pressed로; 켜짐 채움은 섬 글자색 88%로 눈부심을 낮춤 (P2-3)</li><li>종료 빨강은 테마와 무관하게 --call-end #d70015 하나(통화 카드는 늘 검정), 버튼 68 → 64px (P2-2, DESIGN Shapes)</li><li>dialog 이름은 josa('깽이와 통화'); 캐릭터 3D 가장자리 계단 현상은 wallpaper 팀의 AgentBlob AA 작업이라 이 시안 밖 (P3-1)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, critique:Q1, critique:Q3, critique:Q4</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · island-expanded · 줄인 통화: 길게 눌러 펼친 섬</h3>
+          <a href="../voice-call/B-island-expanded.html">HTML</a> · <a href="../voice-call/B-island-expanded.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-island-expanded-light.png" alt=""><figcaption>B-island-expanded-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-island-expanded-dark.png" alt=""><figcaption>B-island-expanded-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-light-19-call-minimised-island</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-dark-19-call-minimised-island</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>줄인 통화에서 바로 음소거 · 종료: 섬을 길게 누르면 그 자리에서 펼쳐짐(iOS 관례). 탭은 지금처럼 통화 카드를 다시 엶 (lead 결정, 비평 Casey)</li><li>펼친 섬: 아바타 44 · '깽이' · '듣고 있어요 · 00:05' · 음소거 · 종료. 빨강은 종료 하나(--call-end, 카드와 같은 토큰) (P2-2)</li><li>음소거는 이름 고정 + aria-pressed, 켜지면 섬 글자색 88% 채움(카드와 같은 규칙) (P2-3)</li><li>새 모션 없음: 섬이 카드로 자라는 morph 스프링을 그대로, 바깥을 누르거나 4초 뒤 다시 접힘</li><li>어둡게 깔지 않음: 대화는 그대로 보이고 섬만 커짐</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, slop:RQ-2, critique:Q2</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · island · 줄인 통화: 섬의 점</h3>
+          <a href="../voice-call/B-island.html">HTML</a> · <a href="../voice-call/B-island.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-island-light.png" alt=""><figcaption>B-island-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-island-dark.png" alt=""><figcaption>B-island-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-light-19-call-minimised-island</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-19-call-minimised-island.jpg" alt=""><figcaption>현재 앱 · chromium-dark-19-call-minimised-island</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>섬의 쉴 때 레벨: 2px 대시 '-----' → 4px 둥근 점 다섯 개, 실제 값만 (P2-1, RQ-2, MOTION §8.3)</li><li>섬은 아바타 · 타이머 · 점: 상단 바 원 위로 겹치지 않게 폭 180 (P3-1)</li><li>aria-label '깽이와 통화 중, 00:03. 눌러서 열기' (josa 적용), 누르면 통화 카드로 다시 자람</li><li>뒤에 깔린 대화는 채팅 B 시안을 그대로 따름(그 수정은 채팅 시안에서 집계)</li><li>길게 누르면 섬이 그 자리에서 펼쳐져 음소거 · 종료 (island-expanded 상태)</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, slop:RQ-2, critique:Q1</p>
+      </article>
+      <article class="g-card">
+        <header><h3>B · 캐릭터가 얼굴: 이름과 상태를 그 아래로</h3>
+          <a href="../voice-call/B.html">HTML</a> · <a href="../voice-call/B.html?theme=dark">dark</a></header>
+        <div class="g-shots">
+          <figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-light.png" alt=""><figcaption>B-light</figcaption></figure><figure class="g-shot"><img loading="lazy" src="../voice-call/png/B-dark.png" alt=""><figcaption>B-dark</figcaption></figure>
+          <figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-light-18-call-overlay.jpg" alt=""><figcaption>현재 앱 · chromium-light-18-call-overlay</figcaption></figure><figure class="g-shot is-now"><img loading="lazy" src="../../impeccable/shots/chromium-dark-18-call-overlay.jpg" alt=""><figcaption>현재 앱 · chromium-dark-18-call-overlay</figcaption></figure>
+        </div>
+        <ol class="g-why"><li>이름과 상태를 캐릭터 바로 아래로: 목소리에 반응하는 얼굴과 '듣고 있어요'가 한 자리, 시선이 위아래로 오가지 않음</li><li>위쪽은 줄이기 셰브런과 섬(타이머)만: 타이머는 섬에만, 카드에서 다시 쓰지 않음</li><li>레벨 막대·중복 안내 삭제: 조용할 때 남는 건 캐릭터와 '듣고 있어요' 하나 (P2-1)</li><li>토글 이름 고정 '음소거' · '스피커', 켜짐 채움 88%; 종료 빨강 --call-end #d70015 하나, 버튼 64px (P2-2, P2-3)</li><li>자막 칸은 시작 정렬 · 한 크기 그대로(출시됨), 이름이 내려와도 자막 칸 위치는 같음</li></ol>
+        <p class="g-motion"><strong>Motion kept</strong> §3 droplet split/merge: 입력창 통화 버튼 → 섬 → 통화 카드로 늘어남(섬이 화면 전체로 자란 것) · §8.3 레벨은 실제 값만: 캐릭터 진폭 + 섬의 점 5개(쉴 때 4px 점, 반복 없음) · §8.11 캐릭터 호흡 3.2초 · 2% 이하, 줄인 모션에서는 정지 · §3 content swap: 상태 글자('듣고 있어요' → '생각하는 중')만 바뀜 · 자막: 시작 정렬 · 한 크기, 새 토큰은 마지막 줄만 늘림 (이미 출시, 유지)</p>
+        <p class="g-fixes"><strong>Fixes</strong> P2-1, P2-2, P2-3, P3-1, critique:Q1, critique:Q3, critique:Q4</p>
+      </article></section>
+<script>if (new URLSearchParams(location.search).get("theme") === "dark") document.documentElement.dataset.theme = "dark";</script>
+</body>
+</html>

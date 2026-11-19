@@ -1,0 +1,120 @@
+{
+  "feature": "schedules",
+  "title": "예약된 일",
+  "critique": "../../impeccable/critique/schedules.md",
+  "score": "27/40",
+  "current": [
+    "chromium-light-41-schedules.jpg",
+    "chromium-dark-41-schedules.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "두 줄 행",
+      "summary": "위쪽 '+'를 없애고 만드는 길을 '깽이에게 예약 부탁하기' 하나로 줄였어요. 추측해서 고르던 아이콘 타일과 sparkles도 뺐어요. 행은 '모닝콜' 아래 '매일 오전 7:30 · 다음은 오늘' 두 줄이에요. 시트는 라벨과 값 행, 따옴표 친 맡긴 일, '깽이에게 바꿔 달라고 하기', 작은 가운데 지우기 순이에요.",
+      "fixes": [
+        "P1-1",
+        "P2-1",
+        "P2-2",
+        "P2-3",
+        "P2-4",
+        "slop:GL-2",
+        "critique:Q1"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "sheet",
+          "name": "예약 시트 (모닝콜)",
+          "shots": {
+            "light": "A-sheet-light.jpg",
+            "dark": "A-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-42-schedule-sheet.jpg",
+            "chromium-dark-42-schedule-sheet.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-3",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "chat",
+          "name": "대화 속 예약 카드",
+          "shots": {
+            "light": "A-chat-light.jpg",
+            "dark": "A-chat-dark.jpg"
+          },
+          "current": [
+            "chromium-light-16-chat-schedule-card.jpg",
+            "chromium-dark-16-chat-schedule-card.jpg"
+          ],
+          "fixes": [
+            "P2-4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "알람처럼",
+      "summary": "알람처럼 시간이 행의 이름이고, 아래 줄은 '모닝콜 · 매일 · 다음은 오늘'이에요. 만들 때는 '깽이에게 부탁하기' 예시 문장 셋 중 하나를 눌러 대화창에 채우고, 고친 다음 보내요. 시트는 A와 같고, 대화 속 카드도 행과 같은 모양이에요.",
+      "fixes": [
+        "P1-1",
+        "P2-1",
+        "P2-2",
+        "P2-3",
+        "P2-4",
+        "slop:GL-2",
+        "critique:Q1"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "sheet",
+          "name": "예약 시트 (모닝콜)",
+          "shots": {
+            "light": "B-sheet-light.jpg",
+            "dark": "B-sheet-dark.jpg"
+          },
+          "current": [
+            "chromium-light-42-schedule-sheet.jpg",
+            "chromium-dark-42-schedule-sheet.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-3",
+            "critique:Q1"
+          ]
+        },
+        {
+          "id": "chat",
+          "name": "대화 속 예약 카드",
+          "shots": {
+            "light": "B-chat-light.jpg",
+            "dark": "B-chat-dark.jpg"
+          },
+          "current": [
+            "chromium-light-16-chat-schedule-card.jpg",
+            "chromium-dark-16-chat-schedule-card.jpg"
+          ],
+          "fixes": [
+            "P2-4"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "A",
+  "motion": "모션은 그대로예요. §3 Toggle은 knob이 lead/trail로 움직이고 트랙은 snap으로 채워져요. §3 Content swap은 '다음은 오늘'과 '꺼져 있어요'를 바꿔요. §3 Sheet는 행에서 펼쳐지고, 열려 있는 동안 원래 행은 비어 있고, 닫혀도 다시 나타나지 않아요(§8.2). 지우기는 두 번 누르는 확인(§8.6)이고, 서버가 확인한 뒤에만 loader에서 check로 바뀌어요."
+}

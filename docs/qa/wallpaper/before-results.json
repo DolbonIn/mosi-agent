@@ -1,0 +1,359 @@
+{
+  "label": "before",
+  "query": "?gl=force",
+  "at": "2026-11-11T16:49:44.315Z",
+  "firstLoadJs": {
+    "files": [
+      "/assets/index-Di1uGTyK.js",
+      "/assets/rolldown-runtime-XKyaHtl9.js",
+      "/assets/vendor-C_hxakMF.js"
+    ],
+    "rawKB": 595.3,
+    "gzipKB": 192.8
+  },
+  "passes": [
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "wallpaper": "gl",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/before-chromium-light-1-chat.png",
+        "docs/qa/wallpaper/raw/before-chromium-light-5-drawer.png",
+        "docs/qa/wallpaper/raw/before-chromium-light-2-empty.png",
+        "docs/qa/wallpaper/raw/before-chromium-light-3-archive.png",
+        "docs/qa/wallpaper/raw/before-chromium-light-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(244 247 255)",
+          "min": 15.7,
+          "p5": 15.7,
+          "median": 15.73
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(254 196 233)",
+          "min": 11.33,
+          "p5": 11.34,
+          "median": 11.45
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(0, 113, 227)",
+          "bgMean": "rgb(255 248 248)",
+          "min": 4.45,
+          "p5": 4.45,
+          "median": 4.48
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(243 247 254)",
+          "min": 15.54,
+          "p5": 15.54,
+          "median": 15.67
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(255 205 212)",
+          "min": 11.88,
+          "p5": 11.88,
+          "median": 11.97
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "wallpaper": "gl",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/before-chromium-dark-1-chat.png",
+        "docs/qa/wallpaper/raw/before-chromium-dark-5-drawer.png",
+        "docs/qa/wallpaper/raw/before-chromium-dark-2-empty.png",
+        "docs/qa/wallpaper/raw/before-chromium-dark-3-archive.png",
+        "docs/qa/wallpaper/raw/before-chromium-dark-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(21 24 34)",
+          "min": 15.61,
+          "p5": 16.11,
+          "median": 16.27
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(92 59 83)",
+          "min": 8.5,
+          "p5": 8.62,
+          "median": 8.76
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(64, 156, 255)",
+          "bgMean": "rgb(108 86 95)",
+          "min": 2.33,
+          "p5": 2.33,
+          "median": 2.37
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(21 24 35)",
+          "min": 15.59,
+          "p5": 16.09,
+          "median": 16.25
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(96 61 68)",
+          "min": 8.45,
+          "p5": 8.45,
+          "median": 8.58
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "wallpaper": "gl",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/before-webkit-light-1-chat.png",
+        "docs/qa/wallpaper/raw/before-webkit-light-5-drawer.png",
+        "docs/qa/wallpaper/raw/before-webkit-light-2-empty.png",
+        "docs/qa/wallpaper/raw/before-webkit-light-3-archive.png",
+        "docs/qa/wallpaper/raw/before-webkit-light-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(243 244 248)",
+          "min": 15.12,
+          "p5": 15.15,
+          "median": 15.31
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(226 196 215)",
+          "min": 10.29,
+          "p5": 10.38,
+          "median": 10.58
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(0, 113, 227)",
+          "bgMean": "rgb(252 248 248)",
+          "min": 4.43,
+          "p5": 4.43,
+          "median": 4.46
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(242 243 247)",
+          "min": 14.99,
+          "p5": 15.02,
+          "median": 15.18
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(29, 29, 31)",
+          "bgMean": "rgb(236 205 209)",
+          "min": 11.21,
+          "p5": 11.22,
+          "median": 11.4
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "wallpaper": "gl",
+      "errors": [],
+      "shots": [
+        "docs/qa/wallpaper/raw/before-webkit-dark-1-chat.png",
+        "docs/qa/wallpaper/raw/before-webkit-dark-5-drawer.png",
+        "docs/qa/wallpaper/raw/before-webkit-dark-2-empty.png",
+        "docs/qa/wallpaper/raw/before-webkit-dark-3-archive.png",
+        "docs/qa/wallpaper/raw/before-webkit-dark-4-profile.png"
+      ],
+      "contrast": [
+        {
+          "screen": "chat",
+          "selector": ".tb-name",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(22 24 31)",
+          "min": 16.09,
+          "p5": 16.15,
+          "median": 16.28
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(84 64 79)",
+          "min": 8.23,
+          "p5": 8.3,
+          "median": 8.64
+        },
+        {
+          "screen": "chat",
+          "selector": ".tab-item[data-on] .tab-label",
+          "text": "rgb(64, 156, 255)",
+          "bgMean": "rgb(104 91 97)",
+          "min": 2.27,
+          "p5": 2.27,
+          "median": 2.28
+        },
+        {
+          "screen": "empty",
+          "selector": ".tb-title",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(22 24 31)",
+          "min": 15.98,
+          "p5": 16.15,
+          "median": 16.28
+        },
+        {
+          "screen": "profile",
+          "selector": ".tab-item:not([data-on]) .tab-label",
+          "text": "rgb(245, 245, 247)",
+          "bgMean": "rgb(87 66 71)",
+          "min": 8.21,
+          "p5": 8.31,
+          "median": 8.47
+        }
+      ]
+    }
+  ],
+  "perf": {
+    "cpuThrottle": 4,
+    "runs": [
+      {
+        "fcp": 332,
+        "lcp": 476,
+        "tbt": 1702,
+        "longTasks": 8,
+        "jsRequested": 30,
+        "jsKB": 500.3,
+        "threeRequested": [
+          "/assets/Wallpaper-DT02w3kB.js (3 KB)",
+          "/assets/react-three-fiber.esm-DobgD-Pe.js (235 KB)"
+        ],
+        "canvases": 1,
+        "wallpaper": "gl",
+        "idle": {
+          "rafIn3s": 180,
+          "rafStacks": [
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Lv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:14513)     at invalidate (/assets/react-three-fiber.esm-DobgD-Pe.js:4225:75385)",
+              90
+            ],
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Iv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:13931)",
+              90
+            ]
+          ],
+          "animations": 0,
+          "taskMsPerSec": 41.5,
+          "scriptMsPerSec": 15.1
+        }
+      },
+      {
+        "fcp": 300,
+        "lcp": 428,
+        "tbt": 141,
+        "longTasks": 5,
+        "jsRequested": 30,
+        "jsKB": 500.3,
+        "threeRequested": [
+          "/assets/Wallpaper-DT02w3kB.js (3 KB)",
+          "/assets/react-three-fiber.esm-DobgD-Pe.js (235 KB)"
+        ],
+        "canvases": 1,
+        "wallpaper": "gl",
+        "idle": {
+          "rafIn3s": 180,
+          "rafStacks": [
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Lv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:14513)     at invalidate (/assets/react-three-fiber.esm-DobgD-Pe.js:4225:75385)",
+              90
+            ],
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Iv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:13931)",
+              90
+            ]
+          ],
+          "animations": 0,
+          "taskMsPerSec": 42.9,
+          "scriptMsPerSec": 17.2
+        }
+      },
+      {
+        "fcp": 444,
+        "lcp": 596,
+        "tbt": 147,
+        "longTasks": 8,
+        "jsRequested": 30,
+        "jsKB": 500.3,
+        "threeRequested": [
+          "/assets/Wallpaper-DT02w3kB.js (3 KB)",
+          "/assets/react-three-fiber.esm-DobgD-Pe.js (235 KB)"
+        ],
+        "canvases": 1,
+        "wallpaper": "gl",
+        "idle": {
+          "rafIn3s": 180,
+          "rafStacks": [
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Lv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:14513)     at invalidate (/assets/react-three-fiber.esm-DobgD-Pe.js:4225:75385)",
+              90
+            ],
+            [
+              "    at window.requestAnimationFrame (<anonymous>:10:19)     at Iv (/assets/react-three-fiber.esm-DobgD-Pe.js:4236:13931)",
+              90
+            ]
+          ],
+          "animations": 0,
+          "taskMsPerSec": 57.7,
+          "scriptMsPerSec": 23.9
+        }
+      }
+    ],
+    "median": {
+      "fcp": 332,
+      "lcp": 476,
+      "tbt": 147,
+      "jsKB": 500.3,
+      "idleRafIn3s": 180,
+      "idleTaskMsPerSec": 42.9
+    }
+  }
+}

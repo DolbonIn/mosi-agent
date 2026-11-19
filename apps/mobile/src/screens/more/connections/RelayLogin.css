@@ -1,0 +1,170 @@
+/* 디스코드 / 텔레그램 로그인 (DiscordLogin.tsx, TelegramLogin.tsx). Tokens only (tokens.css); fields = TextField,
+   code cells = SlackLogin's OtpField, buttons = .btn. */
+
+.rl-footer {
+  align-items: stretch;
+}
+/* Discord's ToS caution: one plain sentence right above the approve button */
+.rl-terms {
+  padding: 0 6px 2px;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  text-wrap: pretty;
+}
+
+/* quiet text button: 취소 / 처음부터 다시 */
+.rl-link {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.rl-link:disabled {
+  color: var(--label-3);
+  cursor: default;
+}
+
+.rl-strong {
+  font-weight: 600;
+  color: var(--label);
+}
+
+/* "디스코드 앱에서 로그인 승인": a real link (app links need one) dressed as the primary capsule */
+.rl-applink {
+  height: 52px;
+  border-radius: var(--r-capsule); /* the primary capsule (= height / 2), like <Button> */
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.rl-applink .brand-icon,
+.rl-applink img {
+  flex: none;
+}
+.rl-applink:active {
+  transform: scale(0.98);
+}
+.rl-applink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rl-applink:active {
+    transform: none;
+  }
+}
+
+/* numbered steps */
+.rl-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rl-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--t-subhead);
+  color: var(--label);
+}
+.rl-steps__n {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* the QR stays black on white in every theme: phones must be able to read it */
+.rl-qr {
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.rl-qr img {
+  display: block;
+  width: 168px;
+  height: 168px;
+  padding: 10px;
+  border-radius: var(--r-tile);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--separator);
+  image-rendering: pixelated;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.rl-qr figcaption {
+  max-width: 260px;
+  text-align: center;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+
+.rl-timer {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+
+/* waiting for "로그인" in the Discord app */
+.rl-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.rl-confirm__spin {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: var(--r-capsule);
+  border: 2.5px solid var(--accent);
+  border-right-color: transparent;
+  animation: rl-spin 0.9s linear infinite;
+}
+@keyframes rl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rl-confirm__spin {
+    animation-duration: 2.4s;
+  }
+}
+.rl-confirm__title {
+  margin: 0;
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--label);
+  word-break: break-word;
+}
+.rl-confirm__sub {
+  margin: 4px 0 0;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}

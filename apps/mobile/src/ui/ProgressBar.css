@@ -1,0 +1,48 @@
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.progress-label {
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--label);
+}
+.progress-value {
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+.progress-track {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--fill);
+}
+.progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.progress-fill--accent {
+  background: var(--accent);
+}
+.progress-fill--label {
+  background: var(--label);
+}
+@media (forced-colors: active) {
+  .progress-track {
+    border: 1px solid CanvasText;
+  }
+  .progress-fill {
+    background: Highlight;
+  }
+}

@@ -1,0 +1,27 @@
+{
+ "query": {
+  "page": 1,
+  "perPage": 10,
+  "countryNm": "일본"
+ },
+ "items": [
+  {
+   "alarm_lvl": 3,
+   "continent_cd": "NE",
+   "continent_eng_nm": "Northeast Asia",
+   "continent_nm": "동북아시아",
+   "country_eng_nm": "Japan",
+   "country_iso_alp2": "JP",
+   "country_nm": "일본",
+   "dang_map_download_url": "https://www.0404.go.kr/files/image/COUNTRY_183/3",
+   "flag_download_url": "https://opendata.mofa.go.kr:8444/fileDownload/images/country_images/flags/176/20220318_162955741.gif",
+   "map_download_url": "https://opendata.mofa.go.kr:8444/fileDownload/images/country_images/maps/176/20220318_162955800.png",
+   "region_ty": "일부",
+   "remark": "후쿠시마 원전 반경 30km 이내 및 일본 정부 지정 피난지시구역",
+   "written_dt": null
+  }
+ ],
+ "total_count": 1,
+ "current_count": 1,
+ "source": "mofa_travel_alarm_0404"
+}

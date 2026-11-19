@@ -1,0 +1,1509 @@
+{
+  "when": "2026-11-12T02:02:54.110Z",
+  "results": [
+    {
+      "tag": "chromium/light",
+      "name": "hero: the new subtitle (B)",
+      "ok": true,
+      "detail": "말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요."
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 1: no dimming (undimmed sheet), shell still inert",
+      "ok": true,
+      "detail": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 1: the character rose above the sheet (one element, scaled ≈168/208)",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 139,
+          "w": 168,
+          "h": 168,
+          "bottom": 307
+        },
+        "panelTop": 432,
+        "heroBlob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 1: headline faded",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 1: no leading button",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 1: id hint in plain words (P3-1)",
+      "ok": true,
+      "detail": "영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: same sheet height as step 1 (P2-2)",
+      "ok": true,
+      "detail": {
+        "s1": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        },
+        "s2": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: '이전 단계' in the sheet head",
+      "ok": true,
+      "detail": "이전 단계"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: no autofocus (no blue ring on arrival)",
+      "ok": true,
+      "detail": "BODY"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: the face next to the 모시 name (memo)",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: the name under the face on the stage",
+      "ok": true,
+      "detail": {
+        "text": "깽이",
+        "visible": true,
+        "box": {
+          "x": 176,
+          "y": 317,
+          "w": 37,
+          "h": 29,
+          "bottom": 345
+        }
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: the character did not move between steps",
+      "ok": true,
+      "detail": {
+        "s1": 139,
+        "s2": 139
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "step 2: the stage name follows the input",
+      "ok": true,
+      "detail": "콩콩이"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "'이전 단계' goes back to step 1 with the input kept",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "sign-up saves the character met on the first screen",
+      "ok": true,
+      "detail": {
+        "hue": 96,
+        "shape": "blob",
+        "eyes": "dot"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "sign-up: the chat shows the same character (server's hue)",
+      "ok": true,
+      "detail": {
+        "chatHue": 96,
+        "server": 96
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "login: undimmed, character above the sheet",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 123,
+          "w": 168,
+          "h": 168,
+          "bottom": 291
+        },
+        "panel": {
+          "x": 8,
+          "y": 400,
+          "w": 374,
+          "h": 436,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "login: '비밀번호를 잊었어요' and '처음이에요 · 시작하기'",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "reset: same sheet, title and back button",
+      "ok": true,
+      "detail": {
+        "title": "비밀번호 다시 만들기",
+        "leading": "로그인으로",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "sheet: a start title never overlaps the leading button",
+      "ok": true,
+      "detail": {
+        "leadRight": 62,
+        "titleLeft": 62,
+        "titleRight": 328,
+        "closeLeft": 328
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "reset: the server route answers 409 no_verified_phone or 503 phone_unavailable, said inline",
+      "ok": true,
+      "detail": {
+        "status": 503,
+        "err": "지금은 전화를 걸 수 없어요. 잠시 후 다시 시도해 주세요"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "code step: the masked number is said, 6-digit one-time-code field with '다시 받기' inside (≥44 px), nothing under the footer, same sheet, '이전 단계'",
+      "ok": true,
+      "detail": {
+        "lead": "010-****-5678로 전화를 걸어 인증번호를 불러 드렸어요.",
+        "maxLength": 6,
+        "inputMode": "numeric",
+        "autocomplete": "one-time-code",
+        "again": true,
+        "clear": true,
+        "leading": "이전 단계",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "a wrong code says how many tries are left (attemptsLeft)",
+      "ok": true,
+      "detail": "인증번호가 맞지 않아요. 4번 더 입력할 수 있어요"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "back to 로그인",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "'처음이에요 · 시작하기' opens sign-up",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "closed: the character is back in the hero, the headline visible",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        },
+        "hero": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/light",
+      "name": "another device: its own preview on the hero before login",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "another device: after login the stage takes the account's character before the chat",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "another device: the colour on screen follows (pixels, 3D canvas: hero ≈262, stage ≈96)",
+      "ok": true,
+      "detail": {
+        "heroSeen": 262,
+        "stageSeen": 96,
+        "canvas": true
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "another device: the chat shows the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "another device: the device copy follows the server, and a reload keeps it",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "API-made account: stage, chat, device copy and reload all show the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 278,
+        "stageSeen": 278,
+        "canvas": true,
+        "bar": 278,
+        "stored": 278,
+        "server": 278,
+        "reloadBar": 278,
+        "reloadStored": 278,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no console errors on the other devices",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "hero: the new subtitle (B)",
+      "ok": true,
+      "detail": "말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요."
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 1: no dimming (undimmed sheet), shell still inert",
+      "ok": true,
+      "detail": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 1: the character rose above the sheet (one element, scaled ≈168/208)",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 139,
+          "w": 168,
+          "h": 168,
+          "bottom": 307
+        },
+        "panelTop": 432,
+        "heroBlob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 1: headline faded",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 1: no leading button",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 1: id hint in plain words (P3-1)",
+      "ok": true,
+      "detail": "영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: same sheet height as step 1 (P2-2)",
+      "ok": true,
+      "detail": {
+        "s1": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        },
+        "s2": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: '이전 단계' in the sheet head",
+      "ok": true,
+      "detail": "이전 단계"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: no autofocus (no blue ring on arrival)",
+      "ok": true,
+      "detail": "BODY"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: the face next to the 모시 name (memo)",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: the name under the face on the stage",
+      "ok": true,
+      "detail": {
+        "text": "깽이",
+        "visible": true,
+        "box": {
+          "x": 176,
+          "y": 317,
+          "w": 37,
+          "h": 29,
+          "bottom": 345
+        }
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: the character did not move between steps",
+      "ok": true,
+      "detail": {
+        "s1": 139,
+        "s2": 139
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "step 2: the stage name follows the input",
+      "ok": true,
+      "detail": "콩콩이"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "'이전 단계' goes back to step 1 with the input kept",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "sign-up saves the character met on the first screen",
+      "ok": true,
+      "detail": {
+        "hue": 96,
+        "shape": "blob",
+        "eyes": "dot"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "sign-up: the chat shows the same character (server's hue)",
+      "ok": true,
+      "detail": {
+        "chatHue": 96,
+        "server": 96
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "login: undimmed, character above the sheet",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 123,
+          "w": 168,
+          "h": 168,
+          "bottom": 291
+        },
+        "panel": {
+          "x": 8,
+          "y": 400,
+          "w": 374,
+          "h": 436,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "login: '비밀번호를 잊었어요' and '처음이에요 · 시작하기'",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "reset: same sheet, title and back button",
+      "ok": true,
+      "detail": {
+        "title": "비밀번호 다시 만들기",
+        "leading": "로그인으로",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "sheet: a start title never overlaps the leading button",
+      "ok": true,
+      "detail": {
+        "leadRight": 62,
+        "titleLeft": 62,
+        "titleRight": 328,
+        "closeLeft": 328
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "reset: the server route answers 409 no_verified_phone or 503 phone_unavailable, said inline",
+      "ok": true,
+      "detail": {
+        "status": 503,
+        "err": "지금은 전화를 걸 수 없어요. 잠시 후 다시 시도해 주세요"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "code step: the masked number is said, 6-digit one-time-code field with '다시 받기' inside (≥44 px), nothing under the footer, same sheet, '이전 단계'",
+      "ok": true,
+      "detail": {
+        "lead": "010-****-5678로 전화를 걸어 인증번호를 불러 드렸어요.",
+        "maxLength": 6,
+        "inputMode": "numeric",
+        "autocomplete": "one-time-code",
+        "again": true,
+        "clear": true,
+        "leading": "이전 단계",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "a wrong code says how many tries are left (attemptsLeft)",
+      "ok": true,
+      "detail": "인증번호가 맞지 않아요. 4번 더 입력할 수 있어요"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "back to 로그인",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "'처음이에요 · 시작하기' opens sign-up",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "closed: the character is back in the hero, the headline visible",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        },
+        "hero": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "another device: its own preview on the hero before login",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "another device: after login the stage takes the account's character before the chat",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "another device: the colour on screen follows (pixels, 3D canvas: hero ≈262, stage ≈96)",
+      "ok": true,
+      "detail": {
+        "heroSeen": 262,
+        "stageSeen": 96,
+        "canvas": true
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "another device: the chat shows the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "another device: the device copy follows the server, and a reload keeps it",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "API-made account: stage, chat, device copy and reload all show the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 347,
+        "stageSeen": 347,
+        "canvas": true,
+        "bar": 347,
+        "stored": 347,
+        "server": 347,
+        "reloadBar": 347,
+        "reloadStored": 347,
+        "errors": []
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no console errors on the other devices",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/light",
+      "name": "hero: the new subtitle (B)",
+      "ok": true,
+      "detail": "말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요."
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 1: no dimming (undimmed sheet), shell still inert",
+      "ok": true,
+      "detail": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 1: the character rose above the sheet (one element, scaled ≈168/208)",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 139,
+          "w": 168,
+          "h": 168,
+          "bottom": 307
+        },
+        "panelTop": 432,
+        "heroBlob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 1: headline faded",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 1: no leading button",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 1: id hint in plain words (P3-1)",
+      "ok": true,
+      "detail": "영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: same sheet height as step 1 (P2-2)",
+      "ok": true,
+      "detail": {
+        "s1": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        },
+        "s2": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: '이전 단계' in the sheet head",
+      "ok": true,
+      "detail": "이전 단계"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: no autofocus (no blue ring on arrival)",
+      "ok": true,
+      "detail": "DIV"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: the face next to the 모시 name (memo)",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: the name under the face on the stage",
+      "ok": true,
+      "detail": {
+        "text": "깽이",
+        "visible": true,
+        "box": {
+          "x": 176,
+          "y": 317,
+          "w": 37,
+          "h": 29,
+          "bottom": 345
+        }
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: the character did not move between steps",
+      "ok": true,
+      "detail": {
+        "s1": 139,
+        "s2": 139
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "step 2: the stage name follows the input",
+      "ok": true,
+      "detail": "콩콩이"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "'이전 단계' goes back to step 1 with the input kept",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "sign-up saves the character met on the first screen",
+      "ok": true,
+      "detail": {
+        "hue": 96,
+        "shape": "blob",
+        "eyes": "dot"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "sign-up: the chat shows the same character (server's hue)",
+      "ok": true,
+      "detail": {
+        "chatHue": 96,
+        "server": 96
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "login: undimmed, character above the sheet",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 123,
+          "w": 168,
+          "h": 168,
+          "bottom": 291
+        },
+        "panel": {
+          "x": 8,
+          "y": 400,
+          "w": 374,
+          "h": 436,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "login: '비밀번호를 잊었어요' and '처음이에요 · 시작하기'",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "reset: same sheet, title and back button",
+      "ok": true,
+      "detail": {
+        "title": "비밀번호 다시 만들기",
+        "leading": "로그인으로",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "sheet: a start title never overlaps the leading button",
+      "ok": true,
+      "detail": {
+        "leadRight": 62,
+        "titleLeft": 62,
+        "titleRight": 328,
+        "closeLeft": 328
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "reset: the server route answers 409 no_verified_phone or 503 phone_unavailable, said inline",
+      "ok": true,
+      "detail": {
+        "status": 503,
+        "err": "지금은 전화를 걸 수 없어요. 잠시 후 다시 시도해 주세요"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "code step: the masked number is said, 6-digit one-time-code field with '다시 받기' inside (≥44 px), nothing under the footer, same sheet, '이전 단계'",
+      "ok": true,
+      "detail": {
+        "lead": "010-****-5678로 전화를 걸어 인증번호를 불러 드렸어요.",
+        "maxLength": 6,
+        "inputMode": "numeric",
+        "autocomplete": "one-time-code",
+        "again": true,
+        "clear": true,
+        "leading": "이전 단계",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "a wrong code says how many tries are left (attemptsLeft)",
+      "ok": true,
+      "detail": "인증번호가 맞지 않아요. 4번 더 입력할 수 있어요"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "back to 로그인",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "'처음이에요 · 시작하기' opens sign-up",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "closed: the character is back in the hero, the headline visible",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        },
+        "hero": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/light",
+      "name": "another device: its own preview on the hero before login",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "another device: after login the stage takes the account's character before the chat",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "another device: the colour on screen follows (pixels, 3D canvas: hero ≈262, stage ≈96)",
+      "ok": true,
+      "detail": {
+        "heroSeen": 262,
+        "stageSeen": 96,
+        "canvas": true
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "another device: the chat shows the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "another device: the device copy follows the server, and a reload keeps it",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "API-made account: stage, chat, device copy and reload all show the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 22,
+        "stageSeen": 22,
+        "canvas": true,
+        "bar": 22,
+        "stored": 22,
+        "server": 22,
+        "reloadBar": 22,
+        "reloadStored": 22,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no console errors on the other devices",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "hero: the new subtitle (B)",
+      "ok": true,
+      "detail": "말로 맡기면 전화도 대신 걸고, 카카오톡도 정리해 드려요."
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 1: no dimming (undimmed sheet), shell still inert",
+      "ok": true,
+      "detail": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 1: the character rose above the sheet (one element, scaled ≈168/208)",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 139,
+          "w": 168,
+          "h": 168,
+          "bottom": 307
+        },
+        "panelTop": 432,
+        "heroBlob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 1: headline faded",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 1: no leading button",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 1: id hint in plain words (P3-1)",
+      "ok": true,
+      "detail": "영문 소문자와 숫자로 3~20자예요. 밑줄(_)도 쓸 수 있어요"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: same sheet height as step 1 (P2-2)",
+      "ok": true,
+      "detail": {
+        "s1": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        },
+        "s2": {
+          "x": 8,
+          "y": 432,
+          "w": 374,
+          "h": 404,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: '이전 단계' in the sheet head",
+      "ok": true,
+      "detail": "이전 단계"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: no autofocus (no blue ring on arrival)",
+      "ok": true,
+      "detail": "DIV"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: the face next to the 모시 name (memo)",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: the name under the face on the stage",
+      "ok": true,
+      "detail": {
+        "text": "깽이",
+        "visible": true,
+        "box": {
+          "x": 176,
+          "y": 317,
+          "w": 37,
+          "h": 29,
+          "bottom": 345
+        }
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: the character did not move between steps",
+      "ok": true,
+      "detail": {
+        "s1": 139,
+        "s2": 139
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "step 2: the stage name follows the input",
+      "ok": true,
+      "detail": "콩콩이"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "'이전 단계' goes back to step 1 with the input kept",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "sign-up saves the character met on the first screen",
+      "ok": true,
+      "detail": {
+        "hue": 96,
+        "shape": "blob",
+        "eyes": "dot"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "sign-up: the chat shows the same character (server's hue)",
+      "ok": true,
+      "detail": {
+        "chatHue": 96,
+        "server": 96
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "login: undimmed, character above the sheet",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 111,
+          "y": 123,
+          "w": 168,
+          "h": 168,
+          "bottom": 291
+        },
+        "panel": {
+          "x": 8,
+          "y": 400,
+          "w": 374,
+          "h": 436,
+          "bottom": 836
+        }
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "login: '비밀번호를 잊었어요' and '처음이에요 · 시작하기'",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "reset: same sheet, title and back button",
+      "ok": true,
+      "detail": {
+        "title": "비밀번호 다시 만들기",
+        "leading": "로그인으로",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "sheet: a start title never overlaps the leading button",
+      "ok": true,
+      "detail": {
+        "leadRight": 62,
+        "titleLeft": 62,
+        "titleRight": 328,
+        "closeLeft": 328
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "reset: the server route answers 409 no_verified_phone or 503 phone_unavailable, said inline",
+      "ok": true,
+      "detail": {
+        "status": 503,
+        "err": "지금은 전화를 걸 수 없어요. 잠시 후 다시 시도해 주세요"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "code step: the masked number is said, 6-digit one-time-code field with '다시 받기' inside (≥44 px), nothing under the footer, same sheet, '이전 단계'",
+      "ok": true,
+      "detail": {
+        "lead": "010-****-5678로 전화를 걸어 인증번호를 불러 드렸어요.",
+        "maxLength": 6,
+        "inputMode": "numeric",
+        "autocomplete": "one-time-code",
+        "again": true,
+        "clear": true,
+        "leading": "이전 단계",
+        "h": [
+          436,
+          436
+        ]
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "a wrong code says how many tries are left (attemptsLeft)",
+      "ok": true,
+      "detail": "인증번호가 맞지 않아요. 4번 더 입력할 수 있어요"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "back to 로그인",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "'처음이에요 · 시작하기' opens sign-up",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "closed: the character is back in the hero, the headline visible",
+      "ok": true,
+      "detail": {
+        "blob": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        },
+        "hero": {
+          "x": 91,
+          "y": 211,
+          "w": 208,
+          "h": 208,
+          "bottom": 419
+        }
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "another device: its own preview on the hero before login",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "another device: after login the stage takes the account's character before the chat",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "another device: the colour on screen follows (pixels, 3D canvas: hero ≈262, stage ≈96)",
+      "ok": true,
+      "detail": {
+        "heroSeen": 262,
+        "stageSeen": 96,
+        "canvas": true
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "another device: the chat shows the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "another device: the device copy follows the server, and a reload keeps it",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 96,
+        "stageSeen": 96,
+        "canvas": true,
+        "bar": 96,
+        "stored": 96,
+        "server": 96,
+        "reloadBar": 96,
+        "reloadStored": 96,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "API-made account: stage, chat, device copy and reload all show the server's character",
+      "ok": true,
+      "detail": {
+        "before": 262,
+        "heroSeen": 262,
+        "stageFirst": 262,
+        "stageLast": 205,
+        "stageSeen": 205,
+        "canvas": true,
+        "bar": 205,
+        "stored": 205,
+        "server": 205,
+        "reloadBar": 205,
+        "reloadStored": 205,
+        "errors": []
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no console errors on the other devices",
+      "ok": true,
+      "detail": []
+    }
+  ]
+}

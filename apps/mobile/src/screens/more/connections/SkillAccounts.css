@@ -1,0 +1,228 @@
+/* k-skill accounts on the connections screen + their connect sheet (SkillAccounts.tsx). Tokens only; built to match
+   the messenger rows and sheet (draft connections B) without depending on their class names. */
+
+.sk-row .list-row-detail {
+  max-width: none;
+  overflow: visible;
+}
+/* "곧 연결돼요": not a button, no chevron, words in --label-2 (no 0.4 fade, so the row stays readable) */
+.sk-row.is-soon .list-row-detail {
+  font-size: var(--t-subhead);
+}
+
+/* "키로 연결": the fold row is the group's own heading; the first key row under it keeps the hairline */
+.sk-keys-h {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.sk-keys-h + .list-row .list-row-main::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+.sk-keys-chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+.sk-keys--open .sk-keys-chev svg {
+  transform: rotate(180deg);
+}
+.sk-keys--open .sk-row {
+  animation: sk-keys-in var(--dur-snap) var(--ease-snap) both;
+}
+.sk-keys--open .sk-row:nth-child(3) {
+  animation-delay: 35ms;
+}
+.sk-keys--open .sk-row:nth-child(n + 4) {
+  animation-delay: 70ms;
+}
+.sk-keys--open .list-footer {
+  animation: sk-keys-in var(--dur-snap) var(--ease-snap) 90ms both;
+}
+.sk-keys--closing .sk-row,
+.sk-keys--closing .list-footer {
+  animation: sk-keys-out var(--dur-exit) ease-in both;
+}
+@keyframes sk-keys-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes sk-keys-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+:root[data-motion="reduce"] .sk-keys-chev svg {
+  transition: none;
+}
+:root[data-motion="reduce"] .sk-keys .sk-row,
+:root[data-motion="reduce"] .sk-keys .list-footer {
+  animation: none;
+}
+
+/* ── sheet ── */
+/* the title reads from the leading edge at title3, like a page heading; the live state sits under it (no plate) */
+.sheet-panel.sk-sheet .sheet-head {
+  padding-top: 14px;
+}
+.sheet-panel.sk-sheet .sheet-title {
+  grid-column: 1 / 3;
+  text-align: left;
+  font-size: var(--t-title3);
+  padding: 0 8px 0 14px;
+}
+.sk-sheet-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: -4px; /* up to the body's own 4 px top padding, never past it: .sheet-body clips (it scrolls) */
+  padding: 0 4px;
+  min-width: 0;
+}
+.sk-live {
+  display: inline-flex;
+}
+.sk-sheet-hint {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+.sk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sk-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* the error line's icon box on the body's left line (x 32), as every in-body note's icon (연결 중 · 안내) */
+.sk-footer .more-error {
+  margin: 0 6px 0 10px;
+}
+
+/* two summary rows: 어디서 발급하나요 (a link out) · 보관 기간 (opens in place) */
+.sk-folds {
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 1px 0 var(--separator), inset 0 -1px 0 var(--separator);
+}
+.sk-folds > * + * {
+  box-shadow: inset 0 1px 0 var(--separator);
+}
+.sk-issue,
+.sk-fold__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 4px;
+  text-align: left;
+  color: var(--label);
+  font-size: var(--t-subhead);
+  border-radius: var(--r-control);
+  text-decoration: none;
+}
+.sk-issue.is-link:active,
+.sk-fold__row:active {
+  background: var(--press-tint);
+}
+.sk-issue.is-link:focus-visible,
+.sk-fold__row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.sk-issue__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sk-issue__ask,
+.sk-fold__title {
+  flex: 1 1 auto;
+  font-weight: 500;
+}
+.sk-issue__where {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+.sk-issue__go,
+.sk-fold__chev {
+  flex: none;
+  display: grid;
+  color: var(--label-2);
+}
+.sk-fold__value {
+  flex: none;
+  color: var(--label-2);
+}
+.sk-fold__chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+.sk-fold.is-open .sk-fold__chev svg {
+  transform: rotate(180deg);
+}
+:root[data-motion="reduce"] .sk-fold__chev svg {
+  transition: none;
+}
+.sk-fold__panel {
+  overflow: hidden;
+}
+.sk-fold__inner {
+  padding: 2px 4px 14px;
+}
+
+.sk-next__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sk-disconnect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* on the same left line as the sheet's other words (the lead, the rows): the button below is the one thing wider */
+.sk-disconnect__note {
+  padding: 0 10px;
+}
+
+/* ── the chat's connection_request card (ConnectionRequestView) — paper, no plate, one accent: 연결하기 ── */
+.sk-req__why {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+}
+/* dismissed: the title rests in label-2 too (still ≥ 4.5:1 on paper) */
+.sk-req.is-muted .ccard-title {
+  color: var(--label-2);
+}
+.sk-req__next {
+  margin: -4px -16px -12px;
+}
+
+/* ── 나의 모시 › 할 수 있는 일: 연결하기 under a skill's line (SkillConnectButton) — accent text, 44 px tall to tap,
+   pulled into the row's padding so it reads as one more line, not a control beside the switch ── */
+.sk-connect {
+  display: flex;
+  align-self: flex-start;
+  margin: -8px 0 -11px -12px;
+}

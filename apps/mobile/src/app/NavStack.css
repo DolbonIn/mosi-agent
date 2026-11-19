@@ -1,0 +1,13 @@
+.nav-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.tab-layer,
+.stack-layer {
+  position: absolute;
+  inset: 0;
+}
+.stack-layer[data-leaving] {
+  pointer-events: none;
+}

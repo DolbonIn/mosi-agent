@@ -1,0 +1,86 @@
+{
+  "feature": "invite-friends",
+  "title": "친구 초대",
+  "critique": "../../impeccable/critique/invite-friends.md",
+  "score": "28/40",
+  "current": [
+    "chromium-light-44-friends.jpg",
+    "chromium-dark-44-friends.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "초대는 목록 아래, 한 번만",
+      "summary": "상단 바 '초대' 캡슐을 빼서 유리가 셋으로 줄었어요. 친구 목록 아래에 폭 전체의 무채색 '친구 초대하기'가 있어요. 페이지 안내에는 사용법만 남겼어요. 친구 행 끝은 셰브런이에요. 초대 시트에는 주 버튼이 하나뿐이고, 링크 패널 대신 만료 한 줄이 있어요.",
+      "fixes": [
+        "P2-1",
+        "P2-3",
+        "slop:RH-1",
+        "slop:RH-3",
+        "slop:GL-2"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "A-invite",
+          "name": "초대 시트",
+          "html": "A-invite.html",
+          "shots": {
+            "light": "A-invite-light.jpg",
+            "dark": "A-invite-dark.jpg"
+          },
+          "current": [
+            "chromium-light-45-invite-sheet.jpg",
+            "chromium-dark-45-invite-sheet.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P3-1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "초대는 친구 묶음의 마지막 행",
+      "summary": "'친구 초대하기'를 친구 묶음의 마지막 행으로 옮겼어요. 사용법 문장은 목록의 캡션이에요. 시트에서는 만료·1회 줄을 '공유하기' 바로 위에 두고, 링크 복사는 글자 버튼으로 바꿨어요.",
+      "fixes": [
+        "P2-1",
+        "P2-3",
+        "slop:RH-1",
+        "slop:RH-3",
+        "slop:GL-2"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "B-invite",
+          "name": "초대 시트",
+          "html": "B-invite.html",
+          "shots": {
+            "light": "B-invite-light.jpg",
+            "dark": "B-invite-dark.jpg"
+          },
+          "current": [
+            "chromium-light-45-invite-sheet.jpg",
+            "chromium-dark-45-invite-sheet.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P3-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로예요. 초대 시트는 누른 자리에서 morph로 열려요(§3 sheet from source). A에서는 버튼, B에서는 행이에요. 링크 복사는 loader → check 뒤 섬 배너가 떠요. 추가는 loader → check 뒤 '친구가 됐어요'가 나와요. 친구 행을 누르면 함께 쓰는 대화로 push되고, 시트를 닫으면 뒤 화면은 다시 들어오지 않아요(§8.2)."
+}

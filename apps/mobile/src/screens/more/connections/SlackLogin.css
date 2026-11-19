@@ -1,0 +1,207 @@
+/* Slack 로그인 (SlackLogin.tsx). Tokens only (tokens.css); field look = TextField, rows = .more-sheet-rows. */
+
+/* text buttons: method switch, "처음부터 다시" */
+.slk-links {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -6px;
+}
+.slk-link {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.slk-link:disabled {
+  color: var(--label-3);
+  cursor: default;
+}
+.slk-restart {
+  align-self: center;
+}
+
+/* "고급: 토큰 직접 입력": quiet, at the end of the form */
+.slk-advanced {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+  cursor: pointer;
+}
+.slk-advanced:disabled {
+  color: var(--label-3);
+}
+
+.slk-email {
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* progress in the primary button: the label says what is happening */
+.slk-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.slk-spin {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-capsule);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  opacity: 0.85;
+  animation: slk-spin 0.8s linear infinite;
+}
+@keyframes slk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slk-spin {
+    animation-duration: 2.4s;
+  }
+}
+.slk-busy {
+  cursor: progress;
+}
+
+/* one-time code: one real input over six cells */
+.slk-otp {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.slk-otp__box {
+  position: relative;
+}
+.slk-otp__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: 17px; /* ≥ 16px: no iOS zoom */
+  letter-spacing: 1em;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-text-fill-color: transparent;
+}
+.slk-otp__input::selection {
+  background: transparent;
+}
+.slk-otp__cells {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 10px repeat(3, 1fr);
+  gap: 8px;
+}
+.slk-otp__box:not([data-len="6"]) .slk-otp__cells {
+  grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+}
+/* the 3 — 3 split Slack itself shows */
+.slk-otp__box[data-len="6"] .slk-otp__cell:nth-child(4) {
+  grid-column: 5;
+}
+.slk-otp__cell {
+  display: grid;
+  place-items: center;
+  height: 56px;
+  border-radius: var(--r-field);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  font-size: 1.375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+.slk-otp__cell.is-active {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.slk-otp__cell.is-active:not(.is-filled)::after {
+  content: "";
+  width: 2px;
+  height: 24px;
+  border-radius: var(--r-capsule);
+  background: var(--accent); /* a 2px caret bar: no text on it */
+  animation: slk-caret 1s steps(1) infinite;
+}
+@keyframes slk-caret {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slk-otp__cell.is-active:not(.is-filled)::after {
+    animation: none;
+  }
+}
+.slk-otp.is-invalid .slk-otp__cell:not(.is-active) {
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+.slk-otp.is-disabled .slk-otp__cell {
+  opacity: 0.5;
+}
+.slk-otp .more-error {
+  margin-top: 8px;
+}
+
+/* workspace picker rows are buttons */
+.slk-ws {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.slk-ws > li + li .slk-ws__row {
+  box-shadow: inset 0 1px 0 var(--separator);
+}
+.slk-ws__row {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--label);
+  cursor: pointer;
+}
+.slk-ws__row:disabled {
+  cursor: default;
+}
+.slk-ws__row:disabled:not([aria-busy]) {
+  opacity: 0.5;
+}
+.slk-ws__row > .icon,
+.slk-ws__row > svg {
+  color: var(--label-3);
+}
+.slk-ws__row .slk-spin {
+  color: var(--accent);
+}
+@media (hover: hover) {
+  .slk-ws__row:not(:disabled):hover {
+    background: var(--fill);
+  }
+}
+.slk-ws__row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: var(--r-tile); /* = .more-sheet-rows */
+}

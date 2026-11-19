@@ -1,0 +1,14 @@
+{
+ "RESULT": {
+  "CODE": "INFO-200",
+  "MESSAGE": "해당하는 데이터가 없습니다."
+ },
+ "query": {
+  "education_office_code": "B10",
+  "school_code": "7010083",
+  "meal_date": "20261108",
+  "meal_kind_code": null,
+  "p_index": 1,
+  "p_size": 100
+ }
+}

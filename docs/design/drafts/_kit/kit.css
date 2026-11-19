@@ -1,0 +1,399 @@
+/*
+ * Draft kit: the device frame and a static copy of the app chrome, drawn ONLY with the app's real tokens
+ * (apps/mobile/src/styles/tokens.css, base.css, glass.css, three/Wallpaper.css are linked before this file).
+ * Nothing here defines a colour, radius, type size or curve of its own: if a draft needs one, it is a token question.
+ *
+ * Frame: iPhone 390×844 · status bar (time, signal, wi-fi, battery) · Dynamic Island 126×37 · home indicator 134×5.
+ * Wider window → the phone sits on a neutral stage with a bezel. Window ≤ 430 px (the renderer) → the screen fills it.
+ */
+
+/* --accent-fill (#0071E3, white 4.7:1, both themes) comes from apps/mobile/src/styles/tokens.css. */
+html,
+body {
+  height: 100%;
+}
+body.kit {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  background: var(--stage, #e6e6eb);
+}
+:root[data-theme="dark"] body.kit {
+  --stage: #141418;
+}
+
+.kit-phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--r-device);
+  background: var(--bg);
+  box-shadow:
+    0 0 0 11px #1d1d1f,
+    0 0 0 12px #3a3a3c,
+    0 30px 80px rgb(0 0 0 / 0.28);
+  contain: layout paint;
+}
+@media (max-width: 430px) {
+  body.kit {
+    display: block;
+    background: var(--bg);
+  }
+  .kit-phone {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* the real wallpaper (three/Wallpaper.css) sits under everything */
+.kit-phone > .wallpaper {
+  z-index: 0;
+}
+
+/* ── status bar + island + home indicator (hardware, not app chrome) ─────────────────── */
+.kit-status {
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 30px 0 46px;
+  color: var(--label);
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+}
+.kit-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kit-status-icons svg {
+  display: block;
+}
+.kit-island {
+  position: absolute;
+  z-index: 51;
+  top: 11px;
+  left: 50%;
+  width: 126px;
+  height: 37px;
+  margin-left: -63px;
+  border-radius: 999px;
+  background: #000;
+}
+.kit-home {
+  position: absolute;
+  z-index: 51;
+  bottom: 8px;
+  left: 50%;
+  width: 134px;
+  height: 5px;
+  margin-left: -67px;
+  border-radius: 999px;
+  background: var(--label);
+}
+
+/* ── screen area: content scrolls between the chrome clears, like app/Screen.css ─────── */
+.k-screen {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  padding: calc(var(--chrome-top) + var(--topbar-h) + 12px) 16px 0;
+}
+.k-screen.has-composer {
+  padding-bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + 10px + 56px + 16px);
+}
+
+/* ── top bar (mirrors app/TopBar.css geometry) ───────────────────────────────────────── */
+.k-topbar {
+  position: absolute;
+  z-index: 20;
+  top: var(--chrome-top);
+  left: 12px;
+  right: 12px;
+  height: var(--topbar-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.k-circle {
+  --r: 999px;
+  justify-self: start;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: var(--label);
+}
+.k-capsule {
+  --r: 999px;
+  grid-column: 2;
+  height: 48px;
+  padding: 0 18px 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+}
+/* title without a glass capsule: text on the edge (DESIGN Two-Layer: ≤3 glass shapes) */
+.k-title {
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 48px;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+}
+.k-right {
+  justify-self: end;
+  display: flex;
+  gap: 8px;
+}
+
+/* ── bottom chrome: composer + tab bar (mirrors chat.css .composer and app/TabBar.css) ── */
+.k-bottom {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: var(--tabbar-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.k-composer {
+  --r: var(--r-composer);
+  margin: 0 12px;
+  min-height: 56px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.k-composer-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--label);
+}
+.k-composer-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 4px;
+  font-size: var(--t-callout);
+  line-height: 1.5;
+  color: var(--label-2); /* app chat.css .composer-field::placeholder */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-composer-field[data-filled] {
+  color: var(--label);
+}
+.k-tabbar {
+  --r: var(--r-tabbar);
+  position: relative;
+  margin: 0 16px;
+  height: var(--tabbar-h);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 6px;
+}
+.k-tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: var(--r-droplet);
+  color: var(--label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.k-tab[data-on] {
+  color: var(--accent-on-droplet); /* tokens.css since a79cac9 (light #005bb8, dark #8cc4ff) */
+  font-weight: 600;
+  background: var(--droplet);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); /* app/TabBar.css .tab-droplet */
+}
+
+/* ── shared content primitives (flat paper per DESIGN "Flat Paper"; radii from tokens only) ── */
+.k-group {
+  background: var(--surface);
+  border-radius: var(--r-group);
+  overflow: hidden;
+}
+.k-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 12px 16px;
+  font-size: var(--t-body);
+  line-height: 1.4;
+  color: var(--label);
+}
+.k-row + .k-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 0.5px;
+  background: var(--separator);
+}
+.k-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.k-row-trail {
+  flex: none;
+  color: var(--label-3);
+}
+
+/* ── more primitives (DESIGN.md components; tokens only) ──────────────────────────────── */
+.k-large-title {
+  padding: 4px 4px 12px;
+  font-family: var(--font-display);
+  font-size: var(--t-large);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+/* section label above a group: an h2 (the app's SectionLabel renders h3, slop-inventory §2 skipped-heading) */
+.k-section {
+  padding: 18px 16px 6px;
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+}
+.k-card {
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+}
+/* Flat Paper (app ui/Card.css .paper, ui/List.css .list-card since 95c51d3): light separates paper by value, dark and
+   increased contrast by one inset hairline. A group placed on a card merges into it (never a card in a card). */
+:root[data-theme="dark"] :is(.k-group, .k-card),
+:root[data-contrast="more"] :is(.k-group, .k-card) {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+:root[data-theme="dark"] .k-card .k-group,
+:root[data-contrast="more"] .k-card .k-group {
+  box-shadow: none;
+}
+.k-footnote {
+  padding: 8px 16px 0;
+  font-size: var(--t-footnote);
+  line-height: 1.5;
+  color: var(--label-2);
+}
+/* buttons: primary = --accent-fill + white (Filled Label Rule), neutral = --fill, plain = text */
+.k-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 999px; /* capsule; --r-control is the 44 px capsule radius */
+  background: var(--accent-fill);
+  color: #fff;
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.k-btn[data-kind="neutral"] {
+  height: 44px;
+  padding: 0 18px;
+  background: var(--fill);
+  color: var(--label);
+}
+.k-btn[data-kind="plain"] {
+  height: 44px;
+  padding: 0 12px;
+  background: none;
+  color: var(--label);
+}
+.k-btn[data-kind="danger"] {
+  height: 44px;
+  background: none;
+  color: var(--danger);
+}
+.k-btn[data-full] {
+  display: flex;
+  width: 100%;
+}
+.k-btn[disabled] {
+  opacity: 0.4;
+}
+/* a sheet over a dimmed screen: put .k-scrim then .k-sheet as the last children of .kit-phone */
+.k-scrim {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  background: rgb(0 0 0 / 0.28);
+}
+.k-sheet {
+  position: absolute;
+  z-index: 31;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 10px 20px calc(20px + 21px);
+  background: var(--surface);
+  border-radius: var(--r-sheet);
+}
+.k-sheet::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 5px;
+  margin: 0 auto 12px;
+  border-radius: 999px;
+  background: var(--fill-3);
+}
+.k-sheet-title {
+  text-align: center;
+  font-size: var(--t-body);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* ── kit-only annotations (never part of a design): the motion note pinned under the frame ── */
+.kit-note {
+  max-width: 390px;
+  margin: 22px auto 0;
+  font-size: var(--t-footnote);
+  line-height: 1.5;
+  color: var(--label-2);
+}
+@media (max-width: 430px) {
+  .kit-note {
+    display: none;
+  }
+}

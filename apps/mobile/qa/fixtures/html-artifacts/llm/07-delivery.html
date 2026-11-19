@@ -1,0 +1,61 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.meta{color:var(--text-2);font-size:14px;line-height:1.6}
+.status{display:flex;align-items:center;gap:8px;margin-top:10px}
+.badge{background:var(--accent-fill);color:var(--on-accent);font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.sep{border-top:1px solid var(--line);margin:14px 0}
+.block{background:var(--surface);border-radius:var(--radius);padding:12px 14px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .k{color:var(--text-2);font-size:14px;flex:0 0 auto}
+.row .v{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.label{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+.timeline{margin-top:6px;position:relative;padding-left:22px}
+.timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--line)}
+.step{position:relative;padding:7px 0}
+.step:before{content:"";position:absolute;left:-22px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--text-3)}
+.step.on:before{background:var(--accent)}
+.step .t{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.step .d{font-size:15px;font-weight:600}
+.step .n{font-size:13px;color:var(--text-2)}
+a.cta{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:12px 14px;border-radius:var(--radius);border:1px solid var(--line);text-decoration:none;color:var(--text);font-weight:600;margin-top:12px}
+a.cta .sub{display:block;font-size:13px;font-weight:400;color:var(--text-2);margin-top:2px}
+.svc{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;font-weight:600}
+</style>
+
+<h2>배송 조회</h2>
+<div class="status">
+  <span class="badge">배송 조회 필요</span>
+</div>
+<p class="meta" style="margin-top:8px">택배사에 실시간 연결되지 않아 현재 상태는 직접 확인이 필요해요.</p>
+
+<div class="sep"></div>
+
+<div class="block">
+  <div class="svc">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="13" height="10" rx="1.5" /><path d="M15 10h4l3 3v4h-7" /><circle cx="6.5" cy="18.5" r="1.8" /><circle cx="18" cy="18.5" r="1.8" /></svg>
+    CJ대한통운
+  </div>
+  <div style="margin-top:6px">
+    <div class="row"><span class="k">송장번호</span><span class="v">6894 1234 5678</span></div>
+    <div class="row"><span class="k">주문번호</span><span class="v">2026111509123456789</span></div>
+    <div class="row"><span class="k">조회일</span><span class="v">2026.11.15 (일)</span></div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<p class="label">진행 단계</p>
+<div class="timeline">
+  <div class="step on"><div class="t">주문 접수</div><div class="d">운송장 등록 대기</div><div class="n">판매처에서 운송장을 전송하면 갱신돼요</div></div>
+  <div class="step"><div class="d">집화 완료</div></div>
+  <div class="step"><div class="d">간선 상차 · 이동</div></div>
+  <div class="step"><div class="d">배송 출발</div></div>
+  <div class="step"><div class="d">배송 완료</div></div>
+</div>
+
+<a class="cta" href="https://trace.cjlogistics.com/next/tracking.html?wblNo=689412345678&amp;utm_source=mosi_app&amp;utm_medium=push&amp;utm_campaign=delivery_tracking_notice_20261115" target="_blank" rel="noopener">
+  <span>CJ대한통운 배송 조회<span class="sub">송장 6894 1234 5678</span></span>
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+</a>

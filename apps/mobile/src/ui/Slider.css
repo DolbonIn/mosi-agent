@@ -1,0 +1,104 @@
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  min-width: 0;
+}
+.slider.is-disabled {
+  opacity: 0.4;
+}
+.slider-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  color: var(--label-2);
+}
+.slider-value {
+  flex: none;
+  min-width: 3.2em;
+  text-align: right;
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+.slider-area {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  touch-action: pan-y;
+  cursor: pointer;
+  border-radius: var(--r-control);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.slider.is-disabled .slider-area {
+  cursor: default;
+  pointer-events: none;
+}
+.slider-area:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* 12 px tall capsule revealed to 6 px by clip-path at rest — thickening keeps true round caps */
+.slider-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: var(--r-capsule);
+  background: var(--fill-2);
+  overflow: hidden;
+}
+.slider-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+}
+.slider-knob {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.04), 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08);
+  transition: background-color var(--dur-fade) var(--ease-fade), box-shadow var(--dur-fade) var(--ease-fade);
+  pointer-events: none;
+}
+/* grabbed: the knob is a clear glass lens — the fill shows through, a specular rim and a lens band give it thickness */
+.slider-area[data-grabbed] .slider-knob {
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.85), inset 1px 1px 1px rgb(255 255 255 / 0.9),
+    inset -1px -1px 1px rgb(255 255 255 / 0.45), inset 0 1px 10px -4px rgb(255 255 255 / 0.95),
+    inset 0 -8px 12px -10px rgb(255 255 255 / 0.6), 0 6px 16px rgb(0 0 0 / 0.14);
+}
+:root[data-theme="dark"] .slider-knob {
+  background: #f5f5f7;
+}
+:root[data-theme="dark"] .slider-area[data-grabbed] .slider-knob {
+  background: rgb(255 255 255 / 0.08);
+}
+:root[data-transparency="reduce"] .slider-area[data-grabbed] .slider-knob,
+:root[data-contrast="more"] .slider-area[data-grabbed] .slider-knob {
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--separator), 0 3px 8px rgb(0 0 0 / 0.15);
+}
+@media (forced-colors: active) {
+  .slider-track {
+    border: 1px solid CanvasText;
+  }
+  .slider-fill {
+    background: Highlight;
+  }
+  .slider-knob {
+    border: 1px solid CanvasText;
+  }
+}

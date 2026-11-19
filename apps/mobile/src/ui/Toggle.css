@@ -1,0 +1,83 @@
+.toggle {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 51px;
+  height: 31px;
+  border-radius: var(--r-capsule);
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* ≥ 44 px hit area without changing the visual */
+.toggle::before {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
+}
+.toggle:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--fill-2);
+  overflow: visible;
+}
+.toggle-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--accent);
+}
+.toggle-knob {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: var(--r-capsule);
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.04), 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.08);
+  transform-origin: 50% 50%;
+  transition: background-color var(--dur-fade) var(--ease-fade), box-shadow var(--dur-fade) var(--ease-fade);
+}
+/* held: a clear glass lens — the track shows through; rim lit top-left, faint counter bottom-right, lens band */
+.toggle[data-held] .toggle-knob {
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.8), inset 1px 1px 1px rgb(255 255 255 / 0.9),
+    inset -1px -1px 1px rgb(255 255 255 / 0.45), inset 0 1px 8px -3px rgb(255 255 255 / 0.95),
+    inset 0 -6px 10px -8px rgb(255 255 255 / 0.6), 0 6px 14px rgb(0 0 0 / 0.14);
+}
+:root[data-theme="dark"] .toggle-knob {
+  background: #f5f5f7;
+}
+:root[data-theme="dark"] .toggle[data-held] .toggle-knob {
+  background: rgb(255 255 255 / 0.08);
+}
+:root[data-transparency="reduce"] .toggle[data-held] .toggle-knob,
+:root[data-contrast="more"] .toggle[data-held] .toggle-knob {
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--separator), 0 3px 8px rgb(0 0 0 / 0.15);
+}
+:root[data-contrast="more"] .toggle-track {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+@media (forced-colors: active) {
+  .toggle-track {
+    border: 1px solid CanvasText;
+  }
+  .toggle[aria-checked="true"] .toggle-fill {
+    background: Highlight;
+  }
+  .toggle-knob {
+    border: 1px solid CanvasText;
+  }
+}

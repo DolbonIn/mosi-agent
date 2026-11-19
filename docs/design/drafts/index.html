@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  모시 de-slop draft viewer: 현재 | A | B per feature. No build, no framework, no network.
+  Data: manifest.json (features), <feature>/meta.json (variants, see FORMAT.md), _status.json (served by serve.ts,
+  or written by bundle.ts). Polls every 10 s. Paths below are rewritten by bundle.ts for the publish bundle.
+-->
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>모시 시안 비교</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="viewer.css">
+<script id="viewer-config" type="application/json">
+{"shots":"../impeccable/shots/","critique":"../impeccable/critique/","inventory":"../impeccable/slop-inventory.md","status":"_status.json","engines":["chromium","webkit"],"poll":10000}
+</script>
+<script>
+  try {
+    var t = JSON.parse(localStorage.getItem("dv:theme") || "null");
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="기능">
+    <header class="rail-head">
+      <h1>시안 비교</h1>
+      <p id="rail-sum" class="tnum">불러오는 중</p>
+    </header>
+    <label class="sr" for="picker">기능 선택</label>
+    <select id="picker" class="picker"></select>
+    <nav aria-label="기능 목록"><ol id="f-list" class="f-list"></ol></nav>
+    <div class="submit-bar" id="submit-bar" hidden>
+      <button type="button" id="submit" class="submit" disabled>선택 0개 제출하기</button>
+      <p id="submit-ok" class="submit-msg" role="status" aria-live="polite"></p>
+      <p id="submit-err" class="submit-msg err" role="alert" aria-live="assertive"></p>
+    </div>
+    <footer class="rail-foot">
+      <div><kbd>←</kbd> <kbd>→</kbd> 기능 · <kbd>[</kbd> <kbd>]</kbd> 상태</div>
+      <div><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 열 · <kbd>D</kbd> 테마 · <kbd>L</kbd> 라이브</div>
+      <div><kbd>O</kbd> 겹쳐 보기</div>
+      <div id="poll-note" class="tnum">10초마다 새 시안 확인</div>
+    </footer>
+  </aside>
+
+  <main class="main">
+    <header class="bar">
+      <div class="bar-title">
+        <h2 id="f-title">&nbsp;</h2>
+        <p id="f-meta">&nbsp;</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="테마" data-key="theme">
+          <button type="button" role="radio" data-v="light">라이트</button>
+          <button type="button" role="radio" data-v="dark">다크</button>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="보기" data-key="mode">
+          <button type="button" role="radio" data-v="shot">캡처</button>
+          <button type="button" role="radio" data-v="live">라이브</button>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="현재 엔진" data-key="engine">
+          <button type="button" role="radio" data-v="chromium">Chrome</button>
+          <button type="button" role="radio" data-v="webkit">WebKit</button>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="비교 방식" data-key="compare">
+          <button type="button" role="radio" data-v="side">나란히</button>
+          <button type="button" role="radio" data-v="overlay">겹쳐 보기</button>
+        </div>
+      </div>
+    </header>
+    <div class="screens" id="screens"></div>
+    <section class="stage" id="stage" aria-label="비교"></section>
+  </main>
+
+  <aside class="panel" aria-label="비평과 노트">
+    <div class="p-head" id="p-head"></div>
+    <section class="pick" id="pick" aria-labelledby="pick-h" hidden></section>
+    <div class="tabs" role="tablist" aria-label="패널">
+      <button type="button" class="tab" role="tab" data-tab="critique">비평</button>
+      <button type="button" class="tab" role="tab" data-tab="notes">노트</button>
+      <button type="button" class="tab" role="tab" data-tab="full">전체 비평</button>
+    </div>
+    <div class="p-body" id="p-body" role="tabpanel"></div>
+  </aside>
+</div>
+<script src="viewer.js"></script>
+</body>
+</html>

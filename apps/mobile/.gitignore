@@ -1,0 +1,3 @@
+dist-qa/
+# local perf / probe builds (foundation)
+dist-*/

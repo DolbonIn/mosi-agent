@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 빈 대화와 제안 · A 빈 대화</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen has-composer">
+    <div class="a-empty">
+      <i data-avatar data-size="56"></i>
+      <p class="d-title">깽이가 기다리고 있어요</p>
+      <p class="d-body">말로 맡기면 알아서 찾아보고 정리해 드려요.</p>
+      <div class="k-group a-sugg d-stagger" role="group" aria-label="이렇게 말해 보세요">
+        <button class="k-row d-press" style="--i:0">내일 날씨 알려 줘</button>
+        <button class="k-row d-press" style="--i:1">이번 주 할 일 정리해 줘</button>
+        <button class="k-row d-press" style="--i:2">점심 메뉴 골라 줘</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 3 glass shapes (menu circle, composer, tab bar); the name is text on the edge, 초대 moved out -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><i data-icon="menu" data-weight="medium"></i></button>
+    <div class="k-title"><i data-avatar data-size="30"></i>깽이</div>
+  </header>
+  <div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><i data-icon="plus"></i></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><i data-icon="mic"></i></span>
+      <span class="k-composer-icon"><i data-icon="phone"></i></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "빈 대화와 제안",
+  "variant": "A · 빈 대화",
+  "title": "지금 화면에서 slop만 걷어 낸 안",
+  "rationale": [
+    "sparkles 타일 자리에 에이전트(56px 아바타, 움직이지 않음)를 뒀어요. 제목이 부르는 이름이 화면에 보여요 (IT-2, CP-8).",
+    "제목과 본문 문구는 지금 그대로예요. 기능과 말투는 그대로 두고 다듬기만 했어요.",
+    "가운데 쌓여 있던 회색 알약 세 개를 왼쪽 정렬 목록 하나로 바꿨어요. 칩은 고르는 자리에만 써요 (CH-2).",
+    "제안을 누르면 바로 보내지 않고 컴포저에 채워 줘서, 고친 뒤에 보낼 수 있어요 (MOTION-SPEC §6 #14).",
+    "그림자와 18px 리터럴 반경을 없앴어요. 목록은 --r-group을 쓰고 종이는 평평해요 (SH-1, RD-1)."
+  ],
+  "motion": [
+    "제안은 지금처럼 snap 스프링으로 y 4→0, 30ms 간격으로 나타나요. 처음 마운트할 때만이에요",
+    "행을 누르면 press 스프링이 반응해요",
+    "누르면 지금 있는 포커스 요청(focusSeq)으로 컴포저에 채우고, 컴포저는 morph로 커져요",
+    "빈 화면은 대기 상태라 아바타가 움직이지 않아요"
+  ],
+  "fixes": ["P2-1", "P2-2", "slop:IT-2", "slop:CH-2", "slop:CP-8", "slop:GL-1"],
+  "compare": [
+    "chromium-light-07-chat-empty-thread.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

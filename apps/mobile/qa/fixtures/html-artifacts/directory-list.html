@@ -1,0 +1,58 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.dir{text-wrap:pretty}
+.dir h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.sub{margin-top:2px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.kpi{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px}
+.kpi div{background:var(--surface);border-radius:var(--radius);padding:10px}
+.kpi b{display:block;font-size:19px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi span{font-size:13px;color:var(--text-2)}
+.city{margin-top:20px}
+.city h3{display:flex;align-items:baseline;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--line);font-size:17px;font-weight:600}
+.city h3 span{font-size:14px;font-weight:400;color:var(--text-2);font-variant-numeric:tabular-nums}
+.city ul{list-style:none}
+.city li+li{border-top:1px solid var(--line)}
+.city a{display:grid;grid-template-columns:minmax(0,1fr) auto 14px;grid-template-areas:"n p c" "m m c";column-gap:10px;row-gap:2px;align-items:baseline;min-height:44px;padding:10px 0;color:var(--text);text-decoration:none}
+.city a::after{grid-area:c;align-self:center;justify-self:end;content:"";width:7px;height:7px;border-top:2px solid var(--text-3);border-right:2px solid var(--text-3);transform:rotate(45deg)}
+.n{grid-area:n;font-size:16px;font-weight:600;line-height:1.4;overflow-wrap:anywhere}
+.p{grid-area:p;font-size:16px;font-weight:600;line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap}
+.m{grid-area:m;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;line-height:1.5;color:var(--text-2)}
+.m i{font-style:normal;padding:0 7px;border:1px solid transparent;border-radius:999px;background:var(--surface);line-height:1.4}
+.m .ko{background:none;border-color:var(--accent);color:var(--accent);font-weight:600}
+.note{margin-top:14px;font-size:14px;color:var(--text-2)}
+</style>
+<section class="dir">
+  <h2>도쿄·오사카 클리닉 12곳</h2>
+  <p class="sub">초진 상담료 낮은 순 · 11월 15일 각 예약 페이지 기준</p>
+  <div class="kpi">
+    <div><b>2,750엔</b><span>최저 · 오사카</span></div>
+    <div><b>6곳</b><span>한국어 가능</span></div>
+    <div><b>5곳</b><span>온라인 상담</span></div>
+  </div>
+
+  <section class="city">
+    <h3>도쿄 <span>7곳</span></h3>
+    <ul>
+      <li><a href="https://hana-clinic.example.com/reserve"><b class="n">하나 클리닉 신주쿠</b><span class="p">3,300엔</span><span class="m">신주쿠역 3분<i class="ko">한국어 가능</i><i>온라인</i></span></a></li>
+      <li><a href="https://midori-naika.example.com/reserve"><b class="n">미도리 내과</b><span class="p">3,850엔</span><span class="m">이케부쿠로역 5분<i>온라인</i></span></a></li>
+      <li><a href="https://sora-medical.example.com/reserve"><b class="n">소라 메디컬</b><span class="p">4,400엔</span><span class="m">시부야역 2분<i class="ko">한국어 가능</i></span></a></li>
+      <li><a href="https://aoi-clinic.example.com/reserve"><b class="n">아오이 클리닉</b><span class="p">4,950엔</span><span class="m">우에노역 4분</span></a></li>
+      <li><a href="https://yuki-iin.example.com/reserve"><b class="n">유키 의원 긴자</b><span class="p">5,500엔</span><span class="m">긴자역 1분<i class="ko">한국어 가능</i><i>온라인</i></span></a></li>
+      <li><a href="https://niji-clinic.example.com/reserve"><b class="n">니지 클리닉</b><span class="p">6,600엔</span><span class="m">시나가와역 6분</span></a></li>
+      <li><a href="https://hikari-naika.example.com/reserve"><b class="n">히카리 내과 롯폰기</b><span class="p">8,800엔</span><span class="m">롯폰기역 3분<i class="ko">한국어 가능</i></span></a></li>
+    </ul>
+  </section>
+
+  <section class="city">
+    <h3>오사카 <span>5곳</span></h3>
+    <ul>
+      <li><a href="https://nami-clinic.example.com/reserve"><b class="n">나미 클리닉 난바</b><span class="p">2,750엔</span><span class="m">난바역 2분<i class="ko">한국어 가능</i><i>온라인</i></span></a></li>
+      <li><a href="https://tsuki-iin.example.com/reserve"><b class="n">츠키 의원</b><span class="p">3,300엔</span><span class="m">우메다역 4분</span></a></li>
+      <li><a href="https://mori-medical.example.com/reserve"><b class="n">모리 메디컬</b><span class="p">4,180엔</span><span class="m">신사이바시역 3분<i class="ko">한국어 가능</i></span></a></li>
+      <li><a href="https://kaze-clinic.example.com/reserve"><b class="n">카제 클리닉</b><span class="p">5,500엔</span><span class="m">덴노지역 5분<i>온라인</i></span></a></li>
+      <li><a href="https://hoshi-naika.example.com/reserve"><b class="n">호시 내과</b><span class="p">6,050엔</span><span class="m">교바시역 7분</span></a></li>
+    </ul>
+  </section>
+
+  <p class="note">가격과 진료 시간은 바뀔 수 있어요. 예약 전에 각 페이지에서 다시 확인해 주세요.</p>
+</section>

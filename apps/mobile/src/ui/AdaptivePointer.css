@@ -1,0 +1,23 @@
+.adaptive-pointer {
+  position: absolute;
+  z-index: 90;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  background: var(--pointer);
+  opacity: 1;
+  transition: opacity var(--dur-fade) var(--ease-fade), background-color var(--dur-fade) var(--ease-fade);
+}
+.adaptive-pointer[data-mode="snap"] {
+  background: var(--hover-tint);
+}
+.adaptive-pointer[data-mode="beam"] {
+  background: var(--accent);
+}
+.adaptive-pointer[data-mode="hidden"] {
+  opacity: 0;
+}
+[data-pointer="adaptive"],
+[data-pointer="adaptive"] * {
+  cursor: none !important;
+}

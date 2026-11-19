@@ -1,0 +1,66 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.dc{text-wrap:pretty}
+.gal{margin:calc(-1*var(--space)) calc(-1*var(--space)) 0;padding:14px var(--space) 0;border-bottom:1px solid var(--line)}
+.gal header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.gal h2{font-size:17px;line-height:1.35;font-weight:700}
+.gal header span{font-size:13px;color:var(--text-2)}
+.tabs{display:flex;gap:6px;margin:10px -4px 0;padding-bottom:12px;font-size:14px;list-style:none}
+.tabs li{padding:3px 10px;border-radius:999px;color:var(--text-2)}
+.tabs .on{background:var(--surface);color:var(--text);font-weight:600}
+.post{padding-top:16px}
+.post h3{font-size:19px;line-height:1.4;font-weight:700;text-wrap:balance}
+.tag{color:var(--accent);font-weight:600}
+.by{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;margin-top:8px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.by b{color:var(--text);font-weight:600}
+.stats{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.stats span{display:inline-flex;align-items:center;gap:4px}
+svg{flex:none}
+.body{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.body p+p{margin-top:10px}
+.vote{display:flex;justify-content:center;gap:10px;margin:20px 0 18px}
+.vote div{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--line);border-radius:var(--radius);font-size:15px;font-variant-numeric:tabular-nums}
+.vote .up{border-color:var(--accent);color:var(--accent);font-weight:600}
+.cm{margin:0 calc(-1*var(--space));padding:0 var(--space);border-top:8px solid var(--surface)}
+.cm h4{display:flex;gap:6px;font-size:15px;font-weight:600;padding:12px 0 4px}
+.cm h4 span{color:var(--accent);font-variant-numeric:tabular-nums}
+.cm ul{list-style:none}
+.cm li{padding:10px 0;border-top:1px solid var(--line)}
+.cm li.re{border-top:0;padding:0 0 10px 24px}
+.re div{background:var(--surface);border-radius:var(--radius);padding:8px 12px}
+.who{display:flex;align-items:baseline;gap:8px;font-size:14px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.who b{color:var(--text);font-weight:600}
+.cm p:not(.who){font-size:15px;line-height:1.55;margin-top:2px}
+</style>
+<article class="dc">
+  <div class="gal">
+    <header><h2>프로그래밍 갤러리</h2><span>디시인사이드</span></header>
+    <ul class="tabs"><li class="on">전체글</li><li>개념글</li><li>공지</li></ul>
+  </div>
+  <section class="post">
+    <h3><span class="tag">[질문]</span> 러스트 처음 배우는데 책 하나만 추천해 줘</h3>
+    <p class="by"><b>하늘</b><time>2026.11.15 12:04</time></p>
+    <p class="stats">
+      <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>조회 1,284</span>
+      <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 3 2l-1 5h6a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 17.8 20H7"/></svg>추천 37</span>
+      <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>댓글 12</span>
+    </p>
+    <div class="body">
+      <p>파이썬만 3년 했고 이번에 러스트 시작하려고 함. 공식 문서는 너무 길어서 처음엔 얇은 책 하나로 감 잡고 싶은데 뭐가 나음?</p>
+      <p>소유권에서 다들 막힌다던데 그 부분 잘 풀어 준 책이면 좋겠음.</p>
+    </div>
+    <div class="vote">
+      <div class="up"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 3 2l-1 5h6a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 17.8 20H7"/></svg>추천 37</div>
+      <div><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 13V4h3v9zM17 13l-4 8a2 2 0 0 1-3-2l1-5H5a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 6.2 4H17"/></svg>비추 2</div>
+    </div>
+  </section>
+  <section class="cm">
+    <h4>댓글 <span>12</span></h4>
+    <ul>
+      <li><p class="who"><b>ㅇㅇ</b><time>12:10</time></p><p>공식 문서 한국어판부터 읽어 봐. 생각보다 안 김</p></li>
+      <li><p class="who"><b>이하늘</b><time>12:15</time></p><p>소유권은 직접 짜 보면서 컴파일러한테 혼나야 늘더라</p></li>
+      <li class="re"><div><p class="who"><b>하늘</b><time>12:18</time></p><p>ㄹㅇ 에러 메시지가 선생님임</p></div></li>
+      <li><p class="who"><b>ㅇㅇ</b><time>12:31</time></p><p>책보다 작은 CLI 하나 만들어 보는 거 추천함</p></li>
+    </ul>
+  </section>
+</article>

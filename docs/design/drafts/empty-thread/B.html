@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 빈 대화와 제안 · B 빈 대화</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen has-composer">
+    <div class="b-empty">
+      <p class="d-body">말로 맡기면 알아서 찾아보고 정리해 드려요.</p>
+      <div class="b-starters d-stagger" role="group" aria-label="이렇게 말해 보세요">
+        <button class="b-starter d-press" style="--i:0">내일 날씨 알려 줘</button>
+        <button class="b-starter d-press" style="--i:1">이번 주 할 일 정리해 줘</button>
+        <button class="b-starter d-press" style="--i:2">점심 메뉴 골라 줘</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 3 glass shapes (menu circle, composer, tab bar); the name is text on the edge, 초대 moved out -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><i data-icon="menu" data-weight="medium"></i></button>
+    <div class="k-title"><i data-avatar data-size="30"></i>깽이</div>
+  </header>
+  <div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><i data-icon="plus"></i></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><i data-icon="mic"></i></span>
+      <span class="k-composer-icon"><i data-icon="phone"></i></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "빈 대화와 제안",
+  "variant": "B · 빈 대화",
+  "title": "한 단계 더 덜어 낸 안",
+  "rationale": [
+    "위쪽에는 아무것도 두지 않았어요. 조용해진 배경과 위쪽 바의 이름만 보여요.",
+    "시작 문장을 컴포저 바로 위, 엄지가 닿는 곳에 뒀어요. 말하는 자리 옆에서 고를 수 있어요.",
+    "제목은 빼고 본문 한 줄만 남겼어요. 위쪽 바에 이름이 이미 있어서 '깽이가 기다리고 있어요'와 겹쳐요 (RH-1).",
+    "제안에는 종이도 칩도 없이 줄 사이 머리카락 선만 있어요. 누르면 컴포저에 채워져요 (§6 #14).",
+    "키보드가 올라오면 시작 문장도 컴포저와 같이 올라가서(visualViewport, 지금 동작) 가려지지 않아요."
+  ],
+  "motion": [
+    "시작 문장은 지금처럼 snap 스프링으로 30ms씩 처음 마운트할 때만 나타나요",
+    "행을 누르면 press 스프링이 반응해요",
+    "컴포저가 키보드 위로 올라갈 때 같이 올라가요 (§6 #2)",
+    "누르면 컴포저에 채우고 컴포저는 morph로 커져요"
+  ],
+  "fixes": ["P2-1", "P2-2", "slop:IT-2", "slop:CH-2", "slop:CP-8", "slop:RH-1", "slop:GL-1"],
+  "compare": [
+    "chromium-light-07-chat-empty-thread.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

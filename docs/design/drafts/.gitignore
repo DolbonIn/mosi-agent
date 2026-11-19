@@ -1,0 +1,4 @@
+.serve.pid
+.serve.log
+.picks.log
+_selftest/

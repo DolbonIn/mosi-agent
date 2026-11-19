@@ -1,0 +1,156 @@
+{
+  "feature": "archive",
+  "title": "보관함",
+  "critique": "../../impeccable/critique/archive.md",
+  "score": "25/40",
+  "current": [
+    "chromium-light-25-archive-artifacts.jpg",
+    "chromium-dark-25-archive-artifacts.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "판을 떼고 미리보기를 읽히게",
+      "summary": "카드 세 장은 그대로 두고, 머리의 색 판만 뺐어요. 미리보기는 ' · '로 끊어 읽히게 했어요. 세그먼트는 '문서 | 사진·파일'이에요. 시트에서는 오목 패널을 걷었고, 막대 선택값이 글자로 보여요. 빈 사진·파일 화면에는 행동이 하나만 남았어요.",
+      "fixes": [
+        "P1-1",
+        "P2-4",
+        "slop:IT-14",
+        "slop:CL-2",
+        "critique:Q1",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "A-doc",
+          "name": "문서 시트",
+          "html": "A-doc.html",
+          "shots": {
+            "light": "A-doc-light.jpg",
+            "dark": "A-doc-dark.jpg"
+          },
+          "current": [
+            "chromium-light-26-artifact-sheet-document.jpg",
+            "chromium-dark-26-artifact-sheet-document.jpg"
+          ],
+          "fixes": [
+            "P2-3"
+          ]
+        },
+        {
+          "id": "A-dash",
+          "name": "요약(대시보드) 시트",
+          "html": "A-dash.html",
+          "shots": {
+            "light": "A-dash-light.jpg",
+            "dark": "A-dash-dark.jpg"
+          },
+          "current": [
+            "chromium-light-27-artifact-sheet-dashboard.jpg",
+            "chromium-dark-27-artifact-sheet-dashboard.jpg"
+          ],
+          "fixes": [
+            "P2-1"
+          ]
+        },
+        {
+          "id": "A-media",
+          "name": "사진·파일 비었을 때",
+          "html": "A-media.html",
+          "shots": {
+            "light": "A-media-light.jpg",
+            "dark": "A-media-dark.jpg"
+          },
+          "current": [
+            "chromium-light-28-archive-media-empty.jpg",
+            "chromium-dark-28-archive-media-empty.jpg"
+          ],
+          "fixes": [
+            "P2-2",
+            "P2-4",
+            "critique:Q1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "한 묶음의 기록",
+      "summary": "카드 세 장 대신 한 묶음 안의 행이에요. 순서는 제목 → 내용 → 종류·날짜예요. 시트 제목은 기록의 제목처럼 왼쪽에 둬요. 요약 시트는 장부처럼, 금액이 모두 오른쪽 한 줄에 서고 막대마다 금액이 붙어요. '대시보드'는 '요약'으로 바꿨어요.",
+      "fixes": [
+        "P1-1",
+        "P2-4",
+        "slop:IT-14",
+        "slop:CL-2",
+        "critique:Q1",
+        "slop:RH-1",
+        "slop:GL-2"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "B-doc",
+          "name": "문서 시트",
+          "html": "B-doc.html",
+          "shots": {
+            "light": "B-doc-light.jpg",
+            "dark": "B-doc-dark.jpg"
+          },
+          "current": [
+            "chromium-light-26-artifact-sheet-document.jpg",
+            "chromium-dark-26-artifact-sheet-document.jpg"
+          ],
+          "fixes": [
+            "P2-3"
+          ]
+        },
+        {
+          "id": "B-dash",
+          "name": "요약(대시보드) 시트",
+          "html": "B-dash.html",
+          "shots": {
+            "light": "B-dash-light.jpg",
+            "dark": "B-dash-dark.jpg"
+          },
+          "current": [
+            "chromium-light-27-artifact-sheet-dashboard.jpg",
+            "chromium-dark-27-artifact-sheet-dashboard.jpg"
+          ],
+          "fixes": [
+            "P2-1"
+          ]
+        },
+        {
+          "id": "B-media",
+          "name": "사진·파일 비었을 때",
+          "html": "B-media.html",
+          "shots": {
+            "light": "B-media-light.jpg",
+            "dark": "B-media-dark.jpg"
+          },
+          "current": [
+            "chromium-light-28-archive-media-empty.jpg",
+            "chromium-dark-28-archive-media-empty.jpg"
+          ],
+          "fixes": [
+            "P2-2",
+            "P2-4",
+            "critique:Q1"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "A",
+  "motion": "모션은 그대로예요. 세그먼트 썸이 두 모서리로 이동하고, 패널은 방향 있는 content swap으로 바뀌어요(§3). 카드를 누르면 시트가 그 카드에서 morph로 열리고 그 카드로 돌아가요(§3 sheet from source). 막대는 처음 보일 때 올라오고, 숫자는 Odometer로 굴러요. 지우기는 두 번 눌러 확인해요. 올리기 시트는 버튼에서 morph로 열려요."
+}

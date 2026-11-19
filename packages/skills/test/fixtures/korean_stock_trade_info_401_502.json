@@ -1,0 +1,4 @@
+{
+ "error": "upstream_error",
+ "message": "KRX API HTTP 오류 (status: 401): Unauthorized"
+}

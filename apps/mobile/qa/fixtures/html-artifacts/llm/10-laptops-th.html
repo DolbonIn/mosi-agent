@@ -1,0 +1,46 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.meta{color:var(--text-2);font-size:13px;line-height:1.5}
+.wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:13px;line-height:1.45}
+th,td{padding:8px 6px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--surface);font-weight:600;font-size:13px;color:var(--text);white-space:nowrap}
+tbody th{color:var(--text-2);font-weight:500;width:70px;white-space:nowrap}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td{color:var(--text)}
+.num{font-variant-numeric:tabular-nums}
+.verdict{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.vrow{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;line-height:1.5}
+.vrow b{font-weight:600}
+.tip{margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--text-2)}
+</style>
+<h2>노트북 5종 사양 비교</h2>
+<p class="meta">표는 좌우로 밀어서 전체 열을 볼 수 있어요. 가격·출시일은 시점마다 달라 공식 스펙 기준으로 정리했어요.</p>
+
+<div class="wrap">
+<table>
+<thead>
+<tr><th></th><th>맥북 에어 M4 13</th><th>갤럭시 북5 프로 14</th><th>LG 그램 16</th><th>요가 슬림 7x</th><th>젠북 14 OLED</th></tr>
+</thead>
+<tbody>
+<tr><th>CPU</th><td>Apple M4 (10코어)</td><td>인텔 코어 Ultra 7 258V</td><td>인텔 코어 Ultra 7 258V</td><td>AMD 라이젠 AI 7 350</td><td>라이젠 7 8840HS / 인텔 Ultra 7</td></tr>
+<tr><th>RAM</th><td class="num">16GB / 24GB</td><td class="num">16GB / 32GB</td><td class="num">16GB / 32GB</td><td class="num">16GB / 32GB</td><td class="num">16GB / 32GB</td></tr>
+<tr><th>저장</th><td class="num">256 · 512GB · 1TB</td><td class="num">256GB · 512GB · 1TB</td><td class="num">256GB · 512GB · 1TB</td><td class="num">512GB · 1TB</td><td class="num">512GB · 1TB</td></tr>
+<tr><th>화면</th><td>13.6" 액정 레티나<br>60Hz 500nit</td><td>14" AMOLED<br>3K 120Hz 터치</td><td>16" IPS<br>WQXGA 60Hz</td><td>14" OLED<br>2.8K 120Hz 터치</td><td>14" OLED<br>3K 120Hz 터치</td></tr>
+<tr><th>무게</th><td class="num">1.24kg</td><td class="num">1.23kg</td><td class="num">1.19~1.29kg</td><td class="num">1.27kg</td><td class="num">1.2kg대</td></tr>
+<tr><th>배터리</th><td class="num">최대 18시간</td><td class="num">최대 21시간</td><td class="num">최대 17시간</td><td class="num">최대 11시간</td><td class="num">최대 13시간</td></tr>
+<tr><th>포트</th><td>USB-C 2, 3.5mm<br>HDMI 없음</td><td>USB-C 2, USB-A 1<br>HDMI 2.1</td><td>USB-C 2, USB-A 2<br>HDMI</td><td>USB-C 2, USB-A 2<br>HDMI 2.1</td><td>USB-C 2, USB-A 1<br>HDMI 2.1</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="verdict">
+<div class="vrow"><b>맥북 에어 M4</b> — 배터리·발열·휴대성이 가장 균형적. macOS 생태계라면 이게 정답에 가까워요. 포트가 적고 화면 주사율이 60Hz인 점은 감안하세요.</div>
+<div class="vrow"><b>갤럭시 북5 프로 14</b> — 3K AMOLED 120Hz 터치 + 최대 21시간 배터리로 스펙 대비 완성도가 높아요. 갤럭시폰 쓰시면 연동도 편하고요.</div>
+<div class="vrow"><b>LG 그램 16</b> — 16형인데 1.2kg대. 화면 크기·키보드가 필요한 문서 작업용으로 가장 실용적이에요.</div>
+<div class="vrow"><b>레노버 요가 슬림 7x</b> — 2.8K OLED 터치, 라이젠 AI 칩으로 가격 대비 화면이 좋아요. 배터리는 다소 짧은 편.</div>
+<div class="vrow"><b>에이수스 젠북 14 OLED</b> — 3K OLED 화질이 강점. AMD·인텔 두 버전이 있으니 구매 시 CPU를 꼭 확인하세요.</div>
+</div>
+
+<p class="tip">"7개"로 말씀하셨는데 CPU·RAM·저장·화면·무게·배터리·포트 7항목으로 맞췄어요. 예산이나 용도(사무·영상편집·게임)를 알려주시면 이 중에서 하나로 좁혀드릴게요.</p>

@@ -1,0 +1,245 @@
+/* Onboarding (MOTION-SPEC §6.1 + §8.12): first paint is the final layout; one primary capsule. */
+.onb {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--chrome-top) + 24px) 24px calc(var(--safe-bottom) + 28px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.onb::-webkit-scrollbar {
+  display: none;
+}
+.onb-hero {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  min-height: 0;
+}
+.onb-blob {
+  width: 208px;
+  height: 208px;
+  margin-bottom: 18px;
+}
+/* the one character: travels from the hero to the stage above an open sheet (transform only, Onboarding.tsx) */
+.onb-blob-move {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+}
+.onb-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.onb-foot {
+  flex: none;
+}
+/* the stage: the room between the top and an open (undimmed) sheet, where the character settles; in sign-up step 2
+   the name being typed sits under its face. Its bottom follows the sheet (same height token, the keyboard) */
+.onb-stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--chrome-top);
+  bottom: calc(8px + var(--safe-bottom) + var(--kb) + var(--onb-sheet-h, 404px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0;
+  pointer-events: none;
+}
+.onb-stage-slot {
+  flex: 0 1 168px;
+  width: 168px;
+  min-height: 40px;
+}
+.onb-stage-name {
+  flex: none;
+  max-width: calc(100% - 48px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--label);
+  visibility: hidden;
+}
+.onb[data-staged] .onb-stage-name[data-on] {
+  visibility: visible;
+}
+.onb-title {
+  font-size: var(--t-title1);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  max-width: 14ch;
+}
+.onb-sub {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--label-2);
+  max-width: 24ch;
+}
+.onb-invite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: var(--r-capsule);
+  background: var(--surface);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label);
+}
+:root[data-theme="dark"] .onb-invite {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.onb-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  margin: 0 0 12px;
+  font-size: var(--t-footnote);
+  color: var(--danger);
+  text-align: center;
+}
+.onb-link {
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.onb-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.onb-login {
+  min-height: 48px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+  border-radius: var(--r-control);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.onb-login:active {
+  background: var(--press-tint);
+}
+.onb-login-em {
+  color: var(--label);
+  font-weight: 600;
+}
+.onb-sheet-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.onb-step {
+  font-size: var(--t-footnote);
+  font-weight: 500;
+  color: var(--label-2);
+}
+.onb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+.onb-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+.onb-form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--t-footnote);
+  color: var(--danger);
+  line-height: 1.45;
+}
+.onb-form-error > :first-child {
+  flex: none;
+  margin-top: 1px;
+}
+/* both sign-up steps share one sheet height (the panel top never slices the headline, only the content swaps);
+   login and its reset views share another */
+.onb-sheet--signup {
+  height: 404px;
+}
+.onb-sheet--login {
+  height: 436px;
+}
+/* plain text actions inside the sheets ("비밀번호를 잊었어요"; the foot link under the primary) */
+.onb-text-action {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 8px 0 4px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+  border-radius: var(--r-control);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.onb-text-action:active {
+  background: var(--press-tint);
+}
+/* "다시 받기" inside the 인증번호 field (its trailing slot): a text action, a full 44 px target, no second accent */
+.onb-code-again {
+  min-height: 44px;
+  margin-right: -6px;
+  padding: 0 8px;
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label-2);
+  border-radius: var(--r-control);
+  white-space: nowrap;
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.onb-code-again:active {
+  background: var(--press-tint);
+}
+.onb-code-again:disabled {
+  opacity: 0.5;
+}
+.onb-foot-link {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+}
+.onb-reset-lead {
+  padding: 0 4px;
+  font-size: var(--t-subhead);
+  line-height: 1.55;
+  color: var(--label);
+  text-wrap: pretty;
+}
+.onb-reset-note {
+  padding: 0 4px;
+  font-size: var(--t-footnote);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+}

@@ -1,0 +1,43 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.cmp{text-wrap:pretty}
+.cmp h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.sub{margin-top:2px;font-size:14px;color:var(--text-2)}
+.scroll{overflow-x:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+th,td{padding:10px 4px;text-align:left;vertical-align:baseline;border-top:1px solid var(--line)}
+thead th{border-top:0;padding-top:0;vertical-align:bottom;font-size:15px;font-weight:600;line-height:1.35}
+tbody th{position:sticky;left:0;z-index:1;background:var(--bg);width:64px;padding-left:0;font-weight:400;font-size:13px;color:var(--text-2)}
+thead th:first-child{position:sticky;left:0;z-index:1;background:var(--bg)}
+.pick{color:var(--accent)}
+.badge{display:inline-block;margin-bottom:4px;padding:1px 8px;border-radius:999px;background:var(--accent-fill);color:var(--on-accent);font-size:13px;font-weight:600;line-height:1.5}
+td b{font-weight:700}
+.no{color:var(--text-2)}
+td svg{vertical-align:-3px;margin-right:2px;color:var(--accent)}
+.sum{list-style:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.sum li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px;font-size:15px;line-height:1.5}
+.sum span{color:var(--text-2);font-size:14px}
+</style>
+<section class="cmp">
+  <h2>무선 이어폰 3종 비교</h2>
+  <p class="sub">가격은 11월 15일 온라인 최저가 기준이에요</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th scope="col"></th><th scope="col">하루 S2</th><th scope="col">노을 Air</th><th scope="col" class="pick"><span class="badge">추천</span><br>바람 Pro</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">가격</th><td><b>89,000원</b></td><td>129,000원</td><td>159,000원</td></tr>
+        <tr><th scope="row">배터리</th><td>6시간</td><td>8시간</td><td><b>9시간</b></td></tr>
+        <tr><th scope="row">소음 차단</th><td class="no">없음</td><td>있음</td><td><b>있음(적응형)</b></td></tr>
+        <tr><th scope="row">무게(한쪽)</th><td><b>4.1g</b></td><td>5.0g</td><td>5.3g</td></tr>
+        <tr><th scope="row">방수</th><td>IPX4</td><td>IPX4</td><td><b>IPX5</b></td></tr>
+        <tr><th scope="row">2대 연결</th><td class="no">안 돼요</td><td><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>돼요</td><td><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>돼요</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="sum">
+    <li><span>가성비</span>하루 S2. 소음 차단이 필요 없으면 충분해요</li>
+    <li><span>출퇴근</span>바람 Pro. 지하철 소음과 긴 배터리가 필요할 때요</li>
+  </ul>
+</section>

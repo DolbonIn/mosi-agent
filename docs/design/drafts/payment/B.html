@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 결제 수단 · B 첫 문장이 상태</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen d-masked">
+    <div class="d-scroll">
+      <!-- the profile row says 결제 수단, so the title does too; "연결된" presumed a card (critique Minor) -->
+      <h1 class="d-large">결제 수단</h1>
+      <div class="d-page">
+        <!-- the state is the first sentence under the title: the title already says 결제 수단, so the sentence doesn't -->
+        <div class="d-lede">
+          <h2 class="d-lede-title">아직 연결할 수 없어요</h2>
+          <p class="d-lede-body">깽이가 대신 결제하는 일도 하지 않아요.</p>
+        </div>
+        <!-- three sentence rows, the critique's copy; the vault link sits under the promise that names saved logins -->
+        <section class="d-section" aria-labelledby="how-h">
+          <h2 class="d-h2" id="how-h">결제 수단을 연결할 수 있게 되면</h2>
+          <ul class="d-paper d-points">
+            <li class="d-point"><p class="d-point-say">카드 정보는 저장된 로그인처럼 이 기기에서 암호화돼요. 서버 운영자도 깽이도 원문을 볼 수 없어요.</p><button class="d-link">저장된 로그인 보기</button></li>
+            <li class="d-point"><p class="d-point-say">결제할 때마다 금액과 가게를 보여 드리고, 직접 확인한 다음에만 결제해요. 정보 공개 범위 설정과 관계없이 항상 물어봐요.</p></li>
+            <li class="d-point"><p class="d-point-say">언제 어디에 썼는지 접근 기록에서 볼 수 있어요.</p></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 2 glass shapes (back circle, tab bar); a pushed screen does not repeat the agent's name (RH-1) -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="뒤로"><i data-icon="chevron-left" data-weight="medium"></i></button>
+  </header>
+  <div class="k-bottom">
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab"><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab" data-on><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "결제 수단",
+  "variant": "B",
+  "title": "첫 문장이 상태: 가운데 빈 상태 대신 왼쪽 정렬 한 단락",
+  "rationale": [
+    "가운데 정렬 빈 상태 블록 대신, 큰 제목 바로 아래 '아직 연결할 수 없어요 / 깽이가 대신 결제하는 일도 하지 않아요.'가 와요. 제목이 이미 '결제 수단'이라 문장에서 되풀이하지 않아요 (P2-1).",
+    "약속 셋은 critique 문구 그대로인 문장 행이에요. 행 제목이 없어서 같은 말을 제목과 본문에서 두 번 하지 않아요 (P2-2).",
+    "'저장된 로그인 보기'는 저장된 로그인을 말하는 1번 약속 바로 아래 글자 링크예요. 왜 거기 있는지 문장이 말해 줘요 (P2-1 첫 번째 안).",
+    "타일, 판, 그림자, 각주가 모두 없어요. 화면의 모양은 종이 묶음 하나예요 (P2-3, IT-16, IT-18).",
+    "결제가 생기면 1행에 카드 행만 더하면 돼서, critique 질문 3의 '결제가 나와도 참인 가장 작은 화면'이에요."
+  ],
+  "motion": [
+    "행 → 큰 제목 morph로 들어오고 camera 슬라이드가 따라와요 (§6.6)",
+    "링크 누름은 같은 프레임의 press 틴트, 금고로 push (§3)",
+    "돌아올 때 재등장 없음 (§8.2)"
+  ],
+  "fixes": ["P2-1", "P2-2", "P3-1", "slop:GR-R2", "critique:Q3"],
+  "compare": [
+    "chromium-light-43-payment.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

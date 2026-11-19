@@ -1,0 +1,150 @@
+{
+ "complete": true,
+ "source_count": 5,
+ "item_count": 11,
+ "sources": {
+  "kstartup": {
+   "ok": true,
+   "pages_fetched": 1,
+   "item_count": 100,
+   "error": null
+  },
+  "bizinfo": {
+   "ok": true,
+   "pages_fetched": 1,
+   "item_count": 15,
+   "error": null
+  },
+  "nipa": {
+   "ok": true,
+   "pages_fetched": 1,
+   "item_count": 10,
+   "error": null
+  },
+  "kocca": {
+   "ok": true,
+   "pages_fetched": 1,
+   "item_count": 3,
+   "error": null
+  },
+  "smtech": {
+   "ok": true,
+   "pages_fetched": 1,
+   "item_count": 10,
+   "error": null
+  }
+ },
+ "items": [
+  {
+   "source": "bizinfo",
+   "id": "PBLN_000000000127865",
+   "title": "[강원] 태백시 태백주도형 청년일자리사업 참여자 4차 추가모집 공고",
+   "field": "인력",
+   "org": "강원특별자치도 / 기초자치단체",
+   "apply_start": "2026-11-11",
+   "apply_end": "2026-11-13",
+   "reg_date": "2026-11-11",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127865"
+  },
+  {
+   "source": "bizinfo",
+   "id": "PBLN_000000000127863",
+   "title": "[충북] 보은군 2026년 중소기업 청년재직자 고용안정 지원사업 추가 모집 공고",
+   "field": "인력",
+   "org": "충청북도 / 기초자치단체",
+   "apply_start": "2026-11-10",
+   "apply_end": "2026-11-13",
+   "reg_date": "2026-11-11",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127863"
+  },
+  {
+   "source": "bizinfo",
+   "id": "PBLN_000000000127864",
+   "title": "[충북] 보은군 2026년 4분기 청년 소상공인 점포 임차료 지원사업 참여자 모집 공고",
+   "field": "경영",
+   "org": "충청북도 / 기초자치단체",
+   "apply_start": "2026-11-09",
+   "apply_end": "2026-11-23",
+   "reg_date": "2026-11-11",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127864"
+  },
+  {
+   "source": "bizinfo",
+   "id": "PBLN_000000000127866",
+   "title": "[강원] 삼척시 2027년 삼척형 청년 스타트업 창업 지원사업 참여자 모집 공고",
+   "field": "창업",
+   "org": "강원특별자치도 / 기초자치단체",
+   "apply_start": "2026-11-11",
+   "apply_end": "2026-12-11",
+   "reg_date": "2026-11-11",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127866"
+  },
+  {
+   "source": "kstartup",
+   "id": "179766",
+   "title": "[강동구 청년해냄센터] 2027년 정부 지원 사업 대비 성공 창업 스쿨 참가자 모집 공고",
+   "field": "멘토링ㆍ컨설팅ㆍ교육",
+   "org": "강동구 청년해냄센터",
+   "apply_start": "",
+   "apply_end": "",
+   "reg_date": "",
+   "url": "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn=179766"
+  },
+  {
+   "source": "kstartup",
+   "id": "179751",
+   "title": "[창업] 실패하지 않는 내 매장 자리 찾기",
+   "field": "창업교육",
+   "org": "마포청년창업취업지원센터 나루",
+   "apply_start": "",
+   "apply_end": "",
+   "reg_date": "",
+   "url": "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn=179751"
+  },
+  {
+   "source": "kstartup",
+   "id": "179742",
+   "title": "(인천 대학 청년 창업펀드 2호) UniVest Scale-up 참여기업 모집",
+   "field": "정책자금",
+   "org": "(재)인천테크노파크",
+   "apply_start": "",
+   "apply_end": "",
+   "reg_date": "",
+   "url": "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn=179742"
+  },
+  {
+   "source": "kstartup",
+   "id": "179712",
+   "title": "청년 창업의 꿈, 『성동청년 창업이룸센터』 입주자 모집 공고【10차】",
+   "field": "시설ㆍ공간ㆍ보육",
+   "org": "서울특별시 성동구청장",
+   "apply_start": "",
+   "apply_end": "",
+   "reg_date": "",
+   "url": "https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?schM=view&pbancSn=179712"
+  }
+ ],
+ "query": {
+  "sources": [
+   "kstartup",
+   "bizinfo",
+   "nipa",
+   "kocca",
+   "smtech"
+  ],
+  "keyword": "청년",
+  "maxPages": 1,
+  "perPage": 100
+ },
+ "attribution": {
+  "software": "https://github.com/djfksjd/ir-search (MIT)",
+  "sources": [
+   "https://www.data.go.kr/data/15125364/openapi.do",
+   "https://www.bizinfo.go.kr/",
+   "https://www.nipa.kr/home/2-2",
+   "https://www.kocca.kr/kocca/pims/list.do",
+   "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
+  ],
+  "redistribution": "Structured metadata and official links only; announcement bodies and attachments are not mirrored."
+ }
+}

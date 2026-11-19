@@ -1,0 +1,15 @@
+{
+  "name": "@pickle/vault",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "dependencies": {
+    "@pickle/protocol": "workspace:*",
+    "@pickle/agent": "workspace:*"
+  }
+}

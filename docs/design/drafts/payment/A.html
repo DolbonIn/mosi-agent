@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 결제 수단 · A 정직한 빈 상태</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen d-masked">
+    <div class="d-scroll">
+      <!-- the profile row says 결제 수단, so the title does too; "연결된" presumed a card (critique Minor) -->
+      <h1 class="d-large">결제 수단</h1>
+      <div class="d-page">
+        <!-- the honest state, said as "can't yet", not "you haven't added one" (P2-1); no plate (IT-18) -->
+        <div class="d-empty">
+          <h2 class="d-empty-title">결제 수단은 아직 연결할 수 없어요</h2>
+          <p class="d-empty-body">깽이가 대신 결제하는 일도 하지 않아요.</p>
+          <!-- MOTION-SPEC §8.14 one real action, labelled by what it is for -->
+          <button class="d-btn d-btn--neutral">로그인 정보는 어떻게 지키는지 보기</button>
+        </div>
+        <!-- three conditional promises (was four plus a footnote): not steps, so a <ul> -->
+        <section class="d-section" aria-labelledby="how-h">
+          <h2 class="d-h2" id="how-h">결제 수단을 연결할 수 있게 되면</h2>
+          <ul class="d-paper d-points">
+            <li class="d-point"><h3 class="d-point-title">기기에서 잠가요</h3><p class="d-point-body">카드 정보는 이 기기에서 암호화돼요. 서버 운영자도 깽이도 원문을 볼 수 없어요.</p></li>
+            <li class="d-point"><h3 class="d-point-title">결제할 때마다 물어봐요</h3><p class="d-point-body">깽이가 금액과 가게를 보여 드리고, 직접 확인한 다음에만 결제해요. 정보 공개 범위 설정과 관계없어요.</p></li>
+            <li class="d-point"><h3 class="d-point-title">모두 기록에 남아요</h3><p class="d-point-body">언제 어디에 썼는지 접근 기록에서 볼 수 있어요.</p></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- function layer: 2 glass shapes (back circle, tab bar); a pushed screen does not repeat the agent's name (RH-1) -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="뒤로"><i data-icon="chevron-left" data-weight="medium"></i></button>
+  </header>
+  <div class="k-bottom">
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab"><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab" data-on><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "결제 수단",
+  "variant": "A",
+  "title": "정직한 빈 상태: 판을 빼고, 약속은 셋, 버튼은 하는 일대로",
+  "rationale": [
+    "'아직 연결된 결제 수단이 없어요'(추가하지 않았다는 뜻)를 '결제 수단은 아직 연결할 수 없어요'로 바꿨어요. 본문은 '깽이가 대신 결제하는 일도 하지 않아요.' 한 문장이에요 (P2-1).",
+    "64px 카드 글리프 판을 뺐어요. 빈 상태 본문 폭은 17em이라 Chrome과 WebKit에서 같은 줄로 감겨요 (IT-18, P3-1).",
+    "'저장된 로그인 보기'는 하는 일대로 '로그인 정보는 어떻게 지키는지 보기'로 이름을 바꿨어요(§8.14 한 가지 행동) (P2-1).",
+    "약속은 넷과 각주에서 셋으로 줄였어요. 암호화는 한 번만 말하고, 이름은 깽이 하나예요. 각주는 2번 행 안으로 들어갔고, 순서가 아니라서 <ul>이에요 (P2-2).",
+    "타일과 그림자를 빼고, 평평한 종이 위에 hairline으로 나눴어요. 세 행이 모두 탭 바 위에 보여요 (P2-3, P3-1)."
+  ],
+  "motion": [
+    "행 → 큰 제목 morph로 들어오고 camera 슬라이드가 따라와요 (§6.6)",
+    "버튼 누름은 같은 프레임의 press 틴트예요 (§3)",
+    "돌아올 때 재등장 없음 (§8.2)"
+  ],
+  "fixes": ["P2-1", "P2-2", "P3-1", "slop:GR-R2"],
+  "compare": [
+    "chromium-light-43-payment.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

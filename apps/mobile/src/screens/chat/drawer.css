@@ -1,0 +1,275 @@
+/* Drawer content (MOTION-SPEC §8.10; draft "drawer" B): the record. Sits on the drawer's recessed paper (--surface-2). */
+.dw {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100%;
+}
+.dw-search-wrap {
+  min-height: 44px;
+}
+/* idle: a button on a fill, so its words are --label (label-2 there was 4.0:1) */
+.dw-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+  color: var(--label);
+  font-size: var(--t-callout);
+  text-align: left;
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.dw-search > svg {
+  flex: none;
+  color: var(--label-2);
+}
+.dw-search:active {
+  background: var(--fill-2);
+}
+/* searching: the field and 취소 share the first line; hits and recents use the drawer's full width under both */
+.dw-spot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 4px;
+  row-gap: 10px;
+}
+.dw-spot > .spot {
+  display: contents;
+}
+.dw-spot .spot-bar {
+  grid-column: 1;
+  grid-row: 1;
+}
+.dw-spot .spot-results {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.dw-cancel {
+  grid-column: 2;
+  grid-row: 1;
+  flex: none;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: var(--t-callout);
+  color: var(--label);
+}
+.dw-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dw-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: var(--r-field);
+  text-align: left;
+  font-size: var(--t-body);
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.dw-item > svg,
+.dw-item > span:first-child {
+  color: var(--label-2);
+  flex: none;
+}
+.dw-item:active {
+  background: var(--press-tint);
+}
+.dw-item[data-on] {
+  background: var(--fill);
+  font-weight: 600;
+}
+.dw-item[data-on] > svg {
+  color: var(--label);
+}
+/* sections: "지금 하는 일" (only while something is live) and "맡긴 일" / "보관한 대화" */
+.dw-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dw-threads {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.dw-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-left: 12px;
+}
+.dw-h {
+  font-family: var(--font-text);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--label-2);
+}
+/* the archive switch is words, not the 보관함 tab's glyph */
+.dw-textbtn {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--r-control);
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.dw-textbtn:active {
+  background: var(--press-tint);
+}
+.dw-empty {
+  padding: 8px 12px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.dw-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* a row: glyph · title (+ unread) · time on the title line only; the subtitle runs the full width under both, two
+   lines like a message preview */
+.dw-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: start;
+  width: 100%;
+  min-height: 56px;
+  padding: 9px 10px 9px 12px;
+  border-radius: var(--r-field);
+  text-align: left;
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+button.dw-row:active {
+  background: var(--press-tint);
+}
+.dw-row[data-on] {
+  background: var(--fill);
+}
+.dw-row-glyph {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  height: 20px;
+  color: var(--label-2);
+}
+.dw-row-title {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.dw-row-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dw-unread {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-capsule);
+  background: var(--accent);
+}
+.dw-row-time {
+  grid-column: 3;
+  grid-row: 1;
+  margin-top: 1px;
+  font-size: var(--t-footnote);
+  line-height: 1.35;
+  color: var(--label-2);
+}
+.dw-row-sub {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  min-width: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.35;
+  color: var(--label-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.dw-row-chev {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: grid;
+  color: var(--label-3);
+}
+/* search hits: no slab on a phone; the title goes regular and what you typed is bold (iOS Spotlight) — accent letters
+   on the drawer paper would be 4.2:1 */
+.dw-row[data-hit] .dw-row-title {
+  font-weight: 400;
+}
+.dw-row[data-hit] .dw-row-sub {
+  grid-column: 2;
+}
+.dw .spot-row .dw-row mark {
+  background: none;
+  color: var(--label);
+  font-weight: 700;
+}
+/* keyboard / fine pointer keep Spotlight's accent cursor: everything on it turns on-accent */
+@media (pointer: fine) {
+  .dw .spot-row[aria-selected="true"] :is(.dw-row-glyph, .dw-row-time, .dw-row-sub, .dw-row-chev, mark) {
+    color: var(--on-accent);
+  }
+}
+.dw-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 12px;
+  box-shadow: 0 -0.5px 0 var(--separator);
+}
+.dw-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 4px 2px;
+  border-radius: var(--r-field);
+  color: var(--label-2);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.dw-tab:active {
+  background: var(--press-tint);
+}
+.dw-tab[data-on] {
+  color: var(--label);
+  background: var(--fill);
+}
+.dw-tab-label {
+  font-size: var(--t-footnote);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

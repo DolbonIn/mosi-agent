@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>친구 초대 · A 초대는 목록 아래, 한 번만</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/LargeTitle.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/List.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Button.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/TextField.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/ui/Sheet.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/more.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/screens/more/friends/friends.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+<style>
+/* one file, two resting states: 친구 (A.html), invite sheet (A-invite.html) */
+  .d-sheet { display: none; }
+  :root[data-state="invite"] .d-sheet { display: block; }
+  .sheet-panel { --r: var(--r-sheet); }
+  .btn[data-size="md"] { height: 44px; border-radius: var(--r-capsule); }
+  .btn[data-size="lg"] { height: 52px; border-radius: var(--r-capsule); }
+  .btn-label { display: inline-flex; align-items: center; gap: 7px; }
+  /* P2 row: the whole row opens the shared conversation, so it ends in the ListRow chevron; "…" stays the one control */
+  .d-chev { color: var(--label-3, var(--label-2)); opacity: 0.7; }
+  .friend-main { padding-right: 0; }
+  /* P3: no link panel, no tile, no raw token; the facts are one footnote line */
+  .d-until {
+    font-size: var(--t-footnote);
+    line-height: 1.45;
+    color: var(--label-2);
+    padding: 0 4px;
+  }
+  .invite-body { gap: 14px; }
+  .invite-body .more-note { padding: 0 4px; }
+  .d-stack-btns { display: flex; flex-direction: column; gap: 8px; }
+
+  /* P2 page note: the how-to alone, no lock (the privacy line lives once, in the sheet) */
+  .d-howto { padding: 0 16px; font-size: var(--t-subhead); }
+  .d-invite-btn { margin-top: -8px; }
+</style>
+</head>
+<body>
+<div class="kit-phone">
+  <main class="d-scroll">
+    <header class="large-title">
+      <div class="large-title-row"><h1 class="large-title-text">친구</h1></div>
+    </header>
+    <div class="d-stack">
+      <p class="more-note d-howto">메시지에서 모시 이름을 부르거나 @로 시작하면 내 모시가 대신 답해요.</p>
+      <div class="list">
+        <div class="list-header"><h2 class="list-section-title">친구 1명</h2></div>
+        <div class="list-card" role="group">
+          <div class="friend-row" data-friend="jinwoo">
+            <button type="button" class="friend-main" aria-label="진우 님, 콩이와 함께 · 2분 전부터, 함께 쓰는 대화 열기">
+              <i data-agent data-size="40" data-hue="165" data-eyes="dot"></i>
+              <span class="friend-text"><span class="friend-name">진우 님</span><span class="friend-sub">콩이와 함께 · 2분 전부터</span></span>
+              <span class="friend-chev d-chev" aria-hidden="true"><i data-glyph="chevron-right" data-size="16" data-weight="semibold"></i></span>
+            </button>
+            <button type="button" class="friend-more" aria-label="진우 님 관리"><i data-glyph="ellipsis" data-size="20" data-weight="medium"></i></button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-full d-invite-btn" data-tone="secondary" data-size="lg"><span class="btn-label"><i data-glyph="link" data-size="19"></i><span>친구 초대하기</span></span></button>
+      <section class="friend-add" aria-label="받은 초대 링크로 친구 추가">
+        <div class="friend-add__row">
+          <div class="tf">
+            <label class="tf-label">받은 초대 링크로 친구 추가</label>
+            <div class="tf-box"><input class="tf-input" type="url" inputmode="url" placeholder="받은 링크를 붙여 넣어 주세요"></div>
+          </div>
+          <button type="button" class="btn friend-add__btn" data-tone="secondary" data-size="md" aria-disabled="true"><span class="btn-label">추가</span></button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <header class="k-topbar">
+    <span class="k-circle glass" aria-label="뒤로"><i data-glyph="chevron-left" data-size="24" data-weight="medium"></i></span>
+    <span class="k-title d-cap"><span class="d-cap-title">친구</span></span>
+    
+  </header>
+
+  <nav class="k-bottom">
+    <div class="k-tabbar glass" data-text>
+      <span class="k-tab"><i data-glyph="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-glyph="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-glyph="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab" data-on><i data-glyph="person" data-size="24" data-weight="medium"></i>나의 모시</span>
+    </div>
+  </nav>
+
+  <!-- 45 · invite sheet (the one shared sheet: chat, 친구 and the drawer all open this) -->
+  <div class="sheet-root d-sheet">
+    <div class="sheet-scrim"></div>
+    <div class="sheet-panel glass" data-sheet role="dialog" aria-labelledby="inv-title">
+      <div class="sheet-head">
+        <div class="sheet-grabber"></div>
+        <h2 class="sheet-title" id="inv-title">친구 초대</h2>
+        <button type="button" class="sheet-close" aria-label="닫기"><span class="sheet-close-plate"><i data-glyph="close" data-size="16" data-weight="semibold"></i></span></button>
+      </div>
+      <div class="sheet-body">
+        <div class="more-sheet invite-body">
+          <p class="more-sheet-lead">친구가 이 링크를 열면 바로 모시 친구가 돼요. 서로의 모시에게 말을 전하고, 함께 쓰는 대화방이 생겨요.</p>
+          <p class="d-until tnum">23시간 59분 뒤까지 · 한 번만 쓸 수 있어요</p>
+          <p class="more-note"><i data-glyph="lock" data-size="15" data-weight="medium"></i><span>친구의 모시에게는 정보 공개 범위에서 허락한 것만 보여요. <button type="button" class="more-inline-link">설정 보기</button></span></p>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <div class="d-stack-btns">
+          <button type="button" class="btn btn-full" data-tone="primary" data-size="lg"><span class="btn-label"><i data-glyph="share" data-size="19" data-weight="medium"></i><span>공유하기</span></span></button>
+          <button type="button" class="btn btn-full" data-tone="secondary" data-size="lg"><span class="btn-label"><i data-glyph="copy" data-size="19"></i><span>링크 복사</span></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">{
+  "feature": "invite-friends",
+  "variant": "A",
+  "title": "초대는 목록 아래, 한 번만",
+  "rationale": [
+    "상단 바의 '초대'와 '깽이' 캡슐을 빼서 유리는 뒤로 원과 탭 바 둘: 친구 목록 아래 폭 전체의 무채색 '친구 초대하기'가 시트의 출발점",
+    "페이지 안내는 사용법만, 자물쇠 없이: '메시지에서 모시 이름을 부르거나 @로 시작하면 내 모시가 대신 답해요.'",
+    "친구 행 끝의 말풍선 대신 셰브런: 행 전체가 대화를 열고, 따로 누르는 건 '…' 하나",
+    "초대 시트: 링크 패널·타일·토큰 없이 '23시간 59분 뒤까지 · 한 번만 쓸 수 있어요' 한 줄",
+    "주 버튼은 하나(공유하기), 링크 복사는 무채색, 공개 범위 문장은 시트에 한 번 + 설정 보기"
+  ],
+  "motion": [
+    "친구 초대하기 → 시트가 그 버튼(행)에서 morph (§3 sheet from source)",
+    "링크 복사 loader → check + 섬 배너 (§3)",
+    "추가 loader → check → '친구가 됐어요' (§3)",
+    "행 → 함께 쓰는 대화 push, 큰 제목 morph (§3)",
+    "시트 닫힘 returns never re-enter (§8.2)"
+  ],
+  "fixes": [
+    "P1-1",
+    "P2-1",
+    "P2-3",
+    "P3-1",
+    "slop:RH-1",
+    "slop:RH-3",
+    "slop:GL-2"
+  ],
+  "compare": [
+    "chromium-light-44-friends.jpg",
+    "chromium-light-45-invite-sheet.jpg"
+  ]
+}</script>
+<script src="glyphs.js"></script>
+<script src="draft.js"></script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

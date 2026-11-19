@@ -1,0 +1,1022 @@
+/*
+ * Chat: the conversation list, streaming text, tool chips, composer, empty state.
+ * Content layer only: the assistant's words are plain text on the canvas, its records are paper, bubbles are neutral
+ * fills (chat B). The composer is the only glass here (with the menu circle and the tab bar: 3 shapes); the jump
+ * capsule is opaque paper. Motion: transform/opacity on the spring tokens; every duration is a token so
+ * data-motion="reduce" collapses it.
+ */
+.thread-screen {
+  /* my bubble: stands apart from the paper by its fill alone (no shadow, Flat Paper). The fill is ink laid over
+     whatever paper is behind it (a fixed share of --label, the rest transparent), so it darkens the agent-tinted
+     wallpaper light by the same step as the flat --bg. On --bg it is #dfdfe1 on #f5f5f7, 1.22:1 (iMessage's grey on
+     white is 1.21). Across every hue and every point of the light it never drops below 1.21:1; the old opaque
+     #dfdfe1 fell to 1.15:1 under a blue-violet light. qa/chat.spec sweeps the hues. */
+  --bubble-me: color-mix(in srgb, var(--label) 10%, transparent);
+  --bubble-r: var(--r-group);
+}
+:root[data-theme="dark"] .thread-screen {
+  /* 15 % label over the paper: #2d2d2f on #0a0a0c (1.44:1), the old opaque fill's colour there, and never lower
+     under any hue (the opaque one fell to 1.07:1 under a yellow light) */
+  --bubble-me: color-mix(in srgb, var(--label) 15%, transparent);
+}
+/* increased contrast: both bubbles also carry the hairline the paper carries there */
+:root[data-contrast="more"] .bubble-me,
+:root[data-contrast="more"] .bubble-peer {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.thread-top {
+  height: 1px;
+}
+/* one 16 pt gutter (the Screen's), so the column lines up with the composer and the tab bar edges (chat B) */
+.thread-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0 0;
+  min-width: 0;
+}
+
+/* ── loading ── */
+.thread-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+.skel-bubble {
+  display: block;
+  width: 62%;
+  height: 52px;
+  border-radius: var(--bubble-r, var(--r-group));
+  background: var(--fill);
+}
+.skel-bubble.me {
+  align-self: flex-end;
+  width: 44%;
+  height: 40px;
+}
+.skel-bubble.wide {
+  width: 86%;
+  height: 88px;
+}
+.thread-older {
+  display: grid;
+  place-items: center;
+  height: 36px;
+}
+.older-ring {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-capsule);
+  border: 2px solid var(--fill-2);
+  border-top-color: var(--label-2);
+  animation: chat-spin 0.9s linear infinite;
+}
+@keyframes chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── thread intro (pushed threads, above the first message) ── */
+.thread-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 8px 12px 16px;
+}
+.thread-intro-title {
+  font-size: var(--t-title3);
+  line-height: 1.3;
+}
+.thread-intro-sub {
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+  line-height: 1.45;
+  max-width: 30ch;
+}
+.thread-intro-meta {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+
+/* ── rows ── */
+.msg-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.msg-me {
+  align-self: flex-end;
+  align-items: flex-end;
+  max-width: 82%;
+  gap: 4px;
+}
+.msg-asst {
+  align-self: stretch;
+}
+.msg-other {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 92%;
+}
+.msg-other > :first-child {
+  flex: none;
+  margin-top: 22px;
+}
+.msg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.msg-author {
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+  padding-left: 4px;
+  line-height: 1.4;
+}
+.bubble {
+  border-radius: var(--bubble-r);
+  padding: 10px 14px;
+  min-width: 0;
+  max-width: 100%;
+}
+.bubble-me {
+  background: var(--bubble-me);
+  color: var(--label);
+  border-bottom-right-radius: var(--r-plate);
+}
+.bubble-peer {
+  align-self: flex-start;
+  background: var(--surface);
+  color: var(--label);
+  border-top-left-radius: var(--r-plate);
+}
+:root[data-theme="dark"] .bubble-peer {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.bubble-text {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+/* a stretch between spaces with two emoji side by side ("🍜🍜", "봤어🔥🔥!"): one box, so no line ends inside it
+   (Chrome broke "줘 🍜 / 🍜"). A box, not nowrap: a stretch longer than the line still wraps inside it. Not scoped to
+   .bubble-text: bubbleFit.ts's hidden ruler builds the same span */
+.bubble-hold {
+  display: inline-block;
+}
+.msg-row[data-failed] .bubble-me {
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+.msg-failed {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.msg-failed-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-footnote);
+  color: var(--danger);
+}
+.msg-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--r-control);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.msg-retry:active {
+  background: var(--press-tint);
+}
+.msg-receipt {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+  padding-right: 4px;
+}
+.msg-sep {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 2px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+/* event notes: plain centred footnote text on the background, no pill (label-2 on --bg ≥ 4.5:1; the grey pill was
+   4.1:1 in light) */
+.msg-event {
+  align-self: center;
+  max-width: 88%;
+  padding: 2px 12px;
+  text-align: center;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+/* a live meeting (MeetLive): where it stands, then the one way out — neutral, 44 px, under the newest note */
+.meet-live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+}
+.meet-live-state {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.meet-live-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--t-footnote);
+  color: var(--danger);
+}
+
+/* friend threads: four authors by avatar + name + side. Both Pickles speak in plain text like the main thread (chat B);
+   the avatar and the name beside each row say whose words they are, never a tint */
+
+/* attachments */
+.bubble-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -4px -8px 6px;
+}
+.bubble-files:only-child {
+  margin-bottom: -4px;
+}
+.bubble-img-link {
+  display: block;
+  border-radius: var(--r-field);
+  overflow: hidden;
+}
+/* a fixed height (no dimensions in AttachmentRef): the row never grows when the picture decodes, so a list pinned to
+   the latest stays put; the width follows the picture within bounds */
+.bubble-img {
+  display: block;
+  height: 200px;
+  width: auto;
+  min-width: 120px;
+  max-width: 240px;
+  object-fit: cover;
+  background: var(--fill);
+}
+.bubble-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--r-field);
+  background: var(--surface);
+  color: var(--label);
+  font-size: var(--t-subhead);
+  max-width: 100%;
+}
+.bubble-file span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── assistant ── */
+.asst {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.asst > * {
+  max-width: 100%;
+}
+/* the assistant's words: plain text on the canvas, no bubble (chat B, DESIGN "plain text for conversation") */
+.asst-text {
+  padding: 0 4px;
+  min-width: 0;
+  color: var(--label);
+  word-break: keep-all;
+}
+/* the turn head: the face, then one line (the wait status, or the folded steps); 44 px tall for the tap, pulled in
+   so it reads as part of the turn */
+.turn-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: -8px 0 -6px;
+  padding: 0 4px;
+  align-self: flex-start;
+  max-width: 100%;
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+  color: var(--label-2);
+}
+.turn-head > .avatar {
+  flex: none;
+}
+.asst-wait {
+  min-width: 0;
+}
+.wait-line {
+  display: block;
+  width: 96px;
+  height: 0.75em;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+}
+.wait-status {
+  color: var(--label-2);
+}
+.wait-secs {
+  color: var(--label-2);
+}
+.wait-stall {
+  padding: 0 4px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.wait-stop {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -12px 0;
+  padding: 0 6px;
+  font-weight: 600;
+  color: var(--label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── markdown ──
+ * the archive's document markdown (more/archive/archive.css, a lazy chunk appended later) reuses these class names
+ * unscoped; the gap and heading rules below carry one more class so they hold after 보관함 has been opened */
+.md {
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--label);
+  min-width: 0;
+}
+.md > :not(:first-child) {
+  margin-top: 4px;
+}
+.md > .md-gap {
+  margin-top: 12px;
+}
+.md p {
+  white-space: pre-wrap;
+}
+.md strong {
+  font-weight: 650;
+}
+.md em {
+  font-style: italic;
+}
+.md-h {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+/* a title (h1/h2, e.g. "회의 요약") at title2, section heads at body weight 600: 16 above, 4 below (meeting B) */
+.md > .md-h1,
+.md > .md-h2 {
+  font-size: var(--t-title2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+.md > .md-h3 {
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.md > .md-h:not(:first-child) {
+  margin-top: 16px;
+}
+.md > .md-h1 + .md-h3,
+.md > .md-h2 + .md-h3 {
+  margin-top: 12px;
+}
+.md-li {
+  display: flex;
+  gap: 8px;
+  padding-left: 2px;
+}
+.md-li-d1 {
+  padding-left: 20px;
+}
+.md-li-d2 {
+  padding-left: 38px;
+}
+.md-marker {
+  flex: none;
+  min-width: 1em;
+  color: var(--label-2);
+  text-align: right;
+}
+.md-li:not(.md-ol) .md-marker {
+  text-align: center;
+}
+/* spaces kept, as in .md p: a glued " ·" opening a run right after a bold name rides on the name (under normal Chrome
+   broke before it and drew its space at the next line's start, +4.3 px; FOUNDATION › Line breaks › glued) */
+.md-li-body {
+  min-width: 0;
+  flex: 1 1 auto;
+  white-space: pre-wrap;
+}
+.md-check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.2em;
+  border-radius: 6px; /* glyph: an 18px checkbox drawn at text size, not a surface */
+  box-shadow: inset 0 0 0 1.5px var(--fill-3);
+  position: relative;
+}
+.md-check[data-on] {
+  background: var(--label);
+  box-shadow: none;
+}
+.md-check[data-on]::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2.5px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--surface);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.md-quote {
+  padding-left: 12px;
+  box-shadow: inset 2px 0 0 var(--fill-3);
+  color: var(--label-2);
+}
+.md-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.88em;
+  padding: 1px 5px;
+  border-radius: 6px; /* glyph: inline code sized by the line, not a surface */
+  background: var(--fill);
+}
+pre.md-code {
+  display: block;
+  padding: 10px 12px;
+  border-radius: var(--r-tile);
+  background: var(--surface-2);
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.45;
+  font-size: var(--t-footnote);
+}
+pre.md-code code {
+  font: inherit;
+}
+.md-hr {
+  border: 0;
+  height: 0.5px;
+  background: var(--separator);
+  margin: 12px 0;
+}
+.md-link {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+/* a URL's pieces (markdown.tsx urlPieces): none breaks inside, the empty box between two is the break (a piece wider
+   than 9 em breaks only where it overflows). WebKit's own breaks after "/" and "." came and went with the elements
+   around the URL: the stream's last line and the finished answer broke one URL two ways (−79 px in reply 20 at 390
+   when the stream swapped for the answer) */
+.md-url {
+  white-space: nowrap;
+}
+.md-url-brk {
+  display: inline-block;
+}
+
+/* streaming lines: each new line rises 2px (MOTION-SPEC §6.2), no typewriter */
+.md-stream .sl {
+  display: block;
+  animation: chat-line-rise var(--dur-snap) var(--ease-snap) both;
+}
+.md-stream .md-li-body .sl,
+.md-stream .md-h .sl {
+  display: block;
+}
+@keyframes chat-line-rise {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+/* ── the turn's one line (MOTION-SPEC §8.5): tool status → "자료 3개 보기 · 외교부" / "2단계 · 1분 33초" ── */
+/* the line and what it opens: the column is the answer's width, the line itself only as wide as its words */
+.tools-fold {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  min-width: 0;
+}
+/* one row, 44 pt for the tap (.turn-head); never wraps: the sources end in "…" first */
+.tools-line {
+  padding-right: 10px;
+  border-radius: var(--r-control);
+  white-space: nowrap;
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.tools-line:active {
+  background: var(--press-tint);
+}
+.tools-line-glyph {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  height: 18px;
+  overflow: clip;
+  color: var(--label-2);
+}
+.tools-line[data-state="needs_approval"] .tools-line-glyph,
+.tools-line[data-state="needs_credential"] .tools-line-glyph {
+  color: var(--label);
+}
+.tools-line > .tools-line-text {
+  min-width: 0;
+  grid-template-columns: minmax(0, auto);
+}
+.tools-line-copy {
+  display: flex;
+  min-width: 0;
+}
+/* a long status ends in "…" before "외 2개"; beside the sources the count stays whole and the sources give way */
+.tools-line-main,
+.tools-line-src {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tools-line-main.is-fixed,
+.tools-line-more {
+  flex: none;
+}
+.tools-line-err {
+  flex: none;
+  color: var(--danger);
+}
+.tools-line-chev {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.tool-ring {
+  animation: chat-spin 0.9s linear infinite;
+}
+/* opens under the line on morph: the height grows and the edge clips while it moves (MOTION-SPEC §3 disclosure) */
+.tools-panel {
+  align-self: stretch;
+  min-width: 0;
+}
+.tools-panel[data-moving] {
+  overflow: clip;
+}
+.tools-panel-in {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 6px;
+}
+.tools-panel-in > * {
+  max-width: 100%;
+}
+.tools-steps-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+}
+/* under full-width records the steps take the same width; alone they keep their own */
+.tools-panel-in > .ccard ~ .tools-steps-wrap {
+  align-self: stretch;
+}
+.tools-steps-cap {
+  margin: 0;
+  padding: 0 4px;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.tools-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-radius: var(--r-field);
+  background: var(--surface);
+  min-width: min(100%, 280px);
+}
+:root[data-theme="dark"] .tools-steps {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.tools-step {
+  display: flex;
+  gap: 10px;
+  padding: 6px 6px;
+}
+.tools-step-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+  color: var(--label);
+  margin-top: 1px;
+}
+.tools-step[data-state="error"] .tools-step-icon {
+  background: var(--danger-fill);
+  color: var(--danger);
+}
+.tools-step-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.tools-step-title {
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.tools-step-sum {
+  font-size: var(--t-subhead);
+  color: var(--label);
+  line-height: 1.45;
+}
+.tools-step-meta {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+
+/* ── jump to latest ── */
+.jump-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  pointer-events: none !important;
+}
+/* only when something new arrived below; opaque paper, not a fourth glass shape (chat P1-1) */
+.jump-latest {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px 0 12px;
+  border-radius: var(--r-capsule);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label);
+  white-space: nowrap;
+}
+.jump-latest:active {
+  background: color-mix(in srgb, var(--label) 6%, var(--surface));
+}
+
+/* ── composer (glass capsule in the bottom chrome) ── */
+.composer-measure {
+  display: flex;
+  flex-direction: column;
+}
+.composer-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.composer {
+  display: flex;
+  flex-direction: column;
+  min-height: 56px;
+  padding: 6px;
+}
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.composer-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-control);
+  color: var(--label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.composer-icon:active {
+  background: var(--press-tint);
+}
+.composer-icon:disabled {
+  color: var(--label-3);
+}
+/* 8 px from send (2 px gap + 6); folds to width 0 while there is something to send (Composer.tsx) */
+.composer-call {
+  margin-left: 6px;
+  overflow: hidden;
+}
+.composer-call[data-folded] {
+  pointer-events: none;
+}
+.composer-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  max-height: 132px;
+  padding: 10px 4px;
+  border: 0;
+  background: transparent;
+  resize: none;
+  font-size: var(--t-callout);
+  line-height: 1.5;
+  color: var(--label);
+  overflow-y: auto;
+  scrollbar-width: none;
+  word-break: keep-all;
+}
+.composer-field::placeholder {
+  /* label-2, not --placeholder: the composer has no visible label, so its placeholder is the label (≥4.5:1) */
+  color: var(--label-2);
+}
+.composer-field:focus-visible {
+  outline: none;
+}
+.composer[data-listening] .composer-field::placeholder {
+  color: var(--label);
+}
+.composer-files {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 4px 4px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.composer-file {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  max-width: 200px;
+  padding: 4px 28px 4px 4px;
+  border-radius: var(--r-field);
+  background: var(--surface);
+}
+.composer-file[data-state="error"] {
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+.composer-thumb,
+.composer-doc {
+  width: 48px;
+  height: 48px;
+  border-radius: calc(var(--r-field) - 4px); /* concentric: inside .composer-file's 4px inset */
+  object-fit: cover;
+  flex: none;
+  background: var(--fill);
+}
+.composer-doc {
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+}
+.composer-file-name {
+  min-width: 0;
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.composer-file[data-state="error"] .composer-file-name {
+  color: var(--danger);
+  white-space: normal;
+  line-height: 1.3;
+}
+.composer-file-ring {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-capsule);
+  border: 2px solid rgb(255 255 255 / 0.5);
+  border-top-color: var(--on-accent);
+  animation: chat-spin 0.9s linear infinite;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 0.4));
+}
+.composer-file-x {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  margin: -6px -10px 0 0;
+}
+.composer-file-x::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-capsule);
+  background: var(--fill-3);
+}
+.composer-file-x > * {
+  position: relative;
+}
+.composer-mention {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  margin: 2px 4px 2px 6px;
+  padding: 0 10px;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+  color: var(--label);
+  font-size: var(--t-footnote);
+}
+.composer-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 12px 4px 50px;
+  font-size: var(--t-footnote);
+  line-height: 1.35;
+}
+.composer-err {
+  color: var(--danger);
+  flex: 1 1 auto;
+  min-width: 0;
+  text-wrap: pretty;
+  word-break: keep-all;
+}
+/* the counter is one token: it never breaks at its comma */
+.composer-count {
+  flex: none;
+  margin-left: auto;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.composer-count[data-over] {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ── empty thread (empty-thread A): the agent's face, one sentence, the suggestions as one grouped list ── */
+.thread-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 12vh 0 24px;
+}
+.thread-empty-face {
+  margin-bottom: 8px;
+}
+.thread-empty-title {
+  font-family: var(--font-display);
+  font-size: var(--t-title3);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.thread-empty-body {
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+  max-width: 32ch;
+  text-wrap: pretty;
+}
+.thread-empty-list {
+  align-self: stretch;
+  margin-top: 22px;
+  text-align: left;
+}
+.thread-empty-list .list-row {
+  min-height: 48px;
+}
+.thread-empty-list .list-row-title {
+  font-size: var(--t-callout);
+}
+/* first time only (EmptyThread.tsx): rows rise in on the snap spring's curve, 30 ms apart. `backwards` holds the
+   start during the delay and lets go after, so nothing stays in document.getAnimations() at idle */
+.thread-empty-list.is-entering .list-row {
+  animation: chat-rise var(--dur-snap) var(--ease-snap) backwards;
+}
+.thread-empty-list.is-entering .list-row:nth-child(2) {
+  animation-delay: 30ms;
+}
+.thread-empty-list.is-entering .list-row:nth-child(3) {
+  animation-delay: 60ms;
+}
+/* reduced motion: the list is simply there */
+:root[data-motion="reduce"] .thread-empty-list .list-row {
+  animation: none;
+}
+@keyframes chat-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.thread-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  font-size: var(--t-footnote);
+  color: var(--danger);
+  padding: 4px 12px;
+}
+
+/* ── agent profile sheet ── */
+.agent-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+.agent-sheet-hero {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+}
+.agent-sheet-name {
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.agent-sheet-persona {
+  font-size: var(--t-subhead);
+  color: var(--label);
+  margin-top: 8px;
+  max-width: 32ch;
+}
+.agent-sheet-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin: 16px 0;
+}
+.agent-sheet-facts > div {
+  padding: 12px;
+  border-radius: var(--r-tile);
+  background: var(--surface-2);
+  text-align: left;
+}
+.agent-sheet-facts dt {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+.agent-sheet-facts dd {
+  font-size: var(--t-title3);
+  font-weight: 600;
+}
+.agent-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}

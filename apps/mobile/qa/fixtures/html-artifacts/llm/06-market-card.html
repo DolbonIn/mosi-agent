@@ -1,0 +1,55 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.meta{color:var(--text-2);font-size:13px;font-variant-numeric:tabular-nums;line-height:1.5}
+.grid{display:grid;gap:10px;margin-top:14px}
+.card{background:var(--surface);border-radius:var(--radius);padding:14px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.name{font-size:15px;font-weight:600}
+.value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.3px}
+.chg{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.up{color:var(--danger)}
+.down{color:var(--accent)}
+.na{font-size:15px;font-weight:600;color:var(--text-2)}
+.note{font-size:13px;color:var(--text-2);line-height:1.5;margin-top:8px}
+.sep{border-top:1px solid var(--line);margin:14px 0}
+.tag{display:inline-block;font-size:12px;color:var(--text-2);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 8px;margin-top:8px}
+h3{font-size:15px;font-weight:600;margin-bottom:6px}
+ul{list-style:none}
+li{font-size:14px;line-height:1.6;color:var(--text-2);padding-left:12px;position:relative}
+li::before{content:"";position:absolute;left:2px;top:9px;width:4px;height:4px;border-radius:50%;background:var(--text-3)}
+</style>
+<h2>오늘의 시장</h2>
+<p class="meta">2026년 11월 15일 (일) 오전 9시 · 주말이라 국내외 정규장은 휴장이에요</p>
+
+<div class="grid">
+  <div class="card">
+    <div class="row"><span class="name">코스피 (KOSPI)</span><span class="chg up">주간 +4.56%</span></div>
+    <div class="value" style="margin-top:6px">5,290.53</div>
+    <p class="note">11월 13일(금) 종가 기준 · 전주 대비 +230.84p</p>
+  </div>
+  <div class="card">
+    <div class="row"><span class="name">코스닥 (KOSDAQ)</span><span class="chg up">주간 +8.60%</span></div>
+    <div class="value" style="margin-top:6px">699.66</div>
+    <p class="note">11월 13일(금) 종가 기준</p>
+  </div>
+  <div class="card">
+    <div class="row"><span class="name">나스닥 (NASDAQ)</span><span class="chg down">-0.91%</span></div>
+    <div class="value na" style="margin-top:6px">지수 수치 확인 불가</div>
+    <p class="note">11월 13일(금) 뉴욕증시 · S&amp;P500 -0.40%, 다우 +0.10%</p>
+  </div>
+  <div class="card">
+    <div class="row"><span class="name">원/달러 환율</span></div>
+    <div class="value na" style="margin-top:6px">수치 확인 불가</div>
+    <p class="note">최근 환율이 하락(원화 강세) 흐름이라는 보도만 확인됐어요</p>
+  </div>
+</div>
+
+<div class="sep"></div>
+<h3>이번 주 체크포인트</h3>
+<ul>
+  <li>17일 엔비디아 실적 발표 — AI주 방향 가늠자</li>
+  <li>19일 앤트로픽 나스닥 상장 예정</li>
+  <li>지난주 반도체주 약세로 국내 증시 부담 이어짐</li>
+</ul>
+<p class="tag">출처: 연합뉴스TV · 파이낸셜투데이 · 비바100 등 보도</p>

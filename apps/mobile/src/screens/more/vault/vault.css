@@ -1,0 +1,176 @@
+/* Vault — saved logins + access log (screens/more/vault). Inset list groups on paper (ui/List), tokens only. */
+
+/* empty page: a left-aligned title and one sentence above the list that will hold the logins (no glyph, no promise) */
+.vault-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.vault-empty__text {
+  padding: 4px 16px 0;
+  word-break: keep-all;
+}
+.vault-empty__title {
+  font-family: var(--font-display);
+  font-size: var(--t-title3);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--label);
+  text-wrap: balance;
+}
+.vault-empty__body {
+  margin-top: 6px;
+  font-size: var(--t-subhead);
+  line-height: 1.55;
+  color: var(--label-2);
+  text-wrap: pretty;
+}
+
+/* ── a saved login = one group ── */
+.vault-login {
+  min-width: 0;
+}
+.vault-hint {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vault-hint[data-hidden] {
+  letter-spacing: 0.08em;
+}
+.list-footer > .vault-login__error {
+  margin: 0 0 4px;
+}
+
+/* 보관 기간: the row opens the keep-for choice under itself; the chevron turns on snap (연결's 고급 fold) */
+.vault-keep__chev svg {
+  transition: transform var(--dur-snap) var(--ease-snap);
+}
+.vault-keep[aria-expanded="true"] .vault-keep__chev svg {
+  transform: rotate(180deg);
+}
+.vault-keep-panel {
+  overflow: hidden;
+}
+.vault-keep-panel__inner {
+  padding: 2px 14px 14px 16px;
+}
+/* ui/List draws a hairline only between adjacent rows: the row after the open panel keeps its own */
+.vault-keep-panel + .list-row .list-row-main::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+}
+
+/* 이 로그인 지우기: the last row of the group, red text — ui/Button's confirm (hold or two taps) laid out as a row */
+.vault-del-row {
+  position: relative;
+  display: flex;
+}
+.vault-del-row::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 16px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.vault-del-row .btn.vault-del {
+  justify-content: flex-start;
+  margin-inline: 0;
+  padding: 0 16px;
+  font-size: var(--t-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  /* a row answers a press with a flat tint and never grows (ui/List); the opaque lift belongs to capsules */
+  transform: none !important;
+}
+.vault-del-row .btn.vault-del[data-state="loading"],
+.vault-del-row .btn.vault-del[data-state="success"] {
+  justify-content: center;
+  padding: 0;
+}
+/* step two of the two-tap confirm: the whole row turns to the red wash, deeper red label (≥4.5:1) */
+.vault-del-row .btn.vault-del[data-confirming] {
+  background-color: var(--danger-fill);
+  color: var(--danger-on-fill);
+  font-weight: 600;
+}
+/* holding sweeps the same wash across the row */
+.vault-del-row .btn.vault-del span.btn-hold {
+  background: var(--danger-fill);
+}
+/* confirmed by the server: no filled row — the check draws on a small accent disc where the ring spun */
+.vault-del-row .btn.vault-del[data-state="success"] {
+  background-color: transparent;
+}
+.vault-del-row .btn.vault-del .btn-ring.done {
+  border-radius: 50%;
+  background: var(--accent-fill);
+}
+/* keyboard focus like a list row: the whole row, not a ring outside it (the group clips outside) */
+.vault-del-row .btn.vault-del:focus-visible {
+  outline: none;
+  background-color: var(--accent-wash);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* ── access log: a row list per day (no rail); the time is the trailing value ── */
+.vault-rec .list-row-lead,
+.vault-rec .list-row-plate {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+.vault-rec .list-row-main {
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.vault-rec .list-row-title {
+  font-weight: 500;
+}
+.vault-rec .list-row-sub {
+  overflow-wrap: anywhere;
+}
+.vault-rec .list-row-detail {
+  font-size: var(--t-footnote);
+  padding-top: 2px;
+}
+/* the quiet third line: a refusal or failure, or the owner's device-signed decision */
+.vault-rec__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.vault-rec__note svg {
+  flex: none;
+}
+.vault-rec__note b {
+  font-weight: 600;
+  color: var(--label);
+}
+.vault-rec__note[data-outcome="error"] b {
+  color: var(--danger);
+}
+
+:root[data-motion="reduce"] .vault-keep__chev svg {
+  transition: none;
+}
+

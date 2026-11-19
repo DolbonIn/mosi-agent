@@ -1,0 +1,233 @@
+/*
+ * The call card: the Dynamic Island grown to the whole device (it keeps the island's black and its label colour,
+ * so the morph reads as one object). Opaque, not glass. Under reduced motion it fades instead of growing.
+ * The character is the face: name and status are its caption, the top keeps only the chevron (the island runs the
+ * timer). Colours are island tokens in both themes; --call-end is the one red.
+ */
+.call-card {
+  --call-fill: color-mix(in srgb, var(--island-label) 16%, transparent);
+  --call-fill-press: color-mix(in srgb, var(--island-label) 26%, transparent);
+  --call-dim: color-mix(in srgb, var(--island-label) 62%, transparent);
+  position: absolute;
+  inset: 0;
+  /* in the overlay layer: over the undo toast (z 30), which a full-screen surface covers like a sheet (MOTION-SPEC
+     §8.13) so it never draws over the captions or the controls; under the sheets (z 40) and the banner (z 60). The
+     island is a layer above them all */
+  z-index: 35;
+  background: var(--island);
+  color: var(--island-label);
+  will-change: clip-path;
+}
+.call-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--chrome-top) + 8px) 24px calc(var(--safe-bottom) + 28px);
+  overflow: hidden;
+}
+.call-head {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.call-min {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-control);
+  color: var(--island-label);
+  transition: background-color var(--dur-fade) var(--ease-fade);
+}
+.call-min:active {
+  background: var(--call-fill);
+}
+.call-min:focus-visible {
+  outline-color: var(--island-label);
+}
+/* the character's caption: name, then what the call is doing (the content swap changes only this word) */
+.call-who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+.call-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.call-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--call-dim);
+}
+.call-ring {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-capsule);
+  border: 1.5px solid var(--call-fill);
+  border-top-color: var(--island-label);
+  animation: call-spin 0.9s linear infinite;
+}
+@keyframes call-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.call-stage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 220px;
+}
+/* Captions. Start-aligned in a full-width column, one size and weight for every line: a streamed token only extends
+   the last line (nothing re-centres), and the current line moving on changes colour only (nothing re-wraps). */
+.call-transcript {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  align-self: stretch;
+  width: 100%;
+  min-height: 132px;
+  max-height: 30%;
+  margin: 0 0 16px;
+  overflow: hidden;
+  text-align: start;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 36px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 36px);
+}
+.call-line {
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--call-dim);
+  /* Hangul breaks between words; a long unbroken run (a URL) may still break anywhere. No text-wrap: pretty: it
+     re-balances the last lines as the text grows, which would move words already read. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  transition: color var(--dur-fade) var(--ease-fade);
+}
+.call-line[data-who="note"] {
+  font-size: var(--t-footnote);
+}
+.call-line[data-current] {
+  color: var(--island-label);
+}
+.call-error {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: var(--t-footnote);
+  color: var(--island-label);
+  text-align: center;
+}
+.call-type {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px 4px 4px 16px;
+  border-radius: var(--r-capsule); /* 52px: concentric with its 44px send circle at a 4px inset */
+  background: var(--call-fill);
+}
+.call-type-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--island-label);
+  font-size: var(--t-callout);
+}
+.call-type-input::placeholder {
+  color: var(--call-dim); /* the black island, not paper: ≈7:1 (--placeholder is for fields on paper) */
+}
+.call-type-input:focus-visible {
+  outline: none;
+}
+.call-type-send {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-control);
+  background: var(--island-label);
+  color: var(--island);
+}
+.call-type-send:disabled {
+  background: var(--call-fill);
+  color: var(--call-dim);
+}
+.call-controls {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+.call-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 72px;
+}
+.call-btn {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-capsule);
+  background: var(--call-fill);
+  color: var(--island-label);
+  transition:
+    background-color var(--dur-fade) var(--ease-fade),
+    color var(--dur-fade) var(--ease-fade);
+}
+.call-btn:active {
+  background: var(--call-fill-press);
+}
+/* on: the label colour at 88 % (a full white disc out-shone the character); the name stays, aria-pressed says it */
+.call-btn[data-on] {
+  background: color-mix(in srgb, var(--island-label) 88%, transparent);
+  color: var(--island);
+}
+.call-btn[data-end] {
+  background: var(--call-end);
+  color: var(--island-label);
+}
+.call-btn[data-end] svg {
+  transform: rotate(135deg);
+}
+.call-btn:disabled {
+  opacity: 0.4;
+}
+.call-btn:focus-visible {
+  outline-color: var(--island-label);
+  outline-offset: 3px;
+}
+.call-btn-label {
+  font-size: var(--t-footnote);
+  color: var(--call-dim);
+  white-space: nowrap;
+}

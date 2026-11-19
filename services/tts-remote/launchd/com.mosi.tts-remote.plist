@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template for the launchd agent that keeps the TTS tunnel and adapter running (../watchdog.sh).
+  NOT installed. install.sh fills in the @...@ fields and loads it, and that is a persistent change to this Mac
+  (a shared machine): run install.sh only with the owner's OK. uninstall.sh takes it out again.
+  The watchdog starts only a piece whose pid file has no live process; a live tunnel or adapter is never touched.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>@LABEL@</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/sh</string><string>@DEST@/watchdog.sh</string></array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key><string>@HOME@</string>
+    <key>TTS_VOICE_DIR</key><string>@DEST@/voices</string>
+@ENV@
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <!-- the tunnel and adapter outlive the watchdog: unloading it (uninstall.sh) leaves them running -->
+  <key>AbandonProcessGroup</key><true/>
+  <key>StandardOutPath</key><string>@RUN@/watchdog.log</string>
+  <key>StandardErrorPath</key><string>@RUN@/watchdog.log</string>
+</dict>
+</plist>

@@ -1,0 +1,5568 @@
+{
+  "when": "2026-11-17T04:14:13.497Z",
+  "widths": [
+    320,
+    360,
+    390,
+    430
+  ],
+  "engines": [
+    "chromium",
+    "webkit"
+  ],
+  "narrowPx": 160,
+  "ok": true,
+  "passes": [
+    {
+      "engine": "chromium",
+      "width": 320,
+      "ms": 122675,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 23
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 25
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 6
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 6
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 5
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 10
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 3
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 7
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 4
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 6
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 3
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "ms": 122063,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 15
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 16
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 4
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 5
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 2
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 9
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 3
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 6
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 3
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "ms": 122625,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 12
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 16
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 3
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 4
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 9
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 2
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 4
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 2
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "ms": 122678,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 9
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 10
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 8
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 1
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 0
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 0
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 2
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "ms": 124611,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 23
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 25
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 6
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 6
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 5
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 10
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 3
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 7
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 4
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 6
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 3
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "ms": 124062,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 15
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 16
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 4
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 5
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 2
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 9
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 3
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 6
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 33
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 3
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "ms": 124235,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 12
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 1
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 16
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 3
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 4
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 9
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 2
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 4
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 31
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 2
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "ms": 124040,
+      "screens": 49,
+      "blocks": 916,
+      "visited": [
+        {
+          "area": "gallery",
+          "screen": "gallery",
+          "scanned": 101,
+          "multiline": 9
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 티켓 사용",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 알림 설정",
+          "scanned": 2,
+          "multiline": 1
+        },
+        {
+          "area": "gallery",
+          "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+          "scanned": 17,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "onboarding",
+          "scanned": 3,
+          "multiline": 2
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 모시 만들기 1/2",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "onboarding",
+          "screen": "sheet: 로그인",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "thread",
+          "scanned": 108,
+          "multiline": 10
+        },
+        {
+          "area": "cards",
+          "screen": "sheet: 보관 기간",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (1/3)",
+          "scanned": 6,
+          "multiline": 1
+        },
+        {
+          "area": "cards",
+          "screen": "html card (2/3)",
+          "scanned": 6,
+          "multiline": 0
+        },
+        {
+          "area": "cards",
+          "screen": "html card (3/3)",
+          "scanned": 5,
+          "multiline": 0
+        },
+        {
+          "area": "chat",
+          "screen": "chat",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "둘러보기",
+          "scanned": 16,
+          "multiline": 8
+        },
+        {
+          "area": "explore",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 일어나야 하는 시간에 맞춰 하늘님께 모닝콜 브리핑을 보내 드릴게요.",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.",
+          "scanned": 11,
+          "multiline": 2
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 제 전화, 먼저 한번 받아 보실래요?",
+          "scanned": 10,
+          "multiline": 1
+        },
+        {
+          "area": "explore",
+          "screen": "sheet: 매일 아침 7시 모닝 브리핑 보내 드릴게요",
+          "scanned": 20,
+          "multiline": 1
+        },
+        {
+          "area": "archive",
+          "screen": "보관함",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "나의 모시",
+          "scanned": 26,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 한도 초기화 티켓",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "내 계정",
+          "scanned": 8,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 내 전화번호",
+          "scanned": 4,
+          "multiline": 0
+        },
+        {
+          "area": "profile",
+          "screen": "앱 연결",
+          "scanned": 33,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 인스타그램",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 라인",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 디스코드",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 슬랙",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Microsoft Teams",
+          "scanned": 5,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: Webex",
+          "scanned": 9,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 토스증권",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 네이버 검색광고",
+          "scanned": 12,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 팝빌",
+          "scanned": 14,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 쿠팡 파트너스",
+          "scanned": 10,
+          "multiline": 2
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: RISS",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "예약된 일",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "친구",
+          "scanned": 4,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "정보 공개 범위",
+          "scanned": 18,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "모시",
+          "scanned": 85,
+          "multiline": 23
+        },
+        {
+          "area": "profile",
+          "screen": "저장된 로그인",
+          "scanned": 5,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 카카오톡",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "접근 기록",
+          "scanned": 3,
+          "multiline": 1
+        },
+        {
+          "area": "profile",
+          "screen": "sheet: 개인 정보 보호",
+          "scanned": 10,
+          "multiline": 3
+        },
+        {
+          "area": "profile",
+          "screen": "알림 설정",
+          "scanned": 16,
+          "multiline": 0
+        },
+        {
+          "area": "profile",
+          "screen": "화면 및 디자인",
+          "scanned": 17,
+          "multiline": 2
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "findings": [
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "원",
+      "path": "ul.res-list > li.res-row > a.res-link > span.res-body > span.res-line > span.res-sub",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "res-sub",
+      "text": "정부 기여금 월 최대 3.3만 원",
+      "lines": [
+        "정부 기여금 월 최대 3.3만",
+        "원"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "상대의 대답은 들을 수 없어요.",
+      "path": "div.thread-content > div.msg-row.msg-asst > div.asst > section.ccard.ccard-approval > div.appr-call > p.appr-sub",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "appr-sub",
+      "text": "이 말을 전하고 끊어요. 상대의 대답은 들을 수 없어요.",
+      "lines": [
+        "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+        "없어요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "나의 모시",
+      "rule": "orphan",
+      "line": "티켓",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "lines": [
+        "한도",
+        "초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한 뒤에만",
+        "보내요. 모시도 서버 운영자도 원문을 볼",
+        "수 없어요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+        "검색. 친구 추가·삭제나 설정은 바꾸지",
+        "않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+        "검색. 친구 추가·삭제나 설정은 바꾸지",
+        "않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: Microsoft Teams",
+      "rule": "sentence-split",
+      "line": "비밀번호는 모시에 저장되지 않아요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요. 연결을 누르면 나오는 코드를 microsof",
+      "lines": [
+        "회사 Microsoft 계정으로 Teams",
+        "채팅을 읽고 보내요. 연결을 누르면",
+        "나오는 코드를",
+        "microsoft.com/devicelogin 에",
+        "입력하고 로그인하면 돼요. 비밀번호는",
+        "모시에 저장되지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "sentence-split",
+      "line": "보관 기간이 지나면 저절로 지워져요.",
+      "path": "div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > ul.privacy-lines > li.privacy-line > p.privacy-line__body",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-line__body",
+      "text": "저장된 로그인, 기억, 연결은 언제든 하나씩 지울 수 있어요. 보관 기간이 지나면 저절로 지워져요.",
+      "lines": [
+        "저장된 로그인, 기억, 연결은 언제든",
+        "하나씩 지울 수 있어요. 보관 기간이 지나면",
+        "저절로 지워져요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "orphan",
+      "line": "보기",
+      "path": "div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > button.privacy-more > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-more",
+      "text": "암호화가 어떻게 되는지 자세히 보기",
+      "lines": [
+        "암호화가 어떻게 되는지 자세히",
+        "보기"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "회비 3만 원은 오늘까지 보내 주세요",
+      "path": "div.mt-body > ul.mt-hls > li.mt-hl.is-peer > span.mt-line > span.mt-bubble.is-peer > span.mt-text.is-clamped",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/MessengerThreadCard.css",
+      "cls": "mt-text",
+      "text": "토요일 오후 2시 대학로 연습실이에요. 회비 3만 원은 오늘까지 보내 주세요",
+      "lines": [
+        "토요일 오후 2시 대학로",
+        "연습실이에요. 회비 3만 원은",
+        "오늘까지 보내 주세요"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "profile",
+      "screen": "나의 모시",
+      "rule": "orphan",
+      "line": "티켓",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "lines": [
+        "한도 초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "profile",
+      "screen": "sheet: Microsoft Teams",
+      "rule": "sentence-split",
+      "line": "비밀번호는 모시에 저장되지 않아요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요. 연결을 누르면 나오는 코드를 microsof",
+      "lines": [
+        "회사 Microsoft 계정으로 Teams 채팅을",
+        "읽고 보내요. 연결을 누르면 나오는 코드를",
+        "microsoft.com/devicelogin 에 입력하고",
+        "로그인하면 돼요. 비밀번호는 모시에",
+        "저장되지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "줘",
+      "path": "section.stack-layer > div.screen-scroll.has-composer > div.thread-content > div.msg-row.msg-me > div.bubble.bubble-me > p.bubble-text",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/chat.css",
+      "cls": "bubble-text",
+      "text": "카톡으로 도윤 님한테 입금했다고 보내 줘",
+      "lines": [
+        "카톡으로 도윤 님한테 입금했다고 보내",
+        "줘"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "적기",
+      "path": "section.stack-layer > div.screen-scroll.has-composer > div.thread-content > div.msg-row.msg-me > div.bubble.bubble-me > p.bubble-text",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/chat.css",
+      "cls": "bubble-text",
+      "text": "이 회의에도 들어가 줘 주간 회의 받아 적기",
+      "lines": [
+        "이 회의에도 들어가 줘 주간 회의 받아",
+        "적기"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도",
+        "서버 운영자도 원문을 볼 수 없어요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구",
+        "추가·삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구",
+        "추가·삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: Microsoft Teams",
+      "rule": "sentence-split",
+      "line": "비밀번호는 모시에 저장되지 않아요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요. 연결을 누르면 나오는 코드를 microsof",
+      "lines": [
+        "회사 Microsoft 계정으로 Teams 채팅을 읽고",
+        "보내요. 연결을 누르면 나오는 코드를",
+        "microsoft.com/devicelogin 에 입력하고",
+        "로그인하면 돼요. 비밀번호는 모시에",
+        "저장되지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "sentence-split",
+      "line": "로그인 정보는 이 기기에서 암호화된 채로만 보관돼요.",
+      "path": "div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > ul.privacy-lines > li.privacy-line > p.privacy-line__body",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-line__body",
+      "text": "대화, 모시가 기억한 내용, 연결한 서비스의 로그인 정보예요. 로그인 정보는 이 기기에서 암호화된 채로만 보",
+      "lines": [
+        "대화, 모시가 기억한 내용, 연결한 서비스의 로그인",
+        "정보예요. 로그인 정보는 이 기기에서 암호화된",
+        "채로만 보관돼요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "회비 3만 원은 오늘까지 보내 주세요",
+      "path": "div.mt-body > ul.mt-hls > li.mt-hl.is-peer > span.mt-line > span.mt-bubble.is-peer > span.mt-text.is-clamped",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/MessengerThreadCard.css",
+      "cls": "mt-text",
+      "text": "토요일 오후 2시 대학로 연습실이에요. 회비 3만 원은 오늘까지 보내 주세요",
+      "lines": [
+        "토요일 오후 2시 대학로 연습실이에요. 회비 3만",
+        "원은 오늘까지 보내 주세요"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+      "path": "div.msg-row.msg-asst > div.asst > section.ccard.ccard-approval > div.appr-meet > div.appr-meet-what > p.appr-detail",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "appr-detail",
+      "text": "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI 비서라고 먼저 알려요.",
+      "lines": [
+        "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+        "비서라고 먼저 알려요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버",
+        "운영자도 원문을 볼 수 없어요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·",
+        "삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·",
+        "삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: Webex",
+      "rule": "sentence-split",
+      "line": "회사 SSO로만 로그인하는 계정은 지원하지 않아요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "Webex 이메일·비밀번호로 스페이스 메시지를 읽고 보내요. 회사 SSO로만 로그인하는 계정은 지원하지 않아",
+      "lines": [
+        "Webex 이메일·비밀번호로 스페이스 메시지를",
+        "읽고 보내요. 회사 SSO로만 로그인하는 계정은",
+        "지원하지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "원",
+      "path": "ul.res-list > li.res-row > a.res-link > span.res-body > span.res-line > span.res-sub",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "res-sub",
+      "text": "정부 기여금 월 최대 3.3만 원",
+      "lines": [
+        "정부 기여금 월 최대 3.3만",
+        "원"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "상대의 대답은 들을 수 없어요.",
+      "path": "div.thread-content > div.msg-row.msg-asst > div.asst > section.ccard.ccard-approval > div.appr-call > p.appr-sub",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "appr-sub",
+      "text": "이 말을 전하고 끊어요. 상대의 대답은 들을 수 없어요.",
+      "lines": [
+        "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+        "없어요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "나의 모시",
+      "rule": "orphan",
+      "line": "티켓",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "lines": [
+        "한도",
+        "초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한",
+        "뒤에만 보내요. 모시도 서버 운영자도",
+        "원문을 볼 수 없어요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+        "검색. 친구 추가·삭제나 설정은 바꾸지",
+        "않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+        "검색. 친구 추가·삭제나 설정은 바꾸지",
+        "않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "sentence-split",
+      "line": "보관 기간이 지나면 저절로 지워져요.",
+      "path": "div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > ul.privacy-lines > li.privacy-line > p.privacy-line__body",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-line__body",
+      "text": "저장된 로그인, 기억, 연결은 언제든 하나씩 지울 수 있어요. 보관 기간이 지나면 저절로 지워져요.",
+      "lines": [
+        "저장된 로그인, 기억, 연결은 언제든",
+        "하나씩 지울 수 있어요. 보관 기간이",
+        "지나면 저절로 지워져요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "orphan",
+      "line": "보기",
+      "path": "div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > button.privacy-more > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-more",
+      "text": "암호화가 어떻게 되는지 자세히 보기",
+      "lines": [
+        "암호화가 어떻게 되는지 자세히",
+        "보기"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "회비 3만 원은 오늘까지 보내 주세요",
+      "path": "div.mt-body > ul.mt-hls > li.mt-hl.is-peer > span.mt-line > span.mt-bubble.is-peer > span.mt-text.is-clamped",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/MessengerThreadCard.css",
+      "cls": "mt-text",
+      "text": "토요일 오후 2시 대학로 연습실이에요. 회비 3만 원은 오늘까지 보내 주세요",
+      "lines": [
+        "토요일 오후 2시 대학로",
+        "연습실이에요. 회비 3만 원은",
+        "오늘까지 보내 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "profile",
+      "screen": "나의 모시",
+      "rule": "orphan",
+      "line": "티켓",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "lines": [
+        "한도 초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한 뒤에만",
+        "보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "줘",
+      "path": "section.stack-layer > div.screen-scroll.has-composer > div.thread-content > div.msg-row.msg-me > div.bubble.bubble-me > p.bubble-text",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/chat.css",
+      "cls": "bubble-text",
+      "text": "카톡으로 도윤 님한테 입금했다고 보내 줘",
+      "lines": [
+        "카톡으로 도윤 님한테 입금했다고 보내",
+        "줘"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "orphan",
+      "line": "적기",
+      "path": "section.stack-layer > div.screen-scroll.has-composer > div.thread-content > div.msg-row.msg-me > div.bubble.bubble-me > p.bubble-text",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/chat.css",
+      "cls": "bubble-text",
+      "text": "이 회의에도 들어가 줘 주간 회의 받아 적기",
+      "lines": [
+        "이 회의에도 들어가 줘 주간 회의 받아",
+        "적기"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요.",
+      "path": "div.more-sheet > form.conn-form > div.tf.tf--plain > p.tf-hint.t-copy > span.conn-lockhint > span",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-lockhint",
+      "text": "입력한 정보는 이 기기에서 암호화한 뒤에만 보내요. 모시도 서버 운영자도 원문을 볼 수 없어요.",
+      "lines": [
+        "입력한 정보는 이 기기에서 암호화한 뒤에만",
+        "보내요. 모시도 서버 운영자도 원문을 볼 수 없어요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구",
+        "추가·삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구",
+        "추가·삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "sentence-split",
+      "line": "로그인 정보는 이 기기에서 암호화된 채로만 보관돼요.",
+      "path": "div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > ul.privacy-lines > li.privacy-line > p.privacy-line__body",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-line__body",
+      "text": "대화, 모시가 기억한 내용, 연결한 서비스의 로그인 정보예요. 로그인 정보는 이 기기에서 암호화된 채로만 보",
+      "lines": [
+        "대화, 모시가 기억한 내용, 연결한 서비스의",
+        "로그인 정보예요. 로그인 정보는 이 기기에서",
+        "암호화된 채로만 보관돼요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "회비 3만 원은 오늘까지 보내 주세요",
+      "path": "div.mt-body > ul.mt-hls > li.mt-hl.is-peer > span.mt-line > span.mt-bubble.is-peer > span.mt-text.is-clamped",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/MessengerThreadCard.css",
+      "cls": "mt-text",
+      "text": "토요일 오후 2시 대학로 연습실이에요. 회비 3만 원은 오늘까지 보내 주세요",
+      "lines": [
+        "토요일 오후 2시 대학로 연습실이에요. 회비 3만",
+        "원은 오늘까지 보내 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "cards",
+      "screen": "thread",
+      "rule": "sentence-split",
+      "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+      "path": "div.msg-row.msg-asst > div.asst > section.ccard.ccard-approval > div.appr-meet > div.appr-meet-what > p.appr-detail",
+      "owner": "screens-chat",
+      "file": "src/screens/chat/cards/cards.css",
+      "cls": "appr-detail",
+      "text": "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI 비서라고 먼저 알려요.",
+      "lines": [
+        "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+        "비서라고 먼저 알려요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "cards",
+      "screen": "html card (2/3)",
+      "rule": "overflow",
+      "line": "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요",
+      "by": 2,
+      "path": "div > div.sum > p",
+      "owner": "agent-runtime",
+      "file": "packages/agent/src/explore.ts",
+      "cls": "sum p",
+      "text": "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요",
+      "lines": [
+        "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 카카오톡",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.more-sheet > div.conn-folds > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·",
+        "삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 디스코드",
+      "rule": "sentence-split",
+      "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "path": "div.sheet-body > div.more-sheet > div.conn-fold > button.conn-fold__row > span.conn-fold__main > span.conn-fold__sub",
+      "owner": "screens-more",
+      "file": "src/screens/more/connections/connections.css",
+      "cls": "conn-fold__sub",
+      "text": "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·삭제나 설정은 바꾸지 않아요.",
+      "lines": [
+        "목록 보기 · 읽기 · 허락받은 메시지 보내기 · 검색. 친구 추가·",
+        "삭제나 설정은 바꾸지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: Microsoft Teams",
+      "rule": "sentence-split",
+      "line": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요. 연결을 누르면 나오는 코드를 microsof",
+      "lines": [
+        "회사 Microsoft 계정으로 Teams 채팅을 읽고",
+        "보내요. 연결을 누르면 나오는 코드를 microsoft.",
+        "com/devicelogin 에 입력하고 로그인하면",
+        "돼요. 비밀번호는 모시에 저장되지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: Webex",
+      "rule": "sentence-split",
+      "line": "회사 SSO로만 로그인하는 계정은 지원하지 않아요.",
+      "path": "div.overlay-layer > div.sheet-root > div.glass.sheet-panel > div.sheet-body > div.more-sheet > p.more-sheet-lead",
+      "owner": "screens-more",
+      "file": "src/screens/more/more.css",
+      "cls": "more-sheet-lead",
+      "text": "Webex 이메일·비밀번호로 스페이스 메시지를 읽고 보내요. 회사 SSO로만 로그인하는 계정은 지원하지 않아",
+      "lines": [
+        "Webex 이메일·비밀번호로 스페이스 메시지를",
+        "읽고 보내요. 회사 SSO로만 로그인하는 계정은",
+        "지원하지 않아요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "profile",
+      "screen": "sheet: 개인 정보 보호",
+      "rule": "sentence-split",
+      "line": "저장된 로그인, 기억, 연결은 언제든 하나씩 지울 수 있어요.",
+      "path": "div.glass.sheet-panel > div.sheet-body > div.more-sheet.privacy-body > ul.privacy-lines > li.privacy-line > p.privacy-line__body",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "privacy-line__body",
+      "text": "저장된 로그인, 기억, 연결은 언제든 하나씩 지울 수 있어요. 보관 기간이 지나면 저절로 지워져요.",
+      "lines": [
+        "저장된 로그인, 기억, 연결은 언제든 하나씩 지울",
+        "수 있어요. 보관 기간이 지나면 저절로 지워져요."
+      ]
+    }
+  ],
+  "table": [
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "mt-text",
+      "findings": 2,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C360",
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로",
+          "연습실이에요. 회비 3만 원은",
+          "오늘까지 보내 주세요"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "bubble-text",
+      "findings": 2,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "C390"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "줘",
+        "lines": [
+          "카톡으로 도윤 님한테 입금했다고 보내",
+          "줘"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "res-sub",
+      "findings": 1,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "C320"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "원",
+        "lines": [
+          "정부 기여금 월 최대 3.3만",
+          "원"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "appr-sub",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "상대의 대답은 들을 수 없어요.",
+        "lines": [
+          "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+          "없어요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "appr-detail",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+        "lines": [
+          "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+          "비서라고 먼저 알려요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 카카오톡",
+      "cls": "conn-lockhint",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320",
+        "C390",
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+        "lines": [
+          "입력한 정보는 이 기기에서 암호화한 뒤에만",
+          "보내요. 모시도 서버 운영자도 원문을 볼",
+          "수 없어요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 카카오톡",
+      "cls": "conn-fold__sub",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320",
+        "C390",
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+        "lines": [
+          "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+          "검색. 친구 추가·삭제나 설정은 바꾸지",
+          "않아요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 디스코드",
+      "cls": "conn-fold__sub",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320",
+        "C390",
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+        "lines": [
+          "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+          "검색. 친구 추가·삭제나 설정은 바꾸지",
+          "않아요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: Microsoft Teams",
+      "cls": "more-sheet-lead",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320",
+        "C360",
+        "C390"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "비밀번호는 모시에 저장되지 않아요.",
+        "lines": [
+          "회사 Microsoft 계정으로 Teams",
+          "채팅을 읽고 보내요. 연결을 누르면",
+          "나오는 코드를",
+          "microsoft.com/devicelogin 에",
+          "입력하고 로그인하면 돼요. 비밀번호는",
+          "모시에 저장되지 않아요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › 나의 모시",
+      "cls": "list-row-title.t-copy (restyled: src/screens/more/profile/profile.css: .profile-tickets .list-row-detail)",
+      "findings": 2,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "C320",
+        "C360"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "티켓",
+        "lines": [
+          "한도",
+          "초기화",
+          "티켓"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 개인 정보 보호",
+      "cls": "privacy-line__body",
+      "findings": 2,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C320",
+        "C390"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "보관 기간이 지나면 저절로 지워져요.",
+        "lines": [
+          "저장된 로그인, 기억, 연결은 언제든",
+          "하나씩 지울 수 있어요. 보관 기간이 지나면",
+          "저절로 지워져요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 개인 정보 보호",
+      "cls": "privacy-more",
+      "findings": 1,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "C320"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "보기",
+        "lines": [
+          "암호화가 어떻게 되는지 자세히",
+          "보기"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: Webex",
+      "cls": "more-sheet-lead",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "C430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "회사 SSO로만 로그인하는 계정은 지원하지 않아요.",
+        "lines": [
+          "Webex 이메일·비밀번호로 스페이스 메시지를",
+          "읽고 보내요. 회사 SSO로만 로그인하는 계정은",
+          "지원하지 않아요."
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "agent-runtime",
+      "screen": "cards › html card (2/3)",
+      "cls": "sum p",
+      "findings": 1,
+      "rules": [
+        "overflow"
+      ],
+      "at": [
+        "W430"
+      ],
+      "sample": {
+        "rule": "overflow",
+        "line": "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요",
+        "lines": [
+          "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "mt-text",
+      "findings": 2,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W360",
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로",
+          "연습실이에요. 회비 3만 원은",
+          "오늘까지 보내 주세요"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "bubble-text",
+      "findings": 2,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "W390"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "줘",
+        "lines": [
+          "카톡으로 도윤 님한테 입금했다고 보내",
+          "줘"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "res-sub",
+      "findings": 1,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "W320"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "원",
+        "lines": [
+          "정부 기여금 월 최대 3.3만",
+          "원"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "appr-sub",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W320"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "상대의 대답은 들을 수 없어요.",
+        "lines": [
+          "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+          "없어요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-chat",
+      "screen": "cards › thread",
+      "cls": "appr-detail",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+        "lines": [
+          "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+          "비서라고 먼저 알려요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 카카오톡",
+      "cls": "conn-lockhint",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W320",
+        "W360",
+        "W390"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "모시도 서버 운영자도 원문을 볼 수 없어요.",
+        "lines": [
+          "입력한 정보는 이 기기에서 암호화한",
+          "뒤에만 보내요. 모시도 서버 운영자도",
+          "원문을 볼 수 없어요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 카카오톡",
+      "cls": "conn-fold__sub",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W320",
+        "W390",
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+        "lines": [
+          "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+          "검색. 친구 추가·삭제나 설정은 바꾸지",
+          "않아요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 디스코드",
+      "cls": "conn-fold__sub",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W320",
+        "W390",
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "친구 추가·삭제나 설정은 바꾸지 않아요.",
+        "lines": [
+          "목록 보기 · 읽기 · 허락받은 메시지 보내기 ·",
+          "검색. 친구 추가·삭제나 설정은 바꾸지",
+          "않아요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 개인 정보 보호",
+      "cls": "privacy-line__body",
+      "findings": 3,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W320",
+        "W390",
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "보관 기간이 지나면 저절로 지워져요.",
+        "lines": [
+          "저장된 로그인, 기억, 연결은 언제든",
+          "하나씩 지울 수 있어요. 보관 기간이",
+          "지나면 저절로 지워져요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › 나의 모시",
+      "cls": "list-row-title.t-copy (restyled: src/screens/more/profile/profile.css: .profile-tickets .list-row-detail)",
+      "findings": 2,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "W320",
+        "W360"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "티켓",
+        "lines": [
+          "한도",
+          "초기화",
+          "티켓"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: 개인 정보 보호",
+      "cls": "privacy-more",
+      "findings": 1,
+      "rules": [
+        "orphan"
+      ],
+      "at": [
+        "W320"
+      ],
+      "sample": {
+        "rule": "orphan",
+        "line": "보기",
+        "lines": [
+          "암호화가 어떻게 되는지 자세히",
+          "보기"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: Microsoft Teams",
+      "cls": "more-sheet-lead",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "회사 Microsoft 계정으로 Teams 채팅을 읽고 보내요.",
+        "lines": [
+          "회사 Microsoft 계정으로 Teams 채팅을 읽고",
+          "보내요. 연결을 누르면 나오는 코드를 microsoft.",
+          "com/devicelogin 에 입력하고 로그인하면",
+          "돼요. 비밀번호는 모시에 저장되지 않아요."
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › sheet: Webex",
+      "cls": "more-sheet-lead",
+      "findings": 1,
+      "rules": [
+        "sentence-split"
+      ],
+      "at": [
+        "W430"
+      ],
+      "sample": {
+        "rule": "sentence-split",
+        "line": "회사 SSO로만 로그인하는 계정은 지원하지 않아요.",
+        "lines": [
+          "Webex 이메일·비밀번호로 스페이스 메시지를",
+          "읽고 보내요. 회사 SSO로만 로그인하는 계정은",
+          "지원하지 않아요."
+        ]
+      },
+      "engine": "webkit"
+    }
+  ],
+  "narrow": [
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "동작 줄이기",
+      "px": 125,
+      "lines": [
+        "동작 줄이기"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "투명도 줄이기",
+      "px": 125,
+      "lines": [
+        "투명도 줄이기"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "화면 및 디자인",
+      "px": 110,
+      "lines": [
+        "화면 및 디자인"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "알림",
+      "px": 125,
+      "lines": [
+        "알림"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "배너와 소리",
+      "px": 125,
+      "lines": [
+        "배너와 소리"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "결제 수단",
+      "px": 129,
+      "lines": [
+        "결제 수단"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "메신저 연결",
+      "px": 110,
+      "lines": [
+        "메신저 연결"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "leading: 앱 로고 자리 (30×30)",
+      "px": 110,
+      "lines": [
+        "leading: 앱 로고",
+        "자리 (30×30)"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "팝빌",
+      "px": 113,
+      "lines": [
+        "팝빌"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요. 입력한 정보는 이 기기에서 암호화한 뒤에만",
+      "px": 113,
+      "lines": [
+        "전자세금계산서를",
+        "조회하고, 내가",
+        "승인하면 발행하거나",
+        "다시 보내요. 입력한",
+        "정보는 이 기기에서",
+        "암호화한 뒤에만",
+        "보내요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "쿠팡 파트너스",
+      "px": 106,
+      "lines": [
+        "쿠팡 파트너스"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "KOPIS에서 지역·장르·기간별 공연(연극·뮤지컬·콘서트)을 찾아줘요.",
+      "px": 106,
+      "lines": [
+        "KOPIS에서 지역·",
+        "장르·기간별 공연",
+        "(연극·뮤지컬·",
+        "콘서트)을 찾아줘요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 티켓 사용",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "남은 티켓",
+      "px": 153,
+      "lines": [
+        "남은 티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 티켓 사용",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "예상 시간",
+      "px": 144,
+      "lines": [
+        "예상 시간"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "항공권 가격 추적",
+      "px": 113,
+      "lines": [
+        "항공권 가격 추적"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "호텔 예약 변경",
+      "px": 113,
+      "lines": [
+        "호텔 예약 변경"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 68,
+      "lines": [
+        "한도",
+        "초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "내 계정",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "아이디",
+      "px": 139,
+      "lines": [
+        "아이디"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "area": "profile",
+      "screen": "알림 설정",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "브리핑 시간",
+      "px": 155,
+      "lines": [
+        "브리핑 시간"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "화면 및 디자인",
+      "px": 150,
+      "lines": [
+        "화면 및 디자인"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "메신저 연결",
+      "px": 150,
+      "lines": [
+        "메신저 연결"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "leading: 앱 로고 자리 (30×30)",
+      "px": 150,
+      "lines": [
+        "leading: 앱 로고 자리",
+        "(30×30)"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "팝빌",
+      "px": 153,
+      "lines": [
+        "팝빌"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요. 입력한 정보는 이 기기에서 암호화한 뒤에만",
+      "px": 153,
+      "lines": [
+        "전자세금계산서를 조회하고,",
+        "내가 승인하면 발행하거나",
+        "다시 보내요. 입력한 정보는",
+        "이 기기에서 암호화한 뒤에만",
+        "보내요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "쿠팡 파트너스",
+      "px": 146,
+      "lines": [
+        "쿠팡 파트너스"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "KOPIS에서 지역·장르·기간별 공연(연극·뮤지컬·콘서트)을 찾아줘요.",
+      "px": 146,
+      "lines": [
+        "KOPIS에서 지역·장르·",
+        "기간별 공연(연극·뮤지컬·",
+        "콘서트)을 찾아줘요."
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "항공권 가격 추적",
+      "px": 153,
+      "lines": [
+        "항공권 가격 추적"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "호텔 예약 변경",
+      "px": 153,
+      "lines": [
+        "호텔 예약 변경"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 108,
+      "lines": [
+        "한도 초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 138,
+      "lines": [
+        "한도 초기화 티켓"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "동작 줄이기",
+      "px": 125,
+      "lines": [
+        "동작 줄이기"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "투명도 줄이기",
+      "px": 125,
+      "lines": [
+        "투명도 줄이기"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "화면 및 디자인",
+      "px": 110,
+      "lines": [
+        "화면 및 디자인"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "알림",
+      "px": 125,
+      "lines": [
+        "알림"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "배너와 소리",
+      "px": 125,
+      "lines": [
+        "배너와 소리"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "결제 수단",
+      "px": 129,
+      "lines": [
+        "결제 수단"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "메신저 연결",
+      "px": 110,
+      "lines": [
+        "메신저 연결"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "leading: 앱 로고 자리 (30×30)",
+      "px": 110,
+      "lines": [
+        "leading: 앱 로고",
+        "자리 (30×30)"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "팝빌",
+      "px": 113,
+      "lines": [
+        "팝빌"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요. 입력한 정보는 이 기기에서 암호화한 뒤에만",
+      "px": 113,
+      "lines": [
+        "전자세금계산서를",
+        "조회하고, 내가",
+        "승인하면 발행하거나",
+        "다시 보내요. 입력한",
+        "정보는 이 기기에서",
+        "암호화한 뒤에만",
+        "보내요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "쿠팡 파트너스",
+      "px": 106,
+      "lines": [
+        "쿠팡 파트너스"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "KOPIS에서 지역·장르·기간별 공연(연극·뮤지컬·콘서트)을 찾아줘요.",
+      "px": 106,
+      "lines": [
+        "KOPIS에서 지역·",
+        "장르·기간별 공연",
+        "(연극·뮤지컬·",
+        "콘서트)을 찾아줘요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 티켓 사용",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "남은 티켓",
+      "px": 153,
+      "lines": [
+        "남은 티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 티켓 사용",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "예상 시간",
+      "px": 144,
+      "lines": [
+        "예상 시간"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "항공권 가격 추적",
+      "px": 113,
+      "lines": [
+        "항공권 가격 추적"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "호텔 예약 변경",
+      "px": 113,
+      "lines": [
+        "호텔 예약 변경"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 68,
+      "lines": [
+        "한도",
+        "초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "내 계정",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "아이디",
+      "px": 136,
+      "lines": [
+        "아이디"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "area": "profile",
+      "screen": "알림 설정",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "브리핑 시간",
+      "px": 155,
+      "lines": [
+        "브리핑 시간"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "화면 및 디자인",
+      "px": 150,
+      "lines": [
+        "화면 및 디자인"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "메신저 연결",
+      "px": 150,
+      "lines": [
+        "메신저 연결"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "leading: 앱 로고 자리 (30×30)",
+      "px": 150,
+      "lines": [
+        "leading: 앱 로고 자리",
+        "(30×30)"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "팝빌",
+      "px": 153,
+      "lines": [
+        "팝빌"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "전자세금계산서를 조회하고, 내가 승인하면 발행하거나 다시 보내요. 입력한 정보는 이 기기에서 암호화한 뒤에만",
+      "px": 153,
+      "lines": [
+        "전자세금계산서를 조회하고,",
+        "내가 승인하면 발행하거나",
+        "다시 보내요. 입력한 정보는",
+        "이 기기에서 암호화한 뒤에만",
+        "보내요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "쿠팡 파트너스",
+      "px": 146,
+      "lines": [
+        "쿠팡 파트너스"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-sub.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-sub",
+      "text": "KOPIS에서 지역·장르·기간별 공연(연극·뮤지컬·콘서트)을 찾아줘요.",
+      "px": 146,
+      "lines": [
+        "KOPIS에서 지역·장르·",
+        "기간별 공연(연극·뮤지컬·",
+        "콘서트)을 찾아줘요."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "항공권 가격 추적",
+      "px": 153,
+      "lines": [
+        "항공권 가격 추적"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "gallery",
+      "screen": "sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "path": "div.list > div.list-card > div.list-row > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "foundation",
+      "file": "src/ui/List.css",
+      "cls": "list-row-title",
+      "text": "호텔 예약 변경",
+      "px": 153,
+      "lines": [
+        "호텔 예약 변경"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 360,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 108,
+      "lines": [
+        "한도 초기화",
+        "티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "area": "profile",
+      "screen": "나의 모시",
+      "path": "div.list > div.list-card > button.list-row.is-clickable > span.list-row-main > span.list-row-text.t-cell > span.list-row-title.t-copy",
+      "owner": "screens-more",
+      "file": "src/screens/more/profile/profile.css",
+      "cls": "profile-tickets",
+      "restyled": "src/screens/more/profile/profile.css: .profile-tickets .list-row-detail",
+      "text": "한도 초기화 티켓",
+      "px": 138,
+      "lines": [
+        "한도 초기화 티켓"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "area": "gallery",
+      "screen": "gallery",
+      "path": "div.gal-stack > div.tf.tf--plain > div.tf-error-wrap > p.tf-error.t-copy > span.swap-host > span",
+      "owner": "foundation",
+      "file": "src/ui/TextField.css",
+      "cls": "tf-error",
+      "text": "이메일 형식을 확인해 주세요",
+      "px": 146,
+      "lines": [
+        "이메일 형식을 확인해 주세요"
+      ]
+    }
+  ],
+  "narrowTable": [
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "list-row-title",
+      "at": [
+        "C320",
+        "C360"
+      ],
+      "px": [
+        106,
+        153
+      ],
+      "sample": {
+        "text": "동작 줄이기",
+        "lines": [
+          "동작 줄이기"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "list-row-sub",
+      "at": [
+        "C320",
+        "C360"
+      ],
+      "px": [
+        106,
+        153
+      ],
+      "sample": {
+        "text": "배너와 소리",
+        "lines": [
+          "배너와 소리"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "tf-error",
+      "at": [
+        "C320",
+        "C360",
+        "C390",
+        "C430"
+      ],
+      "px": [
+        146,
+        146
+      ],
+      "sample": {
+        "text": "이메일 형식을 확인해 주세요",
+        "lines": [
+          "이메일 형식을 확인해 주세요"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › sheet: 티켓 사용",
+      "cls": "list-row-title",
+      "at": [
+        "C320"
+      ],
+      "px": [
+        144,
+        153
+      ],
+      "sample": {
+        "text": "남은 티켓",
+        "lines": [
+          "남은 티켓"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "cls": "list-row-title",
+      "at": [
+        "C320",
+        "C360"
+      ],
+      "px": [
+        113,
+        153
+      ],
+      "sample": {
+        "text": "항공권 가격 추적",
+        "lines": [
+          "항공권 가격 추적"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "profile › 내 계정",
+      "cls": "list-row-title",
+      "at": [
+        "C320"
+      ],
+      "px": [
+        139,
+        139
+      ],
+      "sample": {
+        "text": "아이디",
+        "lines": [
+          "아이디"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "profile › 알림 설정",
+      "cls": "list-row-title",
+      "at": [
+        "C320"
+      ],
+      "px": [
+        155,
+        155
+      ],
+      "sample": {
+        "text": "브리핑 시간",
+        "lines": [
+          "브리핑 시간"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › 나의 모시",
+      "cls": "list-row-title.t-copy (restyled: src/screens/more/profile/profile.css: .profile-tickets .list-row-detail)",
+      "at": [
+        "C320",
+        "C360",
+        "C390"
+      ],
+      "px": [
+        68,
+        138
+      ],
+      "sample": {
+        "text": "한도 초기화 티켓",
+        "lines": [
+          "한도",
+          "초기화",
+          "티켓"
+        ]
+      },
+      "engine": "chromium"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "list-row-title",
+      "at": [
+        "W320",
+        "W360"
+      ],
+      "px": [
+        106,
+        153
+      ],
+      "sample": {
+        "text": "동작 줄이기",
+        "lines": [
+          "동작 줄이기"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "list-row-sub",
+      "at": [
+        "W320",
+        "W360"
+      ],
+      "px": [
+        106,
+        153
+      ],
+      "sample": {
+        "text": "배너와 소리",
+        "lines": [
+          "배너와 소리"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › gallery",
+      "cls": "tf-error",
+      "at": [
+        "W320",
+        "W360",
+        "W390",
+        "W430"
+      ],
+      "px": [
+        146,
+        146
+      ],
+      "sample": {
+        "text": "이메일 형식을 확인해 주세요",
+        "lines": [
+          "이메일 형식을 확인해 주세요"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › sheet: 티켓 사용",
+      "cls": "list-row-title",
+      "at": [
+        "W320"
+      ],
+      "px": [
+        144,
+        153
+      ],
+      "sample": {
+        "text": "남은 티켓",
+        "lines": [
+          "남은 티켓"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "gallery › sheet: 항공권 가격 추적과 호텔 예약 변경 요청",
+      "cls": "list-row-title",
+      "at": [
+        "W320",
+        "W360"
+      ],
+      "px": [
+        113,
+        153
+      ],
+      "sample": {
+        "text": "항공권 가격 추적",
+        "lines": [
+          "항공권 가격 추적"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "profile › 내 계정",
+      "cls": "list-row-title",
+      "at": [
+        "W320"
+      ],
+      "px": [
+        136,
+        136
+      ],
+      "sample": {
+        "text": "아이디",
+        "lines": [
+          "아이디"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "foundation",
+      "screen": "profile › 알림 설정",
+      "cls": "list-row-title",
+      "at": [
+        "W320"
+      ],
+      "px": [
+        155,
+        155
+      ],
+      "sample": {
+        "text": "브리핑 시간",
+        "lines": [
+          "브리핑 시간"
+        ]
+      },
+      "engine": "webkit"
+    },
+    {
+      "owner": "screens-more",
+      "screen": "profile › 나의 모시",
+      "cls": "list-row-title.t-copy (restyled: src/screens/more/profile/profile.css: .profile-tickets .list-row-detail)",
+      "at": [
+        "W320",
+        "W360",
+        "W390"
+      ],
+      "px": [
+        68,
+        138
+      ],
+      "sample": {
+        "text": "한도 초기화 티켓",
+        "lines": [
+          "한도",
+          "초기화",
+          "티켓"
+        ]
+      },
+      "engine": "webkit"
+    }
+  ],
+  "beforeAfter": {
+    "note": "snap-fnd-cards on 96edf68: before = HEAD's lines.spec, after = this one (the chat card thread joins the sweep), same build, same server",
+    "totals": {
+      "chromium": {
+        "committed7aaccdc": 57,
+        "beforeOnHead": 18,
+        "beforeByOwner": {
+          "screens-more": 18
+        },
+        "after": 25,
+        "newByOwner": {
+          "screens-chat": 7
+        },
+        "newOutsideCards": 0,
+        "gone": 0,
+        "blocks": "785 → 916"
+      },
+      "webkit": {
+        "committed7aaccdc": 51,
+        "beforeOnHead": 17,
+        "beforeByOwner": {
+          "screens-more": 17
+        },
+        "after": 25,
+        "newByOwner": {
+          "screens-chat": 7,
+          "agent-runtime": 1
+        },
+        "newOutsideCards": 0,
+        "gone": 0,
+        "blocks": "785 → 916"
+      }
+    },
+    "added": [
+      {
+        "engine": "chromium",
+        "width": 320,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "res-sub",
+        "rule": "orphan",
+        "line": "원",
+        "lines": [
+          "정부 기여금 월 최대 3.3만",
+          "원"
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 320,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "appr-sub",
+        "rule": "sentence-split",
+        "line": "상대의 대답은 들을 수 없어요.",
+        "lines": [
+          "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+          "없어요."
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 360,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "mt-text",
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로",
+          "연습실이에요. 회비 3만 원은",
+          "오늘까지 보내 주세요"
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "bubble-text",
+        "rule": "orphan",
+        "line": "줘",
+        "lines": [
+          "카톡으로 도윤 님한테 입금했다고 보내",
+          "줘"
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "bubble-text",
+        "rule": "orphan",
+        "line": "적기",
+        "lines": [
+          "이 회의에도 들어가 줘 주간 회의 받아",
+          "적기"
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 430,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "mt-text",
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로 연습실이에요. 회비 3만",
+          "원은 오늘까지 보내 주세요"
+        ]
+      },
+      {
+        "engine": "chromium",
+        "width": 430,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "appr-detail",
+        "rule": "sentence-split",
+        "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+        "lines": [
+          "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+          "비서라고 먼저 알려요."
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 320,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "res-sub",
+        "rule": "orphan",
+        "line": "원",
+        "lines": [
+          "정부 기여금 월 최대 3.3만",
+          "원"
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 320,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "appr-sub",
+        "rule": "sentence-split",
+        "line": "상대의 대답은 들을 수 없어요.",
+        "lines": [
+          "이 말을 전하고 끊어요. 상대의 대답은 들을 수",
+          "없어요."
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 360,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "mt-text",
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로",
+          "연습실이에요. 회비 3만 원은",
+          "오늘까지 보내 주세요"
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "bubble-text",
+        "rule": "orphan",
+        "line": "줘",
+        "lines": [
+          "카톡으로 도윤 님한테 입금했다고 보내",
+          "줘"
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "bubble-text",
+        "rule": "orphan",
+        "line": "적기",
+        "lines": [
+          "이 회의에도 들어가 줘 주간 회의 받아",
+          "적기"
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 430,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "mt-text",
+        "rule": "sentence-split",
+        "line": "회비 3만 원은 오늘까지 보내 주세요",
+        "lines": [
+          "토요일 오후 2시 대학로 연습실이에요. 회비 3만",
+          "원은 오늘까지 보내 주세요"
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 430,
+        "owner": "screens-chat",
+        "screen": "thread",
+        "cls": "appr-detail",
+        "rule": "sentence-split",
+        "line": "참석자들에게는 AI 비서라고 먼저 알려요.",
+        "lines": [
+          "모시가 이 회의에 참여해 듣고 받아 적어요. 참석자들에게는 AI",
+          "비서라고 먼저 알려요."
+        ]
+      },
+      {
+        "engine": "webkit",
+        "width": 430,
+        "owner": "agent-runtime",
+        "screen": "html card (2/3)",
+        "cls": "sum p",
+        "rule": "overflow",
+        "line": "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요",
+        "lines": [
+          "전체 900곳 중 439곳 · 카드 2/3 · 앞 카드에서 이어져요"
+        ]
+      }
+    ]
+  }
+}

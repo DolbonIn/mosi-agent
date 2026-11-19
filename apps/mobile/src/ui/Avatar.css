@@ -1,0 +1,19 @@
+.avatar {
+  flex: none;
+  overflow: visible;
+}
+/* §8.11 breathing: 3.2 s, 1 → 1.02; the class is only present while on screen + visible + recent input */
+.avatar__breath {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: avatar-breathe 3.2s ease-in-out infinite;
+}
+@keyframes avatar-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}

@@ -1,0 +1,2020 @@
+{
+  "at": "2026-11-11T19:55:58.614Z",
+  "api": "http://127.0.0.1:8796",
+  "passes": [
+    {
+      "engine": "chromium",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "explore: popular rows",
+          "ok": true,
+          "detail": "26 rows"
+        },
+        {
+          "name": "explore: '명이 맡겼어요' only for a real count (0 / null / missing → nothing)",
+          "ok": true,
+          "detail": "silent crowd-check,call-demo,gov-benefits · 1234 morning-briefing · real 1 · shown 1 · wrong none"
+        },
+        {
+          "name": "explore: one accent (no primary button on the root)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "explore: 여행 filters to travel templates",
+          "ok": true,
+          "detail": "jeju-trip,holiday-plan,travel-safety,airport-drive"
+        },
+        {
+          "name": "headings: no skipped level on pre-delegation sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "pre-delegation: says what it does, needs, time, quota",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "delegate: turn ran on the server, quota went up",
+          "ok": true,
+          "detail": "3% (10250 tokens)"
+        },
+        {
+          "name": "headings: no skipped level on 나의 모시",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile: ticket kinds in words, not two hues (CL-1)",
+          "ok": true,
+          "detail": "한도 초기화 티켓 기본 3 장 프리미엄 0 장"
+        },
+        {
+          "name": "headings: no skipped level on tickets sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "tickets: server reset the quota and spent one basic ticket",
+          "ok": true,
+          "detail": "3%→0%, basic 3→2"
+        },
+        {
+          "name": "headings: no skipped level on privacy sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy sheet: the three questions are headings with no tiles (GR-R1); it keeps the explainer",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy: shows the enclave's real measurement",
+          "ok": true,
+          "detail": "6b5821545d854614391d75a7f0e9de94e6aaa39665f59823c09559e2d59833c2"
+        },
+        {
+          "name": "profile → 연결된 결제 수단: detail title \"연결된 결제 수단\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 연결된 결제 수단",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "payment: no step tiles, the sealing story not repeated (CP-5, IT-16)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 저장된 로그인: detail title \"저장된 로그인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 저장된 로그인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 정보 공개 범위 설정: detail title \"정보 공개 범위 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 예약된 일: detail title \"예약된 일\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 예약된 일",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 접근 기록: detail title \"접근 기록\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 접근 기록",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 친구: detail title \"친구\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 친구",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 알림 설정: detail title \"알림 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 알림 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 화면 및 디자인: detail title \"화면 및 디자인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 화면 및 디자인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → agent: detail title \"깽이\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on agent",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → connections: detail title \"연결된 앱 및 서비스\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on connections",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: the note no longer repeats the encryption line (CP-5)",
+          "ok": true,
+          "detail": "메신저를 연결하면 깽이가 대신 대화를 읽고, 내가 허락한 메시지만 보내요."
+        },
+        {
+          "name": "profile → account: detail title \"내 계정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on account",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: row says 등록 안 됨 before a number exists",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: tel field (inputmode tel, autocomplete tel, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"tel\",\"ac\":\"tel\",\"fs\":17}"
+        },
+        {
+          "name": "phone: helper says who calls and that it comes from +1",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 인증 전화 받기 waits for a number",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: invalid_phone shows a Korean error at the field",
+          "ok": true,
+          "detail": "휴대폰 번호 번호 형식이 맞지 않아요. 휴대폰 번호를 다시 확인해 주세요."
+        },
+        {
+          "name": "phone: the number is grouped as it is typed",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: PUT went out with the number",
+          "ok": true,
+          "detail": "021234567,01012345678"
+        },
+        {
+          "name": "phone: code field (one-time-code, numeric, 4 digits, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"numeric\",\"ac\":\"one-time-code\",\"max\":4,\"fs\":16}"
+        },
+        {
+          "name": "phone: 다시 걸기 waits with a countdown",
+          "ok": true,
+          "detail": "다시 걸기 · 30초"
+        },
+        {
+          "name": "phone: a wrong code says how many tries are left",
+          "ok": true,
+          "detail": "숫자가 맞지 않아요. 2번 더 입력할 수 있어요."
+        },
+        {
+          "name": "phone: the cells clear for another try",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: an expired code says to call again",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 다시 걸기 calls again and restarts the countdown",
+          "ok": true,
+          "detail": "3 PUTs"
+        },
+        {
+          "name": "phone: 번호 바꾸기 keeps the typed number",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: verified → sheet closes, row shows the number with 인증됨",
+          "ok": true,
+          "detail": "내 전화번호 인증됨 010-****-5432"
+        },
+        {
+          "name": "phone: 번호 삭제 reaches the server and the row says 등록 안 됨",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: the only browser-logged failures are the contract errors asked for",
+          "ok": true,
+          "detail": "3 logged · 3 asked"
+        },
+        {
+          "name": "schedules: one add action (top-bar +), hint names the agent, no '다음 오늘'",
+          "ok": true,
+          "detail": "처럼 말하면 깽이가 예약을 만들어요."
+        },
+        {
+          "name": "schedules: toggle off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "schedules: row says 다음 실행 없음",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "display: theme applies live and is saved",
+          "ok": true,
+          "detail": "light → dark"
+        },
+        {
+          "name": "display: text size applies live (--text-scale 1.1) and is saved",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: 보내기 전에 is the first group (critique P1-1)",
+          "ok": true,
+          "detail": "보내기 전에 / 친구의 모시에게 / 깽이"
+        },
+        {
+          "name": "privacy settings: toggle round-trips, preview swaps",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: preview has no tiles; the login line became the friends footer (IT-16, CP-5)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: starts on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: OFF opens the action sheet '보내기 전에 묻지 않을까요?' (묻지 않기 / 취소) naming the agent; nothing is saved yet",
+          "ok": true,
+          "detail": "보내기 전에 묻지 않을까요?"
+        },
+        {
+          "name": "headings: no skipped level on ask-off confirm",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 취소 springs the switch back on; still on on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 묻지 않기 saves OFF; the row says what OFF means",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 나의 모시 row says it is off",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: ON is one tap, no confirm, saved — reversible",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "9 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "9/9 rows with an icon"
+        },
+        {
+          "name": "vault: 접근 기록 says every action in Korean, never a raw key (approval → 승인 요청, an unknown key → 사용)",
+          "ok": true,
+          "detail": "9/9 rows · keys login,save,approval,send_message,remove,logout,qa_unknown_action · 카카오톡 로그인 / 카카오톡 로그인 / 카카오톡 저장 / 카카오톡 승인 요청 / 카카오톡 승인 요청 / 카카오톡 메시지 보내기 / 카카오톡 삭제 / 카카오톡 연결 해제 / 카카오톡 사용"
+        },
+        {
+          "name": "vault: '이 기기의 키로 확인했어요' only on the owner's device-signed rows, never on an agent use",
+          "ok": true,
+          "detail": "2 signed rows"
+        },
+        {
+          "name": "vault: an approval reads 승인됨 / 거절됨, not 완료",
+          "ok": true,
+          "detail": "{\"ok\":\"승인됨\",\"denied\":\"거절됨\"}"
+        },
+        {
+          "name": "friends: invite sheet shows a server link",
+          "ok": true,
+          "detail": "http://127.0.0.1:8796/i/iAcZYwFAoP8xdzX16jdlOu2A"
+        },
+        {
+          "name": "friends: second user accepts the invite (API)",
+          "ok": true,
+          "detail": "201"
+        },
+        {
+          "name": "friends: the new friend appears without a reload",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: tapping a friend opens the shared thread",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: block (two-step) reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: 차단 풀기 lifts the block",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: pasting a received invite link adds the friend",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: switching a skill off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: and back on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "archive: artifact opens as a sheet with its document",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": true,
+        "windows": 52,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone",
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone/verify",
+        "Failed to load resource: the server responded with a status of 410 (Gone) http://127.0.0.1:5187/api/profile/phone/verify"
+      ],
+      "screenshots": 63
+    },
+    {
+      "engine": "chromium",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "explore: popular rows",
+          "ok": true,
+          "detail": "26 rows"
+        },
+        {
+          "name": "explore: '명이 맡겼어요' only for a real count (0 / null / missing → nothing)",
+          "ok": true,
+          "detail": "silent crowd-check,call-demo,gov-benefits · 1234 morning-briefing · real 1 · shown 1 · wrong none"
+        },
+        {
+          "name": "explore: one accent (no primary button on the root)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "explore: 여행 filters to travel templates",
+          "ok": true,
+          "detail": "jeju-trip,holiday-plan,travel-safety,airport-drive"
+        },
+        {
+          "name": "headings: no skipped level on pre-delegation sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "pre-delegation: says what it does, needs, time, quota",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "delegate: turn ran on the server, quota went up",
+          "ok": true,
+          "detail": "3% (10322 tokens)"
+        },
+        {
+          "name": "headings: no skipped level on 나의 모시",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile: ticket kinds in words, not two hues (CL-1)",
+          "ok": true,
+          "detail": "한도 초기화 티켓 기본 3 장 프리미엄 0 장"
+        },
+        {
+          "name": "headings: no skipped level on tickets sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "tickets: server reset the quota and spent one basic ticket",
+          "ok": true,
+          "detail": "3%→0%, basic 3→2"
+        },
+        {
+          "name": "headings: no skipped level on privacy sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy sheet: the three questions are headings with no tiles (GR-R1); it keeps the explainer",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy: shows the enclave's real measurement",
+          "ok": true,
+          "detail": "6b5821545d854614391d75a7f0e9de94e6aaa39665f59823c09559e2d59833c2"
+        },
+        {
+          "name": "profile → 연결된 결제 수단: detail title \"연결된 결제 수단\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 연결된 결제 수단",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "payment: no step tiles, the sealing story not repeated (CP-5, IT-16)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 저장된 로그인: detail title \"저장된 로그인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 저장된 로그인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 정보 공개 범위 설정: detail title \"정보 공개 범위 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 예약된 일: detail title \"예약된 일\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 예약된 일",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 접근 기록: detail title \"접근 기록\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 접근 기록",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 친구: detail title \"친구\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 친구",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 알림 설정: detail title \"알림 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 알림 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 화면 및 디자인: detail title \"화면 및 디자인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 화면 및 디자인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → agent: detail title \"깽이\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on agent",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → connections: detail title \"연결된 앱 및 서비스\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on connections",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: the note no longer repeats the encryption line (CP-5)",
+          "ok": true,
+          "detail": "메신저를 연결하면 깽이가 대신 대화를 읽고, 내가 허락한 메시지만 보내요."
+        },
+        {
+          "name": "profile → account: detail title \"내 계정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on account",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: row says 등록 안 됨 before a number exists",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: tel field (inputmode tel, autocomplete tel, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"tel\",\"ac\":\"tel\",\"fs\":17}"
+        },
+        {
+          "name": "phone: helper says who calls and that it comes from +1",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 인증 전화 받기 waits for a number",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: invalid_phone shows a Korean error at the field",
+          "ok": true,
+          "detail": "휴대폰 번호 번호 형식이 맞지 않아요. 휴대폰 번호를 다시 확인해 주세요."
+        },
+        {
+          "name": "phone: the number is grouped as it is typed",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: PUT went out with the number",
+          "ok": true,
+          "detail": "021234567,01012345678"
+        },
+        {
+          "name": "phone: code field (one-time-code, numeric, 4 digits, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"numeric\",\"ac\":\"one-time-code\",\"max\":4,\"fs\":16}"
+        },
+        {
+          "name": "phone: 다시 걸기 waits with a countdown",
+          "ok": true,
+          "detail": "다시 걸기 · 30초"
+        },
+        {
+          "name": "phone: a wrong code says how many tries are left",
+          "ok": true,
+          "detail": "숫자가 맞지 않아요. 2번 더 입력할 수 있어요."
+        },
+        {
+          "name": "phone: the cells clear for another try",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: an expired code says to call again",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 다시 걸기 calls again and restarts the countdown",
+          "ok": true,
+          "detail": "3 PUTs"
+        },
+        {
+          "name": "phone: 번호 바꾸기 keeps the typed number",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: verified → sheet closes, row shows the number with 인증됨",
+          "ok": true,
+          "detail": "내 전화번호 인증됨 010-****-5432"
+        },
+        {
+          "name": "phone: 번호 삭제 reaches the server and the row says 등록 안 됨",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: the only browser-logged failures are the contract errors asked for",
+          "ok": true,
+          "detail": "3 logged · 3 asked"
+        },
+        {
+          "name": "schedules: one add action (top-bar +), hint names the agent, no '다음 오늘'",
+          "ok": true,
+          "detail": "처럼 말하면 깽이가 예약을 만들어요."
+        },
+        {
+          "name": "schedules: toggle off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "schedules: row says 다음 실행 없음",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "display: theme applies live and is saved",
+          "ok": true,
+          "detail": "dark → light"
+        },
+        {
+          "name": "display: text size applies live (--text-scale 1.1) and is saved",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: 보내기 전에 is the first group (critique P1-1)",
+          "ok": true,
+          "detail": "보내기 전에 / 친구의 모시에게 / 깽이"
+        },
+        {
+          "name": "privacy settings: toggle round-trips, preview swaps",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: preview has no tiles; the login line became the friends footer (IT-16, CP-5)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: starts on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: OFF opens the action sheet '보내기 전에 묻지 않을까요?' (묻지 않기 / 취소) naming the agent; nothing is saved yet",
+          "ok": true,
+          "detail": "보내기 전에 묻지 않을까요?"
+        },
+        {
+          "name": "headings: no skipped level on ask-off confirm",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 취소 springs the switch back on; still on on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 묻지 않기 saves OFF; the row says what OFF means",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 나의 모시 row says it is off",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: ON is one tap, no confirm, saved — reversible",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "9 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "9/9 rows with an icon"
+        },
+        {
+          "name": "vault: 접근 기록 says every action in Korean, never a raw key (approval → 승인 요청, an unknown key → 사용)",
+          "ok": true,
+          "detail": "9/9 rows · keys login,save,approval,send_message,remove,logout,qa_unknown_action · 카카오톡 로그인 / 카카오톡 로그인 / 카카오톡 저장 / 카카오톡 승인 요청 / 카카오톡 승인 요청 / 카카오톡 메시지 보내기 / 카카오톡 삭제 / 카카오톡 연결 해제 / 카카오톡 사용"
+        },
+        {
+          "name": "vault: '이 기기의 키로 확인했어요' only on the owner's device-signed rows, never on an agent use",
+          "ok": true,
+          "detail": "2 signed rows"
+        },
+        {
+          "name": "vault: an approval reads 승인됨 / 거절됨, not 완료",
+          "ok": true,
+          "detail": "{\"ok\":\"승인됨\",\"denied\":\"거절됨\"}"
+        },
+        {
+          "name": "friends: invite sheet shows a server link",
+          "ok": true,
+          "detail": "http://127.0.0.1:8796/i/Tw2vEB4WQo70mIrOLWn3s-Zc"
+        },
+        {
+          "name": "friends: second user accepts the invite (API)",
+          "ok": true,
+          "detail": "201"
+        },
+        {
+          "name": "friends: the new friend appears without a reload",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: tapping a friend opens the shared thread",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: block (two-step) reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: 차단 풀기 lifts the block",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: switching a skill off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: and back on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "archive: artifact opens as a sheet with its document",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": true,
+        "windows": 52,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone",
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone/verify",
+        "Failed to load resource: the server responded with a status of 410 (Gone) http://127.0.0.1:5187/api/profile/phone/verify"
+      ],
+      "screenshots": 62
+    },
+    {
+      "engine": "webkit",
+      "variant": "light",
+      "checks": [
+        {
+          "name": "explore: popular rows",
+          "ok": true,
+          "detail": "26 rows"
+        },
+        {
+          "name": "explore: '명이 맡겼어요' only for a real count (0 / null / missing → nothing)",
+          "ok": true,
+          "detail": "silent crowd-check,call-demo,gov-benefits · 1234 morning-briefing · real 1 · shown 1 · wrong none"
+        },
+        {
+          "name": "explore: one accent (no primary button on the root)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "explore: 여행 filters to travel templates",
+          "ok": true,
+          "detail": "jeju-trip,holiday-plan,travel-safety,airport-drive"
+        },
+        {
+          "name": "headings: no skipped level on pre-delegation sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "pre-delegation: says what it does, needs, time, quota",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "delegate: turn ran on the server, quota went up",
+          "ok": true,
+          "detail": "3% (10269 tokens)"
+        },
+        {
+          "name": "headings: no skipped level on 나의 모시",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile: ticket kinds in words, not two hues (CL-1)",
+          "ok": true,
+          "detail": "한도 초기화 티켓 기본 3장 프리미엄 0장"
+        },
+        {
+          "name": "headings: no skipped level on tickets sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "tickets: server reset the quota and spent one basic ticket",
+          "ok": true,
+          "detail": "3%→0%, basic 3→2"
+        },
+        {
+          "name": "headings: no skipped level on privacy sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy sheet: the three questions are headings with no tiles (GR-R1); it keeps the explainer",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy: shows the enclave's real measurement",
+          "ok": true,
+          "detail": "6b5821545d854614391d75a7f0e9de94e6aaa39665f59823c09559e2d59833c2"
+        },
+        {
+          "name": "profile → 연결된 결제 수단: detail title \"연결된 결제 수단\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 연결된 결제 수단",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "payment: no step tiles, the sealing story not repeated (CP-5, IT-16)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 저장된 로그인: detail title \"저장된 로그인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 저장된 로그인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 정보 공개 범위 설정: detail title \"정보 공개 범위 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 예약된 일: detail title \"예약된 일\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 예약된 일",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 접근 기록: detail title \"접근 기록\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 접근 기록",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 친구: detail title \"친구\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 친구",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 알림 설정: detail title \"알림 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 알림 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 화면 및 디자인: detail title \"화면 및 디자인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 화면 및 디자인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → agent: detail title \"깽이\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on agent",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → connections: detail title \"연결된 앱 및 서비스\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on connections",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: the note no longer repeats the encryption line (CP-5)",
+          "ok": true,
+          "detail": "메신저를 연결하면 깽이가 대신 대화를 읽고, 내가 허락한 메시지만 보내요."
+        },
+        {
+          "name": "profile → account: detail title \"내 계정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on account",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: row says 등록 안 됨 before a number exists",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: tel field (inputmode tel, autocomplete tel, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"tel\",\"ac\":\"tel\",\"fs\":17}"
+        },
+        {
+          "name": "phone: helper says who calls and that it comes from +1",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 인증 전화 받기 waits for a number",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: invalid_phone shows a Korean error at the field",
+          "ok": true,
+          "detail": "휴대폰 번호 번호 형식이 맞지 않아요. 휴대폰 번호를 다시 확인해 주세요."
+        },
+        {
+          "name": "phone: the number is grouped as it is typed",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: PUT went out with the number",
+          "ok": true,
+          "detail": "021234567,01012345678"
+        },
+        {
+          "name": "phone: code field (one-time-code, numeric, 4 digits, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"numeric\",\"ac\":\"one-time-code\",\"max\":4,\"fs\":16}"
+        },
+        {
+          "name": "phone: 다시 걸기 waits with a countdown",
+          "ok": true,
+          "detail": "다시 걸기 · 30초"
+        },
+        {
+          "name": "phone: a wrong code says how many tries are left",
+          "ok": true,
+          "detail": "숫자가 맞지 않아요. 2번 더 입력할 수 있어요."
+        },
+        {
+          "name": "phone: the cells clear for another try",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: an expired code says to call again",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 다시 걸기 calls again and restarts the countdown",
+          "ok": true,
+          "detail": "3 PUTs"
+        },
+        {
+          "name": "phone: 번호 바꾸기 keeps the typed number",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: verified → sheet closes, row shows the number with 인증됨",
+          "ok": true,
+          "detail": "내 전화번호 인증됨 010-****-5432"
+        },
+        {
+          "name": "phone: 번호 삭제 reaches the server and the row says 등록 안 됨",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: the only browser-logged failures are the contract errors asked for",
+          "ok": true,
+          "detail": "3 logged · 3 asked"
+        },
+        {
+          "name": "schedules: one add action (top-bar +), hint names the agent, no '다음 오늘'",
+          "ok": true,
+          "detail": "처럼 말하면 깽이가 예약을 만들어요."
+        },
+        {
+          "name": "schedules: toggle off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "schedules: row says 다음 실행 없음",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "display: theme applies live and is saved",
+          "ok": true,
+          "detail": "light → dark"
+        },
+        {
+          "name": "display: text size applies live (--text-scale 1.1) and is saved",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: 보내기 전에 is the first group (critique P1-1)",
+          "ok": true,
+          "detail": "보내기 전에 / 친구의 모시에게 / 깽이"
+        },
+        {
+          "name": "privacy settings: toggle round-trips, preview swaps",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: preview has no tiles; the login line became the friends footer (IT-16, CP-5)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: starts on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: OFF opens the action sheet '보내기 전에 묻지 않을까요?' (묻지 않기 / 취소) naming the agent; nothing is saved yet",
+          "ok": true,
+          "detail": "보내기 전에 묻지 않을까요?"
+        },
+        {
+          "name": "headings: no skipped level on ask-off confirm",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 취소 springs the switch back on; still on on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 묻지 않기 saves OFF; the row says what OFF means",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 나의 모시 row says it is off",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: ON is one tap, no confirm, saved — reversible",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "9 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "9/9 rows with an icon"
+        },
+        {
+          "name": "vault: 접근 기록 says every action in Korean, never a raw key (approval → 승인 요청, an unknown key → 사용)",
+          "ok": true,
+          "detail": "9/9 rows · keys login,save,approval,send_message,remove,logout,qa_unknown_action · 카카오톡 로그인 / 카카오톡 로그인 / 카카오톡 저장 / 카카오톡 승인 요청 / 카카오톡 승인 요청 / 카카오톡 메시지 보내기 / 카카오톡 삭제 / 카카오톡 연결 해제 / 카카오톡 사용"
+        },
+        {
+          "name": "vault: '이 기기의 키로 확인했어요' only on the owner's device-signed rows, never on an agent use",
+          "ok": true,
+          "detail": "2 signed rows"
+        },
+        {
+          "name": "vault: an approval reads 승인됨 / 거절됨, not 완료",
+          "ok": true,
+          "detail": "{\"ok\":\"승인됨\",\"denied\":\"거절됨\"}"
+        },
+        {
+          "name": "friends: invite sheet shows a server link",
+          "ok": true,
+          "detail": "http://127.0.0.1:8796/i/-X-IoMYJpmLX9ab-DXb1BicN"
+        },
+        {
+          "name": "friends: second user accepts the invite (API)",
+          "ok": true,
+          "detail": "201"
+        },
+        {
+          "name": "friends: the new friend appears without a reload",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: tapping a friend opens the shared thread",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: block (two-step) reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: 차단 풀기 lifts the block",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: pasting a received invite link adds the friend",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: switching a skill off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: and back on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "archive: artifact opens as a sheet with its document",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": false,
+        "windows": 52,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone",
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone/verify",
+        "Failed to load resource: the server responded with a status of 410 (Gone) http://127.0.0.1:5187/api/profile/phone/verify"
+      ],
+      "screenshots": 63
+    },
+    {
+      "engine": "webkit",
+      "variant": "dark",
+      "checks": [
+        {
+          "name": "explore: popular rows",
+          "ok": true,
+          "detail": "26 rows"
+        },
+        {
+          "name": "explore: '명이 맡겼어요' only for a real count (0 / null / missing → nothing)",
+          "ok": true,
+          "detail": "silent crowd-check,call-demo,gov-benefits · 1234 morning-briefing · real 1 · shown 1 · wrong none"
+        },
+        {
+          "name": "explore: one accent (no primary button on the root)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "explore: 여행 filters to travel templates",
+          "ok": true,
+          "detail": "jeju-trip,holiday-plan,travel-safety,airport-drive"
+        },
+        {
+          "name": "headings: no skipped level on pre-delegation sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "pre-delegation: says what it does, needs, time, quota",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "delegate: turn ran on the server, quota went up",
+          "ok": true,
+          "detail": "4% (17661 tokens)"
+        },
+        {
+          "name": "headings: no skipped level on 나의 모시",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile: ticket kinds in words, not two hues (CL-1)",
+          "ok": true,
+          "detail": "한도 초기화 티켓 기본 3장 프리미엄 0장"
+        },
+        {
+          "name": "headings: no skipped level on tickets sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "tickets: server reset the quota and spent one basic ticket",
+          "ok": true,
+          "detail": "4%→0%, basic 3→2"
+        },
+        {
+          "name": "headings: no skipped level on privacy sheet",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy sheet: the three questions are headings with no tiles (GR-R1); it keeps the explainer",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy: shows the enclave's real measurement",
+          "ok": true,
+          "detail": "6b5821545d854614391d75a7f0e9de94e6aaa39665f59823c09559e2d59833c2"
+        },
+        {
+          "name": "profile → 연결된 결제 수단: detail title \"연결된 결제 수단\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 연결된 결제 수단",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "payment: no step tiles, the sealing story not repeated (CP-5, IT-16)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 저장된 로그인: detail title \"저장된 로그인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 저장된 로그인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 정보 공개 범위 설정: detail title \"정보 공개 범위 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 예약된 일: detail title \"예약된 일\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 예약된 일",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 접근 기록: detail title \"접근 기록\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 접근 기록",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 친구: detail title \"친구\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 친구",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 알림 설정: detail title \"알림 설정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 알림 설정",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → 화면 및 디자인: detail title \"화면 및 디자인\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 화면 및 디자인",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → agent: detail title \"깽이\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on agent",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "profile → connections: detail title \"연결된 앱 및 서비스\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on connections",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: the note no longer repeats the encryption line (CP-5)",
+          "ok": true,
+          "detail": "메신저를 연결하면 깽이가 대신 대화를 읽고, 내가 허락한 메시지만 보내요."
+        },
+        {
+          "name": "profile → account: detail title \"내 계정\"",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on account",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: row says 등록 안 됨 before a number exists",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: tel field (inputmode tel, autocomplete tel, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"tel\",\"ac\":\"tel\",\"fs\":17}"
+        },
+        {
+          "name": "phone: helper says who calls and that it comes from +1",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 인증 전화 받기 waits for a number",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: invalid_phone shows a Korean error at the field",
+          "ok": true,
+          "detail": "휴대폰 번호 번호 형식이 맞지 않아요. 휴대폰 번호를 다시 확인해 주세요."
+        },
+        {
+          "name": "phone: the number is grouped as it is typed",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: PUT went out with the number",
+          "ok": true,
+          "detail": "021234567,01012345678"
+        },
+        {
+          "name": "phone: code field (one-time-code, numeric, 4 digits, ≥16px)",
+          "ok": true,
+          "detail": "{\"im\":\"numeric\",\"ac\":\"one-time-code\",\"max\":4,\"fs\":16}"
+        },
+        {
+          "name": "phone: 다시 걸기 waits with a countdown",
+          "ok": true,
+          "detail": "다시 걸기 · 30초"
+        },
+        {
+          "name": "phone: a wrong code says how many tries are left",
+          "ok": true,
+          "detail": "숫자가 맞지 않아요. 2번 더 입력할 수 있어요."
+        },
+        {
+          "name": "phone: the cells clear for another try",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: an expired code says to call again",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "phone: 다시 걸기 calls again and restarts the countdown",
+          "ok": true,
+          "detail": "3 PUTs"
+        },
+        {
+          "name": "phone: 번호 바꾸기 keeps the typed number",
+          "ok": true,
+          "detail": "010-1234-5678"
+        },
+        {
+          "name": "phone: verified → sheet closes, row shows the number with 인증됨",
+          "ok": true,
+          "detail": "내 전화번호 인증됨 010-****-5432"
+        },
+        {
+          "name": "phone: 번호 삭제 reaches the server and the row says 등록 안 됨",
+          "ok": true,
+          "detail": "내 전화번호 등록 안 됨"
+        },
+        {
+          "name": "phone: the only browser-logged failures are the contract errors asked for",
+          "ok": true,
+          "detail": "3 logged · 3 asked"
+        },
+        {
+          "name": "schedules: one add action (top-bar +), hint names the agent, no '다음 오늘'",
+          "ok": true,
+          "detail": "처럼 말하면 깽이가 예약을 만들어요."
+        },
+        {
+          "name": "schedules: toggle off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "schedules: row says 다음 실행 없음",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "display: theme applies live and is saved",
+          "ok": true,
+          "detail": "dark → light"
+        },
+        {
+          "name": "display: text size applies live (--text-scale 1.1) and is saved",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: 보내기 전에 is the first group (critique P1-1)",
+          "ok": true,
+          "detail": "보내기 전에 / 친구의 모시에게 / 깽이"
+        },
+        {
+          "name": "privacy settings: toggle round-trips, preview swaps",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "privacy settings: preview has no tiles; the login line became the friends footer (IT-16, CP-5)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "headings: no skipped level on 정보 공개 범위",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: starts on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: OFF opens the action sheet '보내기 전에 묻지 않을까요?' (묻지 않기 / 취소) naming the agent; nothing is saved yet",
+          "ok": true,
+          "detail": "보내기 전에 묻지 않을까요?"
+        },
+        {
+          "name": "headings: no skipped level on ask-off confirm",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 취소 springs the switch back on; still on on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 묻지 않기 saves OFF; the row says what OFF means",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: 나의 모시 row says it is off",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "ask before sending: ON is one tap, no confirm, saved — reversible",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: no main-list row says 토큰으로 연결",
+          "ok": true,
+          "detail": "계정으로 로그인 | 이메일 코드로 로그인 | 앱에서 승인해 로그인 | 준비 중이에요 | 계정으로 로그인 | 계정으로 로그인 | 회사 계정으로 로그인 | 계정으로 로그인"
+        },
+        {
+          "name": "connections: bots sit in one collapsed 고급 · 직접 만든 봇 연결 group",
+          "ok": true,
+          "detail": "고급 · 직접 만든 봇 연결 슬랙 봇 · 디스코드 봇 · 텔레그램 봇"
+        },
+        {
+          "name": "connections: 고급 opens (aria-expanded) and shows the bot rows",
+          "ok": true,
+          "detail": "3 bot rows"
+        },
+        {
+          "name": "connections: every messenger row shows its real app icon (tile + mark, aria-hidden, 30px)",
+          "ok": true,
+          "detail": "kakaotalk,slack,discord,telegram,line,instagram,teams,webex,slackbot,discordbot,telegrambot · plain: none"
+        },
+        {
+          "name": "connections: row names still read 이름, 상태, 설명 (icon adds nothing to the name)",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 고급 folds back",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "connections: 카카오톡 sheet header shows the KakaoTalk app icon (52px)",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":52}]"
+        },
+        {
+          "name": "connections: bogus 카카오톡 login fails with a Korean error",
+          "ok": true,
+          "detail": "카카오계정 이메일 또는 비밀번호가 맞지 않아요."
+        },
+        {
+          "name": "vault: the sealed login is listed",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: the 카카오톡 login card shows the KakaoTalk app icon",
+          "ok": true,
+          "detail": "[{\"id\":\"kakaotalk\",\"want\":\"kakaotalk\",\"got\":\"kakaotalk\",\"marks\":1,\"painted\":true,\"hidden\":true,\"img\":true,\"w\":40}]"
+        },
+        {
+          "name": "vault: 보관 기간 7일 saved on the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "vault: 접근 기록 shows records",
+          "ok": true,
+          "detail": "9 records"
+        },
+        {
+          "name": "vault: 접근 기록 rows for 카카오톡 show its app icon in the timeline",
+          "ok": true,
+          "detail": "9/9 rows with an icon"
+        },
+        {
+          "name": "vault: 접근 기록 says every action in Korean, never a raw key (approval → 승인 요청, an unknown key → 사용)",
+          "ok": true,
+          "detail": "9/9 rows · keys login,save,approval,send_message,remove,logout,qa_unknown_action · 카카오톡 로그인 / 카카오톡 로그인 / 카카오톡 저장 / 카카오톡 승인 요청 / 카카오톡 승인 요청 / 카카오톡 메시지 보내기 / 카카오톡 삭제 / 카카오톡 연결 해제 / 카카오톡 사용"
+        },
+        {
+          "name": "vault: '이 기기의 키로 확인했어요' only on the owner's device-signed rows, never on an agent use",
+          "ok": true,
+          "detail": "2 signed rows"
+        },
+        {
+          "name": "vault: an approval reads 승인됨 / 거절됨, not 완료",
+          "ok": true,
+          "detail": "{\"ok\":\"승인됨\",\"denied\":\"거절됨\"}"
+        },
+        {
+          "name": "friends: invite sheet shows a server link",
+          "ok": true,
+          "detail": "http://127.0.0.1:8796/i/sNcbWWcIFqohnFo8ipPBXvd8"
+        },
+        {
+          "name": "friends: second user accepts the invite (API)",
+          "ok": true,
+          "detail": "201"
+        },
+        {
+          "name": "friends: the new friend appears without a reload",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: tapping a friend opens the shared thread",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: block (two-step) reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "friends: 차단 풀기 lifts the block",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: switching a skill off reaches the server",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "agent: and back on",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "archive: artifact opens as a sheet with its document",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "failed": [],
+      "consoleErrors": [],
+      "overflow": [],
+      "longTasks": {
+        "supported": false,
+        "windows": 52,
+        "long": []
+      },
+      "skipped": [],
+      "expectedErrors": [
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone",
+        "Failed to load resource: the server responded with a status of 400 (Bad Request) http://127.0.0.1:5187/api/profile/phone/verify",
+        "Failed to load resource: the server responded with a status of 410 (Gone) http://127.0.0.1:5187/api/profile/phone/verify"
+      ],
+      "screenshots": 62
+    }
+  ]
+}

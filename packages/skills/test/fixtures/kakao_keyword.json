@@ -1,0 +1,56 @@
+{
+ "documents": [
+  {
+   "address_name": "서울 강남구 역삼동 858",
+   "category_group_code": "SW8",
+   "category_group_name": "지하철역",
+   "category_name": "교통,수송 > 지하철,전철 > 수도권2호선",
+   "distance": "",
+   "id": "21160803",
+   "phone": "02-6110-2221",
+   "place_name": "강남역 2호선",
+   "place_url": "http://place.map.kakao.com/21160803",
+   "road_address_name": "서울 강남구 강남대로 지하 396",
+   "x": "127.02800140627488",
+   "y": "37.49808633653005"
+  },
+  {
+   "address_name": "서울 강남구 역삼동 858",
+   "category_group_code": "SW8",
+   "category_group_name": "지하철역",
+   "category_name": "교통,수송 > 지하철,전철 > 신분당선",
+   "distance": "",
+   "id": "18381853",
+   "phone": "02-810-5840",
+   "place_name": "강남역 신분당선",
+   "place_url": "http://place.map.kakao.com/18381853",
+   "road_address_name": "서울 강남구 강남대로 지하 396",
+   "x": "127.028185245594",
+   "y": "37.4967771303817"
+  },
+  {
+   "address_name": "서울 강남구 역삼동 620-9",
+   "category_group_code": "CE7",
+   "category_group_name": "카페",
+   "category_name": "가정,생활 > 여가시설 > 만화방 > 만화카페 > 놀숲",
+   "distance": "",
+   "id": "798713718",
+   "phone": "02-558-5846",
+   "place_name": "놀숲 강남역점",
+   "place_url": "http://place.map.kakao.com/798713718",
+   "road_address_name": "서울 강남구 강남대로98길 17",
+   "x": "127.02796403633766",
+   "y": "37.50098127819602"
+  }
+ ],
+ "meta": {
+  "is_end": false,
+  "pageable_count": 42,
+  "same_name": {
+   "keyword": "강남역",
+   "region": [],
+   "selected_region": ""
+  },
+  "total_count": 2564
+ }
+}

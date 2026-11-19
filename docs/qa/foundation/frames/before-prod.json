@@ -1,0 +1,424 @@
+{
+ "chromium": {
+  "chat-scroll-focus": {
+   "frames": 91,
+   "badFrames": 34,
+   "firstBad": {
+    "t": 441,
+    "h": 0,
+    "op": 0,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     758,
+     371,
+     826
+    ],
+    "comp": [
+     13,
+     693,
+     378,
+     749
+    ]
+   },
+   "bar": [
+    16,
+    758,
+    374,
+    826
+   ],
+   "comp": [
+    12,
+    692,
+    378,
+    748
+   ]
+  },
+  "drawer-close": {
+   "surfaceUntil": 508,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 73,
+   "shownAt": 10,
+   "fullAt": 10,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "archive-sheet-close": {
+   "surfaceUntil": 772,
+   "hitFrom": 787,
+   "coveredUntil": 772,
+   "maxCover": 1,
+   "frames": 72,
+   "shownAt": 787,
+   "fullAt": 787,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "explore-predelegate-close": {
+   "surfaceUntil": 773,
+   "hitFrom": 787,
+   "coveredUntil": 773,
+   "maxCover": 1,
+   "frames": 72,
+   "shownAt": 787,
+   "fullAt": 787,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-chat": {
+   "surfaceUntil": null,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 43,
+   "shownAt": 53,
+   "fullAt": 206,
+   "badFrames": 9,
+   "minOpAfterShown": 0.187,
+   "firstBad": {
+    "t": 53,
+    "h": 74,
+    "op": 0.187,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": [
+     12,
+     692,
+     378,
+     748
+    ]
+   },
+   "lastBad": {
+    "t": 187,
+    "h": 74,
+    "op": 0.931,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": [
+     12,
+     692,
+     378,
+     748
+    ]
+   }
+  },
+  "tab-return-archive": {
+   "surfaceUntil": null,
+   "hitFrom": 70,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 43,
+   "shownAt": 70,
+   "fullAt": 221,
+   "badFrames": 9,
+   "minOpAfterShown": 0.187,
+   "firstBad": {
+    "t": 70,
+    "h": 23,
+    "op": 0.187,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   },
+   "lastBad": {
+    "t": 202,
+    "h": 23,
+    "op": 0.926,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   }
+  },
+  "profile-push-back": {
+   "surfaceUntil": null,
+   "hitFrom": 59,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 73,
+   "shownAt": 126,
+   "fullAt": 461,
+   "badFrames": 20,
+   "minOpAfterShown": 0.011,
+   "firstBad": {
+    "t": 126,
+    "h": 26,
+    "op": 0.011,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   },
+   "lastBad": {
+    "t": 441,
+    "h": 26,
+    "op": 0.998,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   }
+  },
+  "pageErrors": []
+ },
+ "webkit": {
+  "chat-scroll-focus": {
+   "frames": 102,
+   "badFrames": 47,
+   "firstBad": {
+    "t": 548,
+    "h": 0,
+    "op": 0,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     759,
+     359,
+     826
+    ],
+    "comp": [
+     15,
+     696,
+     378,
+     752
+    ]
+   },
+   "bar": [
+    16,
+    758,
+    374,
+    826
+   ],
+   "comp": [
+    12,
+    692,
+    378,
+    748
+   ]
+  },
+  "drawer-close": {
+   "surfaceUntil": 512,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 75,
+   "shownAt": 13,
+   "fullAt": 13,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "archive-sheet-close": {
+   "surfaceUntil": 784,
+   "hitFrom": 810,
+   "coveredUntil": 784,
+   "maxCover": 1,
+   "frames": 72,
+   "shownAt": 810,
+   "fullAt": 810,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "explore-predelegate-close": {
+   "surfaceUntil": 788,
+   "hitFrom": 807,
+   "coveredUntil": 788,
+   "maxCover": 1,
+   "frames": 74,
+   "shownAt": 807,
+   "fullAt": 807,
+   "badFrames": 0,
+   "minOpAfterShown": 1,
+   "firstBad": null,
+   "lastBad": null
+  },
+  "tab-return-chat": {
+   "surfaceUntil": null,
+   "hitFrom": null,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 45,
+   "shownAt": 100,
+   "fullAt": 273,
+   "badFrames": 9,
+   "minOpAfterShown": 0.192,
+   "firstBad": {
+    "t": 100,
+    "h": 74,
+    "op": 0.192,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": [
+     12,
+     692,
+     378,
+     748
+    ]
+   },
+   "lastBad": {
+    "t": 244,
+    "h": 74,
+    "op": 0.987,
+    "cover": 0,
+    "surf": 0,
+    "hit": false,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": [
+     12,
+     692,
+     378,
+     748
+    ]
+   }
+  },
+  "tab-return-archive": {
+   "surfaceUntil": null,
+   "hitFrom": 122,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 46,
+   "shownAt": 122,
+   "fullAt": 271,
+   "badFrames": 10,
+   "minOpAfterShown": 0.181,
+   "firstBad": {
+    "t": 122,
+    "h": 23,
+    "op": 0.181,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   },
+   "lastBad": {
+    "t": 269,
+    "h": 23,
+    "op": 0.998,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   }
+  },
+  "profile-push-back": {
+   "surfaceUntil": null,
+   "hitFrom": 129,
+   "coveredUntil": null,
+   "maxCover": 0,
+   "frames": 69,
+   "shownAt": 192,
+   "fullAt": 522,
+   "badFrames": 18,
+   "minOpAfterShown": 0.097,
+   "firstBad": {
+    "t": 192,
+    "h": 26,
+    "op": 0.097,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   },
+   "lastBad": {
+    "t": 504,
+    "h": 26,
+    "op": 0.998,
+    "cover": 0,
+    "surf": 0,
+    "hit": true,
+    "bar": [
+     16,
+     758,
+     374,
+     826
+    ],
+    "comp": null
+   }
+  },
+  "pageErrors": []
+ }
+}

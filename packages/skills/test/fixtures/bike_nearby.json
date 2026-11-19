@@ -1,0 +1,66 @@
+{
+ "query": {
+  "latitude": 37.5717,
+  "longitude": 126.9763,
+  "radius_m": 800,
+  "limit": 5
+ },
+ "count": 5,
+ "items": [
+  {
+   "station_id": "ST-119",
+   "station_name": "303. 광화문역 1번출구 앞",
+   "rack_total_count": 8,
+   "available_bikes": 11,
+   "empty_docks": 0,
+   "shared_percent": 138,
+   "latitude": 37.57176971,
+   "longitude": 126.97466278,
+   "distance_m": 144
+  },
+  {
+   "station_id": "ST-121",
+   "station_name": "305. 종로구청 옆",
+   "rack_total_count": 16,
+   "available_bikes": 10,
+   "empty_docks": 6,
+   "shared_percent": 63,
+   "latitude": 37.57255936,
+   "longitude": 126.97833252,
+   "distance_m": 203
+  },
+  {
+   "station_id": "ST-1611",
+   "station_name": "458. 광화문역 5번출구",
+   "rack_total_count": 21,
+   "available_bikes": 2,
+   "empty_docks": 19,
+   "shared_percent": 10,
+   "latitude": 37.56989288,
+   "longitude": 126.97756958,
+   "distance_m": 230
+  },
+  {
+   "station_id": "ST-124",
+   "station_name": "308. 광화문 S타워 앞",
+   "rack_total_count": 31,
+   "available_bikes": 4,
+   "empty_docks": 27,
+   "shared_percent": 13,
+   "latitude": 37.56996918,
+   "longitude": 126.97393799,
+   "distance_m": 284
+  },
+  {
+   "station_id": "ST-126",
+   "station_name": "310. 청계광장 옆",
+   "rack_total_count": 8,
+   "available_bikes": 9,
+   "empty_docks": 0,
+   "shared_percent": 113,
+   "latitude": 37.56887817,
+   "longitude": 126.9774704,
+   "distance_m": 330
+  }
+ ]
+}

@@ -1,0 +1,70 @@
+# 모시 deploy config for Fish Audio Drama-3 on vLLM-Omni 0.32.0, one RTX PRO 6000 Blackwell (96 GB).
+# Same as vllm_omni/deploy/fish_omni.yaml (tuned on 1x H200 for 128 streams), sized down for a handful of streams:
+# max_num_seqs 16 instead of 128, fewer CUDA-graph sizes (faster boot), and about 63 GB of the card instead of 85 GB.
+async_chunk: true
+enable_chunked_prefill: true
+
+connectors:
+  connector_of_shared_memory:
+    name: SharedMemoryConnector
+    extra:
+      codec_streaming: true
+      codec_chunk_ramp: "6,8,12,16,24,32"
+      codec_chunk_frames: 64
+      codec_left_context_frames: 32
+      ar_prefill_admission_min_batch: 6
+      ar_prefill_admission_max_wait_ms: 100
+      ar_prefill_admission_min_running: 32
+      fish_speech_dac_dtype: fp16
+      fish_speech_dac_cuda_graphs: true
+      fish_speech_dac_stateful: true
+
+stages:
+  - stage_id: 0
+    model_runner: v2
+    max_num_seqs: 16
+    gpu_memory_utilization: 0.58
+    enforce_eager: false
+    trust_remote_code: false
+    enable_prefix_caching: false
+    async_scheduling: true
+    max_num_batched_tokens: 4096
+    mamba_ssm_cache_dtype: bfloat16
+    max_model_len: 8192
+    devices: "0"
+    compilation_config:
+      cudagraph_mode: FULL_AND_PIECEWISE
+      max_cudagraph_capture_size: 1024
+      cudagraph_capture_sizes: [1, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160, 192, 224, 256, 320, 384, 448, 512, 640, 768, 896, 1024]
+    output_connectors:
+      to_stage_1: connector_of_shared_memory
+    default_sampling_params:
+      temperature: 1.0
+      top_k: 30
+      top_p: 0.9
+      max_tokens: 500
+      repetition_penalty: 1.0
+
+  - stage_id: 1
+    model_runner: v1
+    max_num_seqs: 16
+    gpu_memory_utilization: 0.08
+    enforce_eager: true
+    trust_remote_code: false
+    enable_prefix_caching: false
+    async_scheduling: true
+    max_num_batched_tokens: 65536
+    max_model_len: 65536
+    devices: "0"
+    input_connectors:
+      from_stage_0: connector_of_shared_memory
+    default_sampling_params:
+      temperature: 0.0
+      top_p: 1.0
+      top_k: -1
+      max_tokens: 65536
+      repetition_penalty: 1.0
+
+platforms:
+  cuda:
+    cuda_mps: true

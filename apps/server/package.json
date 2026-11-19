@@ -1,0 +1,20 @@
+{
+  "name": "@pickle/server",
+  "version": "0.3.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "start:live": "bun --env-file=$HOME/.config/pickle-clone/secrets.env run src/index.ts",
+    "test": "bun test test",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@pickle/agent": "workspace:*",
+    "@pickle/protocol": "workspace:*",
+    "@pickle/vault": "workspace:*",
+    "@pickle/skills": "workspace:*",
+    "@pickle/messengers": "workspace:*",
+    "@pickle/launcher": "workspace:*"
+  }
+}

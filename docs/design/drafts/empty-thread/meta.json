@@ -1,0 +1,142 @@
+{
+  "feature": "empty-thread",
+  "title": "빈 대화와 제안",
+  "critique": "../../impeccable/critique/empty-thread.md",
+  "score": "27/40",
+  "current": [
+    "chromium-light-07-chat-empty-thread.jpg",
+    "chromium-dark-07-chat-empty-thread.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "에이전트가 맞이하는 빈 대화",
+      "summary": "sparkles 타일 자리에 움직이지 않는 깽이 아바타를 두고, 회색 알약 세 개를 왼쪽 정렬 목록 하나로 바꿨어요. 문구와 배치는 지금 그대로예요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-2",
+        "slop:CH-2",
+        "slop:CP-8",
+        "slop:GL-1"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "A-welcome",
+          "name": "첫 대화 (환영)",
+          "html": "A-welcome.html",
+          "shots": {
+            "light": "A-welcome-light.jpg",
+            "dark": "A-welcome-dark.jpg"
+          },
+          "current": [
+            "chromium-light-05-chat-welcome.jpg",
+            "chromium-dark-05-chat-welcome.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P1-2",
+            "P2-3",
+            "slop:IT-1",
+            "slop:CH-1",
+            "slop:CP-1",
+            "slop:CP-5",
+            "slop:GL-1"
+          ]
+        },
+        {
+          "id": "A-briefing",
+          "name": "하나 고른 뒤 (브리핑 카드)",
+          "html": "A-briefing.html",
+          "shots": {
+            "light": "A-briefing-light.jpg",
+            "dark": "A-briefing-dark.jpg"
+          },
+          "current": [
+            "chromium-light-06-chat-welcome-briefing.jpg",
+            "chromium-dark-06-chat-welcome-briefing.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "slop:CH-1",
+            "slop:IT-1",
+            "slop:GL-1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "컴포저 옆에서 시작하기",
+      "summary": "위쪽은 비워 두고, 본문 한 줄과 시작 문장 세 개를 컴포저 바로 위 엄지 닿는 곳에 둬요. 종이도 칩도 없어요.",
+      "fixes": [
+        "P2-1",
+        "P2-2",
+        "slop:IT-2",
+        "slop:CH-2",
+        "slop:CP-8",
+        "slop:RH-1",
+        "slop:GL-1"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "B-welcome",
+          "name": "첫 대화 (환영)",
+          "html": "B-welcome.html",
+          "shots": {
+            "light": "B-welcome-light.jpg",
+            "dark": "B-welcome-dark.jpg"
+          },
+          "current": [
+            "chromium-light-05-chat-welcome.jpg",
+            "chromium-dark-05-chat-welcome.jpg"
+          ],
+          "fixes": [
+            "P1-1",
+            "P1-2",
+            "P2-3",
+            "slop:NC-1",
+            "slop:CH-1",
+            "slop:CP-1",
+            "slop:CP-5",
+            "slop:GL-1"
+          ]
+        },
+        {
+          "id": "B-briefing",
+          "name": "하나 고른 뒤 (브리핑 카드)",
+          "html": "B-briefing.html",
+          "shots": {
+            "light": "B-briefing-light.jpg",
+            "dark": "B-briefing-dark.jpg"
+          },
+          "current": [
+            "chromium-light-06-chat-welcome-briefing.jpg",
+            "chromium-dark-06-chat-welcome-briefing.jpg"
+          ],
+          "fixes": [
+            "P1-2",
+            "P2-2",
+            "slop:NC-1",
+            "slop:CH-1",
+            "slop:IT-1",
+            "slop:GL-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "A",
+  "motion": "모션은 그대로예요. 제안은 지금처럼 snap 스프링으로 y 4→0, 30ms 간격으로 첫 마운트 때만 나타나요(EmptyThread.tsx). 행은 press 스프링으로 반응하고(§3), 누르면 컴포저가 morph로 커져요(§6 #2, §6 #14). 아바타는 대기 중 정지해요(§8.11)."
+}

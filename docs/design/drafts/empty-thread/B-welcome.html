@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모시 draft: 빈 대화와 제안 · B 첫 대화</title>
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/tokens.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/base.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/styles/glass.css">
+<link rel="stylesheet" href="../../../../apps/mobile/src/three/Wallpaper.css">
+<link rel="stylesheet" href="../_kit/kit.css">
+<link rel="stylesheet" href="draft.css">
+</head>
+<body>
+<div class="kit-phone">
+  <main class="k-screen has-composer">
+    <div class="b-hello d-stagger">
+      <p class="b-hello-1" style="--i:0">안녕하세요, 하늘 님.<br>저는 깽이예요.</p>
+      <p class="b-hello-2" style="--i:1">궁금한 걸 묻거나 귀찮은 일을 맡겨 주세요. 이런 일부터 해 볼 수 있어요.</p>
+    </div>
+    <div class="k-group b-group d-stagger" role="group" aria-label="이런 일을 맡겨 보세요">
+      <button class="k-row d-press" style="--i:2">오늘 날씨와 미세먼지 알아보기</button>
+      <button class="k-row d-press" style="--i:3">신청할 수 있는 정부 지원사업 찾기</button>
+      <button class="k-row d-press" style="--i:4"><span class="k-row-main">카카오톡 연결하고 안 읽은 대화 정리하기</span><span class="k-row-trail"><i data-icon="chevron-right" data-size="16" data-weight="medium"></i></span></button>
+      <button class="k-row d-press" style="--i:5">매일 아침 브리핑 받기</button>
+    </div>
+  </main>
+
+  <!-- function layer: 3 glass shapes (menu circle, composer, tab bar); the name is text on the edge, 초대 moved out -->
+  <header class="k-topbar">
+    <button class="glass k-circle" data-text aria-label="메뉴"><i data-icon="menu" data-weight="medium"></i></button>
+    <div class="k-title"><i data-avatar data-size="30"></i>깽이</div>
+  </header>
+  <div class="k-bottom">
+    <div class="glass k-composer" data-text>
+      <span class="k-composer-icon"><i data-icon="plus"></i></span>
+      <span class="k-composer-field">메시지 보내기</span>
+      <span class="k-composer-icon"><i data-icon="mic"></i></span>
+      <span class="k-composer-icon"><i data-icon="phone"></i></span>
+    </div>
+    <nav class="glass k-tabbar" data-text aria-label="탭">
+      <span class="k-tab" data-on><i data-icon="chat" data-size="24"></i>채팅</span>
+      <span class="k-tab"><i data-icon="compass" data-size="24"></i>둘러보기</span>
+      <span class="k-tab"><i data-icon="archive" data-size="24"></i>보관함</span>
+      <span class="k-tab"><i data-icon="person" data-size="24"></i>나의 모시</span>
+    </nav>
+  </div>
+</div>
+<script type="application/json" id="kit-meta">
+{
+  "feature": "빈 대화와 제안",
+  "variant": "B · 첫 대화",
+  "title": "한 단계 더 덜어 낸 안",
+  "rationale": [
+    "말풍선을 없앴어요. 에이전트의 말은 배경 위에 글자로만 두고, 화면의 종이는 할 일 목록 하나예요 (NC-1). MOTION-SPEC §6 #2의 '어시스턴트 글은 종이 위'를 바꾸는 것이라 승인이 필요해요.",
+    "인사 첫 줄을 제목 크기로 키워서 어디서부터 읽으면 되는지 분명해요. 목록 제목은 따로 두지 않고 말의 마지막 문장이 이어 줘요.",
+    "목록에는 글리프도 판도 없어요. 다른 화면으로 넘어가는 카카오톡 줄에만 chevron을 붙였어요.",
+    "같은 말은 한 번만 해요. 첫 화면에서 볼 것이 8개(행 4 + 칩 4)에서 4개로 줄었어요 (인지 부하). 각 줄은 '~하기'로 맞춰서 누르는 행동처럼 읽혀요.",
+    "크롬은 A와 같아요. 글래스 세 개, 그림자 없음, 토큰 반경만 써요."
+  ],
+  "motion": [
+    "인사, 그다음 목록 순서로 snap 스프링이 30ms씩 처음 한 번만 이어져요",
+    "행을 누르면 press 스프링이 반응해요",
+    "카카오톡 줄은 지금처럼 연결 화면으로 넘어가요",
+    "아바타는 대기 중 정지해요 (§8.11)"
+  ],
+  "fixes": ["P1-1", "P1-2", "P2-3", "slop:NC-1", "slop:CH-1", "slop:CP-1", "slop:CP-5", "slop:GL-1"],
+  "compare": [
+    "chromium-light-05-chat-welcome.jpg"
+  ]
+}
+</script>
+<script src="../_kit/kit.js"></script>
+</body>
+</html>

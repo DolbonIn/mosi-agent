@@ -1,0 +1,151 @@
+/* HTML artifacts (artifact/HtmlArtifactCard.tsx): the model's own page inside the reply, on solid paper */
+.hart {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  /* the card is content, not chrome: flat paper (dark and more-contrast keep an edge with a hairline) */
+  contain: layout paint;
+}
+:root[data-theme="dark"] .hart,
+:root[data-contrast="more"] .hart {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+.hart[data-state="error"] {
+  height: auto;
+}
+
+.hframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+  opacity: 0;
+  transition: opacity 0.18s ease-out;
+}
+.hframe[data-ready] {
+  opacity: 1;
+}
+.hframe--instant {
+  transition: none;
+}
+
+/* loading: lines on the paper where the page will be (the card already holds its height) */
+.hart-skel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+}
+.hart-skel span {
+  display: block;
+  height: 14px;
+  border-radius: var(--r-capsule);
+  background: var(--fill);
+}
+.hart-skel span:first-child {
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.hart-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  font-size: var(--t-subhead);
+  color: var(--danger);
+}
+
+/* past 70% of the screen: the bottom fades into the paper under 전체 화면 */
+.hart-more {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 56px 16px 16px;
+  background: linear-gradient(to bottom, transparent, var(--surface) 62%);
+  pointer-events: none;
+}
+.hart-more > * {
+  pointer-events: auto;
+}
+
+/* the sheet: the page at its full height (the sheet scrolls) */
+.hart-full {
+  position: relative;
+  margin: 0 -4px;
+  border-radius: var(--r-tile);
+  overflow: clip;
+  background: var(--surface);
+}
+:root[data-theme="dark"] .hart-full {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+/* a tapped link: where it goes, then 취소 | 열기 */
+.hlink {
+  position: absolute;
+  inset: auto 8px 8px 8px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px 12px;
+  border-radius: var(--r-group);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1px var(--separator),
+    0 8px 28px rgb(0 0 0 / 0.14);
+}
+/* it takes focus when it appears (the dialog is read out); the bar itself is the visible state, no ring around it */
+.hlink:focus {
+  outline: none;
+}
+.hlink[data-placement="sheet"] {
+  position: sticky;
+  inset: auto 0 8px 0;
+  margin-top: 12px;
+}
+.hlink-host {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--label);
+}
+/* the domain moves to its own line whole rather than breaking after "hoshi-"; only a domain wider than the bar breaks */
+.hlink-domain {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.hlink-url {
+  font-size: var(--t-footnote, 0.8125rem);
+  line-height: 1.4;
+  color: var(--label-2);
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hlink-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.hlink-actions .btn {
+  min-height: 44px;
+  width: 100%;
+  text-decoration: none;
+}
+/* 열기 is a plain <a> dressed as the md capsule (Button sets its radius inline; this link has to say it itself) */
+.hlink-open {
+  height: 44px;
+  border-radius: 22px;
+}

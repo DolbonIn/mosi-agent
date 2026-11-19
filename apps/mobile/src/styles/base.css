@@ -1,0 +1,189 @@
+/* Base: reset, type, focus rings, utilities, reduced-motion rules. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: calc(100% * var(--text-scale));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--label);
+  background: var(--bg);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  height: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+a {
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* ── focus: a two-tone ring, at once, on the control's own radius ── */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+:where(button, a, [tabindex]):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── utilities ── */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.keep-all {
+  word-break: keep-all;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.label-2 {
+  color: var(--label-2);
+}
+.t-footnote {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+}
+.t-subhead {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+}
+.t-headline {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.t-title3 {
+  font-family: var(--font-display);
+  font-size: var(--t-title3);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+.t-title2 {
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+/* one-cell stack: swapped contents share the cell (ContentSwap) */
+.swap-host {
+  position: relative;
+  display: inline-grid;
+}
+.swap-host > * {
+  grid-area: 1 / 1;
+}
+.swap-host.block {
+  display: grid;
+}
+
+/* ── reduced motion: every token collapses to 1 ms; loops stop ── */
+:root[data-motion="reduce"] {
+  --dur-morph: 1ms;
+  --dur-press: 1ms;
+  --dur-snap: 1ms;
+  --dur-camera: 1ms;
+  --dur-lead: 1ms;
+  --dur-trail: 1ms;
+  --dur-fade: 1ms;
+  --dur-exit: 1ms;
+}
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="reduce"] [data-loop]:not([data-loop="busy"]) {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion]) [data-loop]:not([data-loop="busy"]) {
+    animation: none !important;
+  }
+}
+
+/* forced colours: system palette, drawn edges */
+@media (forced-colors: active) {
+  :root {
+    --accent: Highlight;
+    --label: CanvasText;
+    --surface: Canvas;
+  }
+}

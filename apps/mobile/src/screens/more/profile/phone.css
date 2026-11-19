@@ -1,0 +1,171 @@
+/* 내 전화번호 sheet: steps share one column; the OTP is a single real input laid over four cells */
+
+.phone-sheet {
+  padding: 2px 6px 8px;
+  min-width: 0;
+}
+.phone-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.phone-lead {
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--label);
+  text-wrap: pretty;
+}
+.phone-step > .more-note {
+  margin-top: -4px;
+}
+
+/* ── code step ── */
+.phone-code-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.phone-code-title {
+  font-size: var(--t-title3);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.phone-code-sub {
+  font-size: var(--t-subhead);
+  line-height: 1.5;
+  color: var(--label-2);
+  text-wrap: pretty;
+}
+
+.phone-otp {
+  position: relative;
+  align-self: center;
+  width: min(100%, 280px);
+}
+.phone-otp__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: var(--t-callout);
+  letter-spacing: 3em;
+  text-indent: -9999px; /* the digits live in the cells */
+  -webkit-tap-highlight-color: transparent;
+}
+.phone-otp__input::selection {
+  background: transparent;
+}
+.phone-otp__cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.phone-otp__cell {
+  display: grid;
+  place-items: center;
+  height: 64px;
+  border-radius: var(--r-field);
+  background: var(--fill);
+  font-family: var(--font-display);
+  font-size: var(--t-title1);
+  font-weight: 600;
+  color: var(--label);
+  box-shadow: inset 0 0 0 1.5px transparent;
+}
+.phone-otp__cell[data-active] {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.phone-otp[data-invalid] .phone-otp__cell {
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+/* the caret: a 2px bar in the empty active cell */
+.phone-otp__cell[data-active]:empty::after {
+  content: "";
+  width: 2px;
+  height: 1.75rem;
+  border-radius: var(--r-capsule);
+  background: var(--label);
+  animation: phone-caret 1.06s steps(1, end) infinite;
+}
+@keyframes phone-caret {
+  50% {
+    opacity: 0;
+  }
+}
+:root[data-motion="reduce"] .phone-otp__cell[data-active]:empty::after {
+  animation: none;
+}
+.phone-error {
+  justify-content: center;
+  text-align: center;
+}
+
+.phone-code-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── done step ── */
+.phone-done {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--r-group);
+  background: var(--fill);
+}
+.phone-done__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-tile);
+  background: var(--surface);
+  color: var(--label);
+}
+.phone-done__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.phone-done__number {
+  font-size: var(--t-title3);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+}
+.phone-done__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+}
+
+/* my-mosi B: the number is the subject of the enter step — a large filled field; the +1 note sits on its button */
+.phone-tel .tf-input {
+  font-size: var(--t-title3);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.phone-tel .tf-box {
+  min-height: 56px;
+}
+.phone-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}

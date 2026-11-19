@@ -1,0 +1,40 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+h2{font-size:21px;line-height:1.35;font-weight:700;text-wrap:balance}
+.meta{color:var(--text-2);font-size:14px;font-variant-numeric:tabular-nums}
+.sep{border-top:1px solid var(--line);margin:14px 0}
+.week{display:flex;flex-direction:column;gap:2px}
+.row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.row:last-child{border-bottom:none}
+.day{flex:0 0 52px;text-align:center}
+.dow{font-size:13px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+.num.today{background:var(--accent-fill);color:var(--on-accent)}
+.num.sun{color:var(--danger)}
+.body{flex:1;min-width:0}
+.none{color:var(--text-3);font-size:15px;padding-top:5px}
+.ev{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+.time{color:var(--accent);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:1px}
+.evname{font-size:16px;font-weight:600;line-height:1.4}
+.note{font-size:14px;color:var(--text-2);margin-top:2px}
+.block{background:var(--surface);border-radius:var(--radius);padding:12px 14px;font-size:15px;color:var(--text-2);line-height:1.5}
+</style>
+<h2>이번 주 일정</h2>
+<p class="meta">11월 16일 월 ~ 11월 22일 일 · 일정 1개</p>
+<div class="sep"></div>
+<div class="week">
+  <div class="row"><div class="day"><div class="dow">월</div><div class="num">16</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+  <div class="row"><div class="day"><div class="dow">화</div><div class="num">17</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+  <div class="row"><div class="day"><div class="dow">수</div><div class="num">18</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+  <div class="row"><div class="day"><div class="dow">목</div><div class="num">19</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+  <div class="row"><div class="day"><div class="dow">금</div><div class="num">20</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+  <div class="row">
+    <div class="day"><div class="dow">토</div><div class="num today">21</div></div>
+    <div class="body">
+      <div class="ev"><div class="time">15:00</div><div><div class="evname">친구 결혼식</div><div class="note">오후 3시 · 알림 설정됨</div></div></div>
+    </div>
+  </div>
+  <div class="row"><div class="day"><div class="dow">일</div><div class="num sun">22</div></div><div class="body"><div class="none">일정 없음</div></div></div>
+</div>
+<div class="sep"></div>
+<div class="block">그날 오후 3시에 알려드릴게요. 장소나 시간이 바뀌면 말씀해 주세요.</div>

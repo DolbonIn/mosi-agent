@@ -1,0 +1,1768 @@
+{
+  "at": "2026-11-11T17:46:59.816Z",
+  "commit": "HEAD = 78a7d2b (exported: server + app, no working-tree changes)",
+  "app": "apps/mobile @ 78a7d2b",
+  "server": {
+    "api": "http://127.0.0.1:8799",
+    "model": "deepseek/deepseek-v4.1-flash-ultrafast",
+    "version": "0.3.0"
+  },
+  "preview": "http://127.0.0.1:5199",
+  "buildMs": 384,
+  "summary": [
+    {
+      "engine": "chromium",
+      "flow": "1 sign-up + welcome",
+      "ok": true,
+      "ms": 6198,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "2 weather turn",
+      "ok": true,
+      "ms": 3947,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "3 stop → 고마워",
+      "ok": true,
+      "ms": 7438,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "4 call approval",
+      "ok": true,
+      "ms": 5780,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "6b close/back: rows shown, no sheet left on them",
+      "ok": true,
+      "ms": 0,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "5 tabs + sheets: chat / explore / archive / profile",
+      "ok": true,
+      "ms": 37221,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "6a chat scroll: tab bar vs composer",
+      "ok": true,
+      "ms": 15980,
+      "failed": []
+    },
+    {
+      "engine": "chromium",
+      "flow": "7 console / overflow / network",
+      "ok": true,
+      "ms": 0,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "1 sign-up + welcome",
+      "ok": true,
+      "ms": 6206,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "2 weather turn",
+      "ok": true,
+      "ms": 2603,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "3 stop → 고마워",
+      "ok": true,
+      "ms": 6521,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "4 call approval",
+      "ok": true,
+      "ms": 6683,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "6b close/back: rows shown, no sheet left on them",
+      "ok": true,
+      "ms": 0,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "5 tabs + sheets: chat / explore / archive / profile",
+      "ok": true,
+      "ms": 41499,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "6a chat scroll: tab bar vs composer",
+      "ok": true,
+      "ms": 16031,
+      "failed": []
+    },
+    {
+      "engine": "webkit",
+      "flow": "7 console / overflow / network",
+      "ok": true,
+      "ms": 0,
+      "failed": []
+    }
+  ],
+  "results": [
+    {
+      "engine": "chromium",
+      "handle": "qac78d616",
+      "flows": [
+        {
+          "name": "1 sign-up + welcome",
+          "ok": true,
+          "ms": 6198,
+          "times": {
+            "load → onboarding": 90,
+            "모시 만들기 → chat": 1824,
+            "chat → welcome card": 2
+          },
+          "checks": [
+            {
+              "name": "sign-up through the onboarding UI lands in the chat",
+              "ok": true,
+              "detail": "1824 ms"
+            },
+            {
+              "name": "welcome message with its briefing card in the chat",
+              "ok": true,
+              "detail": "4 quick replies"
+            },
+            {
+              "name": "session token stored by the app works against the server",
+              "ok": true,
+              "detail": 200
+            }
+          ]
+        },
+        {
+          "name": "2 weather turn",
+          "ok": true,
+          "ms": 3947,
+          "times": {
+            "send → done": 3271,
+            "send → first tool chip": 499,
+            "send → first live text": 2586
+          },
+          "checks": [
+            {
+              "name": "a tool chip shows while the turn runs",
+              "ok": true,
+              "detail": "서울 날씨 확인:running, 서울 날씨 확인:done"
+            },
+            {
+              "name": "streaming text appears in the live row",
+              "ok": true,
+              "detail": "14 text updates"
+            },
+            {
+              "name": "the final answer lands",
+              "ok": true,
+              "detail": "weather card + 지금 서울은 6.6도, 구름 많고요. 오늘은 최고 15도, 최저 5도까지 오가며 강수확률은 30%예요. 아침까지는 흐린 편이니 가벼운 겉옷 챙기"
+            }
+          ]
+        },
+        {
+          "name": "3 stop → 고마워",
+          "ok": true,
+          "ms": 7438,
+          "times": {
+            "send → first live text": 1221,
+            "Stop → send button back": 42,
+            "고마워 → answer": 425
+          },
+          "checks": [
+            {
+              "name": "Stop ends the turn mid-stream (send button comes back, partial text kept)",
+              "ok": true,
+              "detail": "30 chars kept"
+            },
+            {
+              "name": "a stop is not an error (no error line)",
+              "ok": true
+            },
+            {
+              "name": "a fresh answer to 고마워 comes back",
+              "ok": true,
+              "detail": "천만에요, 큐에이 님. 필요하실 때 언제든 불러 주세요."
+            },
+            {
+              "name": "the stopped answer never appears (live)",
+              "ok": true,
+              "detail": "피보나치 수열을 1번째부터 30번째까지 한 줄에 하나씩 번호를 붙여서 모두 적어줘 → not shown"
+            },
+            {
+              "name": "the stopped answer is not in the thread after a reload",
+              "ok": true
+            },
+            {
+              "name": "server history has no answer to the stopped request",
+              "ok": true,
+              "detail": "7 messages"
+            }
+          ]
+        },
+        {
+          "name": "4 call approval",
+          "ok": true,
+          "ms": 5780,
+          "times": {
+            "send → approval card": 750,
+            "approve → approved receipt": 59,
+            "approve → resumed turn done": 2276
+          },
+          "checks": [
+            {
+              "name": "the outbound call raises the approval card in the UI",
+              "ok": true
+            },
+            {
+              "name": "first tap arms the confirm button (한 번 더)",
+              "ok": true,
+              "detail": "한 번 더 누르면 실행돼요한 번 더 누르면 실행돼요길게 누르거나, 두 번 눌러 확인해요"
+            },
+            {
+              "name": "approved: the server accepted the device-signed decision",
+              "ok": true
+            },
+            {
+              "name": "이 기기의 키로 확인했어요 (signature verified)",
+              "ok": true
+            },
+            {
+              "name": "the resumed turn shows the call error (tool marked 오류)",
+              "ok": true,
+              "detail": "모시식당님께 전화:running, 모시식당님께 전화:error"
+            },
+            {
+              "name": "the agent says the call could not be placed",
+              "ok": true,
+              "detail": "전화 연결이 실패했어요. 번호 형식을 확인하니 국내 번호로는 걸리지 않는 오류가 났네요. 번호가 맞는지 한 번 확인해 주시겠어요? 맞다면 다시 시도해 볼게요."
+            },
+            {
+              "name": "server history: sys_phone_call ended in error",
+              "ok": true,
+              "detail": "needs_approval,error"
+            }
+          ]
+        },
+        {
+          "name": "6b close/back: rows shown, no sheet left on them",
+          "ok": true,
+          "ms": 0,
+          "times": {},
+          "checks": [
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 1,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 165
+              }
+            },
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 3,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 181
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 2,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 181
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 1,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 162
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 4,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 179
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) profile detail back: rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 8,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 8,
+                "frames": 107,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 90,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 180
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 90,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            }
+          ]
+        },
+        {
+          "name": "5 tabs + sheets: chat / explore / archive / profile",
+          "ok": true,
+          "ms": 37221,
+          "times": {
+            "send → artifact card": 253
+          },
+          "checks": [
+            {
+              "name": "a chat turn makes the document (artifact card)",
+              "ok": true
+            },
+            {
+              "name": "Invite sheet (채팅 · 초대): opens and closes",
+              "ok": true,
+              "detail": "친구 초대"
+            },
+            {
+              "name": "PreDelegate sheet (둘러보기): opens and closes",
+              "ok": true,
+              "detail": "매일 아침 7시 모닝 브리핑 보내 드릴게요"
+            },
+            {
+              "name": "보관함 lists the document made in the chat",
+              "ok": true,
+              "detail": "피보나치 수열 1~30항"
+            },
+            {
+              "name": "Artifact sheet (보관함): opens and closes",
+              "ok": true,
+              "detail": "제주 2박 3일 일정"
+            },
+            {
+              "name": "보관함 · 미디어 offers 올리기",
+              "ok": true
+            },
+            {
+              "name": "Upload sheet (보관함 · 미디어): opens and closes",
+              "ok": true,
+              "detail": "보관함에 올리기"
+            },
+            {
+              "name": "Phone sheet (나의 모시 · 내 전화번호): opens and closes",
+              "ok": true,
+              "detail": "내 전화번호"
+            },
+            {
+              "name": "나의 모시: 화면 및 디자인 pushes its detail and back returns",
+              "ok": true
+            },
+            {
+              "name": "나의 모시 → 연결된 앱 및 서비스",
+              "ok": true
+            },
+            {
+              "name": "Connect sheet (연결 · 카카오톡): opens and closes",
+              "ok": true,
+              "detail": "카카오톡"
+            }
+          ]
+        },
+        {
+          "name": "6a chat scroll: tab bar vs composer",
+          "ok": true,
+          "ms": 15980,
+          "times": {},
+          "checks": [
+            {
+              "name": "the chat thread is long enough to scroll",
+              "ok": true,
+              "detail": "2400 px"
+            },
+            {
+              "name": "tab bar at rest is full width",
+              "ok": true,
+              "detail": {
+                "w": 358,
+                "h": 68
+              }
+            },
+            {
+              "name": "the thread actually scrolled during the test",
+              "ok": true,
+              "detail": "4180 px over 10 actions (touch)"
+            },
+            {
+              "name": "(a) tab bar and composer never overlap",
+              "ok": true,
+              "detail": {
+                "frames": 400,
+                "overlapFrames": 0,
+                "first": null
+              }
+            },
+            {
+              "name": "(a) tab bar is never half-minimised",
+              "ok": true,
+              "detail": {
+                "frames": 400,
+                "halfFrames": 0,
+                "first": null,
+                "minimisedFrames": 0
+              }
+            }
+          ]
+        },
+        {
+          "name": "7 console / overflow / network",
+          "ok": true,
+          "ms": 0,
+          "times": {},
+          "checks": [
+            {
+              "name": "0 console errors",
+              "ok": true,
+              "detail": []
+            },
+            {
+              "name": "0 horizontal overflow at every screenshot",
+              "ok": true,
+              "detail": []
+            },
+            {
+              "name": "the PWA only requests its own origin",
+              "ok": true,
+              "detail": "35 /api + 105 static requests, all http://127.0.0.1:5199"
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "stoppedPartialChars": 30,
+        "return:Invite sheet (채팅 · 초대)": {
+          "tracked": 1,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 165
+        },
+        "return:PreDelegate sheet (둘러보기)": {
+          "tracked": 3,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 181
+        },
+        "return:Artifact sheet (보관함)": {
+          "tracked": 2,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 181
+        },
+        "return:Upload sheet (보관함 · 미디어)": {
+          "tracked": 1,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 162
+        },
+        "return:Phone sheet (나의 모시 · 내 전화번호)": {
+          "tracked": 4,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 179
+        },
+        "return:profile detail back": {
+          "tracked": 8,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 21
+        },
+        "return:Connect sheet (연결 · 카카오톡)": {
+          "tracked": 8,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 107,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 180
+        },
+        "scroll": {
+          "method": "touch",
+          "rest": {
+            "w": 358,
+            "h": 68
+          },
+          "perAction": [
+            {
+              "action": "up",
+              "scrolledPx": 623,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down",
+              "scrolledPx": 622,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up",
+              "scrolledPx": 422,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down",
+              "scrolledPx": 421,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "focus composer",
+              "scrolledPx": 0,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up (focused)",
+              "scrolledPx": 623,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down (focused)",
+              "scrolledPx": 623,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up (focused)",
+              "scrolledPx": 423,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down (focused)",
+              "scrolledPx": 423,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "blur",
+              "scrolledPx": 0,
+              "frames": 40,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            }
+          ]
+        }
+      },
+      "consoleErrors": [],
+      "overflows": [],
+      "externalRequests": [],
+      "requests": {
+        "api": 35,
+        "static": 105
+      },
+      "shots": [
+        "chromium-01-onboarding.jpg",
+        "chromium-02-signup-step1.jpg",
+        "chromium-03-signup-step2.jpg",
+        "chromium-04-welcome.jpg",
+        "chromium-05-weather-tool-chip.jpg",
+        "chromium-06-weather-answer.jpg",
+        "chromium-07-stopped.jpg",
+        "chromium-08-after-thanks.jpg",
+        "chromium-09-approval-card.jpg",
+        "chromium-10-approval-resumed.jpg",
+        "chromium-11-artifact-card.jpg",
+        "chromium-12-invite-sheet.jpg",
+        "chromium-13-invite-sheet-closed.jpg",
+        "chromium-14-explore.jpg",
+        "chromium-15-predelegate-sheet.jpg",
+        "chromium-16-predelegate-sheet-closed.jpg",
+        "chromium-17-archive.jpg",
+        "chromium-18-artifact-sheet.jpg",
+        "chromium-19-artifact-sheet-closed.jpg",
+        "chromium-20-upload-sheet.jpg",
+        "chromium-21-upload-sheet-closed.jpg",
+        "chromium-22-profile.jpg",
+        "chromium-23-phone-sheet.jpg",
+        "chromium-24-phone-sheet-closed.jpg",
+        "chromium-25-profile-detail.jpg",
+        "chromium-26-profile-back.jpg",
+        "chromium-27-connect-sheet.jpg",
+        "chromium-28-connect-sheet-closed.jpg",
+        "chromium-29-chat-before-scroll.jpg",
+        "chromium-30-chat-scrolled-focused.jpg",
+        "chromium-31-chat-after-scroll.jpg"
+      ],
+      "at": "2026-11-11T17:46:59.816Z",
+      "commit": "HEAD = 78a7d2b (exported: server + app, no working-tree changes)",
+      "app": "apps/mobile @ 78a7d2b"
+    },
+    {
+      "engine": "webkit",
+      "handle": "qawb8789b",
+      "flows": [
+        {
+          "name": "1 sign-up + welcome",
+          "ok": true,
+          "ms": 6206,
+          "times": {
+            "load → onboarding": 106,
+            "모시 만들기 → chat": 1847,
+            "chat → welcome card": 2
+          },
+          "checks": [
+            {
+              "name": "sign-up through the onboarding UI lands in the chat",
+              "ok": true,
+              "detail": "1847 ms"
+            },
+            {
+              "name": "welcome message with its briefing card in the chat",
+              "ok": true,
+              "detail": "4 quick replies"
+            },
+            {
+              "name": "session token stored by the app works against the server",
+              "ok": true,
+              "detail": 200
+            }
+          ]
+        },
+        {
+          "name": "2 weather turn",
+          "ok": true,
+          "ms": 2603,
+          "times": {
+            "send → done": 1914,
+            "send → first tool chip": 618,
+            "send → first live text": 1048
+          },
+          "checks": [
+            {
+              "name": "a tool chip shows while the turn runs",
+              "ok": true,
+              "detail": "서울 날씨 확인:running, 서울 날씨 확인:done"
+            },
+            {
+              "name": "streaming text appears in the live row",
+              "ok": true,
+              "detail": "8 text updates"
+            },
+            {
+              "name": "the final answer lands",
+              "ok": true,
+              "detail": "weather card + 지금 서울은 6.6도, 구름 많은 새벽이에요. 오늘은 최고 15도, 최저 5도로 낮엔 꽤 포근하고요, 강수확률은 30% 정도라 아주 약하게 비나"
+            }
+          ]
+        },
+        {
+          "name": "3 stop → 고마워",
+          "ok": true,
+          "ms": 6521,
+          "times": {
+            "send → first live text": 367,
+            "Stop → send button back": 64,
+            "고마워 → answer": 321
+          },
+          "checks": [
+            {
+              "name": "Stop ends the turn mid-stream (send button comes back, partial text kept)",
+              "ok": true,
+              "detail": "25 chars kept"
+            },
+            {
+              "name": "a stop is not an error (no error line)",
+              "ok": true
+            },
+            {
+              "name": "a fresh answer to 고마워 comes back",
+              "ok": true,
+              "detail": "천만에요, 큐에이 님. 또 필요하시면 언제든 불러 주세요."
+            },
+            {
+              "name": "the stopped answer never appears (live)",
+              "ok": true,
+              "detail": "피보나치 수열을 1번째부터 30번째까지 한 줄에 하나씩 번호를 붙여서 모두 적어줘 → not shown"
+            },
+            {
+              "name": "the stopped answer is not in the thread after a reload",
+              "ok": true
+            },
+            {
+              "name": "server history has no answer to the stopped request",
+              "ok": true,
+              "detail": "7 messages"
+            }
+          ]
+        },
+        {
+          "name": "4 call approval",
+          "ok": true,
+          "ms": 6683,
+          "times": {
+            "send → approval card": 1143,
+            "approve → approved receipt": 75,
+            "approve → resumed turn done": 2748
+          },
+          "checks": [
+            {
+              "name": "the outbound call raises the approval card in the UI",
+              "ok": true
+            },
+            {
+              "name": "first tap arms the confirm button (한 번 더)",
+              "ok": true,
+              "detail": "한 번 더 누르면 실행돼요한 번 더 누르면 실행돼요길게 누르거나, 두 번 눌러 확인해요"
+            },
+            {
+              "name": "approved: the server accepted the device-signed decision",
+              "ok": true
+            },
+            {
+              "name": "이 기기의 키로 확인했어요 (signature verified)",
+              "ok": true
+            },
+            {
+              "name": "the resumed turn shows the call error (tool marked 오류)",
+              "ok": true,
+              "detail": "모시식당님께 전화:running, 모시식당님께 전화:error"
+            },
+            {
+              "name": "the agent says the call could not be placed",
+              "ok": true,
+              "detail": "전화 연결이 안 됐어요. 발신 측 오류(422)로 걸리지 않았습니다.번호가 맞는지 한 번 확인해 주시거나, 문자로 문의하는 방법도 있어요. 어느 쪽으로 다시 시도해 볼까요?"
+            },
+            {
+              "name": "server history: sys_phone_call ended in error",
+              "ok": true,
+              "detail": "needs_approval,error"
+            }
+          ]
+        },
+        {
+          "name": "6b close/back: rows shown, no sheet left on them",
+          "ok": true,
+          "ms": 0,
+          "times": {},
+          "checks": [
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 1,
+                "frames": 105,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 89,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 191
+              }
+            },
+            {
+              "name": "(b) Invite sheet (채팅 · 초대): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 89,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 3,
+                "frames": 104,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 89,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 192
+              }
+            },
+            {
+              "name": "(b) PreDelegate sheet (둘러보기): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 89,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 1,
+                "frames": 106,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 89,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 189
+              }
+            },
+            {
+              "name": "(b) Artifact sheet (보관함): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 89,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 1,
+                "frames": 104,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 88,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 166
+              }
+            },
+            {
+              "name": "(b) Upload sheet (보관함 · 미디어): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 88,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 4,
+                "frames": 105,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 88,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 163
+              }
+            },
+            {
+              "name": "(b) Phone sheet (나의 모시 · 내 전화번호): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 88,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            },
+            {
+              "name": "(b) profile detail back: rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 8,
+                "frames": 105,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): rows stay visible on every frame",
+              "ok": true,
+              "detail": {
+                "tracked": 8,
+                "frames": 104,
+                "badFrames": 0,
+                "minOpacity": 1,
+                "firstBad": null
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): no sheet surface after 200 ms",
+              "ok": true,
+              "detail": {
+                "lateFrames": 88,
+                "surfaceFrames": 0,
+                "surfaceLastMs": null,
+                "panelMaxAfter200": 0,
+                "scrimMaxAfter200": 0,
+                "otherMaxAfter200": 0,
+                "sheetUnmountedMs": 171
+              }
+            },
+            {
+              "name": "(b) Connect sheet (연결 · 카카오톡): nothing covers the row after 200 ms",
+              "ok": true,
+              "detail": {
+                "sourceTracked": true,
+                "lateFrames": 88,
+                "coveredFrames": 0,
+                "coveredLastMs": null,
+                "coveredBy": null,
+                "coverMaxOpacity": null
+              }
+            }
+          ]
+        },
+        {
+          "name": "5 tabs + sheets: chat / explore / archive / profile",
+          "ok": true,
+          "ms": 41499,
+          "times": {
+            "send → artifact card": 7576
+          },
+          "checks": [
+            {
+              "name": "a chat turn makes the document (artifact card)",
+              "ok": true
+            },
+            {
+              "name": "Invite sheet (채팅 · 초대): opens and closes",
+              "ok": true,
+              "detail": "친구 초대"
+            },
+            {
+              "name": "PreDelegate sheet (둘러보기): opens and closes",
+              "ok": true,
+              "detail": "매일 아침 7시 모닝 브리핑 보내 드릴게요"
+            },
+            {
+              "name": "보관함 lists the document made in the chat",
+              "ok": true,
+              "detail": "제주 2박 3일 여행 일정"
+            },
+            {
+              "name": "Artifact sheet (보관함): opens and closes",
+              "ok": true,
+              "detail": "제주 2박 3일 여행 일정"
+            },
+            {
+              "name": "보관함 · 미디어 offers 올리기",
+              "ok": true
+            },
+            {
+              "name": "Upload sheet (보관함 · 미디어): opens and closes",
+              "ok": true,
+              "detail": "보관함에 올리기"
+            },
+            {
+              "name": "Phone sheet (나의 모시 · 내 전화번호): opens and closes",
+              "ok": true,
+              "detail": "내 전화번호"
+            },
+            {
+              "name": "나의 모시: 화면 및 디자인 pushes its detail and back returns",
+              "ok": true
+            },
+            {
+              "name": "나의 모시 → 연결된 앱 및 서비스",
+              "ok": true
+            },
+            {
+              "name": "Connect sheet (연결 · 카카오톡): opens and closes",
+              "ok": true,
+              "detail": "카카오톡"
+            }
+          ]
+        },
+        {
+          "name": "6a chat scroll: tab bar vs composer",
+          "ok": true,
+          "ms": 16031,
+          "times": {},
+          "checks": [
+            {
+              "name": "the chat thread is long enough to scroll",
+              "ok": true,
+              "detail": "2232 px"
+            },
+            {
+              "name": "tab bar at rest is full width",
+              "ok": true,
+              "detail": {
+                "w": 358,
+                "h": 68
+              }
+            },
+            {
+              "name": "the thread actually scrolled during the test",
+              "ok": true,
+              "detail": "4160 px over 10 actions (scripted flick)"
+            },
+            {
+              "name": "(a) tab bar and composer never overlap",
+              "ok": true,
+              "detail": {
+                "frames": 370,
+                "overlapFrames": 0,
+                "first": null
+              }
+            },
+            {
+              "name": "(a) tab bar is never half-minimised",
+              "ok": true,
+              "detail": {
+                "frames": 370,
+                "halfFrames": 0,
+                "first": null,
+                "minimisedFrames": 0
+              }
+            }
+          ]
+        },
+        {
+          "name": "7 console / overflow / network",
+          "ok": true,
+          "ms": 0,
+          "times": {},
+          "checks": [
+            {
+              "name": "0 console errors",
+              "ok": true,
+              "detail": []
+            },
+            {
+              "name": "0 horizontal overflow at every screenshot",
+              "ok": true,
+              "detail": []
+            },
+            {
+              "name": "the PWA only requests its own origin",
+              "ok": true,
+              "detail": "35 /api + 105 static requests, all http://127.0.0.1:5199"
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "stoppedPartialChars": 25,
+        "return:Invite sheet (채팅 · 초대)": {
+          "tracked": 1,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 105,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 89,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 191
+        },
+        "return:PreDelegate sheet (둘러보기)": {
+          "tracked": 3,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 104,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 89,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 192
+        },
+        "return:Artifact sheet (보관함)": {
+          "tracked": 1,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 106,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 89,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 189
+        },
+        "return:Upload sheet (보관함 · 미디어)": {
+          "tracked": 1,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 104,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 88,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 166
+        },
+        "return:Phone sheet (나의 모시 · 내 전화번호)": {
+          "tracked": 4,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 105,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 88,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 163
+        },
+        "return:profile detail back": {
+          "tracked": 8,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 105,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 90,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 35
+        },
+        "return:Connect sheet (연결 · 카카오톡)": {
+          "tracked": 8,
+          "sourceTracked": true,
+          "clicked": true,
+          "frames": 104,
+          "badFrames": 0,
+          "minOpacity": 1,
+          "detachedFrames": 0,
+          "firstBad": null,
+          "lateFrames": 88,
+          "surfaceFrames": 0,
+          "surfaceLastMs": null,
+          "panelMaxAfter200": 0,
+          "scrimMaxAfter200": 0,
+          "otherMaxAfter200": 0,
+          "coveredFrames": 0,
+          "coveredLastMs": null,
+          "coveredBy": null,
+          "coverMaxOpacity": null,
+          "sheetUnmountedMs": 171
+        },
+        "scroll": {
+          "method": "scripted flick",
+          "rest": {
+            "w": 358,
+            "h": 68
+          },
+          "perAction": [
+            {
+              "action": "up",
+              "scrolledPx": 620,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down",
+              "scrolledPx": 620,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up",
+              "scrolledPx": 420,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down",
+              "scrolledPx": 420,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "focus composer",
+              "scrolledPx": 0,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up (focused)",
+              "scrolledPx": 620,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down (focused)",
+              "scrolledPx": 620,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "up (focused)",
+              "scrolledPx": 420,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "down (focused)",
+              "scrolledPx": 420,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            },
+            {
+              "action": "blur",
+              "scrolledPx": 0,
+              "frames": 37,
+              "overlap": 0,
+              "firstOverlap": null,
+              "half": 0,
+              "firstHalf": null,
+              "mini": 0,
+              "notFull": 0
+            }
+          ]
+        }
+      },
+      "consoleErrors": [],
+      "overflows": [],
+      "externalRequests": [],
+      "requests": {
+        "api": 35,
+        "static": 105
+      },
+      "shots": [
+        "webkit-01-onboarding.jpg",
+        "webkit-02-signup-step1.jpg",
+        "webkit-03-signup-step2.jpg",
+        "webkit-04-welcome.jpg",
+        "webkit-05-weather-tool-chip.jpg",
+        "webkit-06-weather-answer.jpg",
+        "webkit-07-stopped.jpg",
+        "webkit-08-after-thanks.jpg",
+        "webkit-09-approval-card.jpg",
+        "webkit-10-approval-resumed.jpg",
+        "webkit-11-artifact-card.jpg",
+        "webkit-12-invite-sheet.jpg",
+        "webkit-13-invite-sheet-closed.jpg",
+        "webkit-14-explore.jpg",
+        "webkit-15-predelegate-sheet.jpg",
+        "webkit-16-predelegate-sheet-closed.jpg",
+        "webkit-17-archive.jpg",
+        "webkit-18-artifact-sheet.jpg",
+        "webkit-19-artifact-sheet-closed.jpg",
+        "webkit-20-upload-sheet.jpg",
+        "webkit-21-upload-sheet-closed.jpg",
+        "webkit-22-profile.jpg",
+        "webkit-23-phone-sheet.jpg",
+        "webkit-24-phone-sheet-closed.jpg",
+        "webkit-25-profile-detail.jpg",
+        "webkit-26-profile-back.jpg",
+        "webkit-27-connect-sheet.jpg",
+        "webkit-28-connect-sheet-closed.jpg",
+        "webkit-29-chat-before-scroll.jpg",
+        "webkit-30-chat-scrolled-focused.jpg",
+        "webkit-31-chat-after-scroll.jpg"
+      ],
+      "at": "2026-11-11T17:46:59.816Z",
+      "commit": "HEAD = 78a7d2b (exported: server + app, no working-tree changes)",
+      "app": "apps/mobile @ 78a7d2b"
+    }
+  ]
+}

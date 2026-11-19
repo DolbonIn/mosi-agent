@@ -1,0 +1,126 @@
+{
+  "feature": "meeting",
+  "title": "회의 참여: 승인, 회의 중, 요약",
+  "critique": "../../impeccable/critique/meeting.md",
+  "score": "24/40",
+  "current": [
+    "chromium-light-14-chat-meeting-events.jpg",
+    "chromium-dark-14-chat-meeting-events.jpg"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "알림은 글자로, 나가기는 한 번에",
+      "summary": "승인 카드를 회의의 말('회의 참여', 'Google Meet · rak-mnpq-kud', 주인 카드엔 전체 코드, '참여 승인')로 바꾸고 종이비행기·'보낼 내용' 패널을 걷어냈어요. 회색 알림 알약은 바탕 위 가운데 글자로, 회의 중에는 마지막 알림 아래 '회의에서 내보내기' 버튼 하나. 요약은 제목·섹션 위계를, 회의록 카드는 판과 키커 없이.",
+      "fixes": [
+        "P2-1",
+        "slop:GL-1",
+        "slop:RH-3"
+      ],
+      "html": "A.html",
+      "shots": {
+        "light": "A-light.jpg",
+        "dark": "A-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "pending",
+          "name": "참여 확인 (승인 전)",
+          "html": "A-pending.html",
+          "shots": {
+            "light": "A-pending-light.jpg",
+            "dark": "A-pending-dark.jpg"
+          },
+          "current": [
+            "chromium-light-13-chat-meet-approved.jpg",
+            "chromium-dark-13-chat-meet-approved.jpg"
+          ],
+          "fixes": [
+            "slop:GL-1",
+            "slop:RH-3"
+          ]
+        },
+        {
+          "id": "summary",
+          "name": "회의 요약과 회의록",
+          "html": "A-summary.html",
+          "shots": {
+            "light": "A-summary-light.jpg",
+            "dark": "A-summary-dark.jpg"
+          },
+          "current": [
+            "chromium-light-15-chat-meeting-summary-artifact.jpg",
+            "chromium-dark-15-chat-meeting-summary-artifact.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-9",
+            "slop:GL-1",
+            "slop:RH-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "회의는 카드 한 장",
+      "summary": "회의 하나를 카드 하나로: 승인 카드가 그 자리에서 대기 → 승인 → '회의에 들어와 있어요'(깽이 아바타 + '회의에서 내보내기') → '끝나서 나왔어요 · 42분'으로 모양을 바꿔요. 진행 알림 줄은 카드 상태로 흡수되고, 승인 기록은 카드 바닥 각주 한 줄. 요약은 말풍선 없는 글자.",
+      "fixes": [
+        "P2-1",
+        "slop:NC-1",
+        "slop:GL-1",
+        "slop:RH-3",
+        "critique:Q3"
+      ],
+      "html": "B.html",
+      "shots": {
+        "light": "B-light.jpg",
+        "dark": "B-dark.jpg"
+      },
+      "states": [
+        {
+          "id": "pending",
+          "name": "참여 확인 (승인 전)",
+          "html": "B-pending.html",
+          "shots": {
+            "light": "B-pending-light.jpg",
+            "dark": "B-pending-dark.jpg"
+          },
+          "current": [
+            "chromium-light-13-chat-meet-approved.jpg",
+            "chromium-dark-13-chat-meet-approved.jpg"
+          ],
+          "fixes": [
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3"
+          ]
+        },
+        {
+          "id": "summary",
+          "name": "끝난 회의와 요약",
+          "html": "B-summary.html",
+          "shots": {
+            "light": "B-summary-light.jpg",
+            "dark": "B-summary-dark.jpg"
+          },
+          "current": [
+            "chromium-light-15-chat-meeting-summary-artifact.jpg",
+            "chromium-dark-15-chat-meeting-summary-artifact.jpg"
+          ],
+          "fixes": [
+            "P2-1",
+            "P2-2",
+            "slop:IT-9",
+            "slop:NC-1",
+            "slop:GL-1",
+            "slop:RH-3"
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended": "B",
+  "motion": "모션은 그대로: §3 morph(같은 카드가 대기→승인→회의 중→끝남으로 모양만 바꿈, 교차 페이드 없음), §3 content swap(카드 안 상태 줄 120ms exit → morph enter), §3 Loader→check('참여 승인'은 서버 확인 뒤 체크), §3 press, §8.2 돌아올 때 재등장 없음"
+}

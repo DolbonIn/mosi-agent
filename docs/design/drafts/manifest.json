@@ -1,0 +1,222 @@
+[
+  {
+    "feature": "chat",
+    "title": "채팅",
+    "owner": "draft-a",
+    "critique": "chat.md",
+    "score": "27/40",
+    "band": "Acceptable",
+    "primary": "09-chat-weather-card",
+    "screens": [
+      "08-chat-cards-latest-phone-approval",
+      "09-chat-weather-card",
+      "10-chat-results-card",
+      "11-chat-messenger-card",
+      "12-chat-credential-card",
+      "13-chat-meet-approved",
+      "14-chat-meeting-events",
+      "15-chat-meeting-summary-artifact",
+      "16-chat-schedule-card",
+      "17-composer-focused-typed"
+    ]
+  },
+  {
+    "feature": "empty-thread",
+    "title": "빈 대화와 제안",
+    "owner": "design-director",
+    "critique": "empty-thread.md",
+    "score": "27/40",
+    "band": "Acceptable",
+    "primary": "07-chat-empty-thread",
+    "screens": [
+      "05-chat-welcome",
+      "06-chat-welcome-briefing",
+      "07-chat-empty-thread"
+    ]
+  },
+  {
+    "feature": "onboarding",
+    "title": "온보딩",
+    "owner": "draft-b",
+    "critique": "onboarding.md",
+    "score": "23/32 (72%)",
+    "band": "Good",
+    "primary": "01-onboarding",
+    "screens": [
+      "01-onboarding",
+      "02-signup-step1",
+      "03-signup-step2",
+      "04-login-sheet"
+    ]
+  },
+  {
+    "feature": "voice-call",
+    "title": "음성 통화 오버레이",
+    "owner": "draft-a",
+    "critique": "voice-call.md",
+    "score": "28/40",
+    "band": "Good",
+    "primary": "18-call-overlay",
+    "screens": [
+      "18-call-overlay",
+      "19-call-minimised-island"
+    ]
+  },
+  {
+    "feature": "phone-delegation",
+    "title": "전화 대행",
+    "owner": "draft-a",
+    "critique": "phone-delegation.md",
+    "score": "24/40",
+    "band": "Acceptable",
+    "primary": "08-chat-cards-latest-phone-approval",
+    "screens": [
+      "08-chat-cards-latest-phone-approval",
+      "37-phone-sheet"
+    ]
+  },
+  {
+    "feature": "meeting",
+    "title": "회의 참여",
+    "owner": "draft-a",
+    "critique": "meeting.md",
+    "score": "24/40",
+    "band": "Acceptable",
+    "primary": "13-chat-meet-approved",
+    "screens": [
+      "13-chat-meet-approved",
+      "14-chat-meeting-events",
+      "15-chat-meeting-summary-artifact"
+    ]
+  },
+  {
+    "feature": "drawer",
+    "title": "서랍",
+    "owner": "draft-a",
+    "critique": "drawer.md",
+    "score": "26/40",
+    "band": "Acceptable",
+    "primary": "20-drawer",
+    "screens": [
+      "20-drawer",
+      "21-drawer-search"
+    ]
+  },
+  {
+    "feature": "explore",
+    "title": "둘러보기",
+    "owner": "draft-b",
+    "critique": "explore.md",
+    "score": "25/40",
+    "band": "Acceptable",
+    "primary": "22-explore",
+    "screens": [
+      "22-explore",
+      "23-explore-scrolled",
+      "24-predelegate-sheet"
+    ]
+  },
+  {
+    "feature": "archive",
+    "title": "보관함",
+    "owner": "draft-b",
+    "critique": "archive.md",
+    "score": "25/40",
+    "band": "Acceptable",
+    "primary": "25-archive-artifacts",
+    "screens": [
+      "25-archive-artifacts",
+      "26-artifact-sheet-document",
+      "27-artifact-sheet-dashboard",
+      "28-archive-media-empty"
+    ]
+  },
+  {
+    "feature": "connections",
+    "title": "연결",
+    "owner": "draft-b",
+    "critique": "connections.md",
+    "score": "25/40",
+    "band": "Acceptable",
+    "primary": "38-connections",
+    "screens": [
+      "38-connections",
+      "39-connections-scrolled",
+      "40-connect-sheet-kakaotalk"
+    ]
+  },
+  {
+    "feature": "schedules",
+    "title": "일정",
+    "owner": "draft-c",
+    "critique": "schedules.md",
+    "score": "27/40",
+    "band": "Acceptable",
+    "primary": "41-schedules",
+    "screens": [
+      "16-chat-schedule-card",
+      "41-schedules",
+      "42-schedule-sheet"
+    ]
+  },
+  {
+    "feature": "my-mosi",
+    "title": "나의 모시",
+    "owner": "draft-c",
+    "critique": "my-mosi.md",
+    "score": "26/40",
+    "band": "Acceptable",
+    "primary": "29-profile",
+    "screens": [
+      "29-profile",
+      "30-profile-scrolled",
+      "31-profile-bottom",
+      "32-tickets-sheet",
+      "34-agent-settings",
+      "35-agent-settings-scrolled",
+      "36-account"
+    ]
+  },
+  {
+    "feature": "payment",
+    "title": "결제",
+    "owner": "draft-c",
+    "critique": "payment.md",
+    "score": "19/28 (68%)",
+    "band": "Acceptable",
+    "primary": "43-payment",
+    "screens": [
+      "43-payment"
+    ]
+  },
+  {
+    "feature": "invite-friends",
+    "title": "친구 초대",
+    "owner": "draft-b",
+    "critique": "invite-friends.md",
+    "score": "28/40",
+    "band": "Good",
+    "primary": "44-friends",
+    "screens": [
+      "44-friends",
+      "45-invite-sheet"
+    ]
+  },
+  {
+    "feature": "settings",
+    "title": "설정",
+    "owner": "draft-c",
+    "critique": "settings.md",
+    "score": "26/40",
+    "band": "Acceptable",
+    "primary": "46-settings-notifications",
+    "screens": [
+      "33-privacy-sheet",
+      "46-settings-notifications",
+      "47-settings-privacy",
+      "48-settings-display",
+      "49-vault",
+      "50-vault-access-log"
+    ]
+  }
+]

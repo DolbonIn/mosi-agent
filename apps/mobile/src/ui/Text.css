@@ -1,0 +1,51 @@
+/* Korean copy (Text.tsx, FOUNDATION.md › Line breaks): the one class a copy slot takes */
+.t-copy {
+  text-wrap: pretty; /* no one-word last line */
+}
+/* a sentence of a text of two or more: breaks only between sentences. An inline-block lays out its own lines, so it
+   takes pretty too, or "…암호화한 뒤에만 / 보내요." at 320 (kakao-chat skill-ui-22) */
+.t-s {
+  display: inline-block;
+  text-wrap: pretty;
+}
+/* the tight pieces of a word ("(주문은", "지역·", "콘서트)을", "3.3만 원"): never broken inside while they fit a line;
+   Text.tsx puts a <wbr> between them. An inline-block, not a nowrap inline: with four nowrap runs in a line WebKit's
+   pretty picked worse than greedy ("…찾아 / 주소·전화·지도 링크를 / 알려줘요." at 233 px; as boxes it is two lines).
+   Every edge of a piece is a space or a <wbr> already, so no break is added. White space is the parent's, so in copy
+   it wraps inside: the box is as wide as its text (shrink-to-fit), so a piece that fits a line is one line, moved
+   down whole when the line has no room left; a piece wider than the whole line (a long amount in a narrow cell) wraps
+   inside instead of running out of its block (measured both ways, both engines). In a one-line nowrap slot it stays
+   nowrap. A box takes no underline from its parent: no tied copy inside a link */
+.t-tie {
+  display: inline-block;
+  white-space: inherit;
+}
+/* a cell a copy slot can sit in narrow (ListRow's text column beside a detail or chips at 320): under 160 px its copy
+   wraps plainly — pretty and sentence blocks only add lines there (WebKit 106 px: 4 lines → 6) — and the ties stay */
+.t-cell {
+  container: t-cell / inline-size;
+}
+@container t-cell (width < 160px) {
+  .t-copy,
+  .t-s {
+    text-wrap: wrap;
+  }
+  .t-s {
+    display: inline;
+  }
+}
+/* glued spots of flowing text (`glued()`: a bracket and what it holds on to, a number with its separators, a dash and
+   its number, "。" or "、" and the character before, " ·" after a word): a browser breaks there under keep-all. A
+   no-wrap inline, not an inline-block: the rest of the line wraps as before, and WebKit takes no break at the span's
+   end either (a span around "(" alone kept "(" off line ends). `pre`, not `nowrap`: the one space a glued span holds
+   is the one before "·", and WebKit lays a nowrap span with a collapsible space before "·" out past the line end
+   (72 of 402 widths, up to 4.3 px; none with the space preserved) */
+.t-glue {
+  white-space: pre;
+}
+/* a break with no character (`glued()`): an empty inline-block, around which both engines break, keep-all or not
+   (before "(" after a word, after "す。" before kana). Not <wbr>: with one earlier in the paragraph WebKit drew the
+   space before a glued span at a line's start (+4 px) */
+.t-brk {
+  display: inline-block;
+}

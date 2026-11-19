@@ -1,0 +1,77 @@
+/* Chip (ui/Chip.tsx) */
+.chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-capsule);
+  background-color: var(--fill);
+  color: var(--label);
+  font-size: var(--t-subhead);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color var(--dur-snap) var(--ease-snap), color var(--dur-snap) var(--ease-snap);
+}
+/* 44px hit area around the 36px visual */
+.chip::before {
+  content: "";
+  position: absolute;
+  inset: -4px -2px;
+}
+.chip--sm {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--r-capsule);
+  font-size: var(--t-footnote);
+  gap: 5px;
+}
+.chip--sm::before {
+  inset: -7px -2px;
+}
+.chip.is-selected {
+  background-color: var(--accent-fill); /* white label ≥4.5:1 */
+  color: var(--on-accent);
+}
+/* opaque press: fill darkens 6 % (the lift is the scale) */
+.chip[data-pressed="true"] {
+  background-image: linear-gradient(rgb(0 0 0 / 0.06) 0 0);
+}
+:root[data-theme="dark"] .chip[data-pressed="true"] {
+  background-image: linear-gradient(rgb(255 255 255 / 0.08) 0 0);
+}
+.chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .chip:not(.is-selected):not(:disabled):hover {
+    background-color: var(--fill-2);
+  }
+}
+.chip-label {
+  line-height: 1.2;
+}
+
+.chip-group {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 16px;
+  scroll-padding-inline: 16px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.chip-group::-webkit-scrollbar {
+  display: none;
+}
+.chip-group > * {
+  scroll-snap-align: start;
+}

@@ -1,0 +1,719 @@
+{
+  "when": "2026-11-11T21:52:24.837Z",
+  "results": [
+    {
+      "tag": "chromium/light",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "chromium/light",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "chromium/light",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "chromium/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "chromium/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "chromium/reduced",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/light",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "webkit/light",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "webkit/light",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "webkit/light",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "webkit/dark",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "채팅 root: the agent (face + name) in the centre",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "채팅 root: nothing in the centre is glass (no backdrop, no fill)",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이",
+        "glassInCentre": 0,
+        "backdrop": "none",
+        "bg": "rgba(0, 0, 0, 0)",
+        "button": {
+          "w": 74,
+          "h": 48,
+          "label": "깽이 프로필"
+        },
+        "barGlass": 2,
+        "back": "메뉴"
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "채팅 root: the agent is a ≥ 44 px button named for the profile",
+      "ok": true,
+      "detail": {
+        "w": 74,
+        "h": 48,
+        "label": "깽이 프로필"
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "tapping the agent opens the agent sheet",
+      "ok": true
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "둘러보기 root at rest: the centre is empty (no agent)",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "둘러보기 scrolled: '둘러보기' as plain text, not glass",
+      "ok": true,
+      "detail": {
+        "mode": "title",
+        "text": "둘러보기",
+        "glass": 0
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "둘러보기 back at the top: the title hands back (empty)",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "나의 모시 root at rest: empty",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "pushed 내 계정 at rest: back circle, empty centre",
+      "ok": true,
+      "detail": {
+        "back": "뒤로",
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "pushed 내 계정 scrolled: its title or nothing — never the agent's name",
+      "ok": true,
+      "detail": {
+        "mode": "none",
+        "text": ""
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "back on 채팅: the agent again",
+      "ok": true,
+      "detail": {
+        "mode": "agent",
+        "text": "깽이"
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "the top bar's glass is only its side controls",
+      "ok": true,
+      "detail": {
+        "barGlass": 2
+      }
+    },
+    {
+      "tag": "webkit/reduced",
+      "name": "no console errors",
+      "ok": true,
+      "detail": []
+    }
+  ]
+}
