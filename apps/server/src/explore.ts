@@ -5,6 +5,11 @@
  *
  * Template text may contain {displayName} / {agentName} placeholders (only before particles that
  * do not alternate, e.g. "에게"). `call-demo` is special-cased by the app (opens the voice call).
+ *
+ * A template's `prompt` is what the person sends on "부탁하기": one short line in their own words. It is the bubble,
+ * the thread preview and the stored text, so it never names a tool or a rule (DD 1407). How to do it (tool ids, rule
+ * syntax, what to ask first) is the template's `hint`: it reaches the model only, appended to the model copy of the
+ * first message of a new task thread whose text is that template's line (see templateHint).
  */
 import type { DelegateResponse, ExploreResponse, IconName, TaskTemplate, TemplateCategory } from "@pickle/protocol";
 import type { TemplateRow, UserRow } from "./db/index.ts";
@@ -30,7 +35,12 @@ interface Seed {
   description: string;
   icon: IconName;
   hue: number;
+  /** the person's own short line: the bubble on 부탁하기 (no tool ids, no rule syntax) */
   prompt: string;
+  /** model-only: how to do it, added to the model copy of that first message */
+  hint?: string;
+  /** the agent asks for missing details before it starts (PreDelegateSheet's note) */
+  asksFirst?: boolean;
   skills: string[];
   hidden?: boolean;
 }
@@ -55,8 +65,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "K-Startup·기업마당 등 지금 신청할 수 있는 지원사업과 청년·주거 공고(LH)를 내 조건에 맞춰 마감 순으로 정리해요.",
     icon: "coins",
     hue: 45,
-    prompt:
-      "내 조건(지역·나이·상황)을 물어본 뒤 지금 신청 가능한 정부 지원사업과 청년·주거 공고를 마감 순으로 정리해줘. 사는 지역(시·군·구), 나이, 재직·구직·창업 여부 중 아직 모르는 것만 한 번에 짧게 물어봐. 정보가 모이면 k_gov_support로 지원사업 공고를, 주거 지원이 해당되면 k_housing_notices로 지금 모집 중인 청약·임대 공고를 확인해 줘. 항목마다 지원 내용·대상·마감일을 한 줄씩 적고, 조건이 애매한 건 확인이 필요하다고 표시해 줘.",
+    prompt: "지금 신청할 수 있는 정부 지원사업과 청년·주거 공고를 내 조건에 맞춰 찾아 줘.",
+    hint:
+      "내 조건(지역·나이·상황)을 먼저 물어본 뒤 마감 순으로 정리해 줘. 사는 지역(시·군·구), 나이, 재직·구직·창업 여부 중 아직 모르는 것만 한 번에 짧게 물어봐. 정보가 모이면 k_gov_support로 지원사업 공고를, 주거 지원이 해당되면 k_housing_notices로 지금 모집 중인 청약·임대 공고를 확인해 줘. 항목마다 지원 내용·대상·마감일을 한 줄씩 적고, 조건이 애매한 건 확인이 필요하다고 표시해 줘.",
+    asksFirst: true,
     skills: ["k_gov_support", "k_housing_notices"],
   },
   {
@@ -66,8 +78,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "날씨·미세먼지·주요 뉴스·오늘 일정을 매일 아침 7시에 한 번에 정리해 먼저 보내 드려요.",
     icon: "sun",
     hue: 38,
-    prompt:
-      "매일 아침 7시에 모닝 브리핑을 보내 줘. 내가 사는 동네를 모르면 먼저 물어봐. 그다음 sys_schedule_create로 제목 '모닝 브리핑', 규칙 daily@07:00, 내용 '내 동네 날씨와 미세먼지(k_weather, k_fine_dust), 오늘 주요 뉴스 3개(k_news), 오늘 일정을 정리해서 sys_show_briefing 카드로 보여 줘'인 예약을 만들어 줘. 만든 뒤에는 오늘 치 브리핑도 지금 바로 한 번 보여 줘.",
+    prompt: "매일 아침 7시에 모닝 브리핑을 보내 줘.",
+    hint:
+      "내가 사는 동네를 모르면 먼저 물어봐. 그다음 sys_schedule_create로 제목 '모닝 브리핑', 규칙 daily@07:00, 내용 '내 동네 날씨와 미세먼지(k_weather, k_fine_dust), 오늘 주요 뉴스 3개(k_news), 오늘 일정을 정리해서 sys_show_briefing 카드로 보여 줘'인 예약을 만들어 줘. 만든 뒤에는 오늘 치 브리핑도 지금 바로 한 번 보여 줘.",
+    asksFirst: true,
     skills: ["sys_schedule_create", "k_weather", "k_fine_dust", "k_news", "sys_show_briefing"],
   },
   {
@@ -77,8 +91,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "오늘 꼭 알아야 할 뉴스를 분야별로 골라 세 줄씩 요약해 드려요.",
     icon: "doc",
     hue: 215,
-    prompt:
-      "오늘 주요 뉴스를 브리핑해 줘. k_news로 정치·경제·사회·IT 분야의 오늘 주요 뉴스를 찾아, 분야별로 가장 중요한 1~2개만 골라 세 줄 이내로 요약해 줘. 마지막에 더 자세히 알고 싶은 뉴스가 있는지 물어봐.",
+    prompt: "오늘 주요 뉴스를 브리핑해 줘.",
+    hint:
+      "k_news로 정치·경제·사회·IT 분야의 오늘 주요 뉴스를 찾아, 분야별로 가장 중요한 1~2개만 골라 세 줄 이내로 요약해 줘. 마지막에 더 자세히 알고 싶은 뉴스가 있는지 물어봐.",
     skills: ["k_news"],
   },
   {
@@ -88,8 +103,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "관심 있는 종목의 기본 정보와 최근 뉴스를 한눈에 정리해 드려요.",
     icon: "chart",
     hue: 160,
-    prompt:
-      "내 관심 종목을 정리해 줘. 관심 종목을 모르면 종목 이름을 먼저 물어봐. k_stock으로 종목마다 기본 정보(시장·업종 등)를 조회하고, k_news로 최근 관련 뉴스를 2~3개씩 찾아 표로 정리해 줘. 시세 조회가 안 되면 그렇다고 솔직히 말해 줘. 투자 조언은 하지 마.",
+    prompt: "내 관심 종목을 정리해 줘.",
+    hint:
+      "관심 종목을 모르면 종목 이름을 먼저 물어봐. k_stock으로 종목마다 기본 정보(시장·업종 등)를 조회하고, k_news로 최근 관련 뉴스를 2~3개씩 찾아 표로 정리해 줘. 시세 조회가 안 되면 그렇다고 솔직히 말해 줘. 투자 조언은 하지 마.",
+    asksFirst: true,
     skills: ["k_stock", "k_news"],
   },
   {
@@ -99,8 +116,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "출발지에서 가까운 아울렛·대형마트를 찾고 차로 얼마나 걸리는지 알려 드려요.",
     icon: "bag",
     hue: 330,
-    prompt:
-      "주말에 갈 만한 아울렛이나 대형마트를 찾아 줘. 출발지를 모르면 먼저 물어봐. k_place_search로 가까운 아울렛·대형마트를 찾고, 가장 가까운 2~3곳은 k_directions로 자동차 이동 시간과 거리를 알려 줘. 영업시간처럼 확인이 안 된 정보는 확인이 필요하다고 표시해 줘.",
+    prompt: "주말에 갈 만한 아울렛이나 대형마트를 찾아 줘.",
+    hint:
+      "출발지를 모르면 먼저 물어봐. k_place_search로 가까운 아울렛·대형마트를 찾고, 가장 가까운 2~3곳은 k_directions로 자동차 이동 시간과 거리를 알려 줘. 영업시간처럼 확인이 안 된 정보는 확인이 필요하다고 표시해 줘.",
+    asksFirst: true,
     skills: ["k_place_search", "k_directions"],
   },
   {
@@ -110,8 +129,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "날씨와 가볼 만한 곳을 확인해 동선에 맞춘 2박 3일 일정을 문서로 정리해 보관함에 넣어 드려요.",
     icon: "plane",
     hue: 190,
-    prompt:
-      "제주 2박 3일 여행 일정을 문서로 만들어 줘. 여행 날짜, 함께 가는 사람, 좋아하는 스타일(맛집·자연·카페 등)을 모르면 먼저 한 번에 짧게 물어봐. 그다음 k_weather로 제주 날씨를 확인하고 k_place_search로 지역별 가볼 만한 곳과 맛집을 찾아, 동쪽·서쪽 동선이 겹치지 않게 하루씩 일정을 짜 줘. 완성되면 sys_create_artifact로 '제주 2박 3일 일정' 문서(kind: document, 마크다운, 날짜별 일정표와 준비물 체크리스트 포함)를 만들어 보관함에 저장해 줘.",
+    prompt: "제주 2박 3일 여행 일정을 문서로 만들어 줘.",
+    hint:
+      "여행 날짜, 함께 가는 사람, 좋아하는 스타일(맛집·자연·카페 등)을 모르면 먼저 한 번에 짧게 물어봐. 그다음 k_weather로 제주 날씨를 확인하고 k_place_search로 지역별 가볼 만한 곳과 맛집을 찾아, 동쪽·서쪽 동선이 겹치지 않게 하루씩 일정을 짜 줘. 완성되면 sys_create_artifact로 '제주 2박 3일 일정' 문서(kind: document, 마크다운, 날짜별 일정표와 준비물 체크리스트 포함)를 만들어 보관함에 저장해 줘.",
+    asksFirst: true,
     skills: ["k_weather", "k_place_search", "sys_create_artifact"],
   },
   {
@@ -121,8 +142,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "남은 공휴일을 확인해 연차를 가장 적게 쓰고 가장 길게 쉴 수 있는 날을 찾아 드려요.",
     icon: "calendar",
     hue: 10,
-    prompt:
-      "남은 공휴일을 보고 연차 계획을 짜 줘. 남은 연차 일수를 모르면 먼저 물어봐. k_holidays로 오늘 이후 남은 공휴일(내년 상반기 포함)을 조회하고, 주말과 이어 붙여 연차를 가장 적게 쓰고 가장 길게 쉴 수 있는 조합을 3가지 추천해 줘.",
+    prompt: "남은 공휴일을 보고 연차 계획을 짜 줘.",
+    hint:
+      "남은 연차 일수를 모르면 먼저 물어봐. k_holidays로 오늘 이후 남은 공휴일(내년 상반기 포함)을 조회하고, 주말과 이어 붙여 연차를 가장 적게 쓰고 가장 길게 쉴 수 있는 조합을 3가지 추천해 줘.",
+    asksFirst: true,
     skills: ["k_holidays"],
   },
   {
@@ -132,8 +155,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "외교부 여행경보와 안전 공지로 가려는 나라의 안전 정보를 정리해 드려요.",
     icon: "shield",
     hue: 222,
-    prompt:
-      "해외여행 안전 정보를 확인해 줘. 가려는 나라를 모르면 먼저 물어봐. k_travel_safety로 그 나라의 외교부 여행경보 단계와 최근 안전 공지를 조회해, 주의할 지역과 미리 준비할 것을 정리해 줘.",
+    prompt: "해외여행 안전 정보를 확인해 줘.",
+    hint:
+      "가려는 나라를 모르면 먼저 물어봐. k_travel_safety로 그 나라의 외교부 여행경보 단계와 최근 안전 공지를 조회해, 주의할 지역과 미리 준비할 것을 정리해 줘.",
+    asksFirst: true,
     skills: ["k_travel_safety"],
   },
   {
@@ -143,8 +168,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "연결된 카카오톡에서 안 읽은 대화를 모아 누가 무슨 말을 했는지, 답장이 필요한 것만 골라 정리해요.",
     icon: "kakao",
     hue: 50,
-    prompt:
-      "카카오톡에서 안 읽은 대화를 요약해 줘. msg_list_chats로 kakaotalk의 대화방을 확인하고, 안 읽은 메시지가 많은 순서로 최대 5개 방을 msg_read로 읽어 줘. 방마다 누가 무슨 이야기를 했는지 한두 줄로 요약하고, 내가 답장해야 할 것만 따로 표시해 줘. 답장은 내가 부탁할 때만 보내 줘.",
+    prompt: "카카오톡에서 안 읽은 대화를 요약해 줘.",
+    hint:
+      "msg_list_chats로 kakaotalk의 대화방을 확인하고, 안 읽은 메시지가 많은 순서로 최대 5개 방을 msg_read로 읽어 줘. 방마다 누가 무슨 이야기를 했는지 한두 줄로 요약하고, 내가 답장해야 할 것만 따로 표시해 줘. 답장은 내가 부탁할 때만 보내 줘.",
     skills: ["msg_list_chats", "msg_read"],
   },
   {
@@ -154,8 +180,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "연결된 슬랙에서 오늘 오간 대화를 채널별로 요약하고, 나를 찾는 메시지를 먼저 보여 드려요.",
     icon: "slack",
     hue: 280,
-    prompt:
-      "슬랙 채널을 요약해 줘. msg_list_chats로 slack 채널 목록을 보고, 활동이 많은 채널 최대 5개를 msg_read로 읽어 줘. 채널별로 오늘 오간 핵심 내용을 2~3줄로 요약하고, 나를 언급했거나 내 결정이 필요한 메시지를 맨 위에 정리해 줘. 메시지는 보내지 마.",
+    prompt: "슬랙 채널을 요약해 줘.",
+    hint:
+      "msg_list_chats로 slack 채널 목록을 보고, 활동이 많은 채널 최대 5개를 msg_read로 읽어 줘. 채널별로 오늘 오간 핵심 내용을 2~3줄로 요약하고, 나를 언급했거나 내 결정이 필요한 메시지를 맨 위에 정리해 줘. 메시지는 보내지 마.",
     skills: ["msg_list_chats", "msg_read"],
   },
   {
@@ -165,8 +192,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "모시 친구에게 약속이나 부탁을 정중하게 대신 전해 드려요.",
     icon: "people",
     hue: 345,
-    prompt:
-      "모시 친구에게 말을 전해 줘. 어떤 친구에게 무슨 말을 전할지 모르면 먼저 물어봐. 친구가 정해지면 sys_friend_message로 내 모시가 대신 전한다는 말투로 정중하게 전해 줘.",
+    prompt: "모시 친구에게 말을 전해 줘.",
+    hint:
+      "어떤 친구에게 무슨 말을 전할지 모르면 먼저 물어봐. 친구가 정해지면 sys_friend_message로 내 모시가 대신 전한다는 말투로 정중하게 전해 줘.",
+    asksFirst: true,
     skills: ["sys_friend_message"],
   },
   {
@@ -176,8 +205,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "공연예술통합전산망(KOPIS)에서 이번 주말 서울에서 볼 수 있는 연극·뮤지컬·콘서트를 찾아 정리해요.",
     icon: "film",
     hue: 300,
-    prompt:
-      "이번 주말에 서울에서 볼 수 있는 공연을 찾아 줘. k_performances로 이번 주 토요일·일요일에 서울에서 공연 중인 연극, 뮤지컬, 콘서트를 조회하고, 장르별로 3개씩 골라 공연명·장소·기간을 정리해 줘. 마지막에 더 보고 싶은 장르가 있는지 물어봐.",
+    prompt: "이번 주말에 서울에서 볼 수 있는 공연을 찾아 줘.",
+    hint:
+      "k_performances로 이번 주 토요일·일요일에 서울에서 공연 중인 연극, 뮤지컬, 콘서트를 조회하고, 장르별로 3개씩 골라 공연명·장소·기간을 정리해 줘. 마지막에 더 보고 싶은 장르가 있는지 물어봐.",
     skills: ["k_performances"],
   },
   {
@@ -187,8 +217,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "읽고 싶은 책이 가까운 공공도서관에 있는지, 지금 빌릴 수 있는지 찾아 드려요.",
     icon: "doc",
     hue: 28,
-    prompt:
-      "도서관에서 책을 찾아 줘. 책 제목과 사는 지역을 모르면 먼저 물어봐. k_library_books로 그 책을 가진 공공도서관과 대출 가능 여부를 조회해 가까운 곳부터 정리해 줘.",
+    prompt: "도서관에서 책을 찾아 줘.",
+    hint:
+      "책 제목과 사는 지역을 모르면 먼저 물어봐. k_library_books로 그 책을 가진 공공도서관과 대출 가능 여부를 조회해 가까운 곳부터 정리해 줘.",
+    asksFirst: true,
     skills: ["k_library_books"],
   },
   {
@@ -198,8 +230,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "한강 정보와 날씨·미세먼지를 확인하고, 따릉이 대여소 현황까지 챙겨 드려요.",
     icon: "wave",
     hue: 198,
-    prompt:
-      "오늘 한강 산책하기 좋은지 알려 줘. 가고 싶은 한강공원을 모르면 먼저 물어봐. k_han_river로 한강 정보를, k_weather로 서울 날씨를, k_fine_dust로 미세먼지를 확인하고, 따릉이를 탈 거라면 k_seoul_bike로 가까운 대여소의 자전거 현황도 알려 줘.",
+    prompt: "오늘 한강 산책하기 좋은지 알려 줘.",
+    hint:
+      "가고 싶은 한강공원을 모르면 먼저 물어봐. k_han_river로 한강 정보를, k_weather로 서울 날씨를, k_fine_dust로 미세먼지를 확인하고, 따릉이를 탈 거라면 k_seoul_bike로 가까운 대여소의 자전거 현황도 알려 줘.",
+    asksFirst: true,
     skills: ["k_han_river", "k_weather", "k_fine_dust", "k_seoul_bike"],
   },
   {
@@ -209,8 +243,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "타는 역과 방향만 알려 주시면 실시간 도착 정보로 다음 열차 시간을 알려 드려요. 매일 퇴근 시간에 맞춰 알려 드릴 수도 있어요.",
     icon: "train",
     hue: 140,
-    prompt:
-      "퇴근길 지하철 도착 정보를 알려 줘. 내가 타는 역 이름과 호선·방향을 모르면 먼저 물어봐(수도권 지하철만 지원돼). 역을 알면 k_subway_arrival로 실시간 도착 정보를 확인해 다음 열차 두 대의 도착 예정 시간을 알려 줘. 그리고 매일 퇴근 시간에 자동으로 알려 줄지 물어보고, 원하면 sys_schedule_create로 평일 일정(weekly@1,2,3,4,5@HH:MM)을 만들어 줘.",
+    prompt: "퇴근길 지하철 도착 정보를 알려 줘.",
+    hint:
+      "내가 타는 역 이름과 호선·방향을 모르면 먼저 물어봐(수도권 지하철만 지원돼). 역을 알면 k_subway_arrival로 실시간 도착 정보를 확인해 다음 열차 두 대의 도착 예정 시간을 알려 줘. 그리고 매일 퇴근 시간에 자동으로 알려 줄지 물어보고, 원하면 sys_schedule_create로 평일 일정(weekly@1,2,3,4,5@HH:MM)을 만들어 줘.",
+    asksFirst: true,
     skills: ["k_subway_arrival", "sys_schedule_create"],
   },
   {
@@ -220,8 +256,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "출발지에서 공항까지 자동차(택시) 기준 이동 시간과 거리를 알려 드려요.",
     icon: "map",
     hue: 22,
-    prompt:
-      "강남역에서 김포공항까지 택시 얼마나 걸려? 출발지와 공항이 다르면 먼저 물어보고, k_directions로 자동차 기준 이동 시간과 거리를 알려 줘. 비행기 시간을 말해 주면 몇 시에 출발하면 좋을지도 계산해 줘.",
+    prompt: "강남역에서 김포공항까지 택시 얼마나 걸려?",
+    hint:
+      "출발지와 공항이 다르면 먼저 물어보고, k_directions로 자동차 기준 이동 시간과 거리를 알려 줘. 비행기 시간을 말해 주면 몇 시에 출발하면 좋을지도 계산해 줘.",
     skills: ["k_directions"],
   },
   {
@@ -231,8 +268,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "지금 동네 미세먼지와 날씨를 확인해 마스크가 필요한지, 외출하기 좋은 시간을 알려 드려요.",
     icon: "cloud",
     hue: 182,
-    prompt:
-      "지금 미세먼지랑 날씨를 보고 외출해도 되는지 알려 줘. 내 동네를 모르면 먼저 물어봐. k_fine_dust로 미세먼지·초미세먼지 등급을, k_weather로 오늘 시간대별 날씨를 확인해서 마스크가 필요한지와 외출하기 좋은 시간대를 알려 줘. 미세먼지 조회가 안 되면 날씨만으로 알려 줘.",
+    prompt: "지금 미세먼지랑 날씨를 보고 외출해도 되는지 알려 줘.",
+    hint:
+      "내 동네를 모르면 먼저 물어봐. k_fine_dust로 미세먼지·초미세먼지 등급을, k_weather로 오늘 시간대별 날씨를 확인해서 마스크가 필요한지와 외출하기 좋은 시간대를 알려 줘. 미세먼지 조회가 안 되면 날씨만으로 알려 줘.",
+    asksFirst: true,
     skills: ["k_fine_dust", "k_weather"],
   },
   {
@@ -242,8 +281,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "국토교통부 실거래가로 우리 동네 아파트가 최근 얼마에 거래됐는지 정리해 드려요.",
     icon: "house",
     hue: 100,
-    prompt:
-      "우리 동네 아파트 실거래가를 알려 줘. 동네(시·군·구와 동)나 관심 있는 단지 이름을 모르면 먼저 물어봐. k_real_estate로 최근 3개월 실거래 내역을 조회해 단지별 거래가·면적·거래일을 정리하고, 가격 흐름을 한 줄로 요약해 줘.",
+    prompt: "우리 동네 아파트 실거래가를 알려 줘.",
+    hint:
+      "동네(시·군·구와 동)나 관심 있는 단지 이름을 모르면 먼저 물어봐. k_real_estate로 최근 3개월 실거래 내역을 조회해 단지별 거래가·면적·거래일을 정리하고, 가격 흐름을 한 줄로 요약해 줘.",
+    asksFirst: true,
     skills: ["k_real_estate"],
   },
   {
@@ -253,8 +294,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "학교 이름만 알려 주시면 오늘과 이번 주 급식 메뉴를 알려 드려요.",
     icon: "heart",
     hue: 118,
-    prompt:
-      "아이 학교 급식 메뉴를 알려 줘. 학교의 정식 이름(예: 서울대치초등학교)을 모르면 먼저 물어봐. k_school_lunch로 오늘 급식과 이번 주 메뉴를 조회해 정리하고, 알레르기 정보가 있으면 함께 표시해 줘. 매일 아침 알려 줄지도 물어봐.",
+    prompt: "아이 학교 급식 메뉴를 알려 줘.",
+    hint:
+      "학교의 정식 이름(예: 서울대치초등학교)을 모르면 먼저 물어봐. k_school_lunch로 오늘 급식과 이번 주 메뉴를 조회해 정리하고, 알레르기 정보가 있으면 함께 표시해 줘. 매일 아침 알려 줄지도 물어봐.",
+    asksFirst: true,
     skills: ["k_school_lunch"],
   },
   {
@@ -264,8 +307,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "전세·근로·소비자 문제처럼 생활 속 궁금한 법령을 찾아 쉬운 말로 설명해 드려요.",
     icon: "doc",
     hue: 255,
-    prompt:
-      "생활 속 법 문제를 쉽게 설명해 줘. 어떤 상황인지 먼저 물어보고, k_law_search로 관련 법령 조문을 찾아 핵심 내용을 쉬운 말로 풀어 줘. 법률 자문이 아니라 참고 정보라는 점도 짧게 알려 줘.",
+    prompt: "생활 속 법 문제를 쉽게 설명해 줘.",
+    hint:
+      "어떤 상황인지 먼저 물어보고, k_law_search로 관련 법령 조문을 찾아 핵심 내용을 쉬운 말로 풀어 줘. 법률 자문이 아니라 참고 정보라는 점도 짧게 알려 줘.",
+    asksFirst: true,
     skills: ["k_law_search"],
   },
   {
@@ -275,7 +320,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "LH 청약·임대 공고 중 지금 접수 중인 것만 지역별로 골라 마감 순으로 알려 드려요.",
     icon: "house",
     hue: 52,
-    prompt: "서울 행복주택 모집하는 거 있어? 관심 지역이 다르면 먼저 물어보고, k_housing_notices로 지금 접수 중인 공고를 찾아 공고명·지역·마감일을 마감 순으로 정리해 줘.",
+    prompt: "서울 행복주택 모집하는 거 있어?",
+    hint:
+      "관심 지역이 다르면 먼저 물어보고, k_housing_notices로 지금 접수 중인 공고를 찾아 공고명·지역·마감일을 마감 순으로 정리해 줘.",
     skills: ["k_housing_notices"],
   },
   {
@@ -285,7 +332,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "서울 주요 장소의 실시간 혼잡도를 보고 지금 가도 괜찮은지 알려 드려요. (서울만 지원)",
     icon: "people",
     hue: 280,
-    prompt: "지금 성수 카페거리 사람 많아? 다른 곳이 궁금하면 장소를 먼저 물어보고, k_seoul_density로 실시간 혼잡도를 확인해서 지금 가도 괜찮은지, 덜 붐비는 시간이 언제쯤일지 알려 줘. 서울 밖이면 지원하지 않는다고 말해 줘.",
+    prompt: "지금 성수 카페거리 사람 많아?",
+    hint:
+      "다른 곳이 궁금하면 장소를 먼저 물어보고, k_seoul_density로 실시간 혼잡도를 확인해서 지금 가도 괜찮은지, 덜 붐비는 시간이 언제쯤일지 알려 줘. 서울 밖이면 지원하지 않는다고 말해 줘.",
     skills: ["k_seoul_density"],
   },
   // ───── personalised suggestions (hidden from the gallery) ─────
@@ -296,8 +345,10 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "매일 일어날 시간에 먼저 말을 걸어 날씨와 오늘 할 일을 챙겨 드려요.",
     icon: "clock",
     hue: 15,
-    prompt:
-      "매일 아침 일어날 시간에 맞춰 모닝콜 겸 브리핑을 보내 줘. 몇 시에 일어나는지, 평일만인지 먼저 물어봐. 정해지면 sys_schedule_create로 그 시간에 '좋은 아침 인사와 함께 오늘 날씨(k_weather)와 오늘 일정을 짧게 알려 주는' 예약을 만들어 줘.",
+    prompt: "매일 아침 일어날 시간에 맞춰 모닝콜 겸 브리핑을 보내 줘.",
+    hint:
+      "몇 시에 일어나는지, 평일만인지 먼저 물어봐. 정해지면 sys_schedule_create로 그 시간에 '좋은 아침 인사와 함께 오늘 날씨(k_weather)와 오늘 일정을 짧게 알려 주는' 예약을 만들어 줘.",
+    asksFirst: true,
     skills: ["sys_schedule_create", "k_weather"],
     hidden: true,
   },
@@ -308,7 +359,9 @@ export const TEMPLATE_SEEDS: Seed[] = [
     description: "카카오톡을 연결해 두면 {agentName}에게 안 읽은 대화 요약이나 답장을 맡길 수 있어요.",
     icon: "kakao",
     hue: 50,
-    prompt: "카카오톡을 연결해서 안 읽은 대화를 요약해 줘. msg_list_chats로 kakaotalk 대화방을 확인해 줘.",
+    prompt: "카카오톡을 연결해서 안 읽은 대화를 요약해 줘.",
+    hint:
+      "msg_list_chats로 kakaotalk 대화방을 확인해 줘.",
     skills: ["msg_list_chats", "msg_read"],
     hidden: true,
   },
@@ -339,6 +392,21 @@ function render(text: string, user: UserRow): string {
   return text.replaceAll("{displayName}", user.display_name).replaceAll("{agentName}", user.agent_name);
 }
 
+const SEED_BY_ID = new Map(TEMPLATE_SEEDS.map((t) => [t.id, t]));
+
+/** heads a template's hint in the model copy: the person's screen shows only their line above it */
+export const TEMPLATE_HINT_HEAD = "(둘러보기에서 맡긴 일이라 앱이 진행 방법을 덧붙였어요. 사용자 화면에는 위 한 줄만 보여요.)";
+
+/**
+ * The model-only note for a first message whose text is a template's line (the caller checks it is the first message
+ * of the person's own new task thread), else null. Matching the text, not a template id on the request, keeps the
+ * hint on every way the app sends that line: 부탁하기, its retry after a refused send, the island's 다시 시도.
+ */
+export function templateHint(user: UserRow, text: string): string | null {
+  const seed = TEMPLATE_SEEDS.find((t) => t.hint && render(t.prompt, user) === text);
+  return seed ? `${TEMPLATE_HINT_HEAD}\n${render(seed.hint!, user)}` : null;
+}
+
 export function templateView(t: TemplateRow, user: UserRow): TaskTemplate {
   return {
     id: t.id,
@@ -348,6 +416,7 @@ export function templateView(t: TemplateRow, user: UserRow): TaskTemplate {
     icon: t.icon,
     hue: t.hue,
     prompt: render(t.prompt, user),
+    asksFirst: !!SEED_BY_ID.get(t.id)?.asksFirst,
     count: t.count,
     skills: safeJson(t.skills_json, []),
   };

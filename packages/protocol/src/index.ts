@@ -482,7 +482,11 @@ export interface TaskTemplate {
   description: string;
   icon: IconName;
   hue: number; // tint of the template's icon plate
-  prompt: string; // what gets sent to the agent on "부탁하기"
+  /** what the person sends on "부탁하기": one short line in their own words (no tool ids); the server adds the
+   * model-only how-to when this exact line opens a new task thread */
+  prompt: string;
+  /** the agent asks for missing details before it starts (PreDelegateSheet: "시작하기 전에 필요한 것만 짧게 물어봐요") */
+  asksFirst: boolean;
   count: number; // "N명이 맡겼어요"
   skills: string[]; // which skills it exercises
 }

@@ -106,7 +106,8 @@ describe("explore", () => {
       if (!t.hidden && t.skills.length) expect(t.skills.every((s) => broken.has(s))).toBe(false);
       for (const s of t.skills) expect(broken.has(s)).toBe(false);
       for (const s of t.skills) expect(real.has(s)).toBe(true);
-      for (const name of t.prompt.match(/\b(k|msg|sys)_[a-z_]+/g) ?? []) expect(real.has(name)).toBe(true);
+      // tool ids live in the model-only hint (template-hint.test.ts keeps them out of the line)
+      for (const name of t.hint?.match(/\b(k|msg|sys)_[a-z_]+/g) ?? []) expect(real.has(name)).toBe(true);
     }
     expect(new Set(TEMPLATE_SEEDS.filter((t) => !t.hidden).map((t) => t.category))).toEqual(
       new Set(["recommend", "benefit", "shopping", "travel", "people", "culture", "home"]),
@@ -120,7 +121,7 @@ describe("explore", () => {
     expect(res.status).toBe(201);
     const d = (await res.json()) as DelegateResponse;
     expect(d.thread).toMatchObject({ kind: "task", title: "내가 받을 수 있는 정부 지원사업을 찾아 드릴게요.", subtitle: "깽이에게 맡긴 일", icon: "coins" });
-    expect(d.prompt).toContain("k_gov_support");
+    expect(d.prompt).toBe("지금 신청할 수 있는 정부 지원사업과 청년·주거 공고를 내 조건에 맞춰 찾아 줘.");
     const threads = (await (await h.req("GET", "/api/threads", { token })).json()) as Thread[];
     expect(threads.map((t) => t.id)).toContain(d.thread.id);
     const ex = (await (await h.req("GET", "/api/explore", { token })).json()) as ExploreResponse;

@@ -7,6 +7,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { DelegateResponse, Message } from "@pickle/protocol";
 import { hasCancelNote } from "../src/history.ts";
+import { TEMPLATE_HINT_HEAD } from "../src/explore.ts";
 import { quotaDay } from "../src/kst.ts";
 import { MAX_QUEUED_TURNS, QUEUED_STATUS, queuedTurns } from "../src/turns.ts";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
@@ -82,7 +83,7 @@ describe("a new thread's first message queues behind the running turn", () => {
     // its own turn in its own thread: the prompt was never steered into the main turn
     expect(steeredIntoMain).toEqual([]);
     expect(h.turns.inputs[1]!.ctx.threadId).toBe(d.thread.id);
-    expect(h.turns.inputs[1]!.userText).toBe(d.prompt);
+    expect(h.turns.inputs[1]!.userText?.startsWith(`${d.prompt}\n\n${TEMPLATE_HINT_HEAD}\n`)).toBe(true); // + the template's how-to
     expect((await messages(a.token, main)).some((m) => m.text === d.prompt)).toBe(false);
     expect((await messages(a.token, d.thread.id)).map((m) => m.role)).toEqual(["user", "assistant"]);
     expect(queuedTurns(h.app.core, a.session.user.id)).toBe(0);

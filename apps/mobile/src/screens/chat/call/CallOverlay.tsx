@@ -183,8 +183,10 @@ function CallCard() {
                 data-line={l.id}
                 data-who={l.who}
                 data-current={l === lastSpoken || undefined}
-                // lines only ever move up (a new one joins at the bottom of the column): x never changes — the column
-                // is full-width and start-aligned — so this animates y alone; reduced motion: no movement at all
+                // a new line joins at the bottom of the column and the lines above move up; a line that leaves (a mute,
+                // a note nothing will answer) fades out and the lines above come down into its place on the same
+                // spring. x never changes — the column is full-width and start-aligned — so this animates y alone;
+                // reduced motion: no movement at all
                 layout={reduce ? false : "position"}
                 initial={{ opacity: 0, y: reduce ? 0 : 6 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -575,9 +575,17 @@ function recognize() {
   });
 }
 
-/** A line typed in the fallback (with whatever spoken line is held joined to it): a voice-mode turn. */
+/**
+ * A line typed in the fallback (with whatever spoken line is held joined to it): a voice-mode turn. It shows in the
+ * transcript as the person's line, as a spoken one does: a held spoken line becomes the whole line, or else a line of
+ * its own joins at the bottom, before its reply's.
+ */
 export async function say(text: string): Promise<void> {
-  if (!text.trim()) return;
+  const typed = text.trim();
+  if (!typed || !callStore.get().active) return;
+  const held = hold.held();
+  if (heldLine) patchLine(heldLine, { text: held ? `${held} ${typed}` : typed, final: true });
+  else pushLine({ who: "me", text: typed, final: true });
   hold.flush(text);
 }
 

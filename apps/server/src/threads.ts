@@ -23,6 +23,7 @@ import { attachmentPath, attachmentRef } from "./archive.ts";
 import { clampInt, iGa, newId, preview, safeJson } from "./util.ts";
 import { cutToHeard, withVoiceNote } from "./history.ts";
 import { errInfo } from "./log.ts";
+import { templateHint } from "./explore.ts";
 
 const TEXT_ATTACHMENT_INLINE = 8 * 1024;
 /** a heard report is at most a whole reply's spoken text */
@@ -135,7 +136,9 @@ export function threadRoutes(core: Core) {
       if (quotaExceeded(core, userId)) throw new HttpError(429, "quota_exceeded", QUOTA_MESSAGE);
       if (!deps.runTurn) throw new HttpError(503, "llm_not_configured", "AI 서버 설정이 아직 안 됐어요. 관리자에게 알려 주세요.");
 
-      const content = await llmUserContent(core, userId, text, attachments);
+      // 둘러보기's 부탁하기 sends the template's short line; the how-to rides along in the model copy only
+      const hint = thread.kind === "task" && isNewOwnThread(thread, userId) ? templateHint(user, text) : null;
+      const content = (await llmUserContent(core, userId, text, attachments)) + (hint ? `\n\n${hint}` : "");
       // everything below is synchronous until streamTurn, so the busy/steer decision can't race
       const now = core.now();
       const userMsgId = newId("m");

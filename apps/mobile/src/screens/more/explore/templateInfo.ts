@@ -143,5 +143,6 @@ export function resultFor(tpl: TaskTemplate): { icon: AppIconName; text: string 
   return { icon: "chat", text: "새 대화에서 정리해 드려요." };
 }
 
-/** prompts that say "모르면 먼저 물어봐" start with a question */
-export const asksFirst = (tpl: TaskTemplate) => /물어/.test(tpl.prompt);
+/** the agent asks for missing details before it starts: the server says so per template (the prompt is now the
+ * person's own short line, with no "모르면 먼저 물어봐" left to read) */
+export const asksFirst = (tpl: TaskTemplate) => tpl.asksFirst;
