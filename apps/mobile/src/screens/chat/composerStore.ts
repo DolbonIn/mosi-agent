@@ -121,6 +121,8 @@ onServerEvent((e) => {
   const s = receipts.get();
   forget(e.messageIds.filter((id) => s[id] === "steered"));
 });
+/** a `steers_dropped` named this line: its turn stopped or failed and nothing will answer it (the call asks for its notes) */
+export const steerDropped = (id: ID) => droppedSteers.has(id);
 /**
  * The follow-up row: is a steered message still waiting for its own answer? `tail` = the last few messages as
  * "id:role" pairs, oldest first. The turn it was steered into answers once (that reply lands after it); a second

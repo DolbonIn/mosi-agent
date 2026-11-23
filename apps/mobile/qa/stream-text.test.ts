@@ -128,6 +128,14 @@ describe("sameBlock", () => {
     expect(view("보기 [a [b](https://x.com/(no")).toEqual(["보기 a [b"]);
     expect(view("보기 [x]y)")).toEqual(["보기 [x]y)"]);
   });
+  test("a link whose \"]\" has not come yet shows its label as text: \"[구글\" reads \"구글\" (lead U4)", () => {
+    const text = (t: string) => parseInline(t, true).map((r) => r.t).join("");
+    expect(text("자세한 건 [구글")).toBe("자세한 건 구글");
+    expect(text("[구")).toBe("구");
+    expect(text("자세한 건 [")).toBe("자세한 건 ");
+    // only the last one can still be coming: a closed "[a]" before it stays as written
+    expect(text("[a] 그리고 [구")).toBe("[a] 그리고 구");
+  });
   test("hostile URL parentheses never stall a commit: each shape × 5,000 parses in under 50 ms, streaming or not (DD 1432)", () => {
     const shapes = [
       "[a](https://" + "(a".repeat(5000) + " x",

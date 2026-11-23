@@ -5,7 +5,9 @@ import type { ServerEvent } from "@pickle/protocol";
  * `steers_dropped`: a turn the app started stopped (or failed after reading them), and the server answers none of the
  * lines named. Every device of the person gets the ids; wherever a 202 put "하던 일에 이어서 전했어요" on one of them, it
  * goes, also when the send's result went elsewhere (island 다시 시도, PreDelegateSheet, another device's turn), and a
- * 202 that lands after the notice adds none. Drives the real events.ts dispatch through a fake EventSource (no server).
+ * 202 that lands after the notice adds none. The call's transcript asks steerDropped which of its notes such a notice
+ * named (callStore can't be loaded here: audio-unlock.test mocks it for the whole run; the captures cover the call).
+ * Drives the real events.ts dispatch through a fake EventSource (no server).
  * bun runs every test file in one process: the file starts and ends with resetSession (the sign-out reset).
  */
 
@@ -96,5 +98,11 @@ describe("steers_dropped: the lines of a stopped or failed turn lose their recei
     push({ type: "message_deleted", threadId: "t_main", messageId: "m_keep" });
     expect(receiptOf("m_keep")).toBe("steered");
     expect(receiptOf("m_q")).toBe("steered");
+  });
+
+  test("the call asks steerDropped about its notes: yes for every id a notice named (with a receipt or not), no for the rest", async () => {
+    const { steerDropped } = await import("../src/screens/chat/composerStore");
+    expect(["m_s1", "m_s2", "m_d", "m_never", "m_late", "m_own"].map(steerDropped)).toEqual([true, true, true, true, true, true]);
+    expect(["m_keep", "m_q", "m_next", "m_q0"].map(steerDropped)).toEqual([false, false, false, false]);
   });
 });
