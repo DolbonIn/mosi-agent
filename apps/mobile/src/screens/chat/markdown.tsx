@@ -27,7 +27,14 @@ export type Block =
   | { kind: "code"; text: string; gap: boolean; open: boolean }
   | { kind: "hr"; gap: boolean };
 
-const URL_RE = /https?:\/\/[^\s<>()[\]"']+[^\s<>()[\]"'.,!?;:)]/y;
+/** a bare URL. Parentheses count only as a balanced pair, two deep ("…/wiki/A_(B)"; GFM): "(https://x.com/a)" leaves
+ * its ")" out. It never ends on . , ! ? ; : (sentence punctuation after it). */
+const URL_RE = /https?:\/\/(?:[^\s<>()[\]"']|\((?:[^\s<>()[\]"']|\([^\s<>()[\]"']*\))*\))+(?:[^\s<>()[\]"'.,!?;:]|\((?:[^\s<>()[\]"']|\([^\s<>()[\]"']*\))*\))/y;
+/** a link's "](url)", read at the "]" that ends its label: balanced parentheses belong to the URL, two deep
+ * ("https://x.com/(note)/y"; CommonMark) */
+const LINK_TAIL = /\]\((https?:\/\/(?:[^()\s]|\((?:[^()\s]|\([^()\s]*\))*\))+)\)/y;
+/** as before for an unbalanced one: the URL ends at its first ")" ("[a](https://x.com/a(b)" → "https://x.com/a(b") */
+const LINK_OPEN_TAIL = /\]\((https?:\/\/[^)\s]+)\)/y;
 /** a "*" right before VS16 or the keycap mark is the keycap emoji "*️⃣" (U+002A U+FE0F U+20E3), never an emphasis mark */
 const keycapAt = (s: string, k: number) => s[k] === "*" && (s[k + 1] === "\uFE0F" || s[k + 1] === "\u20E3");
 /** the next `c` from `from` that is a mark (a keycap's "*" is not), or -1 */
@@ -38,18 +45,68 @@ function nextMark(s: string, c: string, from: number): number {
 /** a link label that is an address ("clinic.dmm.com", "www.a.jp/b"), drawn as a URL */
 const URL_LABEL = /^(?:[a-z][a-z0-9+.-]*:\/\/\S+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/?#]\S*)?)$/i;
 
-/** Inline tokenizer: ** __ (bold), * _ (italic, ASCII-delimited only), ` (code), [text](url), bare URLs. The keycap
- * "*️⃣" keeps its "*" (keycapAt): it opens, closes and counts as no mark. */
+/**
+ * Where an unfinished link starts at the end of streamed text, or -1: "[label" with no "]" yet, or "[label]" followed by
+ * "(url…" whose ")" has not come (a "(…)" pair inside the URL, any depth, does not close it) or by no ")" at all. The
+ * label holds no "]" and no line break, the rest no space; the leftmost such "[" wins. One pass over the last line with
+ * running "(" − ")" depths, so a hostile reply ("[" × 100k, "(a" × n) costs linear time, never a regex backtrack.
+ */
+function openLinkAt(text: string): number {
+  const ln = text.lastIndexOf("\n") + 1;
+  const n = text.length;
+  // the part after "]" holds no space: only a "]" after the line's last space can open it
+  let ws = ln - 1;
+  for (let j = n - 1; j >= ln; j--) if (/\s/.test(text[j]!)) { ws = j; break; }
+  // depth[k]: "(" minus ")" in text[ln, ln + k); low[k]: the lowest depth[k..] (to the end)
+  const m = n - ln;
+  const depth = new Int32Array(m + 1);
+  for (let k = 0; k < m; k++) { const c = text[ln + k]; depth[k + 1] = depth[k]! + (c === "(" ? 1 : c === ")" ? -1 : 0); }
+  const low = new Int32Array(m + 1);
+  low[m] = depth[m]!;
+  for (let k = m - 1; k >= 0; k--) low[k] = Math.min(depth[k]!, low[k + 1]!);
+  const lastClose = text.lastIndexOf(")");
+  let open = -1;
+  for (let j = ln; j < n; j++) {
+    const c = text[j];
+    if (c === "[") { if (open < 0) open = j; continue; }
+    if (c !== "]") continue;
+    if (open >= 0 && j > ws) {
+      if (j + 1 === n) return open;
+      // "(url…": still open unless a ")" brings the depth below the opener's; anything else: no ")" after the "]"
+      if (text[j + 1] === "(" ? low[j + 2 - ln]! >= depth[j + 2 - ln]! : lastClose < j) return open;
+    }
+    open = -1;
+  }
+  return open;
+}
+
+/** Inline tokenizer: ** __ (bold), * _ (italic, ASCII-delimited only), ` (code), [text](url), bare URLs. A bold or an
+ * italic closes only on the mark that opened it (the other one inside stays as written). The keycap "*️⃣" keeps its
+ * "*" (keycapAt): it opens, closes and counts as no mark. */
 export function parseInline(src: string, streaming = false): Run[] {
   let text = src;
   if (streaming) {
-    // an unfinished link while streaming: show its label as plain text until it closes
-    text = text.replace(/\[([^\]\n]*)(?:\]\(?[^)\s]*)?$/, "$1");
+    // an unfinished link while streaming: show its label as plain text until it closes (openLinkAt)
+    const at = openLinkAt(text);
+    if (at >= 0) {
+      const end = text.indexOf("]", at);
+      text = text.slice(0, at) + text.slice(at + 1, end < 0 ? undefined : end);
+    }
   }
   const runs: Run[] = [];
   let b = false;
+  /** the mark that opened the bold ("**" or "__"): only the same one closes it ("**__init__ 함수**" is one bold) */
+  let bMark = "";
   let i = false;
+  /** the mark that opened the italic: only the same one closes it ("*snake_case 예시*" is one italic) */
+  let iMark = "";
   let buf = "";
+  // a link's label runs from its "[" to the next "]" (no "]" or line break inside, not empty), so every "[" before the
+  // same "]" shares its "](url)": `close` is that "]" and `nl` the next line break (text.length when none is left),
+  // `dead` a "]" whose tail was read and is no link. A run of "[" costs one look, not one scan each ("[" × 100k).
+  let close = -1;
+  let nl = -1;
+  let dead = -1;
   const flush = () => {
     if (!buf) return;
     const last = runs[runs.length - 1];
@@ -60,9 +117,10 @@ export function parseInline(src: string, streaming = false): Run[] {
   for (let k = 0; k < text.length; ) {
     const c = text[k]!;
     const two = text.slice(k, k + 2);
-    if ((two === "**" && !keycapAt(text, k + 1)) || two === "__") {
+    if (((two === "**" && !keycapAt(text, k + 1)) || two === "__") && (!b || two === bMark)) {
       flush();
       b = !b;
+      bMark = b ? two : "";
       k += 2;
       continue;
     }
@@ -84,12 +142,26 @@ export function parseInline(src: string, streaming = false): Run[] {
       continue;
     }
     if (c === "[") {
-      const m = /^\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/.exec(text.slice(k));
-      if (m) {
-        flush();
-        runs.push({ t: m[1]!, href: m[2]!, ...(b ? { b } : {}), ...(URL_LABEL.test(m[1]!) ? { url: true } : {}) });
-        k += m[0].length;
-        continue;
+      if (close <= k) {
+        close = text.indexOf("]", k + 1);
+        if (close < 0) close = text.length;
+      }
+      if (nl <= k) {
+        nl = text.indexOf("\n", k + 1);
+        if (nl < 0) nl = text.length;
+      }
+      if (close < text.length && close > k + 1 && nl > close && close !== dead) {
+        LINK_TAIL.lastIndex = close;
+        LINK_OPEN_TAIL.lastIndex = close;
+        const m = LINK_TAIL.exec(text) ?? LINK_OPEN_TAIL.exec(text);
+        if (m) {
+          flush();
+          const label = text.slice(k + 1, close);
+          runs.push({ t: label, href: m[1]!, ...(b ? { b } : {}), ...(i ? { i } : {}), ...(URL_LABEL.test(label) ? { url: true } : {}) });
+          k = close + m[0].length;
+          continue;
+        }
+        dead = close;
       }
     }
     if ((c === "h" && (text.startsWith("http://", k) || text.startsWith("https://", k))) && (k === 0 || /[\s(（]/.test(text[k - 1]!))) {
@@ -97,20 +169,22 @@ export function parseInline(src: string, streaming = false): Run[] {
       const m = URL_RE.exec(text);
       if (m) {
         flush();
-        runs.push({ t: m[0], href: m[0], url: true });
+        // a link inside a bold or an italic is drawn bold or italic too, labeled or bare
+        runs.push({ t: m[0], href: m[0], url: true, ...(b ? { b } : {}), ...(i ? { i } : {}) });
         k += m[0].length;
         continue;
       }
     }
     if ((c === "*" || c === "_") && !keycapAt(text, k)) {
       // italic only between ASCII-ish word boundaries (Korean underscores in ids stay literal); a mark before a space
-      // never opens, and closes when a word ends there ("*강조* 그리고")
+      // never opens, and closes when a word ends there ("*강조* 그리고"); only the mark that opened it closes it
       const prev = text[k - 1];
       const opening = !i && text[k + 1] !== " " && (k === 0 || /[\s(（"']/.test(prev!)) && nextMark(text, c, k + 1) > k + 1;
-      const closing = i && prev !== " ";
+      const closing = i && c === iMark && prev !== " ";
       if (opening || closing) {
         flush();
         i = !i;
+        iMark = i ? c : "";
         k++;
         continue;
       }

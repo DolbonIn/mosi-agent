@@ -69,6 +69,19 @@ describe("previewOf: first sentence, markdown out, secrets masked", () => {
     expect(previewOf("***️⃣ 메뉴 안내**\n\n주문은 *️⃣를 누르면 돼요. 그다음")).toBe("주문은 *️⃣를 누르면 돼요.");
   });
 
+  test("a \"*\" before a space never opens an italic, one after a space never closes it (as in the app's markdown)", () => {
+    expect(previewOf("2 * 3 * 4예요.")).toBe("2 * 3 * 4예요.");
+    expect(previewOf("*강조 * 다음")).toBe("*강조 * 다음");
+    expect(previewOf("*별표 하나 *그리고")).toBe("*별표 하나 *그리고");
+    expect(previewOf("a * b *c* 끝")).toBe("a * b c 끝");
+    expect(previewOf("*강조* 그리고 *기울임*")).toBe("강조 그리고 기울임");
+    expect(previewOf("*a*")).toBe("a");
+    expect(previewOf("a * b* 끝")).toBe("a * b* 끝");
+    // a keycap's "*" opens nothing either, also when a "*" after a word follows
+    expect(previewOf("*️⃣ 누르고 다시*")).toBe("*️⃣ 누르고 다시*");
+    expect(previewOf("*⃣ 누르고 다시*")).toBe("*⃣ 누르고 다시*");
+  });
+
   test("≤60 chars, cut at a word boundary with …", () => {
     const long = "이번 주 토요일 오후 두 시에 대학로 연습실에서 리허설을 하고 끝나면 근처 식당에서 다 같이 저녁을 먹기로 했어요.";
     const p = previewOf(long);

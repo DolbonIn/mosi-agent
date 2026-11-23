@@ -26,7 +26,8 @@ export function parseDashboard(src: string): DashboardWidget[] | null {
 
 /**
  * Plain text for previews / copy (markdown syntax removed). A "*" right before VS16 or U+20E3 is the keycap "*️⃣"
- * (as in the chat's markdown.tsx): it stays, and it never opens or closes bold or italic.
+ * (as in the chat's markdown.tsx): it stays, and it never opens or closes bold or italic. As there too, a "*" before a
+ * space never opens an italic and one after a space never closes it ("2 * 3 * 4" stays).
  */
 export function stripMarkdown(src: string): string {
   return src
@@ -40,7 +41,7 @@ export function stripMarkdown(src: string): string {
     .replace(/^\s*\|?\s*:?-{2,}.*$/gm, "")
     .replace(/\|/g, " ")
     .replace(/\*\*(?![\uFE0F\u20E3])|__|~~|`/g, "")
-    .replace(/\*(?![\uFE0F\u20E3])(\S(?:[^*]|\*(?=[\uFE0F\u20E3]))*)\*(?![\uFE0F\u20E3])/g, "$1")
+    .replace(/\*(?![\uFE0F\u20E3])(\S(?:(?:[^*]|\*(?=[\uFE0F\u20E3]))*[^\s*])?)\*(?![\uFE0F\u20E3])/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
     .replace(/[ \t]+/g, " ")
     .replace(/\n{2,}/g, "\n")

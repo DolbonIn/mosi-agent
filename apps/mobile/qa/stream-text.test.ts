@@ -3,7 +3,7 @@
 import { describe, expect, test } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { parseBlocks, renderRuns, sliceRuns } from "../src/screens/chat/markdown";
+import { parseBlocks, parseInline, renderRuns, sliceRuns } from "../src/screens/chat/markdown";
 import { commitPoint, sameBlock, sameLine, StreamText } from "../src/screens/chat/StreamText";
 
 // a table (each row a paragraph), a paragraph a list follows, a paragraph ending in a number that a list item continues
@@ -76,6 +76,90 @@ describe("sameBlock", () => {
     }
     const last = parseBlocks(text, true).flatMap((b) => ("runs" in b ? b.runs : []));
     expect(last.filter((r) => r.i).map((r) => r.t)).toEqual(["강조"]);
+  });
+  test("an italic closes only on its own mark while streaming too: no commit ends \"*snake_case\" at the \"_\"", () => {
+    const text = "*snake_case 예시*를 보면 _밑줄 *별표_ 끝";
+    const cs = commits(text, 1);
+    expect(cs.length).toBeGreaterThan(3);
+    for (const c of cs) {
+      // an italic run is always a whole one, never cut at the other mark
+      for (const r of parseBlocks(c, true).flatMap((b) => ("runs" in b ? b.runs : []))) if (r.i) expect(["snake_case 예시", "밑줄 *별표"]).toContain(r.t);
+    }
+    const last = parseBlocks(text, true).flatMap((b) => ("runs" in b ? b.runs : []));
+    expect(last.filter((r) => r.i).map((r) => r.t)).toEqual(["snake_case 예시", "밑줄 *별표"]);
+  });
+  test("a bold closes only on its own mark while streaming too: no commit cuts \"**__init__ 함수**\" at a \"__\"", () => {
+    const text = "**__init__ 함수**를 보면 __a**b__ 끝, ***️⃣ 메뉴__ 끝** 그리고";
+    const whole = ["__init__ 함수", "a**b", "*️⃣ 메뉴__ 끝"];
+    const cs = commits(text, 1);
+    expect(cs.length).toBeGreaterThan(5);
+    for (const c of cs) {
+      // a bold run is always the start of a whole one (a bold still open while streaming is drawn bold), never cut at the other mark
+      for (const r of parseBlocks(c, true).flatMap((b) => ("runs" in b ? b.runs : []))) if (r.b) expect(whole.some((w) => w.startsWith(r.t))).toBe(true);
+    }
+    const last = parseBlocks(text, true).flatMap((b) => ("runs" in b ? b.runs : []));
+    expect(last.filter((r) => r.b).map((r) => r.t)).toEqual(whole);
+  });
+  test("a link whose URL holds a (…) pair while streaming: its label waits as text, never the raw markdown, then the whole link", () => {
+    const text = "자세한 건 [x.com/(note)/y](https://x.com/(note)/y) 에서 봐요. 위키는 https://ja.wikipedia.org/wiki/A_(B) 참고";
+    const cs = commits(text, 1);
+    expect(cs.length).toBeGreaterThan(5);
+    for (const c of cs) {
+      const runs = parseBlocks(c, true).flatMap((b) => ("runs" in b ? b.runs : []));
+      for (const r of runs) {
+        if (!r.href) expect(r.t).not.toContain("](");
+        else if (!r.href.includes("wikipedia")) expect(r.href).toBe("https://x.com/(note)/y");
+        else expect("https://ja.wikipedia.org/wiki/A_(B)".startsWith(r.href)).toBe(true);
+      }
+    }
+    const last = parseBlocks(text, true).flatMap((b) => ("runs" in b ? b.runs : []));
+    expect(last.filter((r) => r.href).map((r) => r.href)).toEqual(["https://x.com/(note)/y", "https://ja.wikipedia.org/wiki/A_(B)"]);
+    // the streamed text as it stands (not cut at a commit point): an open "(" in the URL still waits, a closed link shows
+    const view = (t: string) => parseBlocks(t, true).flatMap((b) => ("runs" in b ? b.runs : [])).map((r) => (r.href ? `<${r.href}>` : r.t));
+    expect(view("보기 [x](https://x.com/(no")).toEqual(["보기 x"]);
+    expect(view("보기 [x](https://x.com/(note)/y")).toEqual(["보기 x"]);
+    expect(view("보기 [x](https://x.com/(a)/(b")).toEqual(["보기 x"]);
+    expect(view("보기 [x](https://x.com/a((b))")).toEqual(["보기 x"]);
+    expect(view("보기 [x](https://x.com/(note)/y)")).toEqual(["보기 ", "<https://x.com/(note)/y>"]);
+    expect(view("보기 [x](https://a.example)")).toEqual(["보기 ", "<https://a.example>"]);
+    // only the last "[…](…" can still be coming: an earlier "[참고]" with a space after it stays, a "[" inside the label
+    // stays in it, a "]" with a ")" after it and no "(" is no link
+    expect(view("[참고] 그리고 [x](https://x.com/(no")).toEqual(["[참고] 그리고 x"]);
+    expect(view("보기 [a [b](https://x.com/(no")).toEqual(["보기 a [b"]);
+    expect(view("보기 [x]y)")).toEqual(["보기 [x]y)"]);
+  });
+  test("hostile URL parentheses never stall a commit: each shape × 5,000 parses in under 50 ms, streaming or not (DD 1432)", () => {
+    const shapes = [
+      "[a](https://" + "(a".repeat(5000) + " x",
+      "[a](https://" + "((a".repeat(5000) + " x",
+      "[a](https://" + "(a".repeat(5000) + ") 끝",
+    ];
+    for (const s of shapes) {
+      let best = Infinity;
+      for (let n = 0; n < 3; n++) {
+        const t0 = performance.now();
+        parseBlocks(s, true);
+        parseBlocks(s);
+        best = Math.min(best, performance.now() - t0);
+      }
+      expect(best).toBeLessThan(50);
+    }
+  });
+  test("hostile brackets and marks never stall a commit: each 100k-character shape parses in under 100 ms (lead 1432)", () => {
+    const K = 100000;
+    const shapes = ["[".repeat(K), "[[ ".repeat(K / 3), "[a](".repeat(K / 4), "[".repeat(K) + "]x", "[".repeat(K) + "](https://a/(b", "[".repeat(K / 2) + "](https://" + "a".repeat(K / 2), "[a]".repeat(K / 3), "[".repeat(20000) + "\n끝", "*".repeat(K), "**".repeat(K / 2), "`".repeat(K), "*a".repeat(K / 2)];
+    for (const s of shapes) {
+      let best = Infinity;
+      for (let n = 0; n < 2; n++) {
+        const t0 = performance.now();
+        parseBlocks(s, true);
+        parseBlocks(s);
+        parseInline(s, true);
+        parseInline(s);
+        best = Math.min(best, performance.now() - t0);
+      }
+      expect(best).toBeLessThan(100);
+    }
   });
   test("blocks are plain data: they survive JSON as they are (no functions, no cycles, nothing dropped)", () => {
     for (const c of commits(DRAFT, 7)) for (const b of parseBlocks(c, true)) expect(JSON.parse(JSON.stringify(b))).toEqual(b);

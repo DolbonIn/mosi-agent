@@ -83,3 +83,17 @@ describe("보관함 text: the keycap *️⃣ keeps its \"*\"", () => {
     expect(withoutTitle("# #️⃣ 메뉴\n본문", "*️⃣ 메뉴")).toBe("# #️⃣ 메뉴\n본문");
   });
 });
+
+describe("보관함 text: a \"*\" next to a space (as in the chat's markdown)", () => {
+  test("one before a space never opens an italic, one after a space never closes it", () => {
+    expect(stripMarkdown("*강조 * 다음")).toBe("*강조 * 다음");
+    expect(stripMarkdown("*별표 하나 *그리고")).toBe("*별표 하나 *그리고");
+    expect(stripMarkdown("a * b *c* 끝")).toBe("a * b c 끝");
+    expect(stripMarkdown("*강조* 그리고 *기울임*")).toBe("강조 그리고 기울임");
+    expect(stripMarkdown("*a*")).toBe("a");
+    expect(stripMarkdown("a * b* 끝")).toBe("a * b* 끝");
+    // a keycap's "*" opens nothing either, also when a "*" after a word follows
+    expect(stripMarkdown("*️⃣ 누르고 다시*")).toBe("*️⃣ 누르고 다시*");
+    expect(stripMarkdown("*⃣ 누르고 다시*")).toBe("*⃣ 누르고 다시*");
+  });
+});

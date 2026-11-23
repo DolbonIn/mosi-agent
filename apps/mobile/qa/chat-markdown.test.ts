@@ -138,6 +138,63 @@ test("italic and bold read as before; an italic closes where its word ends, a sp
   expect(view("snake_case_name 그대로")).toEqual(["snake_case_name 그대로"]);
   expect(view("별표* 하나")).toEqual(["별표* 하나"]);
 });
+test("a bold or an italic closes only on the mark that opened it: the other one inside stays as written (DD 0418)", () => {
+  const view = (t: string) => parseBlocks(t).flatMap((b) => ("runs" in b ? b.runs : [])).map((r) => (r.b ? "<b>" : "") + (r.i ? "<i>" : "") + r.t);
+  expect(view("*snake_case 예시*")).toEqual(["<i>snake_case 예시"]);
+  expect(view("*a_b* 그리고 _c*d_ 끝")).toEqual(["<i>a_b", " 그리고 ", "<i>c*d", " 끝"]);
+  expect(view("_밑줄 *별표_ 끝*")).toEqual(["<i>밑줄 *별표", " 끝*"]);
+  expect(view("**굵게 *기울_임* 끝**")).toEqual(["<b>굵게 ", "<b><i>기울_임", "<b> 끝"]);
+  expect(md("*snake_case 예시*")).toContain("<em>snake_case 예시</em>");
+  // bold: "**" or "__", the same way (text after it: a bold-only line is a section head)
+  expect(view("**__init__ 함수**를 봐요")).toEqual(["<b>__init__ 함수", "를 봐요"]);
+  expect(view("**굵게__ 끝** 다음")).toEqual(["<b>굵게__ 끝", " 다음"]);
+  expect(view("__a**b__ 다음")).toEqual(["<b>a**b", " 다음"]);
+  expect(view("__굵게__ **둘째** 끝")).toEqual(["<b>굵게", " ", "<b>둘째", " 끝"]);
+  // with the keycap rule: a "**" whose second "*" is a keycap is still no mark
+  expect(view("***️⃣ 메뉴__ 끝** 다음")).toEqual(["<b>*️⃣ 메뉴__ 끝", " 다음"]);
+  expect(view("__키캡 **️⃣ 안__ 끝")).toEqual(["<b>키캡 **️⃣ 안", " 끝"]);
+});
+test("a link inside a bold or an italic is bold or italic too, labeled or bare (DD 1400)", () => {
+  const runs = (t: string) => parseBlocks(t).flatMap((b) => ("runs" in b ? b.runs : []));
+  expect(runs("*보기 [링크](https://a.example) 끝*")[1]).toEqual({ t: "링크", href: "https://a.example", i: true });
+  expect(runs("**굵게 https://x.com/a 끝** 다음")[1]).toEqual({ t: "https://x.com/a", href: "https://x.com/a", url: true, b: true });
+  expect(runs("*기울 https://x.com/b 임* 다음")[1]).toEqual({ t: "https://x.com/b", href: "https://x.com/b", url: true, i: true });
+  expect(runs("보기 https://x.com/c 끝")[1]).toEqual({ t: "https://x.com/c", href: "https://x.com/c", url: true });
+  const html = md("**굵게 https://x.com/a 끝** 그리고 *보기 [링크](https://a.example)*");
+  expect(html).toContain('<strong><a class="md-link" href="https://x.com/a"');
+  expect(html).toContain('<em><a class="md-link" href="https://a.example"');
+});
+test("a balanced (…) pair belongs to a link's URL, labeled or bare; a \")\" around the URL stays text (DD 1400)", () => {
+  const runs = (t: string) => parseBlocks(t).flatMap((b) => ("runs" in b ? b.runs : []));
+  const view = (t: string) => runs(t).map((r) => (r.href ? `<${r.href}>` : r.t));
+  // [text](url): CommonMark's balanced parentheses, two deep
+  expect(runs("자세한 건 [x.com/(note)/y](https://x.com/(note)/y) 에서 봐요.")[1]).toEqual({ t: "x.com/(note)/y", href: "https://x.com/(note)/y", url: true });
+  expect(view("[위키](https://ja.wikipedia.org/wiki/A_(B)) 참고")).toEqual(["<https://ja.wikipedia.org/wiki/A_(B)>", " 참고"]);
+  expect(view("[a](https://x.com/((b))) 끝")).toEqual(["<https://x.com/((b))>", " 끝"]);
+  // a "(…)" right after the link is text, as before
+  expect(view("[공식](https://a.example/menu/)(검색 결과에서 확인) 끝")).toEqual(["<https://a.example/menu/>", "(검색 결과에서 확인) 끝"]);
+  // an unbalanced "(" reads as before: the URL ends at the first ")"
+  expect(view("[a](https://x.com/a(b) 끝")).toEqual(["<https://x.com/a(b>", " 끝"]);
+  // bare URLs: a balanced pair belongs to the URL, the ")" closing a "(" before the URL does not
+  expect(view("위키는 https://ja.wikipedia.org/wiki/A_(B) 참고")).toEqual(["위키는 ", "<https://ja.wikipedia.org/wiki/A_(B)>", " 참고"]);
+  expect(view("(https://x.com/wiki/A_(B)) 끝")).toEqual(["(", "<https://x.com/wiki/A_(B)>", ") 끝"]);
+  expect(view("(https://x.com/a) 끝")).toEqual(["(", "<https://x.com/a>", ") 끝"]);
+  expect(view("https://x.com/A_(B). 끝")).toEqual(["<https://x.com/A_(B)>", ". 끝"]);
+  expect(view("https://x.com/a(b 끝")).toEqual(["<https://x.com/a>", "(b 끝"]);
+  expect(view("https://x.com/a((b))c 끝")).toEqual(["<https://x.com/a((b))c>", " 끝"]);
+  // a label is not empty, holds no line break and ends at the first "]"; every "[" before that "]" shares its "(url)"
+  expect(view("[](https://a.example) 끝")).toEqual(["[](", "<https://a.example>", ") 끝"]); // no label: the URL reads bare
+  expect(parseInline("[a\nb](https://a.example)").map((r) => r.t)).toEqual(["[a\nb](", "https://a.example", ")"]);
+  expect(view("[[a](https://a.example) 끝")).toEqual(["<https://a.example>", " 끝"]);
+  expect(runs("[[a](https://a.example) 끝")[0]!.t).toBe("[a");
+  expect(view("[a]x [b](https://a.example) 끝")).toEqual(["[a]x ", "<https://a.example>", " 끝"]);
+  expect(view("[a] [b] [c](https://a.example)")).toEqual(["[a] [b] ", "<https://a.example>"]);
+  // while streaming, an unfinished link is looked for on the last line only (a label holds no line break)
+  expect(parseInline("보기 [a\nb", true).map((r) => r.t).join("")).toBe("보기 [a\nb");
+  const html = md("자세한 건 [x.com/(note)/y](https://x.com/(note)/y) 에서 봐요.");
+  expect(html).toContain('href="https://x.com/(note)/y"');
+  expect(html).not.toContain("/y)");
+});
 
 // URLs break only between fixed pieces (urlPieces): WebKit's own breaks after "/" and "." changed with the elements
 // around a URL, so the stream's last line and the finished answer broke one URL two ways (DD 1415, reply 20 −79 px)
