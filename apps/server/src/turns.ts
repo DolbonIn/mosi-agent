@@ -938,11 +938,27 @@ async function afterTurn(
   }
 }
 
-/** Steered texts that arrived after the agent's last steer poll get their own turn (`rows`: their message rows, oldest first). */
+/**
+ * Steered texts that arrived after the agent's last steer poll get their own turn (`rows`: their message rows, oldest
+ * first). Over the day's quota it never runs: the person sees the quota message under the lines (`turn_error`, what a
+ * send of theirs gets now), and the lines lose their steer receipt (`steers_dropped`), as after a failed follow-up. A
+ * thread that is gone gets nothing (no screen shows it).
+ */
 async function steerFollowUp(core: Core, userId: string, threadId: string, texts: string[], rows: string[]): Promise<void> {
   const lease = holdLease(core, userId, threadId, await core.deps.launcher.acquire(userId));
-  if (!core.db.threadFor(threadId, userId) || quotaExceeded(core, userId)) {
+  if (!core.db.threadFor(threadId, userId)) {
     lease.release();
+    return;
+  }
+  if (quotaExceeded(core, userId)) {
+    lease.release();
+    core.log.info("follow-up turn skipped: daily quota", { user: userId, thread: threadId, lines: texts.length });
+    try {
+      core.events.publish(userId, { type: "turn_error", threadId, error: "quota_exceeded", message: QUOTA_MESSAGE });
+      if (rows.length) core.events.publish(userId, { type: "steers_dropped", threadId, messageIds: rows });
+    } catch {
+      /* ignore */
+    }
     return;
   }
   await executeTurn(core, {

@@ -924,8 +924,9 @@ export type ServerEvent =
   | { type: "agent_status"; status: AgentStatus; text?: string }
   /**
    * A turn with no stream of its own (a briefing or schedule, a steer follow-up) failed after the person's lines went
-   * into it: show `message` as the thread's error, as a stream's `error` event does for a turn the app started. A
-   * `steers_dropped` naming the lines it leaves unanswered comes right after it.
+   * into it, or a follow-up for the person's queued lines could not run (the day's quota is used up: `quota_exceeded`
+   * with the quota message): show `message` as the thread's error, as a stream's `error` event does for a turn the app
+   * started. A `steers_dropped` naming the lines it leaves unanswered comes right after it.
    */
   | { type: "turn_error"; threadId: ID; error: string; message: string }
   /**
@@ -934,7 +935,8 @@ export type ServerEvent =
    * over it, the stream closing: all its lines, as no follow-up turn comes after a Stop), or it failed (the lines it took
    * in; those still queued get a follow-up turn); the error itself still goes to the turn's stream alone. A turn with no
    * stream of its own (a briefing, a schedule, a follow-up; nothing stops it) failed: right after its `turn_error`, the
-   * lines it took in and, for a follow-up, the lines it was answering; those still queued get a follow-up turn. Every
+   * lines it took in and, for a follow-up, the lines it was answering (all of them when the day's quota kept it from
+   * running); those still queued get a follow-up turn. Every
    * device of the person gets it, so the one that sent a line drops its steer receipt too. Not sent when no line goes
    * unanswered.
    */

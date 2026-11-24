@@ -7,7 +7,8 @@
  *
  * Readiness (11-23, live): Cloudflare dropped the kept quick tunnel (DNS gone, /ready 503) while its cloudflared
  * stayed up, and restarts kept reusing it on its old log line. A recorded tunnel is reused only on /ready 200, and a
- * running one whose /ready fails sends calls to the basic voice at once and is replaced when it stays down.
+ * running one whose /ready fails sends calls to the basic voice at once and is replaced when it stays down. A tunnel that
+ * is this server's child (a fallback port) gets a metrics address too and is watched the same way.
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -51,10 +52,11 @@ function scratch(): string {
 }
 
 /**
- * a fake cloudflared: serves /quicktunnel and /ready on --metrics, prints the URL; run n gets the name fake-kept-<n>.
- * /ready answers the status in <dir>/ready-<n> (default 200); SIGUSR1 stops its metrics server (the process lives on).
+ * a fake cloudflared: serves /quicktunnel and /ready on --metrics, prints the URL; run n gets the name fake-kept-<n>
+ * and writes its pid to <dir>/pid-<n>. /ready answers the status in <dir>/ready-<n> (default 200); SIGUSR1 stops its
+ * metrics server (the process lives on).
  */
-function fakeCloudflared(): { bin: string; runs: () => string[]; setReady(run: number, status: number): void; quiet(): void } {
+function fakeCloudflared(): { bin: string; runs: () => string[]; setReady(run: number, status: number): void; quiet(): void; pid(run: number): number } {
   const d = scratch();
   const bin = join(d, "cloudflared");
   writeFileSync(
@@ -65,6 +67,7 @@ const args = process.argv.slice(2);
 const n = fs.existsSync("${d}/n") ? Number(fs.readFileSync("${d}/n", "utf8")) : 0;
 fs.writeFileSync("${d}/n", String(n + 1));
 fs.appendFileSync("${d}/argv", args.join(" ") + "\\n");
+fs.writeFileSync("${d}/pid-" + n, String(process.pid));
 const name = "fake-kept-" + n;
 const m = args.indexOf("--metrics");
 if (m >= 0) {
@@ -92,6 +95,7 @@ setTimeout(() => process.exit(0), 60000);
     runs: () => (existsSync(join(d, "argv")) ? readFileSync(join(d, "argv"), "utf8").trim().split("\n").filter(Boolean) : []),
     setReady: (run, status) => writeFileSync(join(d, `ready-${run}`), String(status)),
     quiet: () => writeFileSync(join(d, "quiet"), ""),
+    pid: (run) => Number(readFileSync(join(d, `pid-${run}`), "utf8")),
   };
 }
 
@@ -259,7 +263,7 @@ describe("kept audio tunnel", () => {
     expect(a.pa.port).not.toBe(holder.port);
     await until(() => a.voice.publicBase() !== null);
     expect(existsSync(join(stateDir, TUNNEL_RECORD))).toBe(false);
-    expect(cf.runs()[0]).toBe(`tunnel --no-autoupdate --url http://127.0.0.1:${a.pa.port}`);
+    expect(cf.runs()[0]).toMatch(new RegExp(`^tunnel --no-autoupdate --url http://127\\.0\\.0\\.1:${a.pa.port} --metrics 127\\.0\\.0\\.1:\\d+$`));
     expect(a.log.lines.find((l) => l.event === "public audio ready")?.fields?.kept).toBeUndefined();
   });
 });
@@ -399,5 +403,42 @@ describe("kept audio tunnel readiness (11-23)", () => {
     pids.add(record(stateDir)!.pid);
     expect(logged(a.log, "public audio ready")).toMatchObject({ url: K0, kept: true, reused: false });
     expect(a.log.lines.some((l) => l.event.startsWith("audio tunnel failed"))).toBe(false);
+  });
+});
+
+describe("a tunnel that is this server's child (fallback port) is watched too", () => {
+  test("a failed /ready sends calls to the basic voice at once, 200 brings it back, and one that stays down is killed and replaced", async () => {
+    const cf = fakeCloudflared();
+    const stateDir = scratch();
+    const holder = startAudioServer({ tokens: new AudioTokens(), port: 0 });
+    cleanups.push(() => void holder.stop(true));
+    const waits: [number, TunnelFailure][] = [];
+    const a = start({ stateDir, port: holder.port!, bin: cf.bin, readyPollMs: 40, deadAfterMs: 800, retryMs: (n, r) => (waits.push([n, r]), 200) });
+    expect(a.pa.port).not.toBe(holder.port);
+    await until(() => a.voice.publicBase() === K0);
+    const first = cf.pid(0);
+    pids.add(first);
+    expect(cf.runs()[0]).toMatch(/ --metrics 127\.0\.0\.1:\d+$/);
+
+    // a short drop: calls go to the basic voice, and come back with no new tunnel
+    cf.setReady(0, 503);
+    await until(() => a.voice.publicBase() === null);
+    expect(logged(a.log, "audio tunnel not ready; calls use the basic voice until it is")).toEqual({ url: K0, status: 503 });
+    cf.setReady(0, 200);
+    await until(() => a.voice.publicBase() === K0);
+    expect(logged(a.log, "audio tunnel ready again")).toEqual({ url: K0 });
+    expect(cf.runs()).toHaveLength(1);
+
+    // it stays down: our child is stopped and a new one started with the usual backoff
+    cf.setReady(0, 503);
+    await until(() => a.voice.publicBase() === K1);
+    const gone = logged(a.log, "audio tunnel stayed not ready; replacing it, calls use the basic voice until the new one is up")!;
+    expect(gone).toMatchObject({ url: K0, status: 503, retryInS: 0 });
+    expect(gone.pid).toBeUndefined(); // no kept pid to name
+    expect(waits).toEqual([[1, "not_ready"]]);
+    await until(() => !pidAlive(first));
+    pids.add(cf.pid(1));
+    expect(cf.runs()).toHaveLength(2);
+    expect(existsSync(join(stateDir, TUNNEL_RECORD))).toBe(false); // still nothing kept
   });
 });

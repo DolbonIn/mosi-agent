@@ -2,12 +2,15 @@
  * steers_dropped: a turn ends without answering lines steered into it (202). A turn the app started: it stopped after
  * the server took it (all its lines), or it failed (the lines it took in; the queued ones get a follow-up turn). A turn
  * with no stream of its own (a briefing, a schedule, a follow-up) that fails: right after its turn_error, the lines it
- * took in and a follow-up's own lines; the queued ones get a follow-up turn as well. Every device of the person hears
+ * took in and a follow-up's own lines; the queued ones get a follow-up turn as well (when the day's quota keeps that
+ * one from running: the quota message as its turn_error, and all its lines). Every device of the person hears
  * which rows those are, so the device that sent a line drops its steer receipt even when another device stopped the turn
  * or held its stream (the island's retry, a delegate sheet).
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
+import { QUOTA_MESSAGE } from "../src/core.ts";
+import { quotaDay } from "../src/kst.ts";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
 
 let h: Harness;
@@ -28,13 +31,17 @@ const waitForAbort = (signal: AbortSignal) =>
 async function device(token: string) {
   const ev = sseReader(await h.req("GET", `/api/events?token=${token}`));
   await ev.next((e) => e.type === "hello");
+  /** the turn_error events got() went past: their error and message */
+  const errors: { error: string; message: string }[] = [];
   return {
+    errors,
     /** the steers_dropped and turn_error events since the last call, and the agent_status idle ones between them, in order */
     async got(waitMs = 60): Promise<string[]> {
       const out: string[] = [];
       for (;;) {
         const e = await ev.next<ServerEvent>((x) => x.type === "steers_dropped" || x.type === "turn_error" || (x.type === "agent_status" && x.status === "idle"), waitMs);
         if (!e) return out;
+        if (e.type === "turn_error") errors.push({ error: e.error, message: e.message });
         out.push(e.type === "steers_dropped" ? `steers_dropped ${e.threadId} ${e.messageIds.join(",")}` : e.type === "turn_error" ? `turn_error ${e.threadId}` : "idle");
       }
     },
@@ -390,6 +397,39 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     const want = ["idle", `turn_error ${tid}`, `steers_dropped ${tid} ${a},${b}`, "idle", `turn_error ${tid}`, `steers_dropped ${tid} ${c}`, "idle"];
     expect(await phone.got()).toEqual(want);
     expect(await laptop.got()).toEqual(want);
+    await phone.cancel();
+    await laptop.cancel();
+  });
+
+  test("the day's quota keeps the follow-up turn from running: the quota message as the thread's error, then the rows it would have answered, oldest first, on every device", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const uid = session.user.id;
+    const phone = await device(token);
+    const laptop = await device(token);
+    let open!: () => void;
+    const gate = new Promise<void>((res) => (open = res));
+    h.turns.set(async () => {
+      await gate;
+      return outcome("네");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steer(token, tid, "추가 1"); // never polled: both left over for a follow-up turn
+    const b = await steer(token, tid, "추가 2");
+    h.db.addUsage(uid, quotaDay(h.clock.now()), h.app.core.cfg.dailyTokens); // the day's quota runs out meanwhile
+    open();
+    expect(await t.r.next((e) => e.type === "done")).toMatchObject({ message: { text: "네" } });
+    await h.app.core.idle();
+    expect(h.turns.inputs.map((i) => i.userText)).toEqual(["첫 질문"]); // no follow-up turn ran
+    for (const d of [phone, laptop]) {
+      expect(await d.got()).toEqual(["idle", `turn_error ${tid}`, `steers_dropped ${tid} ${a},${b}`]);
+      expect(d.errors).toEqual([{ error: "quota_exceeded", message: QUOTA_MESSAGE }]);
+    }
+    // the agent is free again
+    expect(h.app.core.activeTurns.get(uid)).toBeUndefined();
+    const lease = h.launcher.tryAcquire(uid);
+    expect(lease).not.toBeNull();
+    lease!.release();
     await phone.cancel();
     await laptop.cancel();
   });

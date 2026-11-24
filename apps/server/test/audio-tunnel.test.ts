@@ -131,7 +131,7 @@ describe("public audio listener port", () => {
     expect(log.lines.find((l) => l.event.startsWith("audio port in use"))?.fields).toEqual({ port: holder.port!, actual: pa.port });
     await until(() => voice.publicBase() !== null);
     expect(voice.publicBase()).toBe("https://fake-quick-words-0.trycloudflare.com");
-    expect(cf.runs()[0]).toBe(`tunnel --no-autoupdate --url http://127.0.0.1:${pa.port}`);
+    expect(cf.runs()[0]).toMatch(new RegExp(`^tunnel --no-autoupdate --url http://127\\.0\\.0\\.1:${pa.port} --metrics 127\\.0\\.0\\.1:\\d+$`));
   });
 
   test("with PICKLE_PUBLIC_AUDIO_URL the port must be ours: a busy port is an error, not a fallback", () => {

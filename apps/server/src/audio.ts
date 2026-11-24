@@ -172,14 +172,17 @@ export function tunnelFailure(output: string, fallback: TunnelFailure): { reason
 }
 
 /**
- * Spawns `cloudflared tunnel --no-autoupdate --url http://127.0.0.1:<port>` and resolves once the
- * quick-tunnel URL is known and a connection is registered (or 15 s after the URL, whichever first).
+ * Spawns `cloudflared tunnel --no-autoupdate --url http://127.0.0.1:<port> --metrics 127.0.0.1:<free port>` as this
+ * server's child and resolves once the quick-tunnel URL is known and a connection is registered (or 15 s after the URL,
+ * whichever first). Its metrics address comes back with it, so its /ready is watched like a kept tunnel's.
  * Its output is drained but never logged.
  */
 export function startQuickTunnel(o: { port: number; bin: string; timeoutMs?: number }): Promise<Tunnel> {
   let proc: ReturnType<typeof Bun.spawn>;
+  let metrics: number;
   try {
-    proc = Bun.spawn([o.bin, "tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${o.port}`], {
+    metrics = freePort();
+    proc = Bun.spawn([o.bin, ...tunnelArgs(o.port, metrics)], {
       stdin: "ignore",
       stdout: "pipe",
       stderr: "pipe",
@@ -215,7 +218,7 @@ export function startQuickTunnel(o: { port: number; bin: string; timeoutMs?: num
         kill();
         const f = tunnelFailure(output, fail ?? "no_url");
         reject(new TunnelError(f.reason, [code === undefined ? "" : `exit ${code}`, f.detail].filter(Boolean).join(": ")));
-      } else resolve({ url, exited, stop: kill });
+      } else resolve({ url, exited, stop: kill, metrics });
     };
     const deadline = setTimeout(() => done("timeout"), o.timeoutMs ?? 45_000);
     const watch = async (stream: ReadableStream<Uint8Array>) => {
@@ -264,7 +267,8 @@ export interface TunnelRecord {
   startedAt: number;
 }
 
-export function keptTunnelArgs(port: number, metrics: number): string[] {
+/** every cloudflared we start (kept or not): a quick tunnel to the audio port, its metrics server (/ready) on 127.0.0.1 */
+export function tunnelArgs(port: number, metrics: number): string[] {
   return ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${port}`, "--metrics", `127.0.0.1:${metrics}`];
 }
 
@@ -513,7 +517,7 @@ export async function keptQuickTunnel(o: {
   }
 
   const metrics = freePort();
-  const args = keptTunnelArgs(o.port, metrics);
+  const args = tunnelArgs(o.port, metrics);
   let proc: ReturnType<typeof Bun.spawn>;
   try {
     const fd = openSync(logPath, "w", 0o600);
@@ -588,7 +592,7 @@ export interface PublicAudioOptions {
   reuseWaitMs?: number;
   /** tests: keptQuickTunnel's grace after the URL for a tunnel it spawned (default 15 s) */
   urlGraceMs?: number;
-  /** a kept tunnel's /ready check while it runs: every `readyPollMs` (default 15 s); no 200 for `deadAfterMs`
+  /** the tunnel's /ready check while it runs (kept or not): every `readyPollMs` (default 15 s); no 200 for `deadAfterMs`
    *  (default 3 min) = dead, replaced with the usual backoff. Calls use the basic voice from the first failed check. */
   readyPollMs?: number;
   deadAfterMs?: number;
@@ -602,8 +606,9 @@ export interface PublicAudioOptions {
  * whatever port we got. With PICKLE_PUBLIC_AUDIO_URL the port is what the outside proxy expects, so it must be ours.
  * With `stateDir` and our configured port, the tunnel is kept (see keptQuickTunnel): stop() leaves it running for the
  * next start. On a fallback port it is this server's child as before, and the record is left untouched.
- * A kept tunnel's /ready is watched while it runs (watchReady): calls use `<Say>` while it isn't 200, and a tunnel that
- * stays that way is stopped and replaced like one that died. A fallback-port tunnel has no metrics address: only its exit is seen.
+ * The tunnel's /ready is watched while it runs (watchReady): calls use `<Say>` while it isn't 200, and a tunnel that
+ * stays that way is stopped and replaced like one that died. A tunnel that is this server's child (a fallback port, no
+ * state dir) has a metrics address too and is watched the same way.
  */
 export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port: number | null; stop(): Promise<void> } {
   const { env, log } = o;
