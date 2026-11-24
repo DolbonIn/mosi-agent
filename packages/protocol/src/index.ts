@@ -364,6 +364,9 @@ export interface ArtifactCard {
   title: string;
   kind: ArtifactKind;
   preview: string;
+  /** Deleted from the archive (보관함): `preview` is "", the card no longer opens; title and kind stay. Set by the server
+   *  on every message carrying it, which goes out again as `message`. */
+  deleted?: true;
 }
 
 export interface ResultListCard {
@@ -570,7 +573,10 @@ export interface AttachmentRef {
   filename: string;
   mime: string;
   size: number;
-  url: string; // authed GET, e.g. /api/attachments/:id/raw
+  url: string; // authed GET, e.g. /api/attachments/:id/raw; "" once deleted
+  /** Deleted from the archive (보관함): `url` is "", nothing to open; filename, mime and size stay. Set by the server on
+   *  every message carrying it, which goes out again as `message`. */
+  deleted?: true;
 }
 
 export interface Attachment extends AttachmentRef {

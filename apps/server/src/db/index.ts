@@ -587,6 +587,22 @@ export class Db {
       .all({ u: userId, p: `%"type":"${type}"%` }) as MessageRow[];
   }
 
+  /**
+   * Every message in a thread `userId` is a member of whose cards (an artifact) or attachments mention `item.id`, with no
+   * LIMIT: a delete marks them all (archive.ts markDeleted). A LIKE prefilter only — LIKE reads `_` in an id as any
+   * character and ignores case — so the caller matches each card / ref by the exact id.
+   */
+  messagesMentioning(userId: string, item: FriendThreadItem): MessageRow[] {
+    const [col, p] = item.kind === "artifact" ? ["cards_json", `%"artifactId":"${item.id}"%`] : ["attachments_json", `%"id":"${item.id}"%`];
+    return this.sql
+      .query(`SELECT msg.* FROM messages msg JOIN thread_members m ON m.thread_id = msg.thread_id WHERE m.user_id = $u AND msg.${col} LIKE $p`)
+      .all({ u: userId, p }) as MessageRow[];
+  }
+
+  updateMessageAttachments(id: string, refs: AttachmentRef[]): void {
+    this.sql.query("UPDATE messages SET attachments_json = $a WHERE id = $id").run({ id, a: JSON.stringify(refs) });
+  }
+
   // ───────────── approvals ─────────────
 
   insertApproval(a: {

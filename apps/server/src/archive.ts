@@ -1,12 +1,12 @@
 /** 보관함: artifacts (documents/dashboards made by the agent) and user attachments (files on disk). */
 import { mkdir, unlink } from "node:fs/promises";
 import { join } from "node:path";
-import type { Artifact, Attachment, AttachmentRef } from "@pickle/protocol";
+import type { Artifact, Attachment, AttachmentRef, Card } from "@pickle/protocol";
 import type { ArtifactRow, AttachmentRow, FriendThreadItem } from "./db/index.ts";
-import type { Core } from "./core.ts";
+import { publishMessage, type Core } from "./core.ts";
 import { areFriends } from "./friends.ts";
 import { bad, HttpError, json, notFound, type Ctx } from "./http.ts";
-import { newId } from "./util.ts";
+import { newId, safeJson } from "./util.ts";
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 /** multipart overhead allowance on top of the file itself */
@@ -78,6 +78,37 @@ export function readableAttachment(core: Core, userId: string, id: string): Atta
   return core.db.getAttachment(userId, id) ?? sharedByFriend(core, userId, core.db.attachmentById(id), { kind: "attachment", id });
 }
 
+/**
+ * Mark what still shows a deleted artifact or attachment (DD 2103), inside the delete's transaction: in every message of
+ * a thread the owner is in — their own threads and friend threads alike; only the owner's side ever puts their id in a
+ * message, and nobody leaves a thread — the card becomes `{ type, artifactId, title, kind, preview: "", deleted: true }`
+ * and the ref `{ id, filename, mime, size, url: "", deleted: true }`. Returns the messages changed, published by the
+ * caller after the commit.
+ */
+function markDeleted(core: Core, ownerId: string, item: FriendThreadItem): string[] {
+  const changed: string[] = [];
+  for (const row of core.db.messagesMentioning(ownerId, item)) {
+    let hit = false;
+    if (item.kind === "artifact") {
+      const cards = safeJson<Card[]>(row.cards_json, []).map((c): Card => {
+        if (c.type !== "artifact" || c.artifactId !== item.id) return c;
+        hit = true;
+        return { type: "artifact", artifactId: c.artifactId, title: c.title, kind: c.kind, preview: "", deleted: true };
+      });
+      if (hit) core.db.updateMessageCards(row.id, cards);
+    } else {
+      const refs = safeJson<AttachmentRef[]>(row.attachments_json, []).map((r): AttachmentRef => {
+        if (r.id !== item.id) return r;
+        hit = true;
+        return { id: r.id, filename: r.filename, mime: r.mime, size: r.size, url: "", deleted: true };
+      });
+      if (hit) core.db.updateMessageAttachments(row.id, refs);
+    }
+    if (hit) changed.push(row.id);
+  }
+  return changed;
+}
+
 export function archiveRoutes(core: Core) {
   const { db } = core;
   return {
@@ -88,7 +119,10 @@ export function archiveRoutes(core: Core) {
       return json(artifactView(a));
     },
     deleteArtifact: (c: Ctx, userId: string) => {
-      if (!db.deleteArtifact(userId, c.params.id!)) throw notFound("문서를 찾을 수 없어요");
+      const id = c.params.id!;
+      const marked = db.tx(() => (db.deleteArtifact(userId, id) ? markDeleted(core, userId, { kind: "artifact", id }) : null));
+      if (!marked) throw notFound("문서를 찾을 수 없어요");
+      for (const m of marked) publishMessage(core, m); // every device of every member of those threads
       return json({ ok: true });
     },
     blob: (c: Ctx, userId: string) => {
@@ -166,7 +200,9 @@ export function archiveRoutes(core: Core) {
     deleteAttachment: async (c: Ctx, userId: string) => {
       const a = db.getAttachment(userId, c.params.id!);
       if (!a) throw notFound("파일을 찾을 수 없어요");
-      db.deleteAttachment(userId, a.id);
+      const marked = db.tx(() => (db.deleteAttachment(userId, a.id) ? markDeleted(core, userId, { kind: "attachment", id: a.id }) : null));
+      if (!marked) throw notFound("파일을 찾을 수 없어요"); // another delete got there first
+      for (const m of marked) publishMessage(core, m);
       await unlink(attachmentPath(core, userId, a.id)).catch(() => {});
       return json({ ok: true });
     },

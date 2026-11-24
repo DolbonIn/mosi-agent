@@ -512,6 +512,13 @@ password, token, QR link/fingerprint or database key (tests grep the captured lo
   thread, a blocked or removed friend — is the same 404 as a missing id. A friend's file comes with
   `Cache-Control: private, no-cache` (one's own: `private, max-age=3600`). Delete, the lists and `attachmentIds` stay
   the owner's.
+- Deleted from the archive (`DELETE /api/artifacts/:id`, `DELETE /api/attachments/:id`; someone else's id, a missing one
+  and a second delete are 404 and change nothing): in the same transaction every message carrying it in a thread the
+  owner is in (their own threads and friend threads; only the owner's side ever puts their id in a message) keeps the
+  card or ref, marked — `ArtifactCard {…, preview: "", deleted: true}` (title, kind kept), `AttachmentRef {…, url: "",
+  deleted: true}` (filename, mime, size kept) — and goes out again as `message` to every device of every member of the
+  thread; page reads show the same. Matched by the exact id. The attachment's file is removed. The model's history of
+  those messages (`llm_json`) is not changed.
 
 ## Explore
 - `count` is real delegations only (`POST /api/explore/:id/delegate`), 0 on a fresh server; there are no seeded
@@ -591,16 +598,18 @@ The same voice, streamed as it is generated: first audio in about 0.25 s instead
   `POST /api/invites/<token>/accept`.
 
 ## Other
-- `PATCH /api/settings` → the whole settings with `rev` (deep merge; unknown keys, `rev` included, 400). `PATCH /api/agent`
-  → AgentProfile with `rev`: only the fields sent change, merged in the launcher's per-user queue — `skills: {id: bool}`
-  toggles (at least one left on, else 400 `no_skills`; an empty list stands for every skill and is spread first),
-  `avatar: {hue?, shape?, eyes?}`, `name`, `persona`; an older app's whole `enabledSkills` list still replaces the list
-  (empty → 400 `no_skills`; together with `skills` → 400). `POST /api/agent/restart`.
+- `PATCH /api/settings` → the whole settings with `rev` (deep merge; unknown keys, `rev` included, 400).
+  `PATCH /api/agent` → AgentProfile with `rev`: only the fields sent change, merged in the launcher's per-user queue —
+  `skills: {id: bool}` toggles (at least one left on, else 400 `no_skills`; an empty list stands for every skill and is
+  spread first), `avatar: {hue?, shape?, eyes?}` (other avatar keys 400), `name`, `persona`; an older app's whole
+  `enabledSkills` list still replaces the list (empty → 400 `no_skills`; together with `skills` → 400).
+  `POST /api/agent/restart`.
 - Settings and agent revisions (`SettingsView.rev`, `AgentProfile.rev`): made by the server, raised only when a value
   changes, to max(previous + 1, server clock in ms), so never lowered — not after a restart, a restore from a backup or
-  a config made anew (`users.settings_rev`, 0 before the first change; `rev` in the agent's config.json). A change goes to every device of the person as `settings` / `agent` with the whole value — the sending device too,
-  beside its answer — and never to anyone else; a PATCH that changes nothing keeps the rev and sends nothing. Devices keep
-  a value only when its rev is larger than the one they hold (answers and events come on different connections).
+  a config made anew (`users.settings_rev`, 0 before the first change; `rev` in the agent's config.json). A change goes
+  to every device of the person as `settings` / `agent` with the whole value — the sending device too, beside its answer
+  — and never to anyone else; a PATCH that changes nothing keeps the rev and sends nothing. Devices keep a value only
+  when its rev is larger than the one they hold (answers and events come on different connections).
 - Daily briefing (`notifications.briefing`, `notifications.briefingTime` in KST, default "07:30"): a system turn in the
   main thread (event "오늘의 브리핑"), once a day within 2 h of that time, for people seen in the last 7 days. Never on
   the account's sign-up day (KST): the welcome message covers that day, and the first briefing is the next morning.
