@@ -5,7 +5,7 @@
  */
 import type { AuthResponse, Card, SessionBootstrap } from "@pickle/protocol";
 import type { UserRow } from "./db/index.ts";
-import { agentFor, quotaFor, settingsOf, userPublic, type Core } from "./core.ts";
+import { agentFor, quotaFor, settingsView, userPublic, type Core } from "./core.ts";
 import { bad, HttpError, json, readJson, str, type Ctx } from "./http.ts";
 import { defaultSettings } from "./settings.ts";
 import { ieyo, isRecord, newId, randomB64url, sha256Hex, timingSafeEqualStr } from "./util.ts";
@@ -119,7 +119,7 @@ export async function bootstrap(core: Core, user: UserRow): Promise<SessionBoots
     agent: await agentFor(core, user),
     quota: quotaFor(core, user.id),
     tickets: core.db.tickets(user.id),
-    settings: settingsOf(user),
+    settings: settingsView(user),
     mainThreadId: user.main_thread_id ?? ensureMainThread(core, user),
     unreadThreads: core.db.unreadCount(user.id),
     server: { llm: core.deps.runTurn ? "configured" : "missing", model: core.deps.llm?.model ?? null, version: core.cfg.version },

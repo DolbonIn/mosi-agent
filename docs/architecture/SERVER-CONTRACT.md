@@ -72,10 +72,13 @@ Both come with `GET /api/threads` and every `thread_updated` upsert, computed on
   `status {text}` / `text {delta}` / `tool {tool}` / `card {card}` / `memory {…}` → `done {message, quota}` or
   `error {error, message}`; the stream then closes. HTTP status is 200 even if the turn fails; errors before streaming
   are JSON. Client disconnect = Stop (see below); the partial answer is persisted (refetch messages).
-- Events: `GET /api/events?token=<session token>` (EventSource can't send headers) → `: connected`, `{type:"hello", at}`,
-  then `message {threadId, message}` (other tabs, friend side, steer follow-ups, schedule turns, card status flips),
-  `thread_updated {thread}`, `agent_status {status, text?}`, `quota {quota}`, `notification {title, body, threadId?, icon}`,
-  `connection {connection}`. 401 without a valid token. `?token=` also works on `/api/blobs/:id` and
+- Events: `GET /api/events?token=<session token>` (EventSource can't send headers) → `: connected`,
+  `{type:"hello", at, settingsRev, agentRev}`, then `message {threadId, message}` (other tabs, friend side, steer
+  follow-ups, schedule turns, card status flips), `thread_updated {thread}`, `agent_status {status, text?}`,
+  `quota {quota}`, `notification {title, body, threadId?, icon}`, `connection {connection}`, `settings {settings}`,
+  `agent {agent}`. 401 without a valid token. `hello`'s revs are read after the stream is registered, so events
+  published meanwhile may come before it; a device that slept re-reads `GET /api/session` when a rev differs from the
+  one it has seen. `?token=` also works on `/api/blobs/:id` and
   `/api/attachments/:id/raw` (for `<img src>` / PDFs).
 
 ## Stop (cancel a turn)
@@ -588,8 +591,16 @@ The same voice, streamed as it is generated: first audio in about 0.25 s instead
   `POST /api/invites/<token>/accept`.
 
 ## Other
-- `PATCH /api/settings` → UserSettings (deep merge; unknown keys 400). `PATCH /api/agent` → AgentProfile (empty
-  `enabledSkills` → 400 `no_skills`); `POST /api/agent/restart`.
+- `PATCH /api/settings` → the whole settings with `rev` (deep merge; unknown keys, `rev` included, 400). `PATCH /api/agent`
+  → AgentProfile with `rev`: only the fields sent change, merged in the launcher's per-user queue — `skills: {id: bool}`
+  toggles (at least one left on, else 400 `no_skills`; an empty list stands for every skill and is spread first),
+  `avatar: {hue?, shape?, eyes?}`, `name`, `persona`; an older app's whole `enabledSkills` list still replaces the list
+  (empty → 400 `no_skills`; together with `skills` → 400). `POST /api/agent/restart`.
+- Settings and agent revisions (`SettingsView.rev`, `AgentProfile.rev`): made by the server, raised only when a value
+  changes, to max(previous + 1, server clock in ms), so never lowered — not after a restart, a restore from a backup or
+  a config made anew (`users.settings_rev`, 0 before the first change; `rev` in the agent's config.json). A change goes to every device of the person as `settings` / `agent` with the whole value — the sending device too,
+  beside its answer — and never to anyone else; a PATCH that changes nothing keeps the rev and sends nothing. Devices keep
+  a value only when its rev is larger than the one they hold (answers and events come on different connections).
 - Daily briefing (`notifications.briefing`, `notifications.briefingTime` in KST, default "07:30"): a system turn in the
   main thread (event "오늘의 브리핑"), once a day within 2 h of that time, for people seen in the last 7 days. Never on
   the account's sign-up day (KST): the welcome message covers that day, and the first briefing is the next morning.

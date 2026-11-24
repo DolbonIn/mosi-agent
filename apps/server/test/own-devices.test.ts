@@ -15,7 +15,7 @@
  * once instead of at its first answer.
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { AgentEvent, DelegateResponse, Friend, InviteResponse, Message, ServerEvent, SteeredResponse, Thread } from "@pickle/protocol";
+import type { AgentEvent, DelegateResponse, Friend, InviteResponse, Message, Schedule, ServerEvent, SteeredResponse, Thread } from "@pickle/protocol";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
 
 let h: Harness;
@@ -277,19 +277,24 @@ describe("accepting a friend invite: the accepter's own devices too", () => {
   });
 });
 
-/** a device's thread_updated events since the last call, oldest first: "<thread id> <title> unread=<bool>" */
+/**
+ * a device's thread_updated events since the last call, oldest first: got() as "<thread id> <title> unread=<bool>",
+ * threads() as the whole Thread each carried
+ */
 async function listOn(token: string) {
   const ev = sseReader(await h.req("GET", `/api/events?token=${token}`));
   await ev.next((e) => e.type === "hello");
+  const threads = async (waitMs = 60): Promise<Thread[]> => {
+    const out: Thread[] = [];
+    for (;;) {
+      const e = await ev.next<ServerEvent>((x) => x.type === "thread_updated", waitMs);
+      if (!e) return out;
+      if (e.type === "thread_updated") out.push(e.thread);
+    }
+  };
   return {
-    async got(waitMs = 60): Promise<string[]> {
-      const out: string[] = [];
-      for (;;) {
-        const e = await ev.next<ServerEvent>((x) => x.type === "thread_updated", waitMs);
-        if (!e) return out;
-        if (e.type === "thread_updated") out.push(`${e.thread.id} ${e.thread.title} unread=${e.thread.unread}`);
-      }
-    },
+    threads,
+    got: async (waitMs = 60): Promise<string[]> => (await threads(waitMs)).map(listRow),
     cancel: () => ev.cancel(),
   };
 }
@@ -327,15 +332,36 @@ describe("the thread list: every device of the person", () => {
     await theirs.cancel();
   });
 
-  test("a thread made on one device (POST /api/threads, 탐색의 맡기기, the call demo): listed on the others at once, as the 201 has it", async () => {
+  test("DD 2249: a thread no friend is in (a schedule's run marked it unread): reading it on one device clears the mark on the others", async () => {
+    await h.close();
+    h = await makeHarness({ config: { schedulerIntervalMs: 999_999 } });
+    const { token, session } = await h.signup("haneul", { agentName: "깽이" });
+    h.turns.set(async (input) => {
+      await input.ctx.store.createSchedule({ title: "점심 알림", prompt: "점심 메뉴 추천해줘", rule: "daily@12:01" });
+      return outcome("매일 12시 1분에 알려 드릴게요");
+    });
+    await readSse(await h.req("POST", `/api/threads/${session.mainThreadId}/messages`, { token, body: { text: "매일 점심 메뉴 추천해줘" } }));
+    const other = await listOn(token);
+    h.clock.t += 60_000; // T0 is 12:00 KST
+    h.turns.set(async () => outcome("오늘은 김치찌개 어때요?"));
+    expect(await h.app.scheduler.tick()).toEqual({ schedules: 1, briefings: 0 });
+    const [s] = (await (await h.req("GET", "/api/schedules", { token })).json()) as Schedule[];
+    expect((await other.got()).at(-1)).toBe(`${s!.threadId} 점심 알림 unread=true`);
+    expect((await h.req("GET", `/api/threads/${s!.threadId}/messages`, { token })).status).toBe(200);
+    expect(await other.got()).toEqual([`${s!.threadId} 점심 알림 unread=false`]);
+    await other.cancel();
+  });
+
+  test("a thread made on one device (POST /api/threads, 탐색의 맡기기, the call demo): listed on the others at once, the whole thread as the 201 has it (DD 2249: the call demo's preview is its greeting)", async () => {
     const { token } = await h.signup("haneul");
     const other = await listOn(token);
     const made = (await (await h.req("POST", "/api/threads", { token, body: { kind: "task", title: "할 일" } })).json()) as Thread;
-    expect(await other.got()).toEqual([listRow(made)]);
+    expect(await other.threads()).toEqual([made]);
     const task = (await (await h.req("POST", "/api/explore/gov-benefits/delegate", { token })).json()) as DelegateResponse;
-    expect(await other.got()).toEqual([listRow(task.thread)]);
+    expect(await other.threads()).toEqual([task.thread]);
     const call = (await (await h.req("POST", "/api/explore/call-demo/delegate", { token })).json()) as DelegateResponse;
-    expect(await other.got()).toEqual([listRow(call.thread)]);
+    expect(await other.threads()).toEqual([call.thread]);
+    expect(call.thread.preview).toBe("누구에게 어떤 용건으로 전화할까요?");
     await other.cancel();
   });
 });

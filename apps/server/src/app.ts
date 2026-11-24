@@ -5,7 +5,7 @@
  */
 import type { Connection } from "@pickle/protocol";
 import type { AppDeps, ServerConfig } from "./deps.ts";
-import type { Core } from "./core.ts";
+import { agentFor, type Core } from "./core.ts";
 import { EventHub } from "./events.ts";
 import { createLogger, errInfo } from "./log.ts";
 import {
@@ -212,7 +212,11 @@ export function createApp(deps: AppDeps): App {
       } catch {
         /* older Bun */
       }
-      return events.subscribe(userId, c.req.signal);
+      return events.subscribe(userId, c.req.signal, async () => {
+        const user = core.db.userById(userId);
+        if (!user) throw new Error("no user");
+        return { settingsRev: user.settings_rev, agentRev: (await agentFor(core, user)).rev };
+      });
     }, true),
   );
   // threads & messages

@@ -7,6 +7,7 @@ import {
   type Message,
   type Quota,
   type Thread,
+  type SettingsView,
   type UserPublic,
   type UserSettings,
 } from "@pickle/protocol";
@@ -56,6 +57,11 @@ export function settingsOf(u: UserRow): UserSettings {
   return normalizeSettings(safeJson(u.settings_json, null));
 }
 
+/** The settings as handed out (session, profile, PATCH answer, `settings` event): with the person's revision. */
+export function settingsView(u: UserRow): SettingsView {
+  return { ...settingsOf(u), rev: u.settings_rev };
+}
+
 export function quotaFor(core: Core, userId: string): Quota {
   const now = core.now();
   const used = core.db.usage(userId, quotaDay(now)).counted;
@@ -72,6 +78,15 @@ export function quotaExceeded(core: Core, userId: string): boolean {
 export const QUOTA_MESSAGE =
   "오늘 사용량 한도를 다 썼어요. 매일 새벽 4시에 초기화되고, 지금 바로 이어서 쓰려면 나의 모시에서 한도 초기화 티켓을 사용해 주세요.";
 
+/** The agent's live status (the launcher's turn pool); "idle" when it cannot tell. */
+export function agentStatusOf(core: Core, userId: string): AgentProfile["status"] {
+  try {
+    return core.deps.launcher.status(userId);
+  } catch {
+    return "idle";
+  }
+}
+
 /** Agent profile from the launcher with live status; synthesised if the workspace is missing. */
 export async function agentFor(core: Core, user: UserRow): Promise<AgentProfile> {
   let p: AgentProfile | null = null;
@@ -80,12 +95,7 @@ export async function agentFor(core: Core, user: UserRow): Promise<AgentProfile>
   } catch (err) {
     core.log.warn("launcher.profile failed", { user: user.id, err: String(err).slice(0, 80) });
   }
-  let status: AgentProfile["status"] = "idle";
-  try {
-    status = core.deps.launcher.status(user.id);
-  } catch {
-    /* ignore */
-  }
+  const status = agentStatusOf(core, user.id);
   if (p) return { ...p, status };
   return {
     id: user.id,
@@ -97,6 +107,7 @@ export async function agentFor(core: Core, user: UserRow): Promise<AgentProfile>
     enabledSkills: [],
     createdAt: user.created_at,
     lastActiveAt: null,
+    rev: 0, // below any stored revision: a device that has seen one keeps it (AgentProfile.rev)
   };
 }
 

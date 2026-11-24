@@ -84,6 +84,14 @@ export interface AgentProfile {
   enabledSkills: string[]; // skill ids (see SkillInfo.id)
   createdAt: Millis;
   lastActiveAt: Millis | null;
+  /**
+   * The person's agent-profile revision (name, persona, avatar, enabledSkills), made by the server alone: it goes up
+   * only when one of those changes, to max(previous + 1, server clock in ms), so it never goes down (not after a
+   * restart, nor when the profile is put back from a backup or made anew); compare sizes only. A response or `agent` event whose rev is not above the one a device has seen is older than
+   * what it shows (PATCH answers and events come on different connections). 0 = the server could not read the profile
+   * and answered with defaults.
+   */
+  rev: number;
 }
 
 export type AgentStatus = "idle" | "starting" | "running" | "stopped" | "error";
@@ -113,7 +121,7 @@ export interface SessionBootstrap {
   agent: AgentProfile;
   quota: Quota;
   tickets: Tickets;
-  settings: UserSettings;
+  settings: SettingsView;
   mainThreadId: ID;
   unreadThreads: number;
   server: { llm: "configured" | "missing"; model: string | null; version: string };
@@ -146,6 +154,14 @@ export interface UserSettings {
   confirmBeforeSend: boolean;
 }
 
+/**
+ * UserSettings as the server hands them out (GET /api/session, GET /api/profile, the PATCH /api/settings answer, the
+ * `settings` event), with the person's settings revision: made by the server alone, raised on every change that alters
+ * a value to max(previous + 1, server clock in ms) (none, and no event, when a PATCH leaves every value as it was), so
+ * never down, not even after a restore from a backup; 0 before the first change; compare sizes only. Always sent by
+ * the server; optional so an app can keep its own optimistic copy in the same place. Never part of a PATCH body (400).
+ */
+export type SettingsView = UserSettings & { rev?: number };
 export type SettingsPatch = DeepPartial<UserSettings>;
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 
@@ -573,7 +589,7 @@ export interface ProfileResponse {
   connections: { connected: number; total: number; icons: string[] };
   paymentMethods: number;
   savedLogins: number;
-  settings: UserSettings;
+  settings: SettingsView;
   memories: { id: ID; text: string; createdAt: Millis }[];
   /** 나의 모시 > 내 전화번호 (masked; null = not registered). Verified numbers can be called by sys_call_me. */
   phone?: { masked: string; verified: boolean } | null;
@@ -583,10 +599,19 @@ export interface UseTicketRequest {
   kind: keyof Tickets;
 }
 
+/**
+ * PATCH /api/agent: only the fields sent change, merged into the profile as it is when the server applies the patch,
+ * so two devices changing different fields both keep their change (the same field: the later request wins, and the
+ * `agent` event brings every device to it).
+ */
 export interface AgentPatch {
   name?: string;
   persona?: string;
-  avatar?: AvatarSpec;
+  /** only the parts sent change (`{ hue }` keeps shape and eyes); a full AvatarSpec still works */
+  avatar?: Partial<AvatarSpec>;
+  /** skill id → on / off, only the ids sent; at least one skill must stay on after the merge (400 no_skills) */
+  skills?: Record<string, boolean>;
+  /** older apps: the whole list, replacing it (the later request wins); 400 together with `skills` */
   enabledSkills?: string[];
 }
 
@@ -928,7 +953,13 @@ export interface SkillInfo {
 // ───────────────────────────── server push (/api/events SSE) ─────────────────────────────
 
 export type ServerEvent =
-  | { type: "hello"; at: Millis }
+  /**
+   * First event of every stream. `settingsRev` / `agentRev`: the person's revisions as the stream opened (the stream is
+   * registered before they are read, so a change made meanwhile still arrives as its event): a device that slept with
+   * the stream closed re-reads GET /api/session when either differs from the one it has seen. Always sent by this
+   * server.
+   */
+  | { type: "hello"; at: Millis; settingsRev?: number; agentRev?: number }
   | { type: "thread_updated"; thread: Thread }
   /**
    * A row stored in a thread, to every member and every device of theirs: the person's lines (one that starts a turn,
@@ -941,6 +972,16 @@ export type ServerEvent =
   | { type: "quota"; quota: Quota }
   | { type: "connection"; connection: Connection }
   | { type: "agent_status"; status: AgentStatus; text?: string }
+  /**
+   * The person's settings changed (PATCH /api/settings from any device of theirs, the one that sent it too): the whole
+   * settings with their new `rev`. Never sent when a PATCH changes no value, never to anyone else.
+   */
+  | { type: "settings"; settings: SettingsView }
+  /**
+   * The person's agent profile changed (PATCH /api/agent from any device of theirs, the one that sent it too): the
+   * whole profile with its new `rev`. Never sent when a PATCH changes nothing, never to anyone else.
+   */
+  | { type: "agent"; agent: AgentProfile }
   /**
    * A turn with no stream of its own (a briefing or schedule, a steer follow-up) failed after the person's lines went
    * into it, or a follow-up for the person's queued lines could not run (the day's quota is used up: `quota_exceeded`
@@ -993,8 +1034,8 @@ export const ROUTES = {
   attachments: "POST /api/attachments (multipart file, threadId?) | GET /api/attachments | GET /api/attachments/:id/raw | DELETE",
   profile: "GET /api/profile",
   useTicket: "POST /api/tickets/use UseTicketRequest → {quota,tickets}",
-  settings: "PATCH /api/settings SettingsPatch → UserSettings",
-  agent: "GET /api/agent | PATCH /api/agent AgentPatch | POST /api/agent/restart",
+  settings: "PATCH /api/settings SettingsPatch → SettingsView (+ `settings` event to the person's devices when a value changed)",
+  agent: "GET /api/agent | PATCH /api/agent AgentPatch → AgentProfile (+ `agent` event when it changed) | POST /api/agent/restart",
   skills: "GET /api/skills → SkillInfo[]",
   memories: "GET /api/memories | DELETE /api/memories/:id",
   enclave: "GET /api/enclave → EnclaveInfo",

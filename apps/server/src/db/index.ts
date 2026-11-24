@@ -31,6 +31,8 @@ export interface UserRow {
   settings_json: string;
   main_thread_id: string | null;
   created_at: number;
+  /** SettingsView.rev: raised by every settings write that changed a value (setUserSettings); 0 before the first */
+  settings_rev: number;
 }
 
 export interface ThreadRow {
@@ -349,8 +351,16 @@ export class Db {
     return (this.sql.query("SELECT * FROM users WHERE id = $id").get({ id }) as UserRow | null) ?? null;
   }
 
-  setUserSettings(id: string, settingsJson: string): void {
-    this.sql.query("UPDATE users SET settings_json = $s WHERE id = $id").run({ id, s: settingsJson });
+  /**
+   * Store changed settings and raise their revision in the same statement to max(previous + 1, `now` in ms): never down,
+   * not after a restart with an earlier clock (+1), nor after the database is put back from a backup (the clock).
+   * Returns the new revision.
+   */
+  setUserSettings(id: string, settingsJson: string, now: number): number {
+    const row = this.sql
+      .query("UPDATE users SET settings_json = $s, settings_rev = MAX(settings_rev + 1, $now) WHERE id = $id RETURNING settings_rev")
+      .get({ id, s: settingsJson, now: Math.floor(now) }) as { settings_rev: number } | null;
+    return row?.settings_rev ?? 0;
   }
 
   setMainThread(id: string, threadId: string): void {

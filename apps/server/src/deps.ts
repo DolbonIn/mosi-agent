@@ -38,7 +38,8 @@ export interface LauncherLike {
     init: { agentName: string; displayName: string; persona?: string; avatar?: AvatarSpec; enabledSkills?: string[] },
   ): Promise<AgentProfile>;
   profile(userId: string): Promise<AgentProfile | null>;
-  update(userId: string, patch: AgentPatch): Promise<AgentProfile>;
+  /** merged inside the per-user queue (@pickle/launcher applyAgentPatch); `changed` = a value moved and rev went up */
+  update(userId: string, patch: AgentPatch, opts?: { allSkills?: readonly string[] }): Promise<{ profile: AgentProfile; changed: boolean }>;
   workspaceDir(userId: string): string;
   systemPrompt(
     userId: string,

@@ -20,6 +20,7 @@ import type {
   SkillInfo,
 } from "@pickle/protocol";
 import type { CredentialAccess, RunTurn, ToolDef, TurnInput, TurnOutcome } from "@pickle/agent";
+import { applyAgentPatch, nextRev, sameAgentFields } from "@pickle/launcher";
 import { createApp, type App } from "../src/app.ts";
 import { openDatabase, type Db, type CredentialRow } from "../src/db/index.ts";
 import type { AppDeps, HubLike, LauncherLike, LeaseLike, ServerConfig, VaultLike } from "../src/deps.ts";
@@ -72,6 +73,7 @@ export class FakeLauncher implements LauncherLike {
       enabledSkills: [],
       createdAt: Date.now(),
       lastActiveAt: null,
+      rev: nextRev(0),
     };
     this.profiles.set(userId, p);
     return p;
@@ -79,10 +81,15 @@ export class FakeLauncher implements LauncherLike {
   async profile(userId: string) {
     return this.profiles.get(userId) ?? null;
   }
-  async update(userId: string, patch: AgentPatch) {
-    const p = { ...this.profiles.get(userId)!, ...patch };
+  /** the real launcher's merge (applyAgentPatch) and rev rule; one synchronous step, so patches never interleave */
+  async update(userId: string, patch: AgentPatch, opts: { allSkills?: readonly string[] } = {}) {
+    const cur = this.profiles.get(userId);
+    if (!cur) throw new Error("agent not provisioned");
+    const next = applyAgentPatch(cur, patch, opts.allSkills);
+    const changed = !sameAgentFields(cur, next);
+    const p: AgentProfile = changed ? { ...cur, ...next, rev: nextRev(cur.rev) } : cur;
     this.profiles.set(userId, p);
-    return p;
+    return { profile: p, changed };
   }
   workspaceDir(userId: string) {
     return `/tmp/fake-agents/${userId}`;

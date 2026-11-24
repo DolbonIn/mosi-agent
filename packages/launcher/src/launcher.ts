@@ -33,6 +33,30 @@ export interface WorkspaceConfig {
     /** created by reconcile() without real init data; the next provision() fills the user section */
     placeholder?: boolean;
   };
+  /**
+   * Revision of the user section (AgentProfile.rev), raised whenever update() or provision() changes a value there to
+   * nextRev(): max(previous + 1, clock ms). Never down: not after a restart with an earlier clock (+1), nor when the
+   * config is put back from a backup or made anew after a corrupt one (the clock). Absent in configs written before
+   * revisions (read as 0).
+   */
+  rev?: number;
+}
+
+/** The next revision after `prev`: max(prev + 1, now in ms) (WorkspaceConfig.rev). */
+export function nextRev(prev: number | undefined, now = Date.now()): number {
+  return Math.max((prev ?? 0) + 1, Math.floor(now));
+}
+
+/** The user-owned profile fields AgentPatch changes. */
+export type AgentFields = WorkspaceConfig["user"];
+
+/** update() refused a `skills` patch that would leave no skill on (the server answers 400 no_skills). */
+export class NoSkillsError extends Error {
+  readonly code = "no_skills";
+  constructor() {
+    super("at least one skill must stay on");
+    this.name = "NoSkillsError";
+  }
 }
 
 export interface SystemPromptContext {
@@ -84,6 +108,64 @@ function validAvatar(a: unknown): AvatarSpec | null {
 function cleanSkills(v: unknown): string[] | null {
   if (!Array.isArray(v)) return null;
   return [...new Set(v.filter((s): s is string => typeof s === "string").map((s) => s.trim().slice(0, 64)).filter(Boolean))].slice(0, 64);
+}
+
+/**
+ * `patch` merged into `cur` (AgentLauncher.update runs it inside the per-user queue, so concurrent patches never mix):
+ * name / persona as sent, the avatar parts sent over the current avatar, `skills` toggles over the current list (an
+ * empty list means "every skill" downstream, so it is first spread to `allSkills`), or an older app's whole
+ * `enabledSkills` list. Throws on invalid input, and NoSkillsError when `skills` leaves nothing on. Never mutates `cur`.
+ */
+export function applyAgentPatch(cur: AgentFields, patch: AgentPatch, allSkills: readonly string[] = []): AgentFields {
+  const next: AgentFields = { ...cur, avatar: { ...cur.avatar }, enabledSkills: [...cur.enabledSkills] };
+  if (patch.skills !== undefined && patch.enabledSkills !== undefined) throw new Error("send skills or enabledSkills, not both");
+  if (patch.name !== undefined) {
+    const name = oneLine(String(patch.name), 20);
+    if (!name) throw new Error("name must not be empty");
+    next.name = name;
+  }
+  if (patch.persona !== undefined) {
+    const persona = String(patch.persona).trim();
+    if (persona.length > PERSONA_CAP) throw new Error(`persona must be ≤ ${PERSONA_CAP} characters`);
+    next.persona = persona || defaultPersona(next.name);
+  }
+  if (patch.avatar !== undefined) {
+    const a = patch.avatar && typeof patch.avatar === "object" ? validAvatar({ ...cur.avatar, ...patch.avatar }) : null;
+    if (!a) throw new Error("invalid avatar");
+    next.avatar = a;
+  }
+  if (patch.enabledSkills !== undefined) {
+    const s = cleanSkills(patch.enabledSkills);
+    if (!s) throw new Error("enabledSkills must be a string array");
+    next.enabledSkills = s;
+  }
+  if (patch.skills !== undefined) {
+    if (!patch.skills || typeof patch.skills !== "object" || Array.isArray(patch.skills)) throw new Error("skills must be an object");
+    const list = next.enabledSkills.length ? next.enabledSkills : [...allSkills];
+    for (const [id, on] of Object.entries(patch.skills)) {
+      if (typeof on !== "boolean") throw new Error("skills values must be booleans");
+      const i = list.indexOf(id);
+      if (on && i < 0) list.push(id);
+      if (!on && i >= 0) list.splice(i, 1);
+    }
+    const s = cleanSkills(list) ?? [];
+    if (!s.length) throw new NoSkillsError();
+    next.enabledSkills = s;
+  }
+  return next;
+}
+
+/** Whether two profiles' user-owned fields hold the same values (field by field, list order included). */
+export function sameAgentFields(a: AgentFields, b: AgentFields): boolean {
+  return (
+    a.name === b.name &&
+    a.persona === b.persona &&
+    a.avatar.hue === b.avatar.hue &&
+    a.avatar.shape === b.avatar.shape &&
+    a.avatar.eyes === b.avatar.eyes &&
+    a.enabledSkills.length === b.enabledSkills.length &&
+    a.enabledSkills.every((s, i) => s === b.enabledSkills[i])
+  );
 }
 
 /** "깽이" → "깽이라고", "보람" → "보람이라고" (non-Hangul last letter → "라고"). */
@@ -193,6 +275,7 @@ export class AgentLauncher {
       enabledSkills: [...c.user.enabledSkills],
       createdAt: c.launcher.createdAt,
       lastActiveAt: c.launcher.lastActiveAt ?? null,
+      rev: c.rev ?? 0,
     };
   }
 
@@ -238,6 +321,7 @@ export class AgentLauncher {
         lastActiveAt: null,
         ...(placeholder ? { placeholder: true } : {}),
       },
+      rev: nextRev(0),
     };
   }
 
@@ -263,6 +347,7 @@ export class AgentLauncher {
       if (!existing || existing.launcher.placeholder) {
         c = this.#freshConfig(userId, init, false);
         if (existing) c.launcher.createdAt = existing.launcher.createdAt;
+        if (existing) c.rev = Math.max(c.rev ?? 0, nextRev(existing.rev));
         if (existing) {
           // reconcile seeded files from placeholder data; replace them with the real persona/owner
           await atomicWrite(this.#p(userId, "SOUL.md"), soulMd(c.user.persona));
@@ -286,7 +371,13 @@ export class AgentLauncher {
             displayName: oneLine(init.displayName || existing.launcher.displayName || "사용자", 30),
             lastActiveAt: existing.launcher.lastActiveAt ?? null,
           },
+          rev: existing.rev ?? 0,
         };
+        // a value repaired from init data (an emptied name, a broken avatar) is a change the devices must hear of
+        const was = existing.user;
+        const same =
+          was && Array.isArray(was.enabledSkills) && was.avatar && typeof was.avatar === "object" && sameAgentFields(was, c.user);
+        if (!same) c.rev = nextRev(c.rev);
         rewriteAgents = existing.launcher.safetyVersion !== this.safetyVersion;
       }
       await this.#writeConfig(userId, c);
@@ -306,35 +397,32 @@ export class AgentLauncher {
     }
   }
 
-  async update(userId: string, patch: AgentPatch): Promise<AgentProfile> {
+  /**
+   * Merge `patch` into the profile (applyAgentPatch) inside the per-user queue: a read-modify-write that never mixes
+   * with another patch. `changed` = a value moved; only then is the config written and its rev raised. `allSkills`:
+   * the catalog an empty skill list stands for (spread before `skills` toggles apply).
+   */
+  async update(userId: string, patch: AgentPatch, opts: { allSkills?: readonly string[] } = {}): Promise<{ profile: AgentProfile; changed: boolean }> {
     assertUserId(userId);
     return this.#serial(userId, async () => {
       const c = await this.#readConfig(userId);
       if (!c) throw new Error("agent not provisioned");
-      if (patch.name !== undefined) {
-        const name = oneLine(String(patch.name), 20);
-        if (!name) throw new Error("name must not be empty");
-        c.user.name = name;
-      }
+      const next = applyAgentPatch(c.user, patch, opts.allSkills);
+      const changed = !sameAgentFields(c.user, next);
       if (patch.persona !== undefined) {
-        const persona = String(patch.persona).trim();
-        if (persona.length > PERSONA_CAP) throw new Error(`persona must be ≤ ${PERSONA_CAP} characters`);
-        c.user.persona = persona || defaultPersona(c.user.name);
-        await atomicWrite(this.#p(userId, "SOUL.md"), soulMd(c.user.persona));
+        // SOUL.md follows the persona the person saved, even when the config already held it (a hand-edited file)
+        const soul = soulMd(next.persona);
+        if ((await readText(this.#p(userId, "SOUL.md"))) !== soul) await atomicWrite(this.#p(userId, "SOUL.md"), soul);
       }
-      if (patch.avatar !== undefined) {
-        const a = validAvatar(patch.avatar);
-        if (!a) throw new Error("invalid avatar");
-        c.user.avatar = a;
+      if (changed || c.launcher.placeholder) {
+        if (changed) {
+          c.user = next;
+          c.rev = nextRev(c.rev);
+        }
+        delete c.launcher.placeholder;
+        await this.#writeConfig(userId, c);
       }
-      if (patch.enabledSkills !== undefined) {
-        const s = cleanSkills(patch.enabledSkills);
-        if (!s) throw new Error("enabledSkills must be a string array");
-        c.user.enabledSkills = s;
-      }
-      delete c.launcher.placeholder;
-      await this.#writeConfig(userId, c);
-      return this.#toProfile(userId, c);
+      return { profile: this.#toProfile(userId, c), changed };
     });
   }
 

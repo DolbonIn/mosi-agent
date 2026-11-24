@@ -311,4 +311,8 @@ export const MIGRATIONS: string[] = [
   ALTER TABLE meetings ADD COLUMN approval_id TEXT;
   CREATE INDEX meetings_approval ON meetings(user_id, approval_id);
   `,
+  /* v6: G3 — the person's settings revision (SettingsView.rev), raised with every settings write that changes a value,
+     so devices tell a newer answer or event from an older one */ `
+  ALTER TABLE users ADD COLUMN settings_rev INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

@@ -97,7 +97,13 @@ export class EventHub {
     private now: () => number,
   ) {}
 
-  subscribe(userId: string, signal?: AbortSignal): Response {
+  /**
+   * Open a stream for `userId`. `revs` (the person's settings / agent revisions) is read AFTER the stream is registered,
+   * then `hello` carries it: a change landing while it is read is still published to this stream as its event, where
+   * reading first could put a stale rev in `hello` with the change's event already gone. Events published meanwhile go
+   * out before `hello` (devices compare revs, not arrival order). A failed read sends `hello` without revs.
+   */
+  subscribe(userId: string, signal?: AbortSignal, revs?: () => Promise<{ settingsRev: number; agentRev: number }>): Response {
     const ch = new SseChannel(this.heartbeatMs, signal);
     let set = this.subs.get(userId);
     if (!set) this.subs.set(userId, (set = new Set()));
@@ -108,7 +114,13 @@ export class EventHub {
       if (s && s.size === 0) this.subs.delete(userId);
     });
     ch.comment("connected");
-    ch.send({ type: "hello", at: this.now() } satisfies ServerEvent);
+    const at = this.now();
+    if (!revs) ch.send({ type: "hello", at } satisfies ServerEvent);
+    else
+      void revs().then(
+        (r) => ch.send({ type: "hello", at, settingsRev: r.settingsRev, agentRev: r.agentRev } satisfies ServerEvent),
+        () => ch.send({ type: "hello", at } satisfies ServerEvent),
+      );
     return ch.response();
   }
 

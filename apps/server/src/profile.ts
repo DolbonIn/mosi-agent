@@ -1,6 +1,7 @@
 /** 나의 모시: profile summary, quota tickets, settings, agent profile, skills, memories. */
-import type { AgentPatch, ProfileResponse, Tickets } from "@pickle/protocol";
-import { agentFor, quotaFor, settingsOf, userPublic, type Core } from "./core.ts";
+import type { AgentPatch, AvatarSpec, ProfileResponse, SettingsView, Tickets, UserSettings } from "@pickle/protocol";
+import { NoSkillsError } from "@pickle/launcher";
+import { agentFor, agentStatusOf, quotaFor, settingsOf, settingsView, userPublic, type Core } from "./core.ts";
 import { bad, json, notFound, readJson, type Ctx } from "./http.ts";
 import { lastQuotaDays, quotaDay } from "./kst.ts";
 import { mergeSettings, SettingsError } from "./settings.ts";
@@ -12,9 +13,16 @@ import { skillsConfiguredFor } from "./kskill.ts";
 const SHAPES = new Set(["blob", "round", "drop"]);
 const EYES = new Set(["dot", "oval", "smile"]);
 
+/**
+ * PATCH /api/agent body → AgentPatch. Only the fields sent (a partial avatar, per-skill `skills` toggles; an older app's
+ * whole `enabledSkills` list still works, but not together with `skills`). The merge itself happens in the launcher's
+ * per-user queue (launcher.update), where "at least one skill on" is checked on the merged list. Anything else (`rev`
+ * too: only the server makes it) is refused.
+ */
 export function validateAgentPatch(body: Record<string, unknown>, knownSkills: Set<string> | null): AgentPatch {
   const patch: AgentPatch = {};
-  for (const k of Object.keys(body)) if (!["name", "persona", "avatar", "enabledSkills"].includes(k)) throw bad(`알 수 없는 항목이에요: ${k}`);
+  for (const k of Object.keys(body)) if (!["name", "persona", "avatar", "skills", "enabledSkills"].includes(k)) throw bad(`알 수 없는 항목이에요: ${k}`);
+  if (body.skills !== undefined && body.enabledSkills !== undefined) throw bad("스킬 목록이 올바르지 않아요");
   if (body.name !== undefined) {
     if (typeof body.name !== "string") throw bad("이름이 올바르지 않아요");
     const name = body.name.trim();
@@ -27,9 +35,31 @@ export function validateAgentPatch(body: Record<string, unknown>, knownSkills: S
   }
   if (body.avatar !== undefined) {
     const a = body.avatar;
-    if (!isRecord(a) || typeof a.hue !== "number" || a.hue < 0 || a.hue > 360 || !SHAPES.has(String(a.shape)) || !EYES.has(String(a.eyes)))
+    const keys = isRecord(a) ? Object.keys(a) : [];
+    if (
+      !isRecord(a) ||
+      !keys.length ||
+      keys.some((k) => k !== "hue" && k !== "shape" && k !== "eyes") ||
+      (a.hue !== undefined && (typeof a.hue !== "number" || !(a.hue >= 0 && a.hue <= 360))) ||
+      (a.shape !== undefined && !SHAPES.has(String(a.shape))) ||
+      (a.eyes !== undefined && !EYES.has(String(a.eyes)))
+    )
       throw bad("아바타 설정이 올바르지 않아요");
-    patch.avatar = { hue: Math.round(a.hue), shape: a.shape as "blob", eyes: a.eyes as "dot" };
+    const avatar: Partial<AvatarSpec> = {};
+    if (a.hue !== undefined) avatar.hue = Math.round(a.hue as number);
+    if (a.shape !== undefined) avatar.shape = a.shape as AvatarSpec["shape"];
+    if (a.eyes !== undefined) avatar.eyes = a.eyes as AvatarSpec["eyes"];
+    patch.avatar = avatar;
+  }
+  if (body.skills !== undefined) {
+    const s = body.skills;
+    const entries = isRecord(s) ? Object.entries(s) : [];
+    if (!isRecord(s) || !entries.length || entries.length > 100 || entries.some(([, on]) => typeof on !== "boolean")) throw bad("스킬 목록이 올바르지 않아요");
+    if (knownSkills) {
+      const unknown = entries.map(([id]) => id).filter((id) => !knownSkills.has(id));
+      if (unknown.length) throw bad(`알 수 없는 스킬이에요: ${unknown.slice(0, 3).join(", ")}`);
+    }
+    patch.skills = Object.fromEntries(entries) as Record<string, boolean>;
   }
   if (body.enabledSkills !== undefined) {
     if (!Array.isArray(body.enabledSkills) || body.enabledSkills.length > 100 || body.enabledSkills.some((s) => typeof s !== "string"))
@@ -80,7 +110,7 @@ export function profileRoutes(core: Core) {
         connections: { connected: connected.length, total: safeProviders(core).length, icons: connected.map((c) => icons.get(c.provider) ?? c.provider) },
         paymentMethods: counts.card,
         savedLogins: counts.login,
-        settings: settingsOf(user),
+        settings: settingsView(user),
         phone: profilePhone(core, userId),
         memories,
       };
@@ -106,17 +136,24 @@ export function profileRoutes(core: Core) {
       return json({ quota, tickets });
     },
 
+    // read, merge and write with no await in between, so two PATCHes never interleave; a value that moved raises the
+    // revision in the same UPDATE and goes to every device of the person (the sender's too, beside this answer). An
+    // unchanged result stores nothing and sends nothing, so a device echoing a received value back ends the echo here.
     patchSettings: async (c: Ctx, userId: string) => {
       const body = await readJson(c.req);
       const user = db.userById(userId)!;
+      let next: UserSettings;
       try {
-        const next = mergeSettings(settingsOf(user), body);
-        db.setUserSettings(userId, JSON.stringify(next));
-        return json(next);
+        next = mergeSettings(settingsOf(user), body);
       } catch (err) {
         if (err instanceof SettingsError) throw bad(err.message, "invalid_settings");
         throw err;
       }
+      const json_ = JSON.stringify(next);
+      if (json_ === JSON.stringify(settingsOf(user))) return json(settingsView(user));
+      const view: SettingsView = { ...next, rev: db.setUserSettings(userId, json_, core.now()) };
+      core.events.publish(userId, { type: "settings", settings: view });
+      return json(view);
     },
 
     getAgent: async (_c: Ctx, userId: string) => json(await agentFor(core, db.userById(userId)!)),
@@ -130,9 +167,21 @@ export function profileRoutes(core: Core) {
         known = null;
       }
       const patch = validateAgentPatch(body, known);
-      await deps.launcher.update(userId, patch);
+      let res: Awaited<ReturnType<typeof deps.launcher.update>>;
+      try {
+        res = await deps.launcher.update(userId, patch, { allSkills: known ? [...known] : [] });
+      } catch (err) {
+        if (err instanceof NoSkillsError) throw bad("기능을 하나 이상 켜 두어야 해요", "no_skills");
+        throw err;
+      }
+      // the profile as the merge left it, values and rev from the same write: the answer and the event are one object, and
+      // no second read can fall back to the defaults
+      const agent = { ...res.profile, status: agentStatusOf(core, userId) };
+      if (!res.changed) return json(agent);
       if (patch.name) db.setAgentName(userId, patch.name);
-      return json(await agentFor(core, db.userById(userId)!));
+      // the whole profile with its new rev, to every device of the person (this one too, beside the answer)
+      core.events.publish(userId, { type: "agent", agent });
+      return json(agent);
     },
 
     restartAgent: async (_c: Ctx, userId: string) => {
