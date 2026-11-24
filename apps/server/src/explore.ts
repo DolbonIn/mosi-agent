@@ -13,7 +13,7 @@
  */
 import type { DelegateResponse, ExploreResponse, IconName, TaskTemplate, TemplateCategory } from "@pickle/protocol";
 import type { TemplateRow, UserRow } from "./db/index.ts";
-import { threadViewById, type Core } from "./core.ts";
+import { publishThread, threadViewById, type Core } from "./core.ts";
 import { json, notFound, type Ctx } from "./http.ts";
 import { kstParts } from "./kst.ts";
 import { newId, safeJson } from "./util.ts";
@@ -486,6 +486,7 @@ export function exploreRoutes(core: Core) {
         });
       }
       core.db.incrementTemplate(t.id);
+      publishThread(core, id); // every device of the person lists it at once (this one has it from the 201), not at the first answer
       const res: DelegateResponse = { thread: threadViewById(core, id, userId)!, prompt: view.prompt };
       return json(res, 201);
     },

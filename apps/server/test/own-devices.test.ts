@@ -10,9 +10,12 @@
  * receipt as the sending one does (and place a failed turn's error row above it); no other row carries the field, and
  * page reads never do. Likewise a friend-thread line that reached the friend without a turn (201) carries
  * `delivered: true` on the push to the sender's own devices alone (not the friend's, not page reads, not the 201 body).
+ * The thread list follows too (thread_updated): a thread the person read on one device loses its unread mark on the
+ * others (never on the friend's), and a thread made on one device (새 대화, 탐색의 맡기기) is listed on the others at
+ * once instead of at its first answer.
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { AgentEvent, Friend, InviteResponse, Message, ServerEvent, SteeredResponse, Thread } from "@pickle/protocol";
+import type { AgentEvent, DelegateResponse, Friend, InviteResponse, Message, ServerEvent, SteeredResponse, Thread } from "@pickle/protocol";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
 
 let h: Harness;
@@ -274,7 +277,88 @@ describe("accepting a friend invite: the accepter's own devices too", () => {
   });
 });
 
+/** a device's thread_updated events since the last call, oldest first: "<thread id> <title> unread=<bool>" */
+async function listOn(token: string) {
+  const ev = sseReader(await h.req("GET", `/api/events?token=${token}`));
+  await ev.next((e) => e.type === "hello");
+  return {
+    async got(waitMs = 60): Promise<string[]> {
+      const out: string[] = [];
+      for (;;) {
+        const e = await ev.next<ServerEvent>((x) => x.type === "thread_updated", waitMs);
+        if (!e) return out;
+        if (e.type === "thread_updated") out.push(`${e.thread.id} ${e.thread.title} unread=${e.thread.unread}`);
+      }
+    },
+    cancel: () => ev.cancel(),
+  };
+}
+
+const listRow = (t: Thread) => `${t.id} ${t.title} unread=${t.unread}`;
+
+describe("the thread list: every device of the person", () => {
+  test("reading a thread on one device clears its unread mark on the others (thread_updated, unread false); the friend hears nothing; an older page or a second read sends nothing", async () => {
+    const me = await h.signup("haneul", { agentName: "깽이" });
+    const friend = await h.signup("byeol", { displayName: "별", agentName: "토리" });
+    const tid = (await befriend(me, friend)).threadId!;
+    const mine = await listOn(me.token);
+    const theirs = await listOn(friend.token);
+    const send = async (text: string) => expect((await h.req("POST", `/api/threads/${tid}/messages`, { token: friend.token, body: { text } })).status).toBe(201);
+    await send("내일 영화 볼래?");
+    const marked = await mine.got();
+    expect(marked.map((x) => x.split(" ")[0] + " " + x.split(" ").at(-1))).toEqual([`${tid} unread=true`]); // the friend's line marks it
+    const title = marked[0]!.slice(tid.length + 1, marked[0]!.lastIndexOf(" unread="));
+    await theirs.got();
+    const read = async (q = "") => expect((await h.req("GET", `/api/threads/${tid}/messages${q}`, { token: me.token })).status).toBe(200);
+    await read();
+    expect(await mine.got()).toEqual([`${tid} ${title} unread=false`]);
+    expect(await theirs.got()).toEqual([]);
+    await read();
+    expect(await mine.got()).toEqual([]); // already read
+    await send("7시 어때?");
+    await mine.got();
+    await theirs.got();
+    await read(`?before=${Date.now() + 60_000}`); // an older page leaves the mark
+    expect(await mine.got()).toEqual([]);
+    await read();
+    expect(await mine.got()).toEqual([`${tid} ${title} unread=false`]);
+    expect(await theirs.got()).toEqual([]);
+    await mine.cancel();
+    await theirs.cancel();
+  });
+
+  test("a thread made on one device (POST /api/threads, 탐색의 맡기기, the call demo): listed on the others at once, as the 201 has it", async () => {
+    const { token } = await h.signup("haneul");
+    const other = await listOn(token);
+    const made = (await (await h.req("POST", "/api/threads", { token, body: { kind: "task", title: "할 일" } })).json()) as Thread;
+    expect(await other.got()).toEqual([listRow(made)]);
+    const task = (await (await h.req("POST", "/api/explore/gov-benefits/delegate", { token })).json()) as DelegateResponse;
+    expect(await other.got()).toEqual([listRow(task.thread)]);
+    const call = (await (await h.req("POST", "/api/explore/call-demo/delegate", { token })).json()) as DelegateResponse;
+    expect(await other.got()).toEqual([listRow(call.thread)]);
+    await other.cancel();
+  });
+});
+
 describe("what does not change (passes before and after)", () => {
+  test("a turn's start sends no thread_updated; its answer does", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const other = await listOn(token);
+    const g = gate();
+    h.turns.set(async () => {
+      await g.p;
+      return outcome("네");
+    });
+    const r = sseReader(await h.req("POST", `/api/threads/${tid}/messages`, { token, body: { text: "오늘 할 일 정리해 줘" } }));
+    await r.next((e) => e.type === "start");
+    expect(await other.got(100)).toEqual([]);
+    g.open();
+    await h.app.core.idle();
+    expect((await other.got()).map((x) => x.split(" ")[0])).toEqual([tid]);
+    await other.cancel();
+  });
+
   test("an accept: the inviter's device gets the event row once and the 새 친구 notification; the accepter gets no notification; accepting again adds no row", async () => {
     const { accepter, inviterPhone, phone, laptop, inviterNotes, accepterNotes, inv, close, want } = await acceptOnDevices();
     expect(await inviterPhone.got()).toEqual(want);

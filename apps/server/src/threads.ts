@@ -77,6 +77,7 @@ export function threadRoutes(core: Core) {
         { id, ownerId: userId, kind: "task", title: rawTitle || "새 대화", subtitle: `${user.agent_name}에게 맡긴 일`, icon: "sparkles", autoTitle: !rawTitle, now: core.now() },
         [userId],
       );
+      publishThread(core, id); // every device of the person lists it at once (this one has it from the 201), not at the first answer
       return json(threadViewById(core, id, userId), 201);
     },
 
@@ -103,7 +104,12 @@ export function threadRoutes(core: Core) {
       const before = beforeRaw && /^\d{1,15}$/.test(beforeRaw) ? Number(beforeRaw) : null;
       const limit = clampInt(c.url.searchParams.get("limit"), 1, 200, 50);
       const rows = db.listMessages(t.id, before, limit);
-      if (t.unread && before === null) db.setUnread(t.id, userId, false);
+      if (t.unread && before === null) {
+        db.setUnread(t.id, userId, false);
+        // the reader's other devices drop the unread mark too (this one does on its own); unread is per person, so the
+        // friend in a shared thread hears nothing
+        core.events.publish(userId, { type: "thread_updated", thread: threadViewById(core, t.id, userId)! });
+      }
       return json(rows.map((r) => messageView(core, r, userId)));
     },
 
