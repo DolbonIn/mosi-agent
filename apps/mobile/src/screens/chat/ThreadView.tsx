@@ -17,6 +17,7 @@ import { dropStoppedSteers, errorAnchorOf, errorRowAfter, markReceipt, turnStart
 import { EmptyThread } from "./EmptyThread";
 import { DateSeparator, DraftRow, draftHasContent, FollowUpRow, markSchedulesSeen, MessageRow, offerScheduleUndo, peerFace, type RowContext } from "./Messages";
 import { arrivedBelow, type NewsMark } from "./newsBelow";
+import { keptScrollTop, olderAnchor, type OlderAnchor } from "./olderPage";
 import { scrollHeld } from "./scrollHold";
 import { needsSeparator } from "./util";
 import "./chat.css";
@@ -211,6 +212,20 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
     if (head.current.key !== headKey) head.current = { key: headKey, spent: false };
   }, [headKey]);
 
+  // an older page about to go in above: the row at the top of the view, read when the store takes the page (React
+  // has not drawn it yet); the prepend below puts it back at its y (olderPage.ts)
+  const older = useRef<OlderAnchor | null>(null);
+  useEffect(() => {
+    const el = scroller?.current;
+    if (!el) return;
+    return messagesStore.subscribe(() => {
+      const items = messagesStore.get()[threadId]?.items;
+      const was = firstId.current;
+      if (!items?.length || !was || items[0]!.id === was || !items.some((m) => m.id === was) || !content.current) return;
+      older.current = olderAnchor(el, content.current);
+    });
+  }, [scroller, threadId]);
+
   // first page → start at the end (a newest answer taller than the screen: at its head); older page prepended → keep
   // what was on screen where it was
   useLayoutEffect(() => {
@@ -227,8 +242,11 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
       setNewBelow(false);
       lastNews.current = { lastId, draft: draftNews, items: data.items }; // what the first page brings is not news
     } else if (firstId.current && first !== firstId.current && data.items.some((m) => m.id === firstId.current)) {
-      el.scrollTop += el.scrollHeight - lastHeight.current;
+      const kept = older.current ? keptScrollTop(el.scrollTop, older.current) : null;
+      if (kept !== null) el.scrollTop = kept;
+      else el.scrollTop += el.scrollHeight - lastHeight.current; // no row to keep (none showed, or it went away)
     }
+    older.current = null;
     firstId.current = first;
     lastHeight.current = el.scrollHeight;
   }, [scroller, data.loaded, data.items]);
