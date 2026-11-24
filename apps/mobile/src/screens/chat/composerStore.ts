@@ -125,6 +125,30 @@ onServerEvent((e) => {
 /** a `steers_dropped` named this line: its turn stopped or failed and nothing will answer it (the call asks for its notes) */
 export const steerDropped = (id: ID) => droppedSteers.has(id);
 /**
+ * A live `message` push of the person's line with the receipt its sending device got from the request's answer: the
+ * line gets it on this device too, so every open device of the person draws the same rows.
+ *  - `steered: true`, a line the server steered into a running turn (the 202): "하던 일에 이어서 전했어요" (the error row
+ *    goes above the lines handed to a follow-up turn, 이어서 하는 중)
+ *  - `delivered: true`, their friend-thread line that reached the friend without a turn (the 201): "전달됨" (only on
+ *    their own line; the server sends it to the author's devices alone)
+ * Only for a line that was not here before this push (a page read never carries the fields; a push of a row already
+ * here brings no dropped receipt back) and never for one a `steers_dropped` named (markReceipt). events.ts has put the
+ * row in before listeners run: `shownBefore` is the threads as they were just before that.
+ */
+let shown = messagesStore.get();
+let shownBefore = shown;
+messagesStore.subscribe(() => {
+  shownBefore = shown;
+  shown = messagesStore.get();
+});
+onServerEvent((e) => {
+  if (e.type !== "message" || e.message.role !== "user") return;
+  const m = e.message;
+  const kind: Receipt | null = m.steered ? "steered" : m.delivered && m.author?.kind === "me" ? "delivered" : null;
+  if (!kind || shownBefore[e.threadId]?.items.some((x) => x.id === m.id)) return;
+  markReceipt(m.id, kind);
+});
+/**
  * Threads whose error row a `turn_error` put up: a turn the app did not start failed (a briefing, a schedule, a steer
  * follow-up). The server names the dropped lines only for a turn the app started (above), so after these the row order
  * says which lines went unanswered (ThreadView, the call); after a turn of the app's, a line it left queued has a
@@ -201,19 +225,19 @@ export function errorRowAfter(items: readonly Row[], anchor: ID | null | undefin
  * The follow-up row: is a steered message still waiting for its own answer? `tail` = the last few messages as
  * "id:role" pairs, oldest first. The turn it was steered into answers once (that reply lands after it); a second
  * assistant reply after it means the follow-up has arrived.
+ * Worked out in render from the whole receipts map: useStore keeps a selection until the store changes, so a selector
+ * reading `tail` would keep the answer for the tail before. A pushed line's receipt (above) is marked right after
+ * events.ts put the line in, before the thread re-renders with the new tail: the selection then made with the old tail
+ * stayed, and that device never showed 이어서 하는 중.
  */
-export const useAwaitingFollowUp = (tail: string) =>
-  useStore(
-    receipts,
-    (s) => {
-      if (!tail) return false;
-      const rows = tail.split(",").map((x) => x.split(":") as [string, string]);
-      let at = -1;
-      rows.forEach(([id], i) => {
-        if (s[id] === "steered") at = i;
-      });
-      if (at < 0) return false;
-      return rows.slice(at + 1).filter(([, role]) => role === "assistant").length <= 1;
-    },
-    Object.is,
-  );
+export function useAwaitingFollowUp(tail: string): boolean {
+  const s = useReceipts();
+  if (!tail) return false;
+  const rows = tail.split(",").map((x) => x.split(":") as [string, string]);
+  let at = -1;
+  rows.forEach(([id], i) => {
+    if (s[id] === "steered") at = i;
+  });
+  if (at < 0) return false;
+  return rows.slice(at + 1).filter(([, role]) => role === "assistant").length <= 1;
+}
