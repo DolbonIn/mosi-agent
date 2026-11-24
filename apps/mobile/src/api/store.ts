@@ -372,6 +372,14 @@ let remoteBusy = false;
 /** the last failed send, for island 다시 시도 */
 let lastFailed: { threadId: ID; text: string; tempId: ID | null } | null = null;
 /**
+ * The island's "다시 시도할까요?" (lastFailed's thread) gave way to a turn from elsewhere that started while it showed: the
+ * follow-up the server runs right after a failed turn for the lines it left (or any other turn). That turn's work shows
+ * as usual; when it ends with that thread's error row still up, the island asks again (yieldError, setRemoteAgentStatus)
+ */
+let heldError: ID | null = null;
+/** an agent_status other than running came since this device's own turn started: a running one now is another turn */
+let idleSinceOwn = false;
+/**
  * the person's lines this device sent and the server took (a turn's start, a steer or friend delivery, the pushed copy
  * that replaced our optimistic one): `turn_error` reaches every device of theirs, and only the one that sent the line
  * offers 다시 시도 (two devices pressing it would send the line twice). Memory only: after a reload it is empty
@@ -394,6 +402,7 @@ export function resetSession(error?: string) {
   settingsStore.set(null);
   remoteBusy = false;
   lastFailed = null;
+  heldError = null;
   sentHere.clear();
   deletedIds.clear();
   island.idle();
@@ -674,6 +683,7 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
   let accepted = false;
   const own = () => {
     primary = true;
+    idleSinceOwn = false;
     turns.set(threadId, ctrl);
     patchThread(threadId, (t) => ({ ...t, streaming: true, error: undefined }));
   };
@@ -777,6 +787,8 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
   } finally {
     signal?.removeEventListener("abort", onOuterAbort);
     endPrimary();
+    // it failed while the server already runs another turn (the follow-up for the lines it left): that one shows
+    if (primary && idleSinceOwn) yieldError();
   }
 }
 
@@ -852,17 +864,30 @@ export function setRemoteAgentStatus(status: AgentStatus, text?: string) {
     if (!turns.size) {
       const k = islandStore.get().kind;
       if (k === "idle" || k === "done" || k === "offline") island.thinking(null, { remote: true });
-      else island.event();
+      else if (!yieldError()) island.event();
     }
   } else {
     remoteBusy = false;
+    idleSinceOwn = true;
+    const held = heldError;
+    heldError = null;
     if (turns.size) return;
     const k = islandStore.get().kind;
-    if (status === "error") {
-      if (isBusy(k)) island.idle();
-      island.errorBanner(text || "잠시 후 다시 시도해 주세요.", "모시가 잠시 멈췄어요");
-    } else if (isBusy(k)) island.idle();
+    // the turn that took over "다시 시도할까요?" ended: the failed line is still unanswered while its error row is up
+    const again = !!held && lastFailed?.threadId === held && !!messagesStore.get()[held]?.error;
+    if (isBusy(k)) {
+      if (again) island.error();
+      else island.idle();
+    }
+    if (status === "error") island.errorBanner(text || "잠시 후 다시 시도해 주세요.", "모시가 잠시 멈췄어요");
   }
+}
+/** "다시 시도할까요?" is up and a turn from elsewhere runs (none of this device's): its work shows instead (heldError) */
+function yieldError(): boolean {
+  if (turns.size || !remoteBusy || !lastFailed || islandStore.get().kind !== "error") return false;
+  heldError = lastFailed.threadId;
+  island.thinking(null, { remote: true });
+  return true;
 }
 /**
  * events.ts `turn_error`: a turn the person didn't start from this screen failed (a briefing or schedule turn their line

@@ -13,7 +13,7 @@ import { fitAhead } from "./bubbleFit";
 import { prewarmAudio } from "./call/audioUnlock";
 import { launchCall } from "./call/launch";
 import { Composer } from "./Composer";
-import { dropStoppedSteers, dropUnansweredSteers, failedRemotely, markReceipt, turnStarted, useReceipts } from "./composerStore";
+import { dropStoppedSteers, dropUnansweredSteers, errorAnchorOf, errorRowAfter, failedRemotely, markReceipt, turnStarted, useReceipts } from "./composerStore";
 import { EmptyThread } from "./EmptyThread";
 import { DateSeparator, DraftRow, draftHasContent, FollowUpRow, markSchedulesSeen, MessageRow, offerScheduleUndo, peerFace, type RowContext } from "./Messages";
 import { arrivedBelow, type NewsMark } from "./newsBelow";
@@ -362,6 +362,16 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   useLayoutEffect(() => {
     if (turnFailed && failedRemotely(threadId)) dropUnansweredSteers(items.map((m) => [m.id, m.role] as const));
   }, [turnFailed, threadId, items, receipts]);
+  // that row stays with the turn that failed: right after its rows (errorAnchorOf, above the lines it handed to a
+  // follow-up turn: errorRowAfter). What comes later (the follow-up's answer, a line from another device, its wait row)
+  // goes below it. null: last
+  const errorAt = turnFailed ? errorRowAfter(items, errorAnchorOf(threadId), (id) => receipts[id] === "steered") : null;
+  const errorRow = turnFailed && (
+    <div key="thread-error" className="thread-error" role="alert">
+      <Icon name="exclamation" size={15} weight="medium" />
+      {data.error}
+    </div>
+  );
   const empty = data.loaded && !items.length && !data.draft && !data.streaming;
   const placeholder = friend ? `${thread?.peer?.displayName ?? "친구"} 님에게 메시지` : ui.composer.placeholder || "메시지 보내기";
   // the composer sits in the slot above the (static) tab bar
@@ -388,20 +398,17 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
         {!data.loaded && !items.length && <ThreadSkeleton />}
         {empty && <EmptyThread threadId={threadId} kind={thread?.kind ?? "task"} agentName={agentName} face={friend ? peerFace(thread?.peer?.userId) : (agent?.avatar ?? DEFAULT_AVATAR)} />}
         {[
-          ...items.map((m, i) => (
-            <Row key={m.id} m={m} prev={items[i - 1]} ctx={ctx} failed={failed.has(m.id)} error={m.id === lastFailed ? data.error : undefined} fresh={m.createdAt > mountedAt.current && !drafted.current.has(m.id)} />
-          )),
+          errorAt === -1 && errorRow,
+          ...items.flatMap((m, i) => {
+            const row = <Row key={m.id} m={m} prev={items[i - 1]} ctx={ctx} failed={failed.has(m.id)} error={m.id === lastFailed ? data.error : undefined} fresh={m.createdAt > mountedAt.current && !drafted.current.has(m.id)} />;
+            return i === errorAt ? [row, errorRow] : [row];
+          }),
           live && <Row key={live.id} m={live} prev={items[items.length - 1]} ctx={ctx} failed={false} fresh={false} live streaming={data.streaming} />,
         ]}
         <DraftRow draft={data.draft} streaming={data.streaming} ctx={ctx} onStop={stop} />
         <FollowUpRow tail={items.slice(-4).map((m) => `${m.id}:${m.role}`).join(",")} streaming={data.streaming} spec={friend ? null : ctx.agentSpec} />
         {footer}
-        {turnFailed && (
-          <div className="thread-error" role="alert">
-            <Icon name="exclamation" size={15} weight="medium" />
-            {data.error}
-          </div>
-        )}
+        {errorAt === null && errorRow}
       </div>
       <div className="sr-only" aria-live="polite">
         {sr}

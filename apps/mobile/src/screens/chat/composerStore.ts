@@ -141,6 +141,63 @@ messagesStore.subscribe(() => {
 });
 export const failedRemotely = (threadId: ID) => remoteFailed.has(threadId);
 /**
+ * Where each thread's error row sits: right after the row that was the thread's last when the error came (the failed
+ * turn's rows end there). What comes later (a follow-up turn's answer to a line the failed turn left, a line from
+ * another device) goes below it, so the row stays with the turn that failed. A line still being sent then was sent
+ * before the failure (its 202 lands late): the row goes after it, at the server's row once that replaces it, or after
+ * the row before it if the send goes away. A later failure while the row is up (a `turn_error`: the follow-up failed
+ * too, or the day's quota kept it from running) moves it to that turn's end. A thread with no rows here yet gets its
+ * place once they arrive; a row that is gone (deleted): the error row goes last. Gone with the row.
+ */
+const errorAnchor = new Map<ID, ID | null>();
+const lastOf = <T,>(xs: readonly T[], ok: (x: T) => boolean): T | undefined => {
+  for (let i = xs.length - 1; i >= 0; i--) if (ok(xs[i]!)) return xs[i];
+  return undefined;
+};
+function anchorError(threadId: ID) {
+  const t = messagesStore.get()[threadId];
+  if (!t?.error || (!t.loaded && !t.items.length)) return;
+  errorAnchor.set(threadId, t.items.at(-1)?.id ?? null);
+}
+let seenThreads = messagesStore.get();
+messagesStore.subscribe(() => {
+  const s = messagesStore.get();
+  const prev = seenThreads;
+  seenThreads = s;
+  for (const [id, at] of errorAnchor) {
+    const t = s[id];
+    if (!t?.error) errorAnchor.delete(id);
+    else if (at && isTempId(at) && t !== prev[id] && !t.items.some((m) => m.id === at)) {
+      // the line being sent when the error came is no longer an optimistic row: the server's copy of it that came in
+      // its place, or (refused, stopped) the row before it
+      const had = prev[id]?.items ?? [];
+      const known = new Set(had.map((m) => m.id));
+      const copy = lastOf(t.items, (m) => m.role === "user" && !isTempId(m.id) && !known.has(m.id));
+      const before = lastOf(had.slice(0, Math.max(0, had.findIndex((m) => m.id === at))), (m) => !isTempId(m.id));
+      errorAnchor.set(id, copy?.id ?? before?.id ?? null);
+    }
+  }
+  for (const id in s) if (s[id] !== prev[id] && !errorAnchor.has(id)) anchorError(id);
+});
+onServerEvent((e) => {
+  if (e.type === "turn_error") anchorError(e.threadId); // events.ts set the error first; listeners run after
+});
+/** the row this thread's error row follows (undefined: no error row, or its rows are not loaded yet) */
+export const errorAnchorOf = (threadId: ID): ID | null | undefined => errorAnchor.get(threadId);
+/**
+ * Where the error row goes among `items`: the index of the row it follows. That is its anchor, moved up past the
+ * person's lines still marked "하던 일에 이어서 전했어요" (`steered`): the failed turn never read them, a follow-up turn
+ * answers them, so they go below it with their receipts. A line the failed turn read (its receipt dropped), the line that
+ * started it and a partial answer stay above. -1: above the first row (every row up to it handed over); null: the anchor
+ * is not among the rows (none yet, deleted), the error row goes last.
+ */
+export function errorRowAfter(items: readonly Row[], anchor: ID | null | undefined, steered: (id: ID) => boolean): number | null {
+  let i = anchor ? items.findIndex((m) => m.id === anchor) : -1;
+  if (i < 0) return null;
+  while (i >= 0 && items[i]!.role === "user" && steered(items[i]!.id)) i--;
+  return i;
+}
+/**
  * The follow-up row: is a steered message still waiting for its own answer? `tail` = the last few messages as
  * "id:role" pairs, oldest first. The turn it was steered into answers once (that reply lands after it); a second
  * assistant reply after it means the follow-up has arrived.
