@@ -241,7 +241,8 @@ export interface Message {
   /**
    * Only on a live `message` push of the person's line that the server steered into a running turn (202), so another
    * device of theirs can show that line's steer receipt as the sending device does. Never in page reads (GET messages)
-   * or the 202 body, and absent on a line that became a turn of its own (the running turn ended in between).
+   * or the 202 body, and absent on a line that became a turn of its own (the running turn ended in between) or that its
+   * turn left unanswered (`steerDropped` instead).
    */
   steered?: true;
   /**
@@ -251,6 +252,14 @@ export interface Message {
    * called the agent (it became a turn).
    */
   delivered?: true;
+  /**
+   * The person's own line that the server steered into a running turn (202) and that turn left unanswered: a
+   * `steers_dropped` named it. The server stores it, so every view of the line carries it from then on: page reads (GET
+   * messages) and any later `message` push (which then carries no `steered`). A device that missed the event (asleep,
+   * offline) drops the line's steer receipt when it reads the page again. Never on a line its turn answered, nor on one
+   * handed to a follow-up turn that ran, nor on the friend's view of a line.
+   */
+  steerDropped?: true;
 }
 
 export interface ToolActivity {
@@ -1004,7 +1013,7 @@ export type ServerEvent =
    * lines it took in and, for a follow-up, the lines it was answering (all of them when the day's quota kept it from
    * running); those still queued get a follow-up turn. Every
    * device of the person gets it, so the one that sent a line drops its steer receipt too. Not sent when no line goes
-   * unanswered.
+   * unanswered. The rows already carry `steerDropped` when it goes out (a page read meanwhile finds it).
    */
   | { type: "steers_dropped"; threadId: ID; messageIds: ID[] }
   /**

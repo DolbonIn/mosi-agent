@@ -66,6 +66,15 @@ Both come with `GET /api/threads` and every `thread_updated` upsert, computed on
 
 `attachmentIds` ≤ 10.
 
+**Steered lines left unanswered.** A turn that ends without answering lines steered into it (202) — Stop, a failed turn,
+a follow-up the day's quota kept from running — sends `steers_dropped {threadId, messageIds}` to every device of the
+person (right after a stream-less turn's `turn_error`), and the server stores it on those rows just before: from then on
+every view of such a line, page reads (GET messages) and any later `message` push, carries `steerDropped: true`, for the
+line's sender alone. A device that missed the event (asleep, offline) drops the line's steer receipt when it reads the
+page again. `steered: true` stays on live pushes only (a page read never carries it) and never comes with
+`steerDropped`; a line its turn answered, or one handed to a follow-up turn that ran, never gets `steerDropped`. What
+the model reads of the thread does not change.
+
 ## SSE framing
 - Each event `data: <json>\n\n`; heartbeats are comment lines (`: hb`) — ignore (15 s on turn streams, 25 s on events).
 - Turn stream order: `start {threadId, userMessage, messageId}` (userMessage null on approval resume) → any of

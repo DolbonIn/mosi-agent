@@ -18,6 +18,7 @@ import { EmptyThread } from "./EmptyThread";
 import { DateSeparator, DraftRow, draftHasContent, FollowUpRow, markSchedulesSeen, MessageRow, offerScheduleUndo, peerFace, type RowContext } from "./Messages";
 import { arrivedBelow, type NewsMark } from "./newsBelow";
 import { keptScrollTop, olderAnchor, type OlderAnchor } from "./olderPage";
+import { rowKeys } from "./rowKeys";
 import { scrollHeld } from "./scrollHold";
 import { needsSeparator } from "./util";
 import "./chat.css";
@@ -72,6 +73,8 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   // final row takes the draft's place, so it must not enter again — the draft already did, and a second entrance
   // blinks the whole turn from opacity 0 when the reply finishes
   const drafted = useRef(new Set<ID>());
+  // an optimistic line and the server row that replaces it are one element (rowKeys)
+  const keys = useRef<ReturnType<typeof rowKeys> | null>(null);
   // where our own last write put the scroll position (its scroll event comes a frame later, when more of the answer
   // may already be in: that event is not the person scrolling away)
   const wrote = useRef(-1);
@@ -362,6 +365,7 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
 
   const items = data.items;
   if (data.draft) drafted.current.add(data.draft.messageId); // idempotent, so a repeated render is harmless
+  const rows = (keys.current ??= rowKeys())(items);
   // the running answer is the list's last row, keyed by the id its final message keeps: when the reply finishes the
   // final message takes over that row in place (MessageRow live)
   const draft = data.draft;
@@ -414,7 +418,8 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
         {[
           errorAt === -1 && errorRow,
           ...items.flatMap((m, i) => {
-            const row = <Row key={m.id} m={m} prev={items[i - 1]} ctx={ctx} failed={failed.has(m.id)} error={m.id === lastFailed ? data.error : undefined} fresh={m.createdAt > mountedAt.current && !drafted.current.has(m.id)} />;
+            const fresh = rows.freshOf(m, () => m.createdAt > mountedAt.current && !drafted.current.has(m.id));
+            const row = <Row key={rows.keyOf(m)} m={m} prev={items[i - 1]} ctx={ctx} failed={failed.has(m.id)} error={m.id === lastFailed ? data.error : undefined} fresh={fresh} />;
             return i === errorAt ? [row, errorRow] : [row];
           }),
           live && <Row key={live.id} m={live} prev={items[items.length - 1]} ctx={ctx} failed={false} fresh={false} live streaming={data.streaming} />,

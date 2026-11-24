@@ -60,6 +60,7 @@ export interface MessageRow {
   author_user_id: string | null;
   author_kind: "human" | "agent" | null;
   llm_json: string | null;
+  /** 0: not steered; 1: a line steered into a running turn (202); 2: one of those its turn left unanswered (steers_dropped) */
   steered: number;
   created_at: number;
 }
@@ -533,6 +534,12 @@ export class Db {
 
   getMessage(id: string): MessageRow | null {
     return (this.sql.query("SELECT * FROM messages WHERE id = $id").get({ id }) as MessageRow | null) ?? null;
+  }
+
+  /** Steered lines a turn left unanswered (the rows a `steers_dropped` names): 1 → 2. Any other row keeps its value. */
+  markSteersDropped(ids: string[]): void {
+    if (!ids.length) return;
+    this.sql.query(`UPDATE messages SET steered = 2 WHERE id IN (${ids.map(() => "?").join(", ")}) AND steered = 1`).run(...ids);
   }
 
   /** Newest `limit` messages created before `before`, returned oldest → newest. */

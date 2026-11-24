@@ -5,11 +5,13 @@
  * took in and a follow-up's own lines; the queued ones get a follow-up turn as well (when the day's quota keeps that
  * one from running: the quota message as its turn_error, and all its lines). Every device of the person hears
  * which rows those are, so the device that sent a line drops its steer receipt even when another device stopped the turn
- * or held its stream (the island's retry, a delegate sheet).
+ * or held its stream (the island's retry, a delegate sheet). The rows keep it (`steerDropped` on every later view of the
+ * line), so a device that missed the event learns it from its next page read.
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
-import { QUOTA_MESSAGE } from "../src/core.ts";
+import type { Attachment, Friend, InviteResponse, Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
+import { messageViewById, publishMessage, QUOTA_MESSAGE } from "../src/core.ts";
+import { historyFromRows } from "../src/history.ts";
 import { executeTurn, holdLease } from "../src/turns.ts";
 import { quotaDay } from "../src/kst.ts";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
@@ -602,5 +604,310 @@ describe("a turn that fails while a tool still runs: no line keeps its receipt b
     expect(names.indexOf("stream done")).toBeGreaterThan(-1);
     expect(names.indexOf("stream done")).toBeLessThan(names.indexOf("hub message assistant"));
     expect(names.filter((n) => n === "hub steers_dropped" || n === "hub turn_error" || n === "stream error")).toEqual([]);
+  });
+});
+
+/** a photo in the person's archive: its id */
+async function photo(token: string): Promise<string> {
+  const form = new FormData();
+  form.set("file", new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4])], "영수증.png", { type: "image/png" }));
+  const res = await h.req("POST", "/api/attachments", { token, raw: form });
+  expect(res.status).toBe(201);
+  return ((await res.json()) as Attachment).id;
+}
+
+/** steer a line carrying the photo `pic` (deleting the photo from the archive pushes the line again) */
+async function steerWithPhoto(token: string, threadId: string, text: string, pic: string): Promise<string> {
+  const res = await h.req("POST", `/api/threads/${threadId}/messages`, { token, body: { text, attachmentIds: [pic] } });
+  expect(res.status).toBe(202);
+  return ((await res.json()) as SteeredResponse).userMessage.id;
+}
+
+/** the person's first page of the thread: their lines, oldest first, as "text", or "text ×" with `steerDropped: true` */
+async function marks(token: string, threadId: string): Promise<string[]> {
+  const rows = (await (await h.req("GET", `/api/threads/${threadId}/messages?limit=200`, { token })).json()) as Message[];
+  return rows.filter((m) => m.role === "user").map((m) => (m.steerDropped === true ? `${m.text} ×` : "steerDropped" in m ? `${m.text} ?` : m.text));
+}
+
+/**
+ * Read inside the person's hub at each `steers_dropped` as it goes out: each named row's `steered` value, with "×" when a
+ * view of it (what a page read gives) carries `steerDropped`.
+ */
+function atNotice(uid: string): string[] {
+  const seen: string[] = [];
+  const hub = h.app.core.events;
+  const publish = hub.publish.bind(hub);
+  hub.publish = (userId: string, e: ServerEvent) => {
+    if (userId === uid && e.type === "steers_dropped")
+      seen.push(e.messageIds.map((id) => `${h.db.getMessage(id)!.steered}${messageViewById(h.app.core, id, uid)!.steerDropped ? "×" : ""}`).join(","));
+    return publish(userId, e);
+  };
+  return seen;
+}
+
+/** a device of the person: the `message` pushes of one line */
+async function linePushes(token: string) {
+  const ev = sseReader(await h.req("GET", `/api/events?token=${token}`));
+  await ev.next((e: ServerEvent) => e.type === "hello");
+  return {
+    async of(id: string, waitMs = 500): Promise<Message | null> {
+      const e = await ev.next<Extract<ServerEvent, { type: "message" }>>((x) => x.type === "message" && x.message.id === id, waitMs);
+      return e?.message ?? null;
+    },
+    cancel: () => ev.cancel(),
+  };
+}
+
+const deletePhoto = async (token: string, pic: string) => expect((await h.req("DELETE", `/api/attachments/${pic}`, { token })).status).toBe(200);
+
+describe("steerDropped: the rows keep which lines a turn left unanswered, so a device that missed steers_dropped learns it from a page read", () => {
+  test("Stop: both lines carry it on page reads and on a later push of the line (with no steered), stored before steers_dropped goes out; the 202's push carried none", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const seen = atNotice(session.user.id);
+    const d = await linePushes(token);
+    const pic = await photo(token);
+    h.turns.set((input) => waitForAbort(input.ctx.signal));
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steerWithPhoto(token, tid, "이 사진도", pic);
+    const b = await steer(token, tid, "추가");
+    const first = (await d.of(a))!;
+    expect(first.steered).toBe(true);
+    expect("steerDropped" in first).toBe(false);
+    expect(await marks(token, tid)).toEqual(["첫 질문", "이 사진도", "추가"]);
+    await t.stop();
+    expect(seen).toEqual(["2×,2×"]);
+    expect([a, b].map((id) => h.db.getMessage(id)!.steered)).toEqual([2, 2]);
+    expect(await marks(token, tid)).toEqual(["첫 질문", "이 사진도 ×", "추가 ×"]);
+    await deletePhoto(token, pic);
+    const rePush = (await d.of(a))!;
+    expect(rePush.steerDropped).toBe(true);
+    expect("steered" in rePush).toBe(false); // a dropped line carries steerDropped alone
+    await d.cancel();
+  });
+
+  test("an app turn that fails: the line it took in carries it; the line handed to its follow-up turn, which answers it, does not", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const seen = atNotice(session.user.id);
+    const d = await linePushes(token);
+    const pic = await photo(token);
+    let took!: () => void;
+    const tookGate = new Promise<void>((res) => (took = res));
+    let fail!: () => void;
+    const failGate = new Promise<void>((res) => (fail = res));
+    h.turns.set(async (input) => {
+      await tookGate;
+      expect(input.steer!()).toHaveLength(1); // the line with the photo (its model copy carries the photo's note)
+      await failGate;
+      throw rate();
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steerWithPhoto(token, tid, "그리고 이것도", pic);
+    expect("steerDropped" in (await d.of(a))!).toBe(false); // the 202's push
+    took();
+    await Bun.sleep(5);
+    const b = await steer(token, tid, "하나 더"); // queued: its own follow-up turn answers it
+    h.turns.set(async () => outcome("하나 더 할게요"));
+    fail();
+    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "upstream_rate_limited" });
+    await h.app.core.idle();
+    expect(h.turns.inputs.at(-1)!.userText).toBe("하나 더");
+    expect(seen).toEqual(["2×"]);
+    expect([a, b].map((id) => h.db.getMessage(id)!.steered)).toEqual([2, 1]);
+    expect(await marks(token, tid)).toEqual(["첫 질문", "그리고 이것도 ×", "하나 더"]);
+    await deletePhoto(token, pic);
+    const rePush = (await d.of(a))!;
+    expect(rePush.steerDropped).toBe(true);
+    expect("steered" in rePush).toBe(false); // a dropped line carries steerDropped alone
+    await d.cancel();
+  });
+
+  test("a briefing that fails (no stream of its own): the line it took in, then the line of its follow-up turn when that one fails too, each stored before its steers_dropped", async () => {
+    const { token, session } = await h.signup("haneul"); // the first briefing is 11-12 07:30
+    const tid = session.mainThreadId;
+    const seen = atNotice(session.user.id);
+    const d = await linePushes(token);
+    const pic = await photo(token);
+    let a = "";
+    let b = "";
+    h.turns.set(async (input) => {
+      if (!input.userText?.includes("[자동 아침 브리핑]")) throw rate(); // the follow-up turn of the queued line
+      a = await steerWithPhoto(token, tid, "오늘 우산 필요해?", pic);
+      expect(input.steer!()).toHaveLength(1);
+      b = await steer(token, tid, "미세먼지도");
+      throw rate();
+    });
+    h.clock.t = KST(2026, 11, 12, 7, 30);
+    await h.app.scheduler.tick();
+    await h.app.core.idle();
+    expect(h.turns.inputs).toHaveLength(2);
+    expect("steerDropped" in (await d.of(a))!).toBe(false); // the 202's push
+    expect(seen).toEqual(["2×", "2×"]);
+    expect(await marks(token, tid)).toEqual(["오늘 우산 필요해? ×", "미세먼지도 ×"]);
+    await deletePhoto(token, pic);
+    const rePush = (await d.of(a))!;
+    expect(rePush.steerDropped).toBe(true);
+    expect("steered" in rePush).toBe(false); // a dropped line carries steerDropped alone
+    expect(h.db.getMessage(b)!.steered).toBe(2);
+    await d.cancel();
+  });
+
+  test("the day's quota keeps the follow-up turn from running: both lines it would have answered carry it, stored before steers_dropped goes out", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const uid = session.user.id;
+    const seen = atNotice(uid);
+    const d = await linePushes(token);
+    const pic = await photo(token);
+    let open!: () => void;
+    const gate = new Promise<void>((res) => (open = res));
+    h.turns.set(async () => {
+      await gate;
+      return outcome("네");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steerWithPhoto(token, tid, "추가 1", pic); // never polled: both left over for a follow-up turn
+    const b = await steer(token, tid, "추가 2");
+    expect("steerDropped" in (await d.of(a))!).toBe(false); // the 202's push
+    h.db.addUsage(uid, quotaDay(h.clock.now()), h.app.core.cfg.dailyTokens);
+    open();
+    expect(await t.r.next((e) => e.type === "done")).toMatchObject({ message: { text: "네" } });
+    await h.app.core.idle();
+    expect(h.turns.inputs).toHaveLength(1);
+    expect(seen).toEqual(["2×,2×"]);
+    expect([a, b].map((id) => h.db.getMessage(id)!.steered)).toEqual([2, 2]);
+    expect(await marks(token, tid)).toEqual(["첫 질문", "추가 1 ×", "추가 2 ×"]);
+    await deletePhoto(token, pic);
+    const rePush = (await d.of(a))!;
+    expect(rePush.steerDropped).toBe(true);
+    expect("steered" in rePush).toBe(false); // a dropped line carries steerDropped alone
+    await d.cancel();
+  });
+
+  test("never on a line that is answered: the turn's own line, a line it took in and answered, a line its follow-up turn answered, nor on a later push of one", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const seen = atNotice(session.user.id);
+    const d = await linePushes(token);
+    const pic = await photo(token);
+    let took!: () => void;
+    const tookGate = new Promise<void>((res) => (took = res));
+    let finish!: () => void;
+    const finishGate = new Promise<void>((res) => (finish = res));
+    h.turns.set(async (input) => {
+      await tookGate;
+      expect(input.steer!()).toHaveLength(1);
+      await finishGate;
+      return outcome("둘 다 할게요");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steerWithPhoto(token, tid, "이 사진도", pic);
+    took();
+    await Bun.sleep(5);
+    const b = await steer(token, tid, "하나 더"); // left over: its follow-up turn answers it
+    h.turns.set(async () => outcome("하나 더 할게요"));
+    finish();
+    expect(await t.r.next((e) => e.type === "done")).toMatchObject({ message: { text: "둘 다 할게요" } });
+    await h.app.core.idle();
+    expect(h.turns.inputs.map((i) => i.userText)).toEqual(["첫 질문", "하나 더"]);
+    expect(seen).toEqual([]);
+    expect([a, b].map((id) => h.db.getMessage(id)!.steered)).toEqual([1, 1]);
+    expect(await marks(token, tid)).toEqual(["첫 질문", "이 사진도", "하나 더"]);
+    expect((await d.of(a))!.steered).toBe(true); // the 202's push
+    await deletePhoto(token, pic);
+    const again = (await d.of(a))!;
+    expect(again.attachments[0]!.deleted).toBe(true);
+    expect("steerDropped" in again).toBe(false);
+    expect(again.steered).toBe(true); // an answered steered line is pushed as before
+    await d.cancel();
+  });
+
+  test("what the model reads of the thread is the same, byte for byte, as with those rows still plain steered lines (after a Stop, a failed turn and the quota)", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const uid = session.user.id;
+    // Stop with a line steered in
+    h.turns.set((input) => waitForAbort(input.ctx.signal));
+    const t1 = await startTurn(token, tid, "첫 질문");
+    await steer(token, tid, "추가");
+    await t1.stop();
+    // a failed turn: one line taken in, one answered by its follow-up turn
+    let took!: () => void;
+    const tookGate = new Promise<void>((res) => (took = res));
+    let fail!: () => void;
+    const failGate = new Promise<void>((res) => (fail = res));
+    h.turns.set(async (input) => {
+      await tookGate;
+      expect(input.steer!()).toEqual(["그리고 이것도"]);
+      await failGate;
+      throw rate();
+    });
+    const t2 = await startTurn(token, tid, "두 번째");
+    await steer(token, tid, "그리고 이것도");
+    took();
+    await Bun.sleep(5);
+    await steer(token, tid, "하나 더");
+    h.turns.set(async () => outcome("하나 더 할게요"));
+    fail();
+    expect(await t2.r.next((e) => e.type === "error")).toMatchObject({ error: "upstream_rate_limited" });
+    await h.app.core.idle();
+    // the quota keeps a follow-up turn from running
+    let open!: () => void;
+    const gate = new Promise<void>((res) => (open = res));
+    h.turns.set(async () => {
+      await gate;
+      return outcome("네");
+    });
+    const t3 = await startTurn(token, tid, "세 번째");
+    await steer(token, tid, "추가 1");
+    await steer(token, tid, "추가 2");
+    h.db.addUsage(uid, quotaDay(h.clock.now()), h.app.core.cfg.dailyTokens);
+    open();
+    await t3.r.next((e) => e.type === "done");
+    await h.app.core.idle();
+    expect(await marks(token, tid)).toEqual(["첫 질문", "추가 ×", "두 번째", "그리고 이것도 ×", "하나 더", "세 번째", "추가 1 ×", "추가 2 ×"]);
+    const read = () => JSON.stringify(historyFromRows(h.db.historyRows(tid, 60)));
+    const marked = read();
+    for (const text of ["추가", "그리고 이것도", "추가 1", "추가 2"]) expect(marked).toContain(`"content":"${text}"`);
+    expect(h.db.sql.query("UPDATE messages SET steered = 1 WHERE steered = 2").run().changes).toBe(4);
+    expect(read()).toBe(marked);
+  });
+
+  test("the line's sender alone: a friend's view of it (page read, push) carries none", async () => {
+    const a = await h.signup("haneul");
+    const b = await h.signup("jinwoo");
+    const inv = (await (await h.req("POST", "/api/invites", { token: a.token })).json()) as InviteResponse;
+    const acc = await h.req("POST", `/api/invites/${inv.token}/accept`, { token: b.token });
+    expect([200, 201]).toContain(acc.status);
+    const tid = ((await acc.json()) as Friend).threadId!;
+    // a shared thread never takes a steered line today; the row is made here to hold the rule
+    h.db.insertMessage({ id: "m_steered", threadId: tid, role: "user", text: "이것도 부탁해", authorUserId: a.session.user.id, authorKind: "human", steered: true, createdAt: h.clock.now() });
+    h.db.markSteersDropped(["m_steered"]);
+    expect(await marks(a.token, tid)).toContain("이것도 부탁해 ×");
+    expect(await marks(b.token, tid)).toContain("이것도 부탁해");
+    const phoneA = await linePushes(a.token);
+    const phoneB = await linePushes(b.token);
+    publishMessage(h.app.core, "m_steered");
+    const own = (await phoneA.of("m_steered"))!;
+    expect(own.steerDropped).toBe(true);
+    expect("steered" in own).toBe(false);
+    expect("steerDropped" in (await phoneB.of("m_steered"))!).toBe(false);
+    await phoneA.cancel();
+    await phoneB.cancel();
+  });
+
+  test("markSteersDropped turns steered lines (1) alone into 2: a row that is not a steered line keeps 0, one already 2 stays, rows not named keep theirs", async () => {
+    const { session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const put = (id: string, steered: boolean) => h.db.insertMessage({ id, threadId: tid, role: "user", text: id, steered, createdAt: h.clock.now() });
+    put("m_plain", false);
+    put("m_one", true);
+    put("m_two", true);
+    put("m_other", true);
+    h.db.markSteersDropped(["m_two"]);
+    h.db.markSteersDropped([]);
+    h.db.markSteersDropped(["m_plain", "m_one", "m_two", "m_gone"]);
+    expect(["m_plain", "m_one", "m_two", "m_other"].map((id) => h.db.getMessage(id)!.steered)).toEqual([0, 2, 2, 1]);
   });
 });

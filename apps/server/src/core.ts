@@ -166,6 +166,8 @@ export function messageView(core: Core, m: MessageRow, viewerId: string): Messag
         : { kind: "peer-agent", name: `${author?.display_name ?? "친구"} 님의 ${author?.agent_name ?? "모시"}` };
     }
   }
+  // a line of the viewer's own that its turn left unanswered (steers_dropped); a line in their own thread has no author
+  if (m.steered === 2 && m.role === "user" && (m.author_user_id ?? core.db.threadFor(m.thread_id, viewerId)?.owner_id) === viewerId) msg.steerDropped = true;
   return msg;
 }
 
@@ -185,8 +187,9 @@ export function publishThread(core: Core, threadId: string): void {
 /**
  * Push a `message` event for a stored message to every thread member (each device of theirs). Two flags ride this live
  * push alone; page reads and the request's own answer (202 / 201) leave them out, as an app that reloads can't know
- * which receipts went away since:
- *  - `steered: true` on a line the server steered into a running turn;
+ * which receipts went away since (`steerDropped`, stored, comes with every view of the line: messageView):
+ *  - `steered: true` on a line the server steered into a running turn, while no `steers_dropped` named it (a dropped line
+ *    carries `steerDropped` alone);
  *  - with `delivered`, `delivered: true` on a friend-thread line that reached the friend without a turn (201), for the
  *    devices of the line's author alone (the friend got the line itself; the flag means nothing there).
  */
@@ -195,7 +198,7 @@ export function publishMessage(core: Core, messageId: string, opts: { delivered?
   if (!row) return;
   for (const uid of core.db.threadMembers(row.thread_id)) {
     const message = messageView(core, row, uid);
-    if (row.steered) message.steered = true;
+    if (row.steered === 1) message.steered = true;
     if (opts.delivered && uid === row.author_user_id) message.delivered = true;
     core.events.publish(uid, { type: "message", threadId: row.thread_id, message });
   }

@@ -121,6 +121,25 @@ export function noteSteered(core: Core, userId: string, messageId: string): void
   core.activeTurns.get(userId)?.steered.push(messageId);
 }
 
+/**
+ * A turn leaves the lines stored as `ids` unanswered: their rows keep it (steered 2: `steerDropped` on every later read
+ * of the line), then every device of the person hears `steers_dropped`, with no await between. A device that missed the
+ * event (asleep, offline) learns it from its next page read; one that reads a page while the event is on its way already
+ * finds it there.
+ */
+function dropSteers(core: Core, userId: string, threadId: string, ids: string[]): void {
+  try {
+    core.db.markSteersDropped(ids);
+  } catch (err) {
+    core.log.warn("steer drop not stored", { user: userId, thread: threadId, err: errInfo(err) });
+  }
+  try {
+    core.events.publish(userId, { type: "steers_dropped", threadId, messageIds: ids });
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Thread whose turn currently holds the user's agent (undefined = idle, null = not steerable). */
 export function activeThreadOf(core: Core, userId: string): string | null | undefined {
   const cur = core.activeTurns.get(userId);
@@ -823,13 +842,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
         /* ignore */
       }
     }
-    if (dropped.length) {
-      try {
-        core.events.publish(o.userId, { type: "steers_dropped", threadId: o.threadId, messageIds: dropped });
-      } catch {
-        /* ignore */
-      }
-    }
+    if (dropped.length) dropSteers(core, o.userId, o.threadId, dropped);
     try {
       o.lease.release();
     } catch {
@@ -963,10 +976,10 @@ async function steerFollowUp(core: Core, userId: string, threadId: string, texts
     core.log.info("follow-up turn skipped: daily quota", { user: userId, thread: threadId, lines: texts.length });
     try {
       core.events.publish(userId, { type: "turn_error", threadId, error: "quota_exceeded", message: QUOTA_MESSAGE });
-      if (rows.length) core.events.publish(userId, { type: "steers_dropped", threadId, messageIds: rows });
     } catch {
       /* ignore */
     }
+    if (rows.length) dropSteers(core, userId, threadId, rows);
     return;
   }
   await executeTurn(core, {
