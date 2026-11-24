@@ -2,7 +2,7 @@ import type { ID } from "@pickle/protocol";
 import { island, islandStore } from "../../../app/island";
 import { isTurnRunning, messagesStore, reportHeard, sendMessage, sessionStore, stopTurn, type SendResult } from "../../../api/store";
 import { onServerEvent } from "../../../api/events";
-import { dropStoppedSteers, failedTurnSteers, steerDropped } from "../composerStore";
+import { dropStoppedSteers, steerDropped } from "../composerStore";
 import { createMic, createRecognizer, speechSupport, type Mic, type Recognizer } from "./speech";
 import { isEcho, speakable, speechCutter, type SpeechCutter } from "./speechText";
 import { audioContext, unlockAudio } from "./audioUnlock";
@@ -310,33 +310,18 @@ function cut(r: Reply, pieces: string[]) {
 /** the call's replies follow their drafts as they stream (the store flushes text deltas once per frame) */
 function onDraft() {
   for (const r of reply ? [reply, ...queue] : [...queue]) if (!r.over) follow(r);
-  steerFailed();
   steersDropped();
 }
 
 /** lines a turn from elsewhere took (202, "하던 일에 이어서 전했어요"), by their message id, until it answers, fails or stops */
 const steerNotes = new Map<ID, Reply>();
 /**
- * That turn failed and the server names no lines for it (`turn_error`: a briefing, a schedule, a follow-up; the thread's
- * error row, ThreadView's rule): the lines it left unanswered read its error in place of the note, which would read as
- * handled. A turn the app started that fails is steersDropped's.
- */
-function steerFailed() {
-  const threadId = callStore.get().threadId;
-  if (!threadId || !steerNotes.size) return;
-  const t = messagesStore.get()[threadId];
-  const error = t?.error;
-  if (!error) return;
-  for (const id of failedTurnSteers(threadId, t, (x) => steerNotes.has(x))) {
-    show(steerNotes.get(id)!, { text: error, final: true, who: "note" });
-    steerNotes.delete(id);
-  }
-}
-/**
  * That turn stopped or failed and the server answers none of these lines (`steers_dropped`, composerStore keeps the
- * ids). A failure this device shows (its thread error) reads in place of the note, as above. Otherwise (a stop, or a
- * failure streamed to another device) the note leaves the transcript the way a muted line does, and the line it
- * answered stays. A line taken by a turn still streaming here waits for that turn's end: its error may be on its way.
+ * ids; after a briefing's, a schedule's or a follow-up's `turn_error` too). A failure this device shows (its thread
+ * error) reads in place of the note, which would read as handled; a line the failed turn left queued keeps its note (a
+ * follow-up turn answers it). Otherwise (a stop, or a failure streamed to another device) the note leaves the
+ * transcript the way a muted line does, and the line it answered stays. A line taken by a turn still streaming here
+ * waits for that turn's end: its error may be on its way.
  */
 function steersDropped() {
   const threadId = callStore.get().threadId;
@@ -356,11 +341,9 @@ function steersDropped() {
   }
   if (gone.size) callStore.patch({ lines: callStore.get().lines.filter((l) => !gone.has(l.id)) });
 }
-// after every listener (composerStore's keeps the ids and the turn_error threads these ask about; a turn_error's error
-// row is up before composerStore hears it, so the draft pass that row set off found nothing)
+// after every listener (composerStore's keeps the ids this asks about)
 onServerEvent((e) => {
   if (e.type === "steers_dropped" && e.threadId === callStore.get().threadId) queueMicrotask(steersDropped);
-  if (e.type === "turn_error" && e.threadId === callStore.get().threadId) queueMicrotask(steerFailed);
 });
 function follow(r: Reply) {
   const d = messagesStore.get()[r.threadId]?.draft;
@@ -448,8 +431,7 @@ function finishTurn(r: Reply, res: SendResult) {
     show(r, { text: "하던 일에 이어서 전했어요", final: true, who: "note" });
     r.silent = true;
     if (res.steered && res.message) steerNotes.set(res.message.id, r);
-    steerFailed(); // that turn may have failed (or stopped) before the 202 got here
-    steersDropped();
+    steersDropped(); // that turn may have failed or stopped before the 202 got here
     return settle(r);
   }
   if (!res.ok) {

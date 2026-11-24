@@ -1,8 +1,8 @@
-// "하던 일에 이어서 전했어요" under a steered line (screens/chat/composerStore.ts): which lines a failed or stopped turn
-// left unanswered, so the receipt goes. ThreadView calls dropUnansweredSteers while a `turn_error`'s error row is up;
-// ThreadView and the call call dropStoppedSteers when a send of theirs comes back stopped; the call's transcript asks
-// failedTurnSteers of its notes (turn-error-steers.test.ts, with the turn_error it waits for). That wiring is covered
-// by the two-engine captures (normal turn, briefing, follow-up, Stop, 다시 보내기, call, next send).
+// "하던 일에 이어서 전했어요" under a steered line (screens/chat/composerStore.ts): which lines a stopped turn left
+// unanswered, so the receipt goes. ThreadView and the call call dropStoppedSteers when a send of theirs comes back
+// stopped (dropUnansweredSteers). A failed turn's lines go by the server's `steers_dropped` alone (steers-dropped,
+// turn-error-steers tests). That wiring is covered by the two-engine captures (normal turn, briefing, follow-up, Stop,
+// 다시 보내기, call, next send).
 import { describe, expect, test } from "bun:test";
 import { dropStoppedSteers, dropUnansweredSteers, markReceipt, receiptOf, unansweredSteers } from "../src/screens/chat/composerStore";
 
@@ -12,6 +12,7 @@ const rows = (spec: string): Row[] =>
   spec.split(" ").map((t) => [t, t.startsWith("R") ? "assistant" : t.startsWith("E") ? "event" : "user"] as const);
 const failed = (spec: string) => unansweredSteers(rows(spec), (id) => id.endsWith("*"));
 
+// row patterns, from when failures asked this too; the app now asks it only of a stopped send (dropStoppedSteers)
 describe("unansweredSteers", () => {
   test("the person's turn fails: the lines steered into it, before or after its partial answer", () => {
     expect(failed("A1 R1 A2 B1*")).toEqual(["B1*"]); // nothing streamed, or the partial dated at the turn's start
@@ -47,7 +48,7 @@ describe("unansweredSteers", () => {
 });
 
 describe("dropUnansweredSteers", () => {
-  test("drops only the failed turn's steer receipts; earlier steers and friend deliveries stay", () => {
+  test("drops only the stopped turn's steer receipts; earlier steers and friend deliveries stay", () => {
     markReceipt("y1", "steered");
     markReceipt("b1", "steered");
     markReceipt("b2", "steered");
@@ -62,11 +63,11 @@ describe("dropUnansweredSteers", () => {
     ];
     dropUnansweredSteers(thread);
     expect([receiptOf("y1"), receiptOf("b1"), receiptOf("b2"), receiptOf("d1")]).toEqual(["steered", undefined, undefined, "delivered"]);
-    // the next send ends the error row; nothing comes back, and a second pass changes nothing
+    // nothing comes back, and a second pass changes nothing
     dropUnansweredSteers(thread);
     expect([receiptOf("y1"), receiptOf("b1"), receiptOf("b2"), receiptOf("d1")]).toEqual(["steered", undefined, undefined, "delivered"]);
   });
-  test("a 202 that lands after the failure is dropped on the next pass", () => {
+  test("a 202 that lands after the stop is dropped on the next pass", () => {
     const thread: Row[] = [
       ["a5", "user"],
       ["b5", "user"],

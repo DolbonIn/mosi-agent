@@ -3,12 +3,11 @@ import type { ServerEvent } from "@pickle/protocol";
 import type { ThreadMessages } from "../src/api/store";
 
 /**
- * Which failed turns let the row order take "하던 일에 이어서 전했어요" (composerStore failedRemotely, failedTurnSteers).
- * A turn the app started that fails names the lines it had read (`steers_dropped`); the lines it left queued get a
- * follow-up turn, so they keep the receipt, on the device that streamed the turn as on the others. A turn the app did
- * not start (a briefing, a schedule, a steer follow-up) names none: its `turn_error` puts the error row up on every
- * device, and then the row order says which lines it left unanswered (ThreadView, the call's notes). The mark goes with
- * the error row: every send clears it, and so does sign-out. (ThreadView's wiring: the captures OS, OL, S, L, F, N2.)
+ * A failed turn takes "하던 일에 이어서 전했어요" only from the lines the server names (`steers_dropped`), for every kind
+ * of turn: one the app started (after the stream's error), a briefing, a schedule or a steer follow-up (after its
+ * `turn_error`, which puts the error row up on every device). The row order takes nothing: a line the failed turn left
+ * queued keeps its receipt until a later notice names it (its follow-up failed too). (ThreadView's and the call's
+ * wiring: the captures S, L, F, KS, N2, OS.)
  * Drives the real events.ts dispatch through a fake EventSource (no server).
  * bun runs every test file in one process: the file starts and ends with resetSession (the sign-out reset).
  */
@@ -43,16 +42,7 @@ const streamError = async (threadId: string) => {
   const empty: ThreadMessages = { items: [], draft: null, streaming: false, loading: false, loaded: true, hasMore: false, failed: [] };
   messagesStore.set((prev) => ({ ...prev, [threadId]: { ...(prev[threadId] ?? empty), error: ERROR } }));
 };
-const rows = (spec: string) => spec.split(" ").map((id) => ({ id, role: id.startsWith("R") ? "assistant" : "user" }));
-/** "A" a line that started a turn, "B*" a steered line, "R" a reply, "tmp_…" a line still being sent */
-const thread = (spec: string, over: Partial<{ error: string; failed: string[]; streaming: boolean }> = {}) => ({
-  error: ERROR,
-  failed: [] as string[],
-  streaming: false,
-  items: rows(spec),
-  ...over,
-});
-const has = (id: string) => id.endsWith("*");
+const dropped = (threadId: string, messageIds: string[]) => push({ type: "steers_dropped", threadId, messageIds } as ServerEvent);
 
 beforeAll(async () => {
   const { resetSession } = await store();
@@ -73,69 +63,60 @@ afterAll(async () => {
   (globalThis as { EventSource?: unknown }).EventSource = realEventSource;
 });
 
-describe("a failed turn: the row order takes receipts only after a turn_error", () => {
-  test("a stream's error row (a turn the app started failed): the row order takes nothing; steers_dropped takes the lines it read, the line left queued keeps its receipt", async () => {
-    const { failedRemotely, failedTurnSteers, markReceipt, receiptOf } = await chat();
+describe("a failed turn takes receipts only from steers_dropped", () => {
+  test("a stream's error row (a turn the app started failed): steers_dropped takes the lines it read, the line left queued keeps its receipt", async () => {
+    const { markReceipt, receiptOf } = await chat();
     await streamError("t_own");
-    expect(failedRemotely("t_own")).toBe(false);
-    expect(failedTurnSteers("t_own", thread("A1 B1* B2*"), has)).toEqual([]);
     markReceipt("o_b1", "steered");
     markReceipt("o_b2", "steered");
-    push({ type: "steers_dropped", threadId: "t_own", messageIds: ["o_b1"] } as ServerEvent);
+    expect([receiptOf("o_b1"), receiptOf("o_b2")]).toEqual(["steered", "steered"]);
+    dropped("t_own", ["o_b1"]);
     expect(receiptOf("o_b1")).toBeUndefined();
     expect(receiptOf("o_b2")).toBe("steered");
   });
 
-  test("a turn_error (a turn the app did not start failed): its error row is up, and the row order says which lines it left", async () => {
+  test("a turn_error (a briefing, a schedule): the error row is up and every receipt stays; then steers_dropped takes the lines it read, the queued one keeps its receipt", async () => {
     const { messagesStore } = await store();
-    const { failedRemotely, failedTurnSteers } = await chat();
-    expect(failedRemotely("t_rem")).toBe(false);
+    const { markReceipt, receiptOf } = await chat();
+    markReceipt("r_b1", "steered");
+    markReceipt("r_b2", "steered");
     turnError("t_rem");
     expect(messagesStore.get().t_rem?.error).toBe(ERROR);
-    expect(failedRemotely("t_rem")).toBe(true);
-    expect(failedTurnSteers("t_rem", thread("A1 B1*"), has)).toEqual(["B1*"]);
-    // only while that row is up: an error, nothing of theirs unsent, no turn streaming
-    expect(failedTurnSteers("t_rem", thread("A1 B1*", { error: "" }), has)).toEqual([]);
-    expect(failedTurnSteers("t_rem", thread("A1 B1*", { failed: ["tmp_1"] }), has)).toEqual([]);
-    expect(failedTurnSteers("t_rem", thread("A1 B1*", { streaming: true }), has)).toEqual([]);
-    expect(failedTurnSteers("t_rem", undefined, has)).toEqual([]);
-    // a line still being sent is not a row yet
-    expect(failedTurnSteers("t_rem", thread("A1 B1* R1 tmp_2"), has)).toEqual(["B1*"]);
-    // another thread's turn_error is not this one's
-    expect(failedTurnSteers("t_own", thread("A1 B1*"), has)).toEqual([]);
+    expect([receiptOf("r_b1"), receiptOf("r_b2")]).toEqual(["steered", "steered"]);
+    dropped("t_rem", ["r_b1"]);
+    expect(receiptOf("r_b1")).toBeUndefined();
+    expect(receiptOf("r_b2")).toBe("steered");
   });
 
-  test("the follow-up for the lines a failed turn of the app's left queued fails too (its turn_error over that row): marked", async () => {
-    const { failedRemotely } = await chat();
+  test("a turn_error with no notice (the turn read nothing): every receipt stays, the error row up", async () => {
+    const { messagesStore } = await store();
+    const { markReceipt, receiptOf } = await chat();
+    markReceipt("n_b1", "steered");
+    turnError("t_none");
+    expect(messagesStore.get().t_none?.error).toBe(ERROR);
+    expect(receiptOf("n_b1")).toBe("steered");
+  });
+
+  test("the follow-up for the queued line fails too (its turn_error over that row): its notice takes that line; another thread's notice takes nothing here", async () => {
+    const { markReceipt, receiptOf } = await chat();
+    markReceipt("f_b1", "steered");
+    markReceipt("f_b2", "steered");
     await streamError("t_fu");
-    expect(failedRemotely("t_fu")).toBe(false);
+    dropped("t_fu", ["f_b1"]);
+    expect([receiptOf("f_b1"), receiptOf("f_b2")]).toEqual([undefined, "steered"]);
     turnError("t_fu");
-    expect(failedRemotely("t_fu")).toBe(true);
+    expect(receiptOf("f_b2")).toBe("steered");
+    dropped("t_other", ["x_b9"]);
+    expect(receiptOf("f_b2")).toBe("steered");
+    dropped("t_fu", ["f_b2"]);
+    expect(receiptOf("f_b2")).toBeUndefined();
   });
 
-  test("a thread not open here: the row waits for it, and the mark with it, while other threads change", async () => {
-    const { failedRemotely } = await chat();
-    turnError("t_far");
-    await streamError("t_other");
-    expect(failedRemotely("t_far")).toBe(true);
-  });
-
-  test("the next send clears the error row and the mark with it; other threads keep theirs", async () => {
-    const { messagesStore, sendMessage, stopTurn } = await store();
-    const { failedRemotely } = await chat();
-    const sent = sendMessage("t_rem", "다시 알려줘");
-    expect(messagesStore.get().t_rem?.error).toBeUndefined();
-    expect(failedRemotely("t_rem")).toBe(false);
-    stopTurn("t_rem");
-    expect((await sent).status).toBe("aborted");
-    expect(failedRemotely("t_rem")).toBe(false);
-    expect([failedRemotely("t_fu"), failedRemotely("t_far")]).toEqual([true, true]);
-  });
-
-  test("sign-out (resetSession) clears every mark", async () => {
-    const { resetSession } = await store();
-    const { failedRemotely } = await chat();
-    resetSession();
-    expect([failedRemotely("t_fu"), failedRemotely("t_far")]).toEqual([false, false]);
+  test("a 202 that lands after the notice named its line adds no receipt", async () => {
+    const { markReceipt, receiptOf } = await chat();
+    turnError("t_late");
+    dropped("t_late", ["l_b1"]);
+    markReceipt("l_b1", "steered");
+    expect(receiptOf("l_b1")).toBeUndefined();
   });
 });
