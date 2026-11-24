@@ -502,6 +502,20 @@ the class `.t-copy` (text-wrap: pretty: no one-word last line), and its text goe
   TextField `hint` and `error`, the banner body (line-clamped, see below), Spotlight `emptyHint`. A screen's own
   copy slot uses the same three things (`copy()`, `<Sentences>`, `.t-copy`) instead of its own pretty and spans. In a
   flex container, wrap the copy in a span first: each sentence span would otherwise be a flex item of its own.
+- **No tie wider than its line.** A tie wider than its line wraps inside its box: the box takes the line whole, so
+  what follows goes down a line, and a nbsp at its break is drawn at the next line's start ("고성군문화복지센터&nbsp; /
+  · 강원" in a results row at 320, the dot 3–4 px in, three lines for two). A slot that can be narrower than its ties
+  gives its narrowest line in em at the width at hand, `copy(text, { line })`, the width read by `useWidth(ref)`
+  (before the first paint and on every resize): no tie or nbsp run is wider by `emWidth` (below), past it a "·" stays
+  apart and the word keeps its own tie when that fits, and the sentence blocks stay. Not the narrowest phone's line at
+  every width: a tie that fits a wider line then comes apart there too ("보내줘” / 라고 입력했다." at 430, "·" opening
+  lines). A line-clamped slot gives it as `clamp` (below). lines.mjs reports a tie laid on two lines (`wide-tie`).
+  Measured on results subtitles (320 from saved replies, 876 made up; each with and without a link) at 320–430 × text
+  size 0.9–1.3 in Chrome and WebKit, 95,680 rows: rows with a tie wrapped inside its box 16,153 → 0, indented lines
+  1,136 → 0, lines 171,739 → 158,789, no row a line longer. Of the 97,287 ties held on one line before, 516 now break
+  inside (443 a Latin word and its "·", which `emWidth` overestimates; the rest within the upper bounds of `emWidth`
+  and of 'when'). With 320's line at every width the same rows broke 1,754 (1,707 at 360–430). Lines opening on "·"
+  2,425 → 2,774: a word that fills its line leaves its dot to the next one.
 - **Line-clamped slots** take `copy(text, { clamp })`, `clamp` the slot's narrowest line in em: no sentence blocks (a
   sentence box would be one tall line to the clamp) and no tie or nbsp run wider than that line by `emWidth(text)`, an
   upper bound of the system font's width: the app's `--font-text` at every size the app draws text at (the type tokens

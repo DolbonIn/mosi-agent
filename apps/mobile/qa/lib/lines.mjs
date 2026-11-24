@@ -27,6 +27,9 @@
 //   sentence-split  a text of two sentences or more where a sentence that would fit on one line runs over two
 //   overflow        a line's last glyph ends more than 0.5 px past its block's content box (a nowrap tie too wide)
 //                   (0.5 px of slack for WebKit's whole-px Ranges: see the rule)
+//   wide-tie        a tie (.t-tie) laid on two lines or more: wider than its line, it wraps inside its box, takes the
+//                   line whole (what follows goes down a line) and draws a nbsp at its break at the next line's start
+//                   ("고성군문화복지센터&nbsp; / · 강원"). The slot gives its narrowest line (copy(text, { line }))
 //   line-gain       a copy block (pretty, or sentence blocks .t-s) takes more lines than the same text with plain
 //                   wrap: from opts.narrowPx (160) up, one more line is allowed for two sentences or more, none for one;
 //                   below it none at all (the foundation turns pretty and sentence blocks off in a narrow .t-cell)
@@ -287,6 +290,13 @@ export function linesInPage(opts = {}) {
     sorted.forEach((l, k) => {
       if (!clamped && l.right > contentRight + 0.5) findings.push({ rule: "overflow", line: (text[k] ?? "").trim(), by: Math.round((l.right - contentRight) * 10) / 10 });
     });
+    // ties laid on two lines or more (their characters' lines, blanks left out: a nbsp at a line's end has no line)
+    const tieLines = new Map();
+    for (const c of chars) {
+      const tie = c.blank ? null : c.el?.closest(".t-tie");
+      if (tie && block.contains(tie)) (tieLines.get(tie) ?? tieLines.set(tie, new Set()).get(tie)).add(c.line);
+    }
+    for (const [tie, on] of tieLines) if (on.size > 1) findings.push({ rule: "wide-tie", line: tie.textContent.replace(/\s+/g, " ").trim() });
     const all = chars.map((c) => c.ch).join("");
     // emoji side by side on two lines ("🍜 / 🍜"): each cluster sits on the line of its first code point
     if (seg) {

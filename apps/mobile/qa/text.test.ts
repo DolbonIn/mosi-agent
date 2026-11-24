@@ -233,6 +233,28 @@ describe("Sentences", () => {
     expect(clamped("문의는 fontanaclinic · 전화", 7.5)).toBe(`<p>문의는 ${t("fontanaclinic\u00a0·")} 전화</p>`);
     expect(clamped("010-1111-1111 전화", 7.5)).toBe(`<p>${t("010-1111-1111")} 전화</p>`);
   });
+  test("line: no tie or nbsp run wider than a narrow slot's narrowest line, the sentence blocks kept", () => {
+    const t = (x: string) => `<span class="t-tie">${x}</span>`;
+    const lined = (text: string, line?: number) => renderToStaticMarkup(createElement("p", null, copy(text, { line })));
+    // "고성군문화복지센터 ·" 9.64 em: beside "뮤지컬 · 11.27~11.28" at 320 (7.05 em, InfoCards subLine) the dot stays
+    // apart; with room it rides
+    expect(lined("고성군문화복지센터 · 강원", 7.05)).toBe(`<p>고성군문화복지센터 ${t("·")} 강원</p>`);
+    expect(lined("고성군문화복지센터 · 강원", 9.64)).toBe(`<p>${t("고성군문화복지센터\u00a0·")} 강원</p>`);
+    expect(lined("고성군문화복지센터 · 강원")).toBe(`<p>${t("고성군문화복지센터\u00a0·")} 강원</p>`);
+    // past the line the word keeps its own tie when that fits ("132,400원" 5.07 em, "132,400원 ·" 5.71), and a word's
+    // own tie over it is not made either ("example.com에서" 8.7 em)
+    expect(lined("쿠팡 · 132,400원 · 확인", 5.4)).toBe(`<p>${t("쿠팡\u00a0·")} ${t("132,400원")} ${t("·")} 확인</p>`);
+    expect(lined("example.com에서 봐요.", 8)).toBe("<p>example.com에서 봐요.</p>");
+    expect(lined("총 23 곳을 찾았어요", 2.5)).toBe("<p>총 23 곳을 찾았어요</p>");
+    expect(lined("총 23 곳을 찾았어요", 3)).toBe(`<p>${t("총\u00a023")} 곳을 찾았어요</p>`);
+    // the sentence blocks stay (a clamp turns them off), the cap holds inside each
+    expect(lined("가요. 고성군문화복지센터 · 강원.", 7.05)).toBe(
+      `<p><span class="t-s">가요.</span> <span class="t-s">고성군문화복지센터 ${t("·")} 강원.</span></p>`,
+    );
+    expect(lined("가요. 고성군문화복지센터 · 강원.")).toBe(
+      `<p><span class="t-s">가요.</span> <span class="t-s">${t("고성군문화복지센터\u00a0·")} 강원.</span></p>`,
+    );
+  });
   test("a · opening a line of its own stays there (spaces and nbsp only, no line break)", () => {
     const dot = `<span class="t-tie">·</span>`;
     expect(html("준비물\n· 물\n· 수건", false)).toBe(`준비물\n${dot} 물\n${dot} 수건`);

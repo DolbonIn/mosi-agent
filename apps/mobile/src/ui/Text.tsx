@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useLayoutEffect, useState, type ReactNode, type RefObject } from "react";
 import "./Text.css";
 
 /**
@@ -44,8 +44,14 @@ import "./Text.css";
  *   - a word holding a domain is tied whole, path, particle and all, at any length: "microsoft.com/devicelogin에",
  *     "example.co.kr", "user@example.com". WebKit breaks inside it at "." and "/" ("microsoft. / com/devicelogin에");
  *     a box wider than the line wraps inside instead of running out.
- * In a line-clamped slot the caller gives the slot's narrowest line in em (`copy(text, { clamp: 5 })`, the banner body)
- * and no tie is wider: -webkit-line-clamp counts a box that wraps inside as one line, so a 2-line clamp would show 3.
+ * No tie is wider than its line where the slot says how narrow its lines get. A box wider than the line wraps inside: it
+ * takes the line whole, so what follows goes down a line, and a nbsp at its break is drawn at the next line's start
+ * ("고성군문화복지센터&nbsp; / · 강원", the dot 3–4 px in, three lines for two). A slot that can be narrower than its ties
+ * gives its narrowest line in em at the width at hand (`copy(text, { line })`, a results row's subtitle beside its time,
+ * from its list's width by `useWidth`): with the narrowest phone's line at every width, a tie that fits a wider line
+ * comes apart there too ("보내줘” / 라고 입력했다." at 430, "·" opening lines). A line-clamped one gives it as `clamp`
+ * (`copy(text, { clamp: 5 })`, the banner body): -webkit-line-clamp counts a box that wraps inside as one line, so a
+ * 2-line clamp would show 3.
  * In a narrow cell the copy wraps plainly: a `.t-cell` (a container; ListRow's text column) under 160 px turns pretty and
  * the sentence blocks off, since in a narrow column they only add lines. The ties stay at every width.
  * Not straight into a flex container: each sentence span would be a flex item of its own. Wrap the copy in a span
@@ -205,8 +211,9 @@ function rides(prev: string, w: string): boolean {
 }
 
 /**
- * the text with its tight spots tied (see above). `clamp`: in a line-clamped slot, its narrowest line in em; no tie or
- * nbsp run is wider (a box wider than the line wraps inside, and the clamp counts it as one line)
+ * the text with its tight spots tied (see above). `clamp`: the slot's narrowest line in em (a line-clamped slot's, or
+ * a narrow one's: `copy(text, { line })`); no tie or nbsp run is wider (a box wider than the line wraps inside, takes
+ * the line whole and, line-clamped, counts as one line). Past it a "·" stays apart and the word keeps its own tie
  */
 export function tied(text: string, { clamp = Infinity }: { clamp?: number } = {}): ReactNode {
   const words: string[] = [];
@@ -249,19 +256,31 @@ export function tied(text: string, { clamp = Infinity }: { clamp?: number } = {}
 
 /**
  * a text that breaks only between its sentences, with its tight spots tied (`sentences={false}`: ties only; `clamp`:
- * a line-clamped slot's narrowest line in em, ties only and none wider)
+ * a line-clamped slot's narrowest line in em, ties only and none wider; `line`: a narrow slot's narrowest line in em,
+ * no tie wider)
  */
-export function Sentences({ text, sentences = true, clamp }: { text: string; sentences?: boolean; clamp?: number }) {
+export function Sentences({
+  text,
+  sentences = true,
+  clamp,
+  line,
+}: {
+  text: string;
+  sentences?: boolean;
+  clamp?: number;
+  line?: number;
+}) {
   // no sentence blocks in a text holding a character WebKit sizes apart from how it draws it (`ODD`): its block would
   // move the sentence after it
   const parts = sentences && clamp === undefined && !odd(text) ? sentencesOf(text) : [];
-  if (parts.length < 2) return <>{tied(text, { clamp })}</>;
+  const widest = clamp ?? line;
+  if (parts.length < 2) return <>{tied(text, { clamp: widest })}</>;
   return (
     <>
       {parts.map((s, i) => (
         <Fragment key={i}>
           {i > 0 ? " " : null}
-          <span className="t-s">{tied(s)}</span>
+          <span className="t-s">{tied(s, { clamp: widest })}</span>
         </Fragment>
       ))}
     </>
@@ -612,9 +631,33 @@ export function glued(text: string, before = ""): ReactNode {
  * A copy slot's content: a plain string goes through `Sentences`; anything else (a node the caller built) is left as
  * it is. `clamp` for a line-clamped slot, its narrowest line in em (the banner body: `{ clamp: 5 }` beside 실행 취소):
  * no sentence blocks (an inline-block sentence would be one tall line to the clamp) and no tie wider (a box wider than
- * the line wraps inside and shows a line more).
+ * the line wraps inside and shows a line more). `line` for a slot that can be narrower than its ties, its narrowest
+ * line in em at the width at hand (a results row's subtitle beside its time, from `useWidth`): no tie wider (a box
+ * wider than the line wraps inside and takes the line whole, its nbsp drawn at the next line's start), the sentence
+ * blocks kept.
  * `sentences: false` turns the sentence blocks off alone.
  */
-export function copy(node: ReactNode, { sentences = true, clamp }: { sentences?: boolean; clamp?: number } = {}): ReactNode {
-  return typeof node === "string" ? <Sentences text={node} sentences={sentences} clamp={clamp} /> : node;
+export function copy(
+  node: ReactNode,
+  { sentences = true, clamp, line }: { sentences?: boolean; clamp?: number; line?: number } = {},
+): ReactNode {
+  return typeof node === "string" ? <Sentences text={node} sentences={sentences} clamp={clamp} line={line} /> : node;
+}
+
+/**
+ * The layout width in px of `ref`'s element (a transform does not change it), read before the first paint and again
+ * on every resize; `fallback` until then (a server render, a test) and while the element draws nothing. For
+ * `copy(text, { line })` in a slot whose lines follow the viewport: the line at hand, not the narrowest phone's.
+ */
+export function useWidth(ref: RefObject<Element | null>, fallback: number): number {
+  const [width, setWidth] = useState(fallback);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    setWidth(el.clientWidth || fallback);
+    const ro = new ResizeObserver(([e]) => e && setWidth(e.contentRect.width || fallback));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, fallback]);
+  return width;
 }

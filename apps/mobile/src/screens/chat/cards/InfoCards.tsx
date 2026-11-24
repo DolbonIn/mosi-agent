@@ -8,7 +8,8 @@ import { nav } from "../../../app/nav";
 import { t } from "../../../motion/springs";
 import { Icon } from "../../../ui/Icon";
 import { ListRow } from "../../../ui/List";
-import { copy } from "../../../ui/Text";
+import { useTierValue } from "../../../motion/tier";
+import { copy, emWidth, useWidth } from "../../../ui/Text";
 import { Toggle } from "../../../ui/Toggle";
 import { createStore, useStore } from "../../../lib/createStore";
 import { MessengerThreadCard } from "./MessengerThreadCard";
@@ -145,8 +146,25 @@ export function isWideMeta(meta: string | undefined): boolean {
   return w > 24;
 }
 
+/**
+ * .res-sub's narrowest line in em at text size `scale`, so no tie in it is wider (FOUNDATION › Line breaks: a tie wider
+ * than its line takes the line whole and draws its nbsp at the next line's start, "고성군문화복지센터&nbsp; / · 강원" at
+ * 320): the row (the list's width `list`, 256 px at 320; 26 less beside the chevron, its 16 px and the 10 px gap), less
+ * the gap and 'when' (by `emWidth`, its digits as a tabular "0", at footnote size, at most 60 % of the row), at
+ * subhead size
+ */
+export function subLine(when: string | undefined, chevron: boolean, scale: number, list = 256): number {
+  const row = chevron ? list - 26 : list;
+  const meta = when ? 12 + Math.min(emWidth(when.replace(/\d/g, "0")) * 13 * scale, row * 0.6) : 0;
+  return (row - meta) / (15 * scale);
+}
+
 export function ResultsCard({ card }: { card: ResultListCard }) {
   const [all, setAll] = useState(false);
+  const scale = useTierValue("textScale");
+  // the row's width at hand, so a tie that fits a wider phone's line stays tied there
+  const listRef = useRef<HTMLUListElement>(null);
+  const list = useWidth(listRef, 256);
   const shown = all ? card.items : card.items.slice(0, 5);
   return (
     <section className="ccard ccard-results" aria-label={card.title}>
@@ -154,7 +172,7 @@ export function ResultsCard({ card }: { card: ResultListCard }) {
         <h3 className="ccard-title">{card.title}</h3>
         {card.source && <span className="ccard-source">{card.source}</span>}
       </div>
-      <ul className="res-list">
+      <ul className="res-list" ref={listRef}>
         <AnimatePresence initial={false}>
           {shown.map((it, i) => {
             const snippet = isWideMeta(it.meta);
@@ -168,7 +186,9 @@ export function ResultsCard({ card }: { card: ResultListCard }) {
                     <span className="res-line">
                       {/* a narrow cell beside a long 'when' (133 px at 320): a .t-cell around the copy (FOUNDATION ›
                           Line breaks), so under 160 px it wraps plainly */}
-                      <span className="res-sub t-cell">{it.subtitle && <span className="t-copy">{copy(it.subtitle)}</span>}</span>
+                      <span className="res-sub t-cell">
+                        {it.subtitle && <span className="t-copy">{copy(it.subtitle, { line: subLine(when, !!it.url, scale, list) })}</span>}
+                      </span>
                       {when && <span className="res-meta tnum">{when}</span>}
                     </span>
                   )}
