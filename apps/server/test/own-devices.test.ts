@@ -8,7 +8,8 @@
  * one device showed "오늘 날씨 알려줘" → error → the umbrella answer with the umbrella line missing (DD 1814).
  * A pushed line that was steered into the running turn carries `steered: true`, so the other device can show its steer
  * receipt as the sending one does (and place a failed turn's error row above it); no other row carries the field, and
- * page reads never do.
+ * page reads never do. Likewise a friend-thread line that reached the friend without a turn (201) carries
+ * `delivered: true` on the push to the sender's own devices alone (not the friend's, not page reads, not the 201 body).
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { AgentEvent, Friend, InviteResponse, Message, ServerEvent, SteeredResponse, Thread } from "@pickle/protocol";
@@ -36,14 +37,17 @@ async function device(token: string) {
   return {
     /**
      * message, turn_error and steers_dropped events since the last call, in order: "<role> <text> <id>" for a message,
-     * with " steered=<value>" after it whenever the pushed message has the field at all
+     * with " steered=<value>" / " delivered=<value>" after it whenever the pushed message has that field at all
      */
     async got(waitMs = 60): Promise<string[]> {
       const out: string[] = [];
       for (;;) {
         const e = await ev.next<ServerEvent>((x) => x.type === "message" || x.type === "turn_error" || x.type === "steers_dropped", waitMs);
         if (!e) return out;
-        if (e.type === "message") out.push(`${e.message.role} ${e.message.text} ${e.message.id}${"steered" in e.message ? ` steered=${e.message.steered}` : ""}`);
+        if (e.type === "message") {
+          const m = e.message;
+          out.push(`${m.role} ${m.text} ${m.id}${"steered" in m ? ` steered=${m.steered}` : ""}${"delivered" in m ? ` delivered=${m.delivered}` : ""}`);
+        }
         else if (e.type === "turn_error") out.push(`turn_error ${e.threadId}`);
         else if (e.type === "steers_dropped") out.push(`steers_dropped ${e.messageIds.join(",")}`);
       }
@@ -60,11 +64,11 @@ async function steer(token: string, threadId: string, text: string): Promise<str
   return userMessage.id;
 }
 
-/** the thread's rows as a page read returns them: none carries `steered` */
-async function pageHasNoSteered(token: string, threadId: string) {
+/** the thread's rows as a page read returns them: none carries `steered` or `delivered` (live-push flags) */
+async function pageHasNoLiveFlags(token: string, threadId: string) {
   const page = (await (await h.req("GET", `/api/threads/${threadId}/messages`, { token })).json()) as Message[];
   expect(page.length).toBeGreaterThan(0);
-  expect(page.filter((m) => "steered" in m)).toEqual([]);
+  expect(page.filter((m) => "steered" in m || "delivered" in m)).toEqual([]);
 }
 
 describe("the person's rows reach every device of theirs", () => {
@@ -103,7 +107,7 @@ describe("the person's rows reach every device of theirs", () => {
     const done = await r.next<Extract<AgentEvent, { type: "done" }>>((e) => e.type === "done");
     await h.app.core.idle();
     expect(await other.got()).toEqual([`assistant 둘 다 답할게요 ${done!.message.id}`]);
-    await pageHasNoSteered(token, tid);
+    await pageHasNoLiveFlags(token, tid);
     await other.cancel();
   });
 
@@ -155,7 +159,7 @@ describe("the person's rows reach every device of theirs", () => {
     expect(got.slice(2).map((x) => x.replace(/ m_\S+$/, ""))).toEqual(["assistant 오늘은 맑아서 우산은 필요 없어요."]);
     expect(await b.got()).toEqual(got);
     expect(h.turns.inputs.at(-1)!.userText).toBe("오늘 우산 필요해?");
-    await pageHasNoSteered(token, tid);
+    await pageHasNoLiveFlags(token, tid);
     await a.cancel();
     await b.cancel();
   });
@@ -185,7 +189,7 @@ describe("the person's rows reach every device of theirs", () => {
     expect((await other.got())[0]).toBe(`user 둘째 질문 ${late.userMessage!.id}`);
     g.open();
     await h.app.core.idle();
-    await pageHasNoSteered(token, tid);
+    await pageHasNoLiveFlags(token, tid);
     await other.cancel();
   });
 });
@@ -197,7 +201,10 @@ async function befriend(x: { token: string }, y: { token: string }): Promise<Fri
   return (await acc.json()) as Friend;
 }
 
-/** in a friend thread, a line to the friend alone (201) and a line that calls my agent (its answer streams) */
+/**
+ * in a friend thread, a line to the friend alone (201) and a line that calls my agent (its answer streams); `want` is
+ * what the friend's device gets, `mineWant` what mine get (the 201 line says it was delivered)
+ */
 async function friendLines() {
   const me = await h.signup("haneul", { agentName: "깽이" });
   const friend = await h.signup("byeol", { displayName: "별", agentName: "토리" });
@@ -206,19 +213,26 @@ async function friendLines() {
   const theirs = await device(friend.token);
   const res = await h.req("POST", `/api/threads/${tid}/messages`, { token: me.token, body: { text: "내일 영화 볼래?" } });
   expect(res.status).toBe(201);
-  const line = ((await res.json()) as { userMessage: Message }).userMessage;
+  const body = (await res.json()) as { delivered: boolean; userMessage: Message };
+  expect(body.delivered).toBe(true); // the 201 says so itself
+  expect("delivered" in body.userMessage).toBe(false);
+  const line = body.userMessage;
   h.turns.set(async () => outcome("상영 시간을 찾아볼게요"));
   const evs = (await readSse(await h.req("POST", `/api/threads/${tid}/messages`, { token: me.token, body: { text: "@깽이 상영 시간 알려줘" } }))) as AgentEvent[];
   const start = evs.find((e) => e.type === "start") as Extract<AgentEvent, { type: "start" }>;
   const done = evs.find((e) => e.type === "done") as Extract<AgentEvent, { type: "done" }>;
+  expect("delivered" in start.userMessage!).toBe(false);
   await h.app.core.idle();
-  return { mine, theirs, want: [`user 내일 영화 볼래? ${line.id}`, `user @깽이 상영 시간 알려줘 ${start.userMessage!.id}`, `assistant 상영 시간을 찾아볼게요 ${done.message.id}`] };
+  await pageHasNoLiveFlags(me.token, tid);
+  await pageHasNoLiveFlags(friend.token, tid);
+  const rest = [`user @깽이 상영 시간 알려줘 ${start.userMessage!.id}`, `assistant 상영 시간을 찾아볼게요 ${done.message.id}`];
+  return { mine, theirs, want: [`user 내일 영화 볼래? ${line.id}`, ...rest], mineWant: [`user 내일 영화 볼래? ${line.id} delivered=true`, ...rest] };
 }
 
 describe("friend threads: the sender's own devices too", () => {
-  test("my line to the friend (201) and my line that calls my agent, with its answer: on my devices as on the friend's", async () => {
-    const { mine, theirs, want } = await friendLines();
-    expect(await mine.got()).toEqual(want);
+  test("my line to the friend (201) and my line that calls my agent, with its answer: on my devices as on the friend's; the 201 line tells my devices it was delivered, not the friend's", async () => {
+    const { mine, theirs, want, mineWant } = await friendLines();
+    expect(await mine.got()).toEqual(mineWant);
     expect(await theirs.got()).toEqual(want);
     await mine.cancel();
     await theirs.cancel();

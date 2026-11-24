@@ -228,6 +228,13 @@ export interface Message {
    * or the 202 body, and absent on a line that became a turn of its own (the running turn ended in between).
    */
   steered?: true;
+  /**
+   * Only on a live `message` push, to the sender's own devices, of their friend-thread line that reached the friend
+   * without calling their agent (the send's 201 `delivered`), so every open device of theirs shows it delivered as the
+   * sending one does. Never on the friend's devices, in page reads (GET messages) or the 201 body, nor on a line that
+   * called the agent (it became a turn).
+   */
+  delivered?: true;
 }
 
 export interface ToolActivity {

@@ -172,17 +172,20 @@ export function publishThread(core: Core, threadId: string): void {
 }
 
 /**
- * Push a `message` event for a stored message to thread members (optionally excluding one user). A line the server
- * steered into a running turn carries `steered: true` here, on the live push alone: page reads and the 202 leave it out
- * (an app that reloads can't know which receipts were dropped since).
+ * Push a `message` event for a stored message to every thread member (each device of theirs). Two flags ride this live
+ * push alone; page reads and the request's own answer (202 / 201) leave them out, as an app that reloads can't know
+ * which receipts went away since:
+ *  - `steered: true` on a line the server steered into a running turn;
+ *  - with `delivered`, `delivered: true` on a friend-thread line that reached the friend without a turn (201), for the
+ *    devices of the line's author alone (the friend got the line itself; the flag means nothing there).
  */
-export function publishMessage(core: Core, messageId: string, opts: { exclude?: string } = {}): void {
+export function publishMessage(core: Core, messageId: string, opts: { delivered?: boolean } = {}): void {
   const row = core.db.getMessage(messageId);
   if (!row) return;
   for (const uid of core.db.threadMembers(row.thread_id)) {
-    if (uid === opts.exclude) continue;
     const message = messageView(core, row, uid);
     if (row.steered) message.steered = true;
+    if (opts.delivered && uid === row.author_user_id) message.delivered = true;
     core.events.publish(uid, { type: "message", threadId: row.thread_id, message });
   }
 }

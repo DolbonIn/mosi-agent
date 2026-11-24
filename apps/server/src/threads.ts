@@ -384,8 +384,9 @@ export function threadRoutes(core: Core) {
         db.touchThread(thread.id, now, preview(`${me.display_name}: ${text}`));
         db.setUnread(thread.id, peerId, true);
       });
-      // the friend and the sender's own other devices (the sending one merges it by id with the 201 / start)
-      publishMessage(core, id);
+      // the friend and the sender's own other devices (the sending one merges it by id with the 201 / start); a line that
+      // reached the friend without a turn (the 201 below) tells the sender's devices it was delivered
+      publishMessage(core, id, { delivered: !lease });
       publishThread(core, thread.id);
       const peer = db.userById(peerId);
       if (peer && settingsOf(peer).notifications.friendMessages) {
