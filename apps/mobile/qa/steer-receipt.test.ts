@@ -1,10 +1,10 @@
 // "하던 일에 이어서 전했어요" under a steered line (screens/chat/composerStore.ts): which lines a failed or stopped turn
-// left unanswered, so the receipt goes. ThreadView calls dropUnansweredSteers while the thread's error row is up;
+// left unanswered, so the receipt goes. ThreadView calls dropUnansweredSteers while a `turn_error`'s error row is up;
 // ThreadView and the call call dropStoppedSteers when a send of theirs comes back stopped; the call's transcript asks
-// failedTurnSteers of its notes. That wiring is covered by the two-engine captures (normal turn, briefing, follow-up,
-// Stop, 다시 보내기, call, next send).
+// failedTurnSteers of its notes (turn-error-steers.test.ts, with the turn_error it waits for). That wiring is covered
+// by the two-engine captures (normal turn, briefing, follow-up, Stop, 다시 보내기, call, next send).
 import { describe, expect, test } from "bun:test";
-import { dropStoppedSteers, dropUnansweredSteers, failedTurnSteers, markReceipt, receiptOf, unansweredSteers } from "../src/screens/chat/composerStore";
+import { dropStoppedSteers, dropUnansweredSteers, markReceipt, receiptOf, unansweredSteers } from "../src/screens/chat/composerStore";
 
 type Row = readonly [string, string];
 /** "A" a line that started a turn, "B*" a steered line, "R" a reply, "E" an event row */
@@ -81,27 +81,6 @@ describe("dropUnansweredSteers", () => {
 
 /** thread messages: "tmp_…" ids are lines still being sent */
 const items = (spec: string) => rows(spec).map(([id, role]) => ({ id, role }));
-
-describe("failedTurnSteers (the call's notes)", () => {
-  const thread = (spec: string, over: Partial<{ error: string; failed: string[]; streaming: boolean }> = {}) => ({
-    error: "지금 요청이 많아요. 잠시 후 다시 시도해 주세요.",
-    failed: [] as string[],
-    streaming: false,
-    items: items(spec),
-    ...over,
-  });
-  const has = (id: string) => id.endsWith("*");
-  test("only while the error row is up: an error, nothing of theirs unsent, no turn streaming", () => {
-    expect(failedTurnSteers(thread("A1 B1*"), has)).toEqual(["B1*"]);
-    expect(failedTurnSteers(thread("A1 B1*", { error: "" }), has)).toEqual([]);
-    expect(failedTurnSteers(thread("A1 B1*", { failed: ["tmp_1"] }), has)).toEqual([]);
-    expect(failedTurnSteers(thread("A1 B1*", { streaming: true }), has)).toEqual([]);
-    expect(failedTurnSteers(undefined, has)).toEqual([]);
-  });
-  test("a line still being sent is not a row yet", () => {
-    expect(failedTurnSteers(thread("A1 B1* R1 tmp_2"), has)).toEqual(["B1*"]);
-  });
-});
 
 describe("dropStoppedSteers", () => {
   const stopped = { status: "aborted" as const, accepted: true };

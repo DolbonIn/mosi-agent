@@ -13,7 +13,7 @@ import { fitAhead } from "./bubbleFit";
 import { prewarmAudio } from "./call/audioUnlock";
 import { launchCall } from "./call/launch";
 import { Composer } from "./Composer";
-import { dropStoppedSteers, dropUnansweredSteers, markReceipt, turnStarted, useReceipts } from "./composerStore";
+import { dropStoppedSteers, dropUnansweredSteers, failedRemotely, markReceipt, turnStarted, useReceipts } from "./composerStore";
 import { EmptyThread } from "./EmptyThread";
 import { DateSeparator, DraftRow, draftHasContent, FollowUpRow, markSchedulesSeen, MessageRow, offerScheduleUndo, peerFace, type RowContext } from "./Messages";
 import { arrivedBelow, type NewsMark } from "./newsBelow";
@@ -353,13 +353,15 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
       : null;
   const failed = new Set(data.failed);
   const lastFailed = data.failed[data.failed.length - 1];
-  // the turn failed with nothing of theirs left unsent (the error row below): the lines steered into it go unanswered,
-  // so their "하던 일에 이어서 전했어요" goes (before paint, and for good: it stays gone after the next send)
+  // the turn failed with nothing of theirs left unsent (the error row below). One the app didn't start (`turn_error`:
+  // the server names no lines for it): the lines steered into it go unanswered, so their "하던 일에 이어서 전했어요" goes
+  // (before paint, and for good: it stays gone after the next send). One of the app's names the lines it had read
+  // (`steers_dropped`, composerStore); a line it left queued keeps the receipt, its follow-up turn answers it
   const turnFailed = !!data.error && !lastFailed && !data.streaming;
   const receipts = useReceipts();
   useLayoutEffect(() => {
-    if (turnFailed) dropUnansweredSteers(items.map((m) => [m.id, m.role] as const));
-  }, [turnFailed, items, receipts]);
+    if (turnFailed && failedRemotely(threadId)) dropUnansweredSteers(items.map((m) => [m.id, m.role] as const));
+  }, [turnFailed, threadId, items, receipts]);
   const empty = data.loaded && !items.length && !data.draft && !data.streaming;
   const placeholder = friend ? `${thread?.peer?.displayName ?? "친구"} 님에게 메시지` : ui.composer.placeholder || "메시지 보내기";
   // the composer sits in the slot above the (static) tab bar

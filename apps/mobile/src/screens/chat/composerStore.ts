@@ -1,6 +1,6 @@
 import type { ID } from "@pickle/protocol";
 import { onServerEvent } from "../../api/events";
-import { isTempId, type SendResult } from "../../api/store";
+import { isTempId, messagesStore, type SendResult } from "../../api/store";
 import { createStore, useStore } from "../../lib/createStore";
 
 /**
@@ -46,9 +46,9 @@ export const receiptOf = (id: ID): Receipt | undefined => receipts.get()[id];
 export const useReceipts = () => useStore(receipts, (s) => s, Object.is);
 
 /**
- * The steered lines a failed or stopped turn left unanswered (the thread's error row is up, or a turn sent from there
- * came back stopped; a call's transcript asks the same of its lines). `rows` = the thread's messages as [id, role],
- * oldest first.
+ * The steered lines a failed or stopped turn left unanswered (the error row of a turn the app did not start is up:
+ * `failedRemotely`; or a turn sent from there came back stopped; a call's transcript asks the same of its lines).
+ * `rows` = the thread's messages as [id, role], oldest first.
  *  - lines after the last reply: the failed turn is the one they went into (the person's turn, a briefing, a schedule)
  *  - none there, and no line of the person's after that reply either: the reply is the failed turn's partial answer
  *    (the server dates it at the end, after the lines it streamed past) or a finished one whose steered lines were
@@ -75,11 +75,11 @@ type Row = { id: ID; role: string };
 const rowsOf = (items: readonly Row[]) => items.filter((m) => !isTempId(m.id)).map((m) => [m.id, m.role] as const);
 
 /**
- * A thread whose turn failed with nothing of theirs left unsent (its error row is up): the steered lines that turn left
- * unanswered. The call's transcript asks this of its own lines.
+ * A thread whose turn failed with nothing of theirs left unsent (its error row is up), a turn the app did not start
+ * (`failedRemotely`): the steered lines that turn left unanswered. The call's transcript asks this of its own lines.
  */
-export function failedTurnSteers(t: { error?: string; failed: readonly ID[]; streaming: boolean; items: readonly Row[] } | undefined, steered: (id: ID) => boolean): ID[] {
-  if (!t?.error || t.failed.length || t.streaming) return [];
+export function failedTurnSteers(threadId: ID, t: { error?: string; failed: readonly ID[]; streaming: boolean; items: readonly Row[] } | undefined, steered: (id: ID) => boolean): ID[] {
+  if (!t?.error || t.failed.length || t.streaming || !remoteFailed.has(threadId)) return [];
   return unansweredSteers(rowsOf(t.items), steered);
 }
 
@@ -111,8 +111,9 @@ function forget(ids: readonly ID[]) {
  * lines it had read; the rest go to a follow-up turn). The server sends `steers_dropped` with their ids to every
  * device of the person. The receipt goes wherever a 202 put it, including sends whose result went elsewhere (island
  * 다시 시도, PreDelegateSheet, another device's turn, which a stream's error never reaches). Kept so a 202 still on its
- * way adds none. Ids are the server's, never reused. On the device streaming the turn this overlaps ThreadView's own
- * dropStoppedSteers / failedTurnSteers: whichever comes first drops the receipt, the other finds nothing.
+ * way adds none. Ids are the server's, never reused. On the device streaming the turn a stop overlaps ThreadView's own
+ * dropStoppedSteers: whichever comes first drops the receipt, the other finds nothing. A failure is this notice alone:
+ * only the server knows which lines the turn had read.
  */
 const droppedSteers = new Set<ID>();
 onServerEvent((e) => {
@@ -123,6 +124,22 @@ onServerEvent((e) => {
 });
 /** a `steers_dropped` named this line: its turn stopped or failed and nothing will answer it (the call asks for its notes) */
 export const steerDropped = (id: ID) => droppedSteers.has(id);
+/**
+ * Threads whose error row a `turn_error` put up: a turn the app did not start failed (a briefing, a schedule, a steer
+ * follow-up). The server names the dropped lines only for a turn the app started (above), so after these the row order
+ * says which lines went unanswered (ThreadView, the call); after a turn of the app's, a line it left queued has a
+ * follow-up turn coming and keeps "하던 일에 이어서 전했어요". Gone with the error row (every send clears it).
+ */
+const remoteFailed = new Set<ID>();
+onServerEvent((e) => {
+  if (e.type === "turn_error") remoteFailed.add(e.threadId);
+});
+messagesStore.subscribe(() => {
+  if (!remoteFailed.size) return;
+  const s = messagesStore.get();
+  for (const id of remoteFailed) if (!s[id]?.error) remoteFailed.delete(id);
+});
+export const failedRemotely = (threadId: ID) => remoteFailed.has(threadId);
 /**
  * The follow-up row: is a steered message still waiting for its own answer? `tail` = the last few messages as
  * "id:role" pairs, oldest first. The turn it was steered into answers once (that reply lands after it); a second

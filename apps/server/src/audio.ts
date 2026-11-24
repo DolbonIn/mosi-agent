@@ -135,9 +135,12 @@ export interface Tunnel {
   stop(): void;
   /** a kept tunnel (survives the server): its pid, whether this start reused it, and how to stop watching it */
   kept?: { pid: number; reused: boolean; release(): void };
+  /** its cloudflared metrics server (127.0.0.1): GET /ready says whether Cloudflare still routes the tunnel */
+  metrics?: number;
 }
 
-export type TunnelFailure = "rate_limited" | "api_timeout" | "api_error" | "no_url" | "timeout" | "exited" | "spawn_failed";
+/** `not_ready`: cloudflared runs but its /ready never answered 200 (Cloudflare dropped the tunnel; 11-23) */
+export type TunnelFailure = "rate_limited" | "api_timeout" | "api_error" | "no_url" | "timeout" | "exited" | "spawn_failed" | "not_ready";
 
 /** A quick tunnel that did not come up, with the reason cloudflared gave (its output holds no secrets). */
 export class TunnelError extends Error {
@@ -346,22 +349,85 @@ function freePort(): number {
   return port;
 }
 
-/** waits for the kept tunnel's URL (metrics, else its log) and a registered connection (or 15 s after the URL) */
-async function awaitKeptTunnel(o: { metrics: number; logPath: string; alive: () => boolean; timeoutMs: number; stopped: () => boolean }): Promise<{ url: string } | { fail: TunnelFailure }> {
+/**
+ * Waits for the kept tunnel's URL (metrics, else its log) and a registered connection. A tunnel this start spawned
+ * counts as up on /ready 200, a "Registered tunnel connection" line in its fresh log, or `urlGraceMs` (15 s) after the URL. A reused
+ * one (`reuse`) counts only on /ready 200: its log still holds the lines of its first start and its URL is old news, so
+ * neither says Cloudflare still routes it (11-23: a kept tunnel whose name was gone, /ready 503, was reused for days).
+ */
+async function awaitKeptTunnel(o: {
+  metrics: number;
+  logPath: string;
+  alive: () => boolean;
+  timeoutMs: number;
+  stopped: () => boolean;
+  reuse?: boolean;
+  urlGraceMs?: number;
+}): Promise<{ url: string } | { fail: TunnelFailure; status?: number | null }> {
   const end = Date.now() + o.timeoutMs;
   let urlAt = 0;
+  let status: number | null = null;
   while (Date.now() < end) {
     if (o.stopped()) return { fail: "timeout" };
     if (!o.alive()) return { fail: "exited" };
-    const log = logTail(o.logPath);
+    const log = o.reuse ? "" : logTail(o.logPath);
     const url = (await quickTunnelUrl(o.metrics)) ?? parseTunnelUrl(log);
     if (url) {
       urlAt ||= Date.now();
-      if ((await metricsGet(o.metrics, "/ready"))?.status === 200 || /Registered tunnel connection/i.test(log) || Date.now() - urlAt > 15_000) return { url };
+      status = (await metricsGet(o.metrics, "/ready"))?.status ?? null;
+      if (status === 200) return { url };
+      if (!o.reuse && (/Registered tunnel connection/i.test(log) || Date.now() - urlAt > (o.urlGraceMs ?? 15_000))) return { url };
     }
     await Bun.sleep(250);
   }
-  return { fail: "timeout" };
+  return urlAt ? { fail: "not_ready", status } : { fail: "timeout" };
+}
+
+/**
+ * Watches a running kept tunnel's /ready. Its pid can live on while Cloudflare no longer routes it (11-23: the name's
+ * DNS gone, /ready 503 with readyConnections 0, cloudflared retrying "control stream encountered a failure" for days),
+ * so the pid alone says nothing. `onDown` on the first check that isn't 200 (a metrics server that doesn't answer
+ * counts), `onUp` when it is 200 again, and `dead` once no 200 came for `deadAfterMs`.
+ */
+export function watchReady(
+  metrics: number,
+  o: { everyMs: number; deadAfterMs: number; onDown(status: number | null): void; onUp(): void },
+): { dead: Promise<{ status: number | null; downForMs: number }>; cancel(): void } {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let cancelled = false;
+  let up = true;
+  let lastOk = Date.now();
+  const dead = new Promise<{ status: number | null; downForMs: number }>((resolve) => {
+    const tick = async () => {
+      timer = null;
+      if (cancelled) return;
+      const status = (await metricsGet(metrics, "/ready"))?.status ?? null;
+      if (cancelled) return;
+      if (status === 200) {
+        lastOk = Date.now();
+        if (!up) {
+          up = true;
+          o.onUp();
+        }
+      } else {
+        if (up) {
+          up = false;
+          o.onDown(status);
+        }
+        const downForMs = Date.now() - lastOk;
+        if (downForMs >= o.deadAfterMs) return resolve({ status, downForMs });
+      }
+      timer = setTimeout(() => void tick(), o.everyMs);
+    };
+    timer = setTimeout(() => void tick(), o.everyMs);
+  });
+  return {
+    dead,
+    cancel: () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    },
+  };
 }
 
 /** polls a process that isn't our child (a reused tunnel): resolves -1 once it's gone */
@@ -391,7 +457,20 @@ const signal = (pid: number) => {
  * outlives this server) and records it. Signals only a process it can prove it started: a record whose pid is now
  * something else is dropped and that process left alone.
  */
-export async function keptQuickTunnel(o: { stateDir: string; port: number; bin: string; log: Logger; timeoutMs?: number; pollMs?: number; stopped?: () => boolean }): Promise<Tunnel> {
+export async function keptQuickTunnel(o: {
+  stateDir: string;
+  port: number;
+  bin: string;
+  log: Logger;
+  timeoutMs?: number;
+  pollMs?: number;
+  stopped?: () => boolean;
+  /** how long a recorded tunnel gets to answer /ready 200 before it is replaced; default 20 s */
+  reuseWaitMs?: number;
+  /** a tunnel this start spawned counts as up this long after its URL even without a registered connection; default
+   *  15 s (never for a reused one) */
+  urlGraceMs?: number;
+}): Promise<Tunnel> {
   const recordPath = join(o.stateDir, TUNNEL_RECORD);
   const logPath = join(o.stateDir, TUNNEL_LOG);
   const timeoutMs = o.timeoutMs ?? 45_000;
@@ -411,7 +490,7 @@ export async function keptQuickTunnel(o: { stateDir: string; port: number; bin: 
       rmSync(recordPath, { force: true });
       o.log.info("stopped our kept audio tunnel for an old port", { pid: rec.pid, port: rec.port });
     } else {
-      const r = await awaitKeptTunnel({ metrics: rec.metrics, logPath, alive: () => pidAlive(rec.pid), timeoutMs, stopped });
+      const r = await awaitKeptTunnel({ metrics: rec.metrics, logPath, alive: () => pidAlive(rec.pid), timeoutMs: o.reuseWaitMs ?? 20_000, stopped, reuse: true, urlGraceMs: o.urlGraceMs });
       if ("url" in r) {
         const w = watchPid(rec.pid, o.pollMs ?? 15_000);
         if (rec.url !== r.url) writeTunnelRecord(recordPath, { ...rec, url: r.url });
@@ -419,14 +498,17 @@ export async function keptQuickTunnel(o: { stateDir: string; port: number; bin: 
         return {
           url: r.url,
           exited: w.exited,
-          stop: () => (w.cancel(), signal(rec.pid)),
+          // checked again: it may be stopped long after this start proved the pid is our cloudflared
+          stop: () => (w.cancel(), isRecordedTunnel(rec, processCommand(rec.pid)) && signal(rec.pid)),
           kept: { pid: rec.pid, reused: true, release: w.cancel },
+          metrics: rec.metrics,
         };
       }
       if (stopped()) throw new TunnelError("timeout", "server stopping"); // leave the kept tunnel for the next start
       if (pidAlive(rec.pid)) signal(rec.pid);
       dropTunnelRecord(recordPath, rec.pid);
-      o.log.warn("kept audio tunnel did not answer; starting a new one", { pid: rec.pid, reason: r.fail });
+      if (r.fail === "not_ready") o.log.warn("kept audio tunnel is not ready; starting a new one", { pid: rec.pid, status: r.status ?? null });
+      else o.log.warn("kept audio tunnel did not answer; starting a new one", { pid: rec.pid, reason: r.fail });
     }
   }
 
@@ -448,7 +530,7 @@ export async function keptQuickTunnel(o: { stateDir: string; port: number; bin: 
   const exited = proc.exited.then((c) => (code = c));
   const pid = proc.pid;
   writeTunnelRecord(recordPath, { pid, port: o.port, metrics, bin: o.bin, args, url: null, startedAt: Date.now() });
-  const r = await awaitKeptTunnel({ metrics, logPath, alive: () => code === null, timeoutMs, stopped });
+  const r = await awaitKeptTunnel({ metrics, logPath, alive: () => code === null, timeoutMs, stopped, urlGraceMs: o.urlGraceMs });
   if ("fail" in r) {
     if (code === null) signal(pid);
     await Promise.race([exited, Bun.sleep(500)]);
@@ -457,7 +539,7 @@ export async function keptQuickTunnel(o: { stateDir: string; port: number; bin: 
     throw new TunnelError(f.reason, [code === null ? "" : `exit ${code}`, f.detail].filter(Boolean).join(": "));
   }
   writeTunnelRecord(recordPath, { pid, port: o.port, metrics, bin: o.bin, args, url: r.url, startedAt: Date.now() });
-  return { url: r.url, exited, stop: () => signal(pid), kept: { pid, reused: false, release: () => {} } };
+  return { url: r.url, exited, stop: () => code === null && signal(pid), kept: { pid, reused: false, release: () => {} }, metrics };
 }
 
 /** Next quick-tunnel attempt: 15 s doubling (60 s when rate limited), ±20 % so servers on one IP don't sync, ≤ 10 min. */
@@ -502,6 +584,14 @@ export interface PublicAudioOptions {
   stateDir?: string;
   /** how often a reused tunnel (not our child) is checked for life; default 15 s */
   keepPollMs?: number;
+  /** how long a recorded tunnel gets at start to answer /ready 200 before it is replaced; default 20 s */
+  reuseWaitMs?: number;
+  /** tests: keptQuickTunnel's grace after the URL for a tunnel it spawned (default 15 s) */
+  urlGraceMs?: number;
+  /** a kept tunnel's /ready check while it runs: every `readyPollMs` (default 15 s); no 200 for `deadAfterMs`
+   *  (default 3 min) = dead, replaced with the usual backoff. Calls use the basic voice from the first failed check. */
+  readyPollMs?: number;
+  deadAfterMs?: number;
 }
 
 /**
@@ -512,6 +602,8 @@ export interface PublicAudioOptions {
  * whatever port we got. With PICKLE_PUBLIC_AUDIO_URL the port is what the outside proxy expects, so it must be ours.
  * With `stateDir` and our configured port, the tunnel is kept (see keptQuickTunnel): stop() leaves it running for the
  * next start. On a fallback port it is this server's child as before, and the record is left untouched.
+ * A kept tunnel's /ready is watched while it runs (watchReady): calls use `<Say>` while it isn't 200, and a tunnel that
+ * stays that way is stopped and replaced like one that died. A fallback-port tunnel has no metrics address: only its exit is seen.
  */
 export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port: number | null; stop(): Promise<void> } {
   const { env, log } = o;
@@ -550,6 +642,8 @@ export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port:
   let stopped = false;
   let tunnel: Tunnel | null = null;
   let retry: ReturnType<typeof setTimeout> | null = null;
+  /** the running tunnel's /ready watch */
+  let ready: { cancel(): void } | null = null;
   const bin = env.CLOUDFLARED_BIN?.trim() || (existsSync("/opt/homebrew/bin/cloudflared") ? "/opt/homebrew/bin/cloudflared" : "cloudflared");
   const retryMs = o.retryMs ?? tunnelRetryMs;
   const reachable = o.reachable === undefined ? publicAudioReachable : o.reachable;
@@ -562,7 +656,7 @@ export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port:
     const t0 = performance.now();
     try {
       const t = keep
-        ? await keptQuickTunnel({ stateDir: o.stateDir!, port: server.port!, bin, log, pollMs: o.keepPollMs, stopped: () => stopped })
+        ? await keptQuickTunnel({ stateDir: o.stateDir!, port: server.port!, bin, log, pollMs: o.keepPollMs, reuseWaitMs: o.reuseWaitMs, urlGraceMs: o.urlGraceMs, stopped: () => stopped })
         : await startQuickTunnel({ port: server.port!, bin });
       if (stopped) return t.kept ? t.kept.release() : t.stop();
       tunnel = t;
@@ -580,9 +674,45 @@ export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port:
           if (r.ok) log.info("public audio reachable", { url: t.url, tries: r.tries });
           else log.warn("public audio not reachable from here yet", { url: t.url, tries: r.tries, last: r.last });
         });
+      if (t.metrics) {
+        const w = watchReady(t.metrics, {
+          everyMs: o.readyPollMs ?? 15_000,
+          deadAfterMs: o.deadAfterMs ?? 180_000,
+          onDown: (status) => {
+            if (stopped || tunnel !== t) return;
+            voice.setPublicBase(null);
+            log.warn("audio tunnel not ready; calls use the basic voice until it is", { url: t.url, status });
+          },
+          onUp: () => {
+            if (stopped || tunnel !== t) return;
+            voice.setPublicBase(t.url);
+            log.info("audio tunnel ready again", { url: t.url });
+          },
+        });
+        ready = w;
+        void w.dead.then((d) => {
+          if (stopped || tunnel !== t) return;
+          tunnel = null;
+          ready = null;
+          voice.setPublicBase(null);
+          t.stop();
+          if (t.kept) dropTunnelRecord(join(o.stateDir!, TUNNEL_RECORD), t.kept.pid);
+          const wait = retryMs(1, "not_ready");
+          log.warn("audio tunnel stayed not ready; replacing it, calls use the basic voice until the new one is up", {
+            url: t.url,
+            status: d.status,
+            downForS: Math.round(d.downForMs / 1000),
+            ...(t.kept ? { pid: t.kept.pid } : {}),
+            retryInS: Math.round(wait / 1000),
+          });
+          retry = setTimeout(() => void launch(1), wait);
+        });
+      }
       void t.exited.then((code) => {
         if (stopped || tunnel !== t) return;
         tunnel = null;
+        ready?.cancel();
+        ready = null;
         voice.setPublicBase(null);
         if (t.kept) dropTunnelRecord(join(o.stateDir!, TUNNEL_RECORD), t.kept.pid);
         const wait = retryMs(1, "exited");
@@ -605,6 +735,8 @@ export function startPublicAudio(voice: VoiceIo, o: PublicAudioOptions): { port:
     async stop() {
       stopped = true;
       if (retry) clearTimeout(retry);
+      ready?.cancel();
+      ready = null;
       if (tunnel?.kept) {
         tunnel.kept.release();
         log.info("audio tunnel left running for the next start", { pid: tunnel.kept.pid, url: tunnel.url });

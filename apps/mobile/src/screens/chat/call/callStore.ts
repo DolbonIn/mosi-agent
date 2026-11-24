@@ -317,15 +317,17 @@ function onDraft() {
 /** lines a turn from elsewhere took (202, "하던 일에 이어서 전했어요"), by their message id, until it answers, fails or stops */
 const steerNotes = new Map<ID, Reply>();
 /**
- * That turn failed (the thread's error row, ThreadView's rule): the lines it left unanswered read its error in place of
- * the note, which would read as handled.
+ * That turn failed and the server names no lines for it (`turn_error`: a briefing, a schedule, a follow-up; the thread's
+ * error row, ThreadView's rule): the lines it left unanswered read its error in place of the note, which would read as
+ * handled. A turn the app started that fails is steersDropped's.
  */
 function steerFailed() {
   const threadId = callStore.get().threadId;
-  const t = threadId && steerNotes.size ? messagesStore.get()[threadId] : undefined;
+  if (!threadId || !steerNotes.size) return;
+  const t = messagesStore.get()[threadId];
   const error = t?.error;
   if (!error) return;
-  for (const id of failedTurnSteers(t, (x) => steerNotes.has(x))) {
+  for (const id of failedTurnSteers(threadId, t, (x) => steerNotes.has(x))) {
     show(steerNotes.get(id)!, { text: error, final: true, who: "note" });
     steerNotes.delete(id);
   }
@@ -354,9 +356,11 @@ function steersDropped() {
   }
   if (gone.size) callStore.patch({ lines: callStore.get().lines.filter((l) => !gone.has(l.id)) });
 }
-// after every listener (composerStore's keeps the ids this asks about)
+// after every listener (composerStore's keeps the ids and the turn_error threads these ask about; a turn_error's error
+// row is up before composerStore hears it, so the draft pass that row set off found nothing)
 onServerEvent((e) => {
   if (e.type === "steers_dropped" && e.threadId === callStore.get().threadId) queueMicrotask(steersDropped);
+  if (e.type === "turn_error" && e.threadId === callStore.get().threadId) queueMicrotask(steerFailed);
 });
 function follow(r: Reply) {
   const d = messagesStore.get()[r.threadId]?.draft;
