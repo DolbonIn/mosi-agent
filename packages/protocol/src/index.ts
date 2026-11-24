@@ -924,16 +924,19 @@ export type ServerEvent =
   | { type: "agent_status"; status: AgentStatus; text?: string }
   /**
    * A turn with no stream of its own (a briefing or schedule, a steer follow-up) failed after the person's lines went
-   * into it: show `message` as the thread's error, as a stream's `error` event does for a turn the app started.
+   * into it: show `message` as the thread's error, as a stream's `error` event does for a turn the app started. A
+   * `steers_dropped` naming the lines it leaves unanswered comes right after it.
    */
   | { type: "turn_error"; threadId: ID; error: string; message: string }
   /**
-   * A turn the app started ended without answering lines the server steered into it (202; `messageIds` = their rows,
-   * oldest first): it stopped after the server took it (멈추기 on any device, the island's, the call talking over it, the
-   * stream closing: all its lines, as no follow-up turn comes after a Stop), or it failed (the lines it took in; those
-   * still queued get a follow-up turn). Every device of the person gets it, so the one that sent a line drops its steer
-   * receipt too; the error itself still goes to the turn's stream alone. Not sent when no line goes unanswered, nor for
-   * a system turn (a briefing, a schedule, a follow-up: no stream to stop, and its failure is a `turn_error`).
+   * A turn ended without answering lines the server steered into it (202; `messageIds` = their rows, oldest first).
+   * A turn the app started: it stopped after the server took it (멈추기 on any device, the island's, the call talking
+   * over it, the stream closing: all its lines, as no follow-up turn comes after a Stop), or it failed (the lines it took
+   * in; those still queued get a follow-up turn); the error itself still goes to the turn's stream alone. A turn with no
+   * stream of its own (a briefing, a schedule, a follow-up; nothing stops it) failed: right after its `turn_error`, the
+   * lines it took in and, for a follow-up, the lines it was answering; those still queued get a follow-up turn. Every
+   * device of the person gets it, so the one that sent a line drops its steer receipt too. Not sent when no line goes
+   * unanswered.
    */
   | { type: "steers_dropped"; threadId: ID; messageIds: ID[] }
   /**

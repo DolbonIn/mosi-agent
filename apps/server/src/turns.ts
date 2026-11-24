@@ -180,8 +180,11 @@ export interface ExecuteTurnOptions {
    * in the thread and its tool calls in history, and the scheduler tries again). Its usage still counts.
    */
   dropBareRow?: boolean;
-  /** the turn answers lines the person sent (a steer follow-up): a failure is shown to them (`turn_error`) */
-  forSteered?: boolean;
+  /**
+   * The turn answers lines the person sent (a steer follow-up; these are their rows, oldest first): a failure is shown to
+   * them (`turn_error`), and the rows go out in its `steers_dropped`
+   */
+  forSteered?: string[];
 }
 
 export interface TurnResult {
@@ -757,9 +760,10 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     loginCards.done();
     // No stream carries this error (a system turn, a steer follow-up) but the person's lines went into the turn: they
     // see it under them, as after a turn of their own (the app's thread error, like a stream's "error" event)
-    if (result.error && o.initiatedBy === "system" && (o.forSteered || steered.length)) {
+    const turnError = o.initiatedBy === "system" && (o.forSteered || steered.length) ? result.error : null;
+    if (turnError) {
       try {
-        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: result.error.error, message: result.error.message });
+        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message });
       } catch {
         /* ignore */
       }
@@ -783,20 +787,23 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     } catch {
       leftovers = [];
     }
-    // The lines steered into a turn the app started that it ends without answering: every device of the person hears
-    // their rows, so the one that sent a line drops its receipt (the device that stopped the turn or held its stream
-    // may be another one, or the island's retry, a delegate sheet). Stopped: all of them, there is no follow-up after a
-    // Stop. Failed: the ones it took in, the oldest (the launcher's queue is first in, first out); the lines still
-    // queued get their follow-up turn
-    let dropped: string[] = [];
-    if (o.initiatedBy === "user" && (clientGone || result.error)) {
-      try {
-        const ids = (o.lease as Partial<HeldLease>).steeredIds?.() ?? [];
-        dropped = clientGone ? ids : ids.slice(0, Math.max(0, ids.length - leftovers.length));
-      } catch {
-        dropped = [];
-      }
+    // The lines a turn ends without answering: every device of the person hears their rows, so the one that sent a line
+    // drops its receipt (the device that stopped the turn or held its stream may be another one, or the island's retry,
+    // a delegate sheet). A turn the app started, stopped: all lines steered into it, there is no follow-up after a Stop.
+    // Failed (the app's turn, or one with a turn_error above: a briefing, a schedule, a follow-up): the lines it took
+    // in, the oldest (the launcher's queue is first in, first out), and a follow-up's own lines; the lines still queued
+    // get their follow-up turn
+    let ids: string[] = [];
+    try {
+      ids = (o.lease as Partial<HeldLease>).steeredIds?.() ?? [];
+    } catch {
+      ids = [];
     }
+    const read = ids.slice(0, Math.max(0, ids.length - leftovers.length));
+    let dropped: string[] = [];
+    if (o.initiatedBy === "user" && clientGone) dropped = ids;
+    else if (o.initiatedBy === "user" && result.error) dropped = read;
+    else if (turnError) dropped = [...(o.forSteered ?? []), ...read];
     if (clientGone) {
       // Stop = stop everything in flight for this thread: steered/leftover messages get no
       // follow-up turn, and the model learns they were cancelled. Done before release, so no new
@@ -826,7 +833,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       /* ignore */
     }
     core.events.publish(o.userId, { type: "agent_status", status: "idle" });
-    if (leftovers.length) core.track(steerFollowUp(core, o.userId, o.threadId, leftovers));
+    if (leftovers.length) core.track(steerFollowUp(core, o.userId, o.threadId, leftovers, ids.slice(read.length)));
   }
   return result;
 }
@@ -931,8 +938,8 @@ async function afterTurn(
   }
 }
 
-/** Steered texts that arrived after the agent's last steer poll get their own turn. */
-async function steerFollowUp(core: Core, userId: string, threadId: string, texts: string[]): Promise<void> {
+/** Steered texts that arrived after the agent's last steer poll get their own turn (`rows`: their message rows, oldest first). */
+async function steerFollowUp(core: Core, userId: string, threadId: string, texts: string[], rows: string[]): Promise<void> {
   const lease = holdLease(core, userId, threadId, await core.deps.launcher.acquire(userId));
   if (!core.db.threadFor(threadId, userId) || quotaExceeded(core, userId)) {
     lease.release();
@@ -948,7 +955,7 @@ async function steerFollowUp(core: Core, userId: string, threadId: string, texts
     sink: () => {},
     initiatedBy: "system",
     historyExcludeTexts: new Set(texts),
-    forSteered: true,
+    forSteered: rows,
   });
 }
 
