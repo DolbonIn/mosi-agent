@@ -517,8 +517,15 @@ password, token, QR link/fingerprint or database key (tests grep the captured lo
   owner is in (their own threads and friend threads; only the owner's side ever puts their id in a message) keeps the
   card or ref, marked — `ArtifactCard {…, preview: "", deleted: true}` (title, kind kept), `AttachmentRef {…, url: "",
   deleted: true}` (filename, mime, size kept) — and goes out again as `message` to every device of every member of the
-  thread; page reads show the same. Matched by the exact id. The attachment's file is removed. The model's history of
-  those messages (`llm_json`) is not changed.
+  thread; page reads show the same. Matched by the exact id. The attachment's file is removed. In the same transaction
+  the model's copy of those messages (`llm_json`) loses the content: the turn that made the document keeps its
+  `sys_create_artifact` call and result as a pair (found by the result's `data.artifactId`), the call's arguments
+  without `content`, the result's `summary` saying it was deleted with `deleted: true` (replay does not take such an
+  HTML card's call for a design-guide call); the message that sent the file
+  gets its files' notes made again (small text files inline, the deleted one as deleted), the text before and anything
+  after kept. The visible answer text and memories are not changed. A document deleted while the turn that made it
+  still runs is caught when the turn's answer row is written (same transaction): its card goes in marked, the row's
+  model copy and a paused turn's approval messages without its content. An approval already waiting is not changed.
 
 ## Explore
 - `count` is real delegations only (`POST /api/explore/:id/delegate`), 0 on a fresh server; there are no seeded

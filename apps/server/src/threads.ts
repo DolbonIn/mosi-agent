@@ -19,13 +19,12 @@ import {
 import { bad, forbidden, HttpError, json, notFound, readJson, type Ctx } from "./http.ts";
 import { activeThreadOf, holdLease, MAX_QUEUED_TURNS, noteSteered, parseCall, queuedTurns, streamQueuedTurn, streamTurn, waitForStoppedTurn, type HeldLease } from "./turns.ts";
 import { areFriends } from "./friends.ts";
-import { attachmentPath, attachmentRef } from "./archive.ts";
+import { attachmentNotes, attachmentRef } from "./archive.ts";
 import { clampInt, iGa, newId, preview, safeJson } from "./util.ts";
 import { cutToHeard, withVoiceNote } from "./history.ts";
 import { errInfo } from "./log.ts";
 import { templateHint } from "./explore.ts";
 
-const TEXT_ATTACHMENT_INLINE = 8 * 1024;
 /** a heard report is at most a whole reply's spoken text */
 const HEARD_MAX_CHARS = 20_000;
 const HEARD_POLL_MS = 50;
@@ -36,23 +35,9 @@ function requireThread(core: Core, threadId: string, userId: string): ThreadRow 
   return t;
 }
 
-/** LLM-side user content: the text plus short notes for attachments (small text files inlined). */
-async function llmUserContent(core: Core, userId: string, text: string, atts: AttachmentRef[]): Promise<string> {
-  if (!atts.length) return text;
-  const notes: string[] = [];
-  for (const a of atts) {
-    if (a.mime === "text/plain" && a.size <= TEXT_ATTACHMENT_INLINE) {
-      try {
-        const body = await Bun.file(attachmentPath(core, userId, a.id)).text();
-        notes.push(`[첨부: ${a.filename}]\n${body}`);
-        continue;
-      } catch {
-        /* fall through */
-      }
-    }
-    notes.push(`[첨부: ${a.filename} (${a.mime}, ${Math.ceil(a.size / 1024)}KB) — 내용은 볼 수 없어요]`);
-  }
-  return `${text}\n\n${notes.join("\n")}`;
+/** LLM-side user content: the text plus short notes for attachments (small text files inlined; archive.ts attachmentNotes). */
+function llmUserContent(core: Core, userId: string, text: string, atts: AttachmentRef[]): string {
+  return atts.length ? `${text}\n\n${attachmentNotes(core, userId, atts)}` : text;
 }
 
 function mentionsAgent(text: string, agentName: string): boolean {
@@ -144,7 +129,7 @@ export function threadRoutes(core: Core) {
 
       // 둘러보기's 부탁하기 sends the template's short line; the how-to rides along in the model copy only
       const hint = thread.kind === "task" && isNewOwnThread(thread, userId) ? templateHint(user, text) : null;
-      const content = (await llmUserContent(core, userId, text, attachments)) + (hint ? `\n\n${hint}` : "");
+      const content = llmUserContent(core, userId, text, attachments) + (hint ? `\n\n${hint}` : "");
       // everything below is synchronous until streamTurn, so the busy/steer decision can't race
       const now = core.now();
       const userMsgId = newId("m");

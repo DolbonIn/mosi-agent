@@ -139,7 +139,9 @@ describe("a deleted artifact", () => {
     const ids = Array.from({ length: 201 }, () => message(a.session.mainThreadId, a, { cards: [doc] }));
     const d = await device(a.token);
     expect((await del(a.token, "artifacts", "a_many")).status).toBe(200);
-    expect(new Set((await d.messages(200)).map((e) => e.message.id))).toEqual(new Set(ids));
+    const got = (await d.messages(200)).map((e) => e.message.id);
+    expect(got.length).toBe(201);
+    expect(new Set(got)).toEqual(new Set(ids));
     for (const id of ids) expect((JSON.parse(row(id).cards_json) as ArtifactCard[])[0]!.deleted).toBe(true);
     await d.cancel();
   });

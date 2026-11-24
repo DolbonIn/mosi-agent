@@ -1,8 +1,10 @@
 /** 보관함: artifacts (documents/dashboards made by the agent) and user attachments (files on disk). */
+import { readFileSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import { join } from "node:path";
+import type { LlmMessage } from "@pickle/agent";
 import type { Artifact, Attachment, AttachmentRef, Card } from "@pickle/protocol";
-import type { ArtifactRow, AttachmentRow, FriendThreadItem } from "./db/index.ts";
+import type { ArtifactRow, AttachmentRow, FriendThreadItem, MessageRow } from "./db/index.ts";
 import { publishMessage, type Core } from "./core.ts";
 import { areFriends } from "./friends.ts";
 import { bad, HttpError, json, notFound, type Ctx } from "./http.ts";
@@ -95,18 +97,168 @@ function markDeleted(core: Core, ownerId: string, item: FriendThreadItem): strin
         hit = true;
         return { type: "artifact", artifactId: c.artifactId, title: c.title, kind: c.kind, preview: "", deleted: true };
       });
-      if (hit) core.db.updateMessageCards(row.id, cards);
+      if (hit) {
+        core.db.updateMessageCards(row.id, cards);
+        const llm = forgetArtifactCall(llmOf(row), item.id);
+        if (llm) core.db.setMessageLlm(row.id, llm);
+      }
     } else {
-      const refs = safeJson<AttachmentRef[]>(row.attachments_json, []).map((r): AttachmentRef => {
+      const was = safeJson<AttachmentRef[]>(row.attachments_json, []);
+      let target: AttachmentRef | null = null;
+      const refs = was.map((r): AttachmentRef => {
         if (r.id !== item.id) return r;
         hit = true;
+        target = r;
         return { id: r.id, filename: r.filename, mime: r.mime, size: r.size, url: "", deleted: true };
       });
-      if (hit) core.db.updateMessageAttachments(row.id, refs);
+      if (hit) {
+        core.db.updateMessageAttachments(row.id, refs);
+        const llm = forgetAttachmentText(core, ownerId, row, was, refs, target!);
+        if (llm) core.db.setMessageLlm(row.id, llm);
+      }
     }
     if (hit) changed.push(row.id);
   }
   return changed;
+}
+
+// ───────────── the model's copy (llm_json) of what was deleted (H2) ─────────────
+// What the model is told in place of a deleted document's result: a fact, no wording to copy into an answer.
+const DELETED_ARTIFACT_SUMMARY = "사용자가 보관함에서 이 문서를 지웠어요. 내용은 남아 있지 않아요.";
+
+function llmOf(row: MessageRow): LlmMessage[] | null {
+  const parsed = safeJson<unknown>(row.llm_json, null);
+  return Array.isArray(parsed) ? (parsed as LlmMessage[]) : null;
+}
+
+/**
+ * The turn that made a deleted document keeps its tool call and result as a pair (history replay drops a call without
+ * its result and a result without its call): the call's arguments lose their `content` key (title and kind stay; never
+ * "", which for html means "show the guide"), and the result says it was deleted (`summary`, `deleted: true`). The pair
+ * is found by the result's `data.artifactId`; other calls stay as they were. Null when nothing changes.
+ */
+function forgetArtifactCall(llm: LlmMessage[] | null, artifactId: string): LlmMessage[] | null {
+  if (!llm) return null;
+  const calls = new Set<string>();
+  const next = llm.map((m): LlmMessage => {
+    if (m.role !== "tool") return m;
+    const r = safeJson<{ data?: { artifactId?: unknown } } | null>(m.content, null);
+    if (!r || typeof r !== "object" || r.data?.artifactId !== artifactId) return m;
+    calls.add(m.tool_call_id);
+    return { ...m, content: JSON.stringify({ ...r, summary: DELETED_ARTIFACT_SUMMARY, deleted: true }) };
+  });
+  if (!calls.size) return null;
+  return next.map((m): LlmMessage => {
+    if (m.role !== "assistant" || !Array.isArray(m.tool_calls) || !m.tool_calls.some((c) => calls.has(c.id))) return m;
+    return { ...m, tool_calls: m.tool_calls.map((c) => (calls.has(c.id) ? { ...c, function: { ...c.function, arguments: withoutContent(c.function.arguments) } } : c)) };
+  });
+}
+
+/**
+ * A turn's answer row is written once, when the turn ends (turns.ts); a document the turn made and the person deleted
+ * while it ran has no row yet for markDeleted to find. Inside that write's transaction, the turn's cards for documents
+ * no longer in any archive get H's mark, and its model copy — and a turn paused for approval, its messages — lose them
+ * as in forgetArtifactCall. SQLite runs the two transactions one after the other: a delete before this write is caught
+ * here, one after it by markDeleted.
+ */
+export function forgetDeletedInTurn(
+  core: Core,
+  cards: Card[],
+  llm: LlmMessage[] | null,
+  prior: LlmMessage[] | null,
+): { cards: Card[]; llm: LlmMessage[] | null; prior: LlmMessage[] | null } {
+  const out = { cards, llm, prior };
+  for (const c of cards) {
+    if (c.type !== "artifact" || c.deleted || core.db.artifactById(c.artifactId)) continue;
+    out.cards = out.cards.map((x): Card => (x === c ? { type: "artifact", artifactId: c.artifactId, title: c.title, kind: c.kind, preview: "", deleted: true } : x));
+    out.llm = forgetArtifactCall(out.llm, c.artifactId) ?? out.llm;
+    out.prior = forgetArtifactCall(out.prior, c.artifactId) ?? out.prior;
+  }
+  return out;
+}
+
+function withoutContent(args: string): string {
+  const a = safeJson<unknown>(args, null);
+  if (!a || typeof a !== "object" || Array.isArray(a)) return "{}"; // unreadable arguments: nothing of them is kept
+  const { content: _gone, ...rest } = a as Record<string, unknown>;
+  return JSON.stringify(rest);
+}
+
+/** Small text files go to the model inline, up to this size (threads.ts llmUserContent). */
+export const TEXT_ATTACHMENT_INLINE = 8 * 1024;
+
+/** A deleted file in the model's copy of the message that sent it. */
+export const deletedFileNote = (a: Pick<AttachmentRef, "filename">) => `[첨부: ${a.filename} — 보관함에서 지운 파일이라 내용이 없어요]`;
+
+/**
+ * What the model gets for a message's files, after the text (threads.ts llmUserContent): small text files inline, a
+ * short note for the rest, and for a deleted file only that it was deleted. Synchronous (≤ 10 files of ≤ 8 KB) so a
+ * delete can rebuild it inside its transaction.
+ */
+export function attachmentNotes(core: Core, userId: string, atts: AttachmentRef[]): string {
+  const notes: string[] = [];
+  for (const a of atts) {
+    if (a.deleted) {
+      notes.push(deletedFileNote(a));
+      continue;
+    }
+    if (a.mime === "text/plain" && a.size <= TEXT_ATTACHMENT_INLINE) {
+      try {
+        notes.push(`[첨부: ${a.filename}]\n${fileText(readFileSync(attachmentPath(core, userId, a.id)))}`);
+        continue;
+      } catch {
+        /* fall through */
+      }
+    }
+    notes.push(`[첨부: ${a.filename} (${a.mime}, ${Math.ceil(a.size / 1024)}KB) — 내용은 볼 수 없어요]`);
+  }
+  return notes.join("\n");
+}
+
+/**
+ * A text file's bytes read the way Bun.file().text() reads them, which made every note before H2 (an old row's notes
+ * must come out the same to the byte to be found again): after a UTF-16LE BOM with more behind it, UTF-16LE code
+ * units as they are (an odd last byte dropped, a lone surrogate kept); anything else UTF-8, its BOM dropped and bad
+ * bytes as U+FFFD.
+ */
+export function fileText(b: Uint8Array): string {
+  if (b.length > 2 && b[0] === 0xff && b[1] === 0xfe) {
+    let s = "";
+    for (let i = 2; i + 1 < b.length; i += 2) s += String.fromCharCode(b[i]! | (b[i + 1]! << 8));
+    return s;
+  }
+  return new TextDecoder().decode(b);
+}
+
+/**
+ * The model's copy of a message that sent a now deleted file: its user content is rebuilt with the files' notes made
+ * again (attachmentNotes, the deleted one as deleted), keeping the text before them and anything after them (a template
+ * hint) as it was. If that copy was not made the usual way, only the deleted file's inlined text is replaced, wherever
+ * it appears. Null when nothing changes (an image or PDF was never inlined, but its note still becomes the deleted one).
+ */
+function forgetAttachmentText(core: Core, ownerId: string, row: MessageRow, was: AttachmentRef[], now: AttachmentRef[], target: AttachmentRef): LlmMessage[] | null {
+  const llm = llmOf(row);
+  if (!llm) return null;
+  const head = `${row.text}\n\n${attachmentNotes(core, ownerId, was)}`;
+  const made = `${row.text}\n\n${attachmentNotes(core, ownerId, now)}`;
+  let inlined: string | null | undefined;
+  let changed = false;
+  const next = llm.map((m): LlmMessage => {
+    if (m.role !== "user" || typeof m.content !== "string") return m;
+    let c = m.content;
+    if (c.startsWith(head)) c = made + c.slice(head.length);
+    else {
+      inlined ??= attachmentNotes(core, ownerId, [target]);
+      if (inlined.startsWith(`[첨부: ${target.filename}]\n`) && c.includes(inlined)) c = c.split(inlined).join(deletedFileNote(target));
+    }
+    if (c === m.content) return m;
+    changed = true;
+    return { ...m, content: c };
+  });
+  // a small text file whose text was in neither form: left as it was, said once (no names in logs)
+  if (!changed && target.mime === "text/plain" && target.size <= TEXT_ATTACHMENT_INLINE && llm.some((m) => m.role === "user"))
+    core.log.info("deleted file: its text not found in the model copy", { message: row.id });
+  return changed ? next : null;
 }
 
 export function archiveRoutes(core: Core) {

@@ -17,6 +17,7 @@ import { newId, preview, safeJson } from "./util.ts";
 import { errInfo } from "./log.ts";
 import { SseChannel } from "./events.ts";
 import { kskillConnectedNames, skillsWithoutLogins, trackConnectionCards } from "./kskill.ts";
+import { forgetDeletedInTurn } from "./archive.ts";
 import type { Ctx } from "./http.ts";
 
 export const APPROVAL_TTL_MS = 30 * 60 * 1000;
@@ -689,16 +690,18 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     if (clientGone && !outcome && produced && !hasCancelNote(llm)) llm = [...(llm ?? []), CANCEL_NOTE_MESSAGE];
     if (produced && !(o.dropBareRow && bare)) {
       db.tx(() => {
+        // documents this turn made and the person deleted while it ran (archive.ts forgetDeletedInTurn)
+        const kept = forgetDeletedInTurn(core, finalCards, llm, pending ? (pending.messages ?? []) : null);
         db.insertMessage({
           id: messageId,
           threadId: o.threadId,
           role: "assistant",
           text: finalText,
-          cards: finalCards,
+          cards: kept.cards,
           tools: finalTools,
           authorUserId: isFriend ? o.userId : null,
           authorKind: isFriend ? "agent" : null,
-          llm,
+          llm: kept.llm,
           createdAt: Math.max(now, startedAt + 1),
         });
         if (pending && approvalId) {
@@ -708,7 +711,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
             threadId: o.threadId,
             messageId,
             callJson: JSON.stringify(pending.call),
-            priorJson: JSON.stringify(pending.messages ?? []),
+            priorJson: JSON.stringify(kept.prior ?? []),
             specJson: JSON.stringify(pending.spec),
             now,
             expiresAt: now + APPROVAL_TTL_MS,

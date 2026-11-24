@@ -83,12 +83,19 @@ export function compactHtmlCalls(msgs: LlmMessage[]): LlmMessage[] {
     }
   }
   const guideCalls = new Set<string>(); // older turns' guide calls, whose results are replaced
+  // a card deleted from the archive keeps its call without content (archive.ts forgetArtifactCall): not a guide call,
+  // its result says it was deleted
+  const deletedCalls = new Set<string>();
+  for (const m of msgs) {
+    if (m.role === "tool" && m.content.includes('"deleted":true') && safeJson<{ deleted?: unknown } | null>(m.content, null)?.deleted === true)
+      deletedCalls.add(m.tool_call_id);
+  }
   return msgs.map((m, i) => {
     if (m.role === "tool") return guideCalls.has(m.tool_call_id) ? { ...m, content: HTML_GUIDE_REPLAY } : m;
     if (m.role !== "assistant" || !m.tool_calls?.length) return m;
     let changed = false;
     const calls = m.tool_calls.map((c) => {
-      if (c.function?.name !== "sys_create_artifact" || !c.function.arguments.includes("html")) return c;
+      if (c.function?.name !== "sys_create_artifact" || deletedCalls.has(c.id) || !c.function.arguments.includes("html")) return c;
       const a = safeJson<Record<string, unknown> | null>(c.function.arguments, null);
       if (!a || a.kind !== "html") return c;
       const content = typeof a.content === "string" ? a.content : "";
