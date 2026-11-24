@@ -159,6 +159,7 @@ export function threadRoutes(core: Core) {
           return streamQueuedTurn(core, c, { userId, threadId: thread.id, userText: content, mode, initiatedBy: "user", historyBeforeId: userMsgId }, () => {
             insertUserRow(false);
             db.touchThread(thread.id, now);
+            publishMessage(core, userMsgId); // the person's other devices (this one merges it by id)
             return messageView(core, db.getMessage(userMsgId)!, userId);
           });
         }
@@ -170,6 +171,9 @@ export function threadRoutes(core: Core) {
         noteSteered(core, userId, userMsgId);
         const userMessage = messageView(core, db.getMessage(userMsgId)!, userId);
         db.touchThread(thread.id, now);
+        // the person's other devices get the line too, so every device shows it in the same place (this one has it from
+        // the 202 and merges the push by id)
+        publishMessage(core, userMsgId);
         publishThread(core, thread.id);
         const res: SteeredResponse = { steered: true, userMessage };
         return json(res, 202);
@@ -312,12 +316,16 @@ export function threadRoutes(core: Core) {
     },
   };
 
-  /** Persists the user row (`prepare`) and streams the turn; frees the lease on any failure. */
+  /**
+   * Persists the user row (`prepare`), pushes it to the person's other devices (`message`; the sending one has it from
+   * the stream's `start` and merges the push by id) and streams the turn; frees the lease on any failure.
+   */
   function startTurn(c: Ctx, lease: HeldLease, thread: ThreadRow, userId: string, userMsgId: string, content: string, mode: "text" | "voice", prepare: () => void): Response {
     try {
       prepare();
       const now = core.now();
       db.touchThread(thread.id, now);
+      publishMessage(core, userMsgId);
       const userMessage = messageView(core, db.getMessage(userMsgId)!, userId);
       return streamTurn(core, c, {
         userId,
@@ -376,7 +384,8 @@ export function threadRoutes(core: Core) {
         db.touchThread(thread.id, now, preview(`${me.display_name}: ${text}`));
         db.setUnread(thread.id, peerId, true);
       });
-      publishMessage(core, id, { exclude: userId });
+      // the friend and the sender's own other devices (the sending one merges it by id with the 201 / start)
+      publishMessage(core, id);
       publishThread(core, thread.id);
       const peer = db.userById(peerId);
       if (peer && settingsOf(peer).notifications.friendMessages) {

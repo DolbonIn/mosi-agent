@@ -171,12 +171,18 @@ export function publishThread(core: Core, threadId: string): void {
   }
 }
 
-/** Push a `message` event for a stored message to thread members (optionally excluding one user). */
+/**
+ * Push a `message` event for a stored message to thread members (optionally excluding one user). A line the server
+ * steered into a running turn carries `steered: true` here, on the live push alone: page reads and the 202 leave it out
+ * (an app that reloads can't know which receipts were dropped since).
+ */
 export function publishMessage(core: Core, messageId: string, opts: { exclude?: string } = {}): void {
   const row = core.db.getMessage(messageId);
   if (!row) return;
   for (const uid of core.db.threadMembers(row.thread_id)) {
     if (uid === opts.exclude) continue;
-    core.events.publish(uid, { type: "message", threadId: row.thread_id, message: messageView(core, row, uid) });
+    const message = messageView(core, row, uid);
+    if (row.steered) message.steered = true;
+    core.events.publish(uid, { type: "message", threadId: row.thread_id, message });
   }
 }

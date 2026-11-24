@@ -735,8 +735,9 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     }
 
     if (result.message) {
-      // other members (friend threads) and other tabs of the same user
-      publishMessage(core, messageId, { exclude: o.initiatedBy === "user" && !result.error ? o.userId : undefined });
+      // every member: other members (friend threads) and every device of the person, the one holding the stream too
+      // (it has the row from "done" and merges the push by id)
+      publishMessage(core, messageId);
       publishThread(core, o.threadId);
       core.events.publish(o.userId, { type: "quota", quota: quotaFor(core, o.userId) });
     }

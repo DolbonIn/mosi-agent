@@ -222,6 +222,12 @@ export interface Message {
   createdAt: Millis;
   /** sender for friend threads ("내 모시", "진우 님의 모시", ...) */
   author?: { kind: "me" | "my-agent" | "peer" | "peer-agent"; name: string };
+  /**
+   * Only on a live `message` push of the person's line that the server steered into a running turn (202), so another
+   * device of theirs can show that line's steer receipt as the sending device does. Never in page reads (GET messages)
+   * or the 202 body, and absent on a line that became a turn of its own (the running turn ended in between).
+   */
+  steered?: true;
 }
 
 export interface ToolActivity {
@@ -917,6 +923,12 @@ export interface SkillInfo {
 export type ServerEvent =
   | { type: "hello"; at: Millis }
   | { type: "thread_updated"; thread: Thread }
+  /**
+   * A row stored in a thread, to every member and every device of theirs: the person's lines (one that starts a turn,
+   * one steered into a running turn, a queued first line, a friend-thread line), the agent's answers, event rows, card
+   * status flips. The device whose request stored the row gets it too, besides that request's own answer (`start`, the
+   * 202 / 201, `done`): merge by id, whichever comes first.
+   */
   | { type: "message"; threadId: ID; message: Message }
   | { type: "notification"; title: string; body: string; threadId?: ID; icon: IconName }
   | { type: "quota"; quota: Quota }
