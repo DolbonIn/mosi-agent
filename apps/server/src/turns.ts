@@ -765,13 +765,6 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     // No stream carries this error (a system turn, a steer follow-up) but the person's lines went into the turn: they
     // see it under them, as after a turn of their own (the app's thread error, like a stream's "error" event)
     const turnError = o.initiatedBy === "system" && (o.forSteered || steered.length) ? result.error : null;
-    if (turnError) {
-      try {
-        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message });
-      } catch {
-        /* ignore */
-      }
-    }
     if (!outcome && runPromise) {
       // aborted while runTurn (maybe a tool: a call, a messenger send) is still going: give it a
       // moment to wind down so the next turn doesn't overlap with it
@@ -818,6 +811,17 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
         log.warn("cancel note failed", { user: o.userId, thread: o.threadId, err: errInfo(err) });
       }
       leftovers = [];
+    }
+    // A failed turn with no stream: its turn_error goes out once the turn has wound down (a tool may still have been
+    // running above), right before its steers_dropped with no await between, so no line keeps its receipt beside the
+    // error row. (A turn the app started sent its error on its stream; the app draws the error row once that stream
+    // closes, right after this.)
+    if (turnError) {
+      try {
+        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message });
+      } catch {
+        /* ignore */
+      }
     }
     if (dropped.length) {
       try {

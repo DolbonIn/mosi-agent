@@ -10,6 +10,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
 import { QUOTA_MESSAGE } from "../src/core.ts";
+import { executeTurn, holdLease } from "../src/turns.ts";
 import { quotaDay } from "../src/kst.ts";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
 
@@ -449,5 +450,157 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     expect(h.turns.inputs.map((i) => i.userText)).toEqual(["점심 메뉴 추천해줘", "한식으로"]);
     expect(await d.got()).toEqual(["idle", "idle"]);
     await d.cancel();
+  });
+});
+
+/**
+ * Every event the server sends the person (their hub; a message with its role) and, for a turn run here, its stream, in
+ * the order sent. After a failed turn's error a "·" goes in at the next microtask: an await between the error and
+ * `steers_dropped` puts it between them.
+ */
+function recorder(uid: string) {
+  const log: { what: string; t: number }[] = [];
+  const note = (what: string) => {
+    log.push({ what, t: performance.now() });
+    if (what === "hub turn_error" || what === "stream error") queueMicrotask(() => log.push({ what: "·", t: performance.now() }));
+  };
+  const hub = h.app.core.events;
+  const publish = hub.publish.bind(hub);
+  hub.publish = (userId: string, e: ServerEvent) => {
+    if (userId === uid) note(e.type === "message" ? `hub message ${e.message.role}` : `hub ${e.type}`);
+    return publish(userId, e);
+  };
+  const names = () => log.map((x) => x.what);
+  const at = (what: string) => log.find((x) => x.what === what)!.t;
+  return { log, note, names, at };
+}
+
+describe("a turn that fails while a tool still runs: no line keeps its receipt beside the error row", () => {
+  /** idle 80 ms: a turn waiting on a tool times out; settle 300 ms: the server waits that long for the tool, twice */
+  const slow = async () => {
+    await h.close();
+    h = await makeHarness({ config: { turnIdleTimeoutMs: 80, turnSettleMs: 300 } });
+  };
+  /** a tool that does not stop when the turn is aborted (a call, a messenger send) */
+  const stuckTool = () => {
+    let done!: () => void;
+    const p = new Promise<void>((res) => (done = res));
+    return { p, done };
+  };
+
+  test("a briefing that fails while a tool still runs (it timed out): after the tool's wait, its turn_error and then steers_dropped, nothing and no await between them; every device gets them", async () => {
+    await slow();
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const phone = await device(token);
+    const rec = recorder(session.user.id);
+    const tool = stuckTool();
+    let a = "";
+    h.turns.set(async (input, emit) => {
+      a = await steer(token, tid, "오늘 우산 필요해?");
+      expect(input.steer!()).toEqual(["오늘 우산 필요해?"]);
+      emit({ type: "tool", tool: { id: "t1", name: "k_weather", title: "날씨 확인", state: "running", startedAt: 1 } });
+      await tool.p;
+      throw new DOMException("aborted", "AbortError");
+    });
+    h.clock.t = KST(2026, 11, 12, 7, 30);
+    await h.app.scheduler.tick();
+    await h.app.core.idle();
+    const names = rec.names();
+    const i = names.indexOf("hub turn_error");
+    expect(i).toBeGreaterThan(-1);
+    expect(names.slice(i, i + 2)).toEqual(["hub turn_error", "hub steers_dropped"]);
+    expect(names.indexOf("·")).toBeGreaterThan(i + 1); // no await between the two
+    expect(rec.at("hub steers_dropped") - rec.at("hub turn_error")).toBeLessThan(50);
+    expect(names.filter((n) => n === "hub turn_error")).toHaveLength(1);
+    expect(await phone.got()).toEqual([`turn_error ${tid}`, `steers_dropped ${tid} ${a}`, "idle"]);
+    tool.done();
+    await phone.cancel();
+  });
+
+  test("a turn the app started fails while a tool still runs: its stream's error at once as before (before its row is pushed); after the tool's wait steers_dropped, and the turn ends right after it (its stream closes then, and the app draws the error row then)", async () => {
+    await slow();
+    const { token, session } = await h.signup("haneul");
+    const uid = session.user.id;
+    const tid = session.mainThreadId;
+    const rec = recorder(uid);
+    const tool = stuckTool();
+    h.turns.set(async (input, emit) => {
+      await steer(token, tid, "그리고 이것도");
+      expect(input.steer!()).toEqual(["그리고 이것도"]);
+      emit({ type: "tool", tool: { id: "t1", name: "k_weather", title: "날씨 확인", state: "running", startedAt: 1 } });
+      await tool.p;
+      throw new DOMException("aborted", "AbortError");
+    });
+    // what streamTurn runs for POST /api/threads/:id/messages (it closes the stream once this returns), its stream
+    // recorded in the same log
+    const lease = holdLease(h.app.core, uid, tid, await h.launcher.acquire(uid));
+    const result = await executeTurn(h.app.core, { userId: uid, threadId: tid, userText: "첫 질문", userMessage: null, mode: "text", lease, sink: (e) => rec.note(`stream ${e.type}`), initiatedBy: "user" });
+    rec.note("returned");
+    await h.app.core.idle();
+    expect(result.error).toMatchObject({ error: "upstream_timeout" });
+    const names = rec.names();
+    const i = names.indexOf("stream error");
+    expect(i).toBeGreaterThan(-1);
+    expect(names.indexOf("hub message assistant")).toBeGreaterThan(i); // the error first, as before
+    const j = names.indexOf("hub steers_dropped");
+    expect(names.slice(j, j + 2)).toEqual(["hub steers_dropped", "hub agent_status"]);
+    expect(rec.at("returned") - rec.at("hub steers_dropped")).toBeLessThan(50);
+    expect(names.filter((n) => n === "stream error" || n === "hub steers_dropped")).toEqual(["stream error", "hub steers_dropped"]);
+    expect(names).not.toContain("hub turn_error"); // the error goes to the turn's stream alone
+    tool.done();
+  });
+
+  test("over HTTP, the same app turn: its error comes on the stream at once; the stream closes right after steers_dropped goes out (the app draws the error row once its stream closes)", async () => {
+    await slow();
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const rec = recorder(session.user.id);
+    const tool = stuckTool();
+    h.turns.set(async (input, emit) => {
+      await steer(token, tid, "그리고 이것도");
+      expect(input.steer!()).toEqual(["그리고 이것도"]);
+      emit({ type: "tool", tool: { id: "t1", name: "k_weather", title: "날씨 확인", state: "running", startedAt: 1 } });
+      await tool.p;
+      throw new DOMException("aborted", "AbortError");
+    });
+    const res = await h.req("POST", `/api/threads/${tid}/messages`, { token, body: { text: "첫 질문" } });
+    const reader = res.body!.getReader();
+    const dec = new TextDecoder();
+    let body = "";
+    for (;;) {
+      const x = await reader.read();
+      if (x.done) break;
+      body += dec.decode(x.value, { stream: true });
+      if (body.includes('"type":"error"') && !rec.names().includes("stream error read")) rec.note("stream error read");
+    }
+    rec.note("stream closed");
+    await h.app.core.idle();
+    const names = rec.names();
+    expect(names.filter((n) => n === "stream error read" || n === "hub steers_dropped" || n === "stream closed")).toEqual(["stream error read", "hub steers_dropped", "stream closed"]);
+    expect(rec.at("stream closed") - rec.at("hub steers_dropped")).toBeLessThan(50);
+    tool.done();
+  });
+
+  test("a turn that does not fail is as before: the app's stream gets done before the row is pushed, no steers_dropped; a briefing that answers sends no turn_error", async () => {
+    const { token, session } = await h.signup("haneul");
+    const uid = session.user.id;
+    const tid = session.mainThreadId;
+    const rec = recorder(uid);
+    h.turns.set(async (input) => {
+      await steer(token, tid, "그리고 이것도");
+      expect(input.steer!()).toEqual(["그리고 이것도"]);
+      return outcome("둘 다 할게요");
+    });
+    const lease = holdLease(h.app.core, uid, tid, await h.launcher.acquire(uid));
+    await executeTurn(h.app.core, { userId: uid, threadId: tid, userText: "첫 질문", userMessage: null, mode: "text", lease, sink: (e) => rec.note(`stream ${e.type}`), initiatedBy: "user" });
+    h.turns.set(async () => outcome("오늘은 맑아요"));
+    h.clock.t = KST(2026, 11, 12, 7, 30);
+    await h.app.scheduler.tick();
+    await h.app.core.idle();
+    const names = rec.names();
+    expect(names.indexOf("stream done")).toBeGreaterThan(-1);
+    expect(names.indexOf("stream done")).toBeLessThan(names.indexOf("hub message assistant"));
+    expect(names.filter((n) => n === "hub steers_dropped" || n === "hub turn_error" || n === "stream error")).toEqual([]);
   });
 });
