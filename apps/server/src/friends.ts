@@ -180,7 +180,8 @@ export function friendRoutes(core: Core) {
         db.touchThread(threadId, now, "친구가 되었어요");
         db.setUnread(threadId, inviterId, true);
       });
-      publishMessage(core, eventId, { exclude: userId });
+      // both friends, every device: the inviter's and the accepter's, the accepting one too (the 201 carries no rows)
+      publishMessage(core, eventId);
       publishThread(core, threadId);
       core.events.publish(inviterId, { type: "notification", title: "새 친구", body: `${me.display_name} 님과 친구가 되었어요`, threadId, icon: "people" });
       return json(await friendView(core, joinOf(core, userId, inviterId)!), 201);

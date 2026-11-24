@@ -1,7 +1,8 @@
 /**
  * Every device of the person gets the person's rows and the agent's answers as `message` events, not only the device
  * that sent the line: a line that starts a turn, a line steered into a running one (202), the first line of a new thread
- * that waits for the agent, the answer of a turn the app started, and a friend-thread line. The device that sent the
+ * that waits for the agent, the answer of a turn the app started, a friend-thread line, and the "became friends" event
+ * row of an invite the person accepted. The device that sent the
  * line gets the push too (one /api/events stream per device, fanned out per person); it merges it by id with what its
  * request already returned (start / 202 / done / 201). Before, the person's other devices got only thread_updated, so
  * one device showed "오늘 날씨 알려줘" → error → the umbrella answer with the umbrella line missing (DD 1814).
@@ -224,7 +225,57 @@ describe("friend threads: the sender's own devices too", () => {
   });
 });
 
+/**
+ * the inviter's device and two devices of the one who accepts, open before the accept (plus a stream each for
+ * notifications); the accept (201) and its event row as a page read returns it
+ */
+async function acceptOnDevices() {
+  const inviter = await h.signup("haneul", { agentName: "깽이" });
+  const accepter = await h.signup("byeol", { displayName: "별", agentName: "토리" });
+  const inviterPhone = await device(inviter.token);
+  const phone = await device(accepter.token);
+  const laptop = await device(accepter.token);
+  const inviterNotes = sseReader(await h.req("GET", `/api/events?token=${inviter.token}`));
+  const accepterNotes = sseReader(await h.req("GET", `/api/events?token=${accepter.token}`));
+  await inviterNotes.next((e) => e.type === "hello");
+  await accepterNotes.next((e) => e.type === "hello");
+  const inv = (await (await h.req("POST", "/api/invites", { token: inviter.token })).json()) as InviteResponse;
+  const acc = await h.req("POST", `/api/invites/${inv.token}/accept`, { token: accepter.token });
+  expect(acc.status).toBe(201);
+  const tid = ((await acc.json()) as Friend).threadId!;
+  const page = (await (await h.req("GET", `/api/threads/${tid}/messages`, { token: accepter.token })).json()) as Message[];
+  const row = page.find((m) => m.role === "event")!;
+  expect(row.text).toContain("친구가 되었어요");
+  const close = () => Promise.all([inviterPhone.cancel(), phone.cancel(), laptop.cancel(), inviterNotes.cancel(), accepterNotes.cancel()]);
+  return { accepter, inviterPhone, phone, laptop, inviterNotes, accepterNotes, inv, close, want: [`event ${row.text} ${row.id}`] };
+}
+
+describe("accepting a friend invite: the accepter's own devices too", () => {
+  test("the 'became friends' event row: on every device of the one who accepted (the accepting one too), as on the inviter's; once each", async () => {
+    const { inviterPhone, phone, laptop, close, want } = await acceptOnDevices();
+    expect(await phone.got()).toEqual(want);
+    expect(await laptop.got()).toEqual(want);
+    expect(await inviterPhone.got()).toEqual(want);
+    await close();
+  });
+});
+
 describe("what does not change (passes before and after)", () => {
+  test("an accept: the inviter's device gets the event row once and the 새 친구 notification; the accepter gets no notification; accepting again adds no row", async () => {
+    const { accepter, inviterPhone, phone, laptop, inviterNotes, accepterNotes, inv, close, want } = await acceptOnDevices();
+    expect(await inviterPhone.got()).toEqual(want);
+    expect(await inviterNotes.next((e) => e.type === "notification")).toMatchObject({ title: "새 친구", body: "별 님과 친구가 되었어요" });
+    expect(await accepterNotes.next((e) => e.type === "notification", 60)).toBeNull();
+    await phone.got(); // whatever the accept itself brought the accepter (that is the test above)
+    await laptop.got();
+    const again = await h.req("POST", `/api/invites/${inv.token}/accept`, { token: accepter.token });
+    expect(again.status).toBe(200); // already friends: no new row, no push
+    expect(await inviterPhone.got()).toEqual([]);
+    expect(await phone.got()).toEqual([]);
+    expect(await laptop.got()).toEqual([]);
+    await close();
+  });
+
   test("the friend gets my line, my agent's line and its answer once each", async () => {
     const { mine, theirs, want } = await friendLines();
     expect(await theirs.got()).toEqual(want);
