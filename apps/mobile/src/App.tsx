@@ -1,9 +1,11 @@
 import { MotionConfig } from "framer-motion";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { setOpenThreadHandler } from "./api/events";
 import { bootstrap, useSession } from "./api/store";
 import { nav } from "./app/nav";
+import { listenPush, openTarget, type PushTarget, readOpenTarget, syncPush, withoutOpenKeys } from "./app/push";
 import { Shell } from "./app/Shell";
+import { afterStartup } from "./app/startup";
 import { useTierValue } from "./motion/tier";
 import { registerScreens } from "./screens";
 import { Onboarding } from "./screens/chat/onboarding/Onboarding";
@@ -37,6 +39,32 @@ export function App() {
     void bootstrap();
     return () => setOpenThreadHandler(null);
   }, []);
+
+  // lock-screen notifications (app/push.ts): a tap that started the app (?open=…) waits for the session, a tap in a
+  // running app opens at once; with a session the device's subscription is sent again on every start
+  const ready = status === "ready";
+  const readyRef = useRef(ready);
+  readyRef.current = ready;
+  const pendingOpen = useRef<PushTarget | null>(null);
+  useEffect(() => {
+    if (isGallery) return;
+    const fromUrl = readOpenTarget(location.search);
+    if (fromUrl) {
+      history.replaceState(history.state, "", `${location.pathname}${withoutOpenKeys(location.search)}${location.hash}`);
+      pendingOpen.current = fromUrl;
+    }
+    return listenPush((t) => {
+      if (readyRef.current) openTarget(t);
+      else pendingOpen.current = t;
+    });
+  }, []);
+  useEffect(() => {
+    if (isGallery || !ready) return;
+    const t = pendingOpen.current;
+    pendingOpen.current = null;
+    if (t) openTarget(t);
+    void afterStartup().then(() => syncPush());
+  }, [ready]);
 
   return (
     <MotionConfig reducedMotion={reduce ? "always" : "never"}>

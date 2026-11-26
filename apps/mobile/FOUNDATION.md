@@ -654,6 +654,19 @@ markThreadRead(threadId);       // local unread:false (the server clears it on G
   or `{ kind: "thread", thread, prompt, autoSend }` (call-demo: `autoSend: false`).
 - Server events (`api/events.ts`, `GET /api/events?token=`) arrive as banners. `setOpenThreadHandler` routes
   notification / island taps to `nav.push("thread", { threadId })`, so register a `"thread"` screen.
+- Lock-screen notifications (Web Push, B1c) live in `app/push.ts` and `public/sw.js`.
+  - The worker shows each push's title only (the body is always empty), with its sound, also while the app is on screen
+    and shows its own banner (DD 2257: never hide a stop line to avoid a double; WebKit revokes a subscription that
+    breaks userVisibleOnly). The next line of the same tag replaces the old one and alerts again (`renotify`). It has
+    **no fetch handler**: it never caches or serves the app. `qa/push.test.ts` fails if a fetch listener appears.
+  - Nothing is registered or requested until notification permission is `granted`. After that the shell calls
+    `syncPush()` on every start with a session (after `afterStartup()`), when the permission turns granted, and when
+    the worker reports a replaced subscription. A screen that asks for the permission can `await syncPush()` for the
+    state: `subscribed` · `off` (503 push_off) · `invalid` (400, "이 기기로는 알림을 보낼 수 없어요") · `no_permission`
+    · `unsupported` · `error`.
+  - A tap opens its target. With a thread, that thread on the chat tab. An invest notification without a thread
+    (`invest:blind`) opens `"invest"` on 나의 모시 when that screen is registered. A running app gets a worker message;
+    a cold start gets `/?open=thread&thread=…&message=…` or `/?open=invest`, read once and removed from the address.
 - For credentials, `sealCredential` / `saveCredentialSealed` in `endpoints.ts` seal the secret for the enclave
   (`@pickle/vault/client`, aad `${userId}:${service}:${kind}`) before it leaves the device. `attachmentUrl(id)` /
   `blobUrl(id)` add `?token=` for `<img src>`.
