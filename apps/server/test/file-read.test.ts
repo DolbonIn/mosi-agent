@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { FILE_TEXT_MAX_BYTES, systemTools, type LlmMessage, type LlmToolCall, type ToolResult } from "@pickle/agent";
 import type { ApprovalCard, Attachment, Card, Friend, InviteResponse, Schedule, ScheduleCard } from "@pickle/protocol";
-import { FILE_TEXT_NOT_KEPT, fileReader, withoutFileText } from "../src/archive.ts";
+import { FILE_TEXT_NOT_KEPT, fileReader, switchOffGoneSchedule, withoutFileText } from "../src/archive.ts";
 import { Db } from "../src/db/index.ts";
 import { MIGRATIONS } from "../src/db/schema.ts";
 import { meetToolset, type MeetTurnState } from "../src/meetAgent.ts";
@@ -165,6 +165,19 @@ describe("sys_file_read: a file by name", () => {
     expect(spent.map((x) => x.summary)).toEqual(["'가.txt' 파일을 다 읽었어요 · 30,000자", "'나.txt' 파일을 다 읽었어요 · 30,000자", "이번 답에서 읽을 수 있는 양(60,000자)을 다 썼어요"]);
     // a new turn reads again
     expect((await turn(me.token, me.session.mainThreadId, "다시", [{ file: "가.txt" }]))[0]!.summary).toBe("'가.txt' 파일을 다 읽었어요 · 30,000자");
+  });
+
+  test("the chip line cuts a name over 20 characters to 19 and '…' (DD 2006); 20 stay whole; the model gets the whole name", async () => {
+    const me = (await h.signup("alice")) as Me;
+    const long = "아주 긴 이름의 모시 작업 지시문 최종본.md";
+    const twenty = `${"정리본".padEnd(16, "가")}.txt`;
+    expect([long.length > 20, twenty.length]).toEqual([true, 20]);
+    await file(me.token, long, "본문");
+    await file(me.token, twenty, "본문");
+    const [a, b] = await turn(me.token, me.session.mainThreadId, "읽어줘", [{ file: long }, { file: twenty }]);
+    expect(a!.summary).toBe(`'${long.slice(0, 19)}…' 파일을 다 읽었어요 · 2자`);
+    expect(b!.summary).toBe(`'${twenty}' 파일을 다 읽었어요 · 2자`);
+    expect(a!.data.file).toBe(long);
   });
 
   test("a start inside an emoji takes the emoji whole; a start at or past the end reads nothing and says how long the file is", async () => {
@@ -436,7 +449,9 @@ describe("a schedule's file", () => {
     expect(published).toContain(answer.id); // the card's row, so open screens turn its switch off
     const text = h.turns.inputs.at(-1)!.userText!;
     expect(text.startsWith("지시문대로 해줘\n\n[이 예약에 붙인 지시 파일('지시문.md')은 보관함에서 지워져서 내용이 없어요. 지시 내용을 짐작해서 하지 마세요.")).toBe(true);
-    expect(text).toContain("이 예약은 이번 답 뒤에 꺼 둬요. 이번 답에는 세 가지만 짧게 써요: 지시 파일이 지워져서 이번에는 이 예약을 하지 못했다는 것, 그래서 예약을 꺼 두었다는 것, 파일을 다시 올리고 예약을 새로 만들면 다시 할 수 있다는 것.]");
+    // DD 2046: what goes off is always "이 예약"; "이번" stays with what could not be done
+    expect(text).toContain("이 답이 끝나면 이 예약을 꺼요. 이번 답에는 세 가지만 짧게 써요: 지시 파일이 지워져서 이번에는 이 예약을 하지 못했다는 것, 그래서 이 예약을 꺼 두었다는 것, 파일을 다시 올리고 예약을 새로 만들면 다시 할 수 있다는 것.]");
+    expect(text).not.toContain("이번 예약");
     expect(text).not.toContain("사람이");
     expect(text).not.toContain("회차");
     expect(text).not.toContain("결정 사항만 정리해");
@@ -452,7 +467,8 @@ describe("a schedule's file", () => {
     // it stays off: turning it on is refused; other edits keep it off
     const on = await h.req("PATCH", `/api/schedules/${off!.id}`, { token: me.token, body: { enabled: true } });
     expect(on.status).toBe(409);
-    expect(((await on.json()) as { error: string }).error).toBe("schedule_file_deleted");
+    // DD 2040 F6: another device's stale screen shows these words as its banner
+    expect(await on.json()).toEqual({ error: "schedule_file_deleted", message: "지시 파일을 지워서 이 예약은 다시 켤 수 없어요. 파일을 다시 올리고 예약을 새로 만들어 주세요." });
     const renamed = await h.req("PATCH", `/api/schedules/${off!.id}`, { token: me.token, body: { title: "아침 지시 2" } });
     expect(renamed.status).toBe(200);
     expect((await renamed.json()) as Schedule).toMatchObject({ title: "아침 지시 2", enabled: false, nextRunAt: null });
@@ -489,12 +505,117 @@ describe("a schedule's file", () => {
     const b = await scheduled(bob, "요약해");
     expect((await h.req("DELETE", `/api/attachments/${b.att.id}`, { token: bob.token })).status).toBe(200);
     expect((await h.req("PATCH", `/api/schedules/${b.schedule.id}`, { token: bob.token, body: { enabled: false } })).status).toBe(200);
-    expect((await h.req("PATCH", `/api/schedules/${b.schedule.id}`, { token: bob.token, body: { enabled: true } })).status).toBe(409);
+    const again = await h.req("PATCH", `/api/schedules/${b.schedule.id}`, { token: bob.token, body: { enabled: true } });
+    expect(again.status).toBe(409);
+    expect(await again.json()).toEqual({ error: "schedule_file_deleted", message: "지시 파일을 지워서 이 예약은 다시 켤 수 없어요. 파일을 다시 올리고 예약을 새로 만들어 주세요." });
+    // before any run, a deleted file's schedule that is still on takes a name-only edit and stays on
+    const dave = (await h.signup("dave")) as Me;
+    const d = await scheduled(dave, "요약해");
+    expect((await h.req("DELETE", `/api/attachments/${d.att.id}`, { token: dave.token })).status).toBe(200);
+    const named = await h.req("PATCH", `/api/schedules/${d.schedule.id}`, { token: dave.token, body: { title: "새 이름" } });
+    expect(named.status).toBe(200);
+    expect((await named.json()) as Schedule).toMatchObject({ title: "새 이름", enabled: true, file: { name: "지시문.md", deleted: true } });
     // a schedule whose file is still there turns on again as before
     const carol = (await h.signup("carol")) as Me;
     const c = await scheduled(carol, "요약해");
     expect((await h.req("PATCH", `/api/schedules/${c.schedule.id}`, { token: carol.token, body: { enabled: false } })).status).toBe(200);
     expect((await h.req("PATCH", `/api/schedules/${c.schedule.id}`, { token: carol.token, body: { enabled: true } })).status).toBe(200);
+  });
+
+  test("two schedule cards in one message: only the deleted file's schedule and card go off", async () => {
+    const me = (await h.signup("alice")) as Me;
+    await file(me.token, "지시문.md", "결정 사항만 정리해");
+    await turn(
+      me.token,
+      me.session.mainThreadId,
+      "지시문대로 매일 아침 7시 반에, 그리고 매일 아침 8시에는 오늘 할 일을 정리해줘",
+      [
+        { title: "아침 지시", prompt: "지시문대로 해줘", rule: "daily@07:30", time_quote: "매일 아침 7시 반", file: "지시문.md" },
+        { title: "할 일 정리", prompt: "오늘 할 일을 정리해줘", rule: "daily@08:00", time_quote: "매일 아침 8시" },
+      ],
+      "sys_schedule_create",
+    );
+    const att = ((await (await h.req("GET", "/api/attachments", { token: me.token })).json()) as Attachment[])[0]!;
+    expect((await h.req("DELETE", `/api/attachments/${att.id}`, { token: me.token })).status).toBe(200);
+    const row = h.db.historyRows(me.session.mainThreadId, 60).at(-1)!;
+    const scheduleCards = (json: string) => (JSON.parse(json) as Card[]).filter((c): c is ScheduleCard => c.type === "schedule");
+    const before = scheduleCards(row.cards_json);
+    expect(before.map((c) => c.enabled)).toEqual([true, true]);
+    const list = await schedules(me.token);
+    const morning = list.find((x) => x.title === "아침 지시")!;
+    const evening = list.find((x) => x.title === "할 일 정리")!;
+    expect(before.map((c) => c.scheduleId)).toEqual([morning.id, evening.id]);
+    // the morning one's first run, the other not due yet
+    expect(evening.nextRunAt!).toBeGreaterThan(morning.nextRunAt!);
+    h.clock.t = morning.nextRunAt!;
+    h.turns.set(async () => outcome("지시 파일이 지워져서 이번에는 하지 못했어요"));
+    expect(await h.app.scheduler.tick()).toEqual({ schedules: 1, briefings: 0 });
+    expect(scheduleCards(h.db.getMessage(row.id)!.cards_json)).toEqual([{ ...before[0]!, enabled: false }, before[1]!]);
+    const after = await schedules(me.token);
+    expect(after.find((x) => x.id === morning.id)).toMatchObject({ enabled: false, nextRunAt: null });
+    expect(after.find((x) => x.id === evening.id)).toMatchObject({ enabled: true });
+  });
+
+  test("the switch-off is the person's own: another person's call with my schedule's id leaves it on with its next run; their own goes off (team-lead 0116)", async () => {
+    const a = (await h.signup("alice")) as Me;
+    const b = (await h.signup("bob")) as Me;
+    const body = { title: "아침 지시", prompt: "지시문대로 해줘", rule: "daily@07:30" };
+    expect((await h.req("POST", "/api/schedules", { token: a.token, body })).status).toBe(201);
+    expect((await h.req("POST", "/api/schedules", { token: b.token, body })).status).toBe(201);
+    const mine = (await schedules(a.token))[0]!;
+    const theirs = (await schedules(b.token))[0]!;
+    expect(mine).toMatchObject({ enabled: true });
+    expect(mine.nextRunAt).toBeGreaterThan(0);
+    // bob's id with alice's schedule: the db method the deleted-file path calls, then that path itself
+    h.db.switchOffSchedule(b.session.user.id, mine.id);
+    expect(switchOffGoneSchedule(h.app.core, b.session.user.id, mine.id)).toEqual([]);
+    expect((await schedules(a.token))[0]).toMatchObject({ id: mine.id, enabled: true, nextRunAt: mine.nextRunAt });
+    // bob's own goes off; alice's still on
+    h.db.switchOffSchedule(b.session.user.id, theirs.id);
+    expect((await schedules(b.token))[0]).toMatchObject({ id: theirs.id, enabled: false, nextRunAt: null });
+    expect((await schedules(a.token))[0]).toMatchObject({ id: mine.id, enabled: true, nextRunAt: mine.nextRunAt });
+  });
+
+  test("taskDone off: the run that turns a deleted file's schedule off still sends its banner, once; a failed run before it and other runs send none", async () => {
+    const me = (await h.signup("alice")) as Me;
+    expect((await h.req("PATCH", "/api/settings", { token: me.token, body: { notifications: { taskDone: false } } })).status).toBe(200);
+    const kept = await scheduled(me, "요약해", "남는 파일.md");
+    const gone = await scheduled(me, "정리해", "지울 파일.md");
+    expect((await h.req("DELETE", `/api/attachments/${gone.att.id}`, { token: me.token })).status).toBe(200);
+    const banners: { title: string; threadId?: string }[] = [];
+    const publish = h.app.events.publish.bind(h.app.events);
+    h.app.events.publish = (userId, ev) => {
+      if (ev.type === "notification") banners.push({ title: ev.title, threadId: ev.threadId });
+      publish(userId, ev);
+    };
+    const runs = async (y: number, m: number, d: number) => {
+      // one run a person at a time: the two take two ticks
+      h.clock.t = KST(y, m, d, 7, 30);
+      expect(await h.app.scheduler.tick()).toEqual({ schedules: 1, briefings: 0 });
+      h.clock.t = KST(y, m, d, 7, 31);
+      expect(await h.app.scheduler.tick()).toEqual({ schedules: 1, briefings: 0 });
+    };
+    const state = async (id: string) => (await schedules(me.token)).find((x) => x.id === id)!;
+    // the first morning the deleted file's run breaks off after some text (stored with its error): no banner, still on
+    h.turns.set(async (input, emit) => {
+      if (!input.userText?.includes("지워져서")) return outcome("요약했어요");
+      emit({ type: "text", delta: "지시 파일이 " });
+      throw Object.assign(new Error("upstream down"), { status: 503 });
+    });
+    await runs(2026, 11, 27);
+    expect(h.db.historyRows((await state(gone.schedule.id)).threadId!, 60).at(-1)).toMatchObject({ role: "assistant", text: "지시 파일이 " });
+    expect(banners).toEqual([]);
+    expect(await state(gone.schedule.id)).toMatchObject({ enabled: true });
+    // the next morning its answer is stored whole: off, and its one banner
+    h.turns.set(async (input) => outcome(input.userText?.includes("지워져서") ? "지시 파일이 지워져서 이번에는 하지 못했어요" : "요약했어요"));
+    await runs(2026, 11, 28);
+    expect(await state(gone.schedule.id)).toMatchObject({ enabled: false, nextRunAt: null });
+    expect(banners).toEqual([{ title: "아침 지시", threadId: (await state(gone.schedule.id)).threadId! }]);
+    // after that only the kept schedule runs, and sends none
+    h.clock.t = KST(2026, 11, 29, 7, 30);
+    expect(await h.app.scheduler.tick()).toEqual({ schedules: 1, briefings: 0 });
+    expect(h.turns.inputs.at(-1)!.ctx.threadId).toBe((await state(kept.schedule.id)).threadId!);
+    expect(banners).toHaveLength(1);
   });
 
   test("v7: a schema-6 database migrates; its schedules have no file and run as before", async () => {

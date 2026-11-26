@@ -418,7 +418,9 @@ export class Scheduler {
         ...(withFile ? { stored: withFile.stored } : {}),
         eventText: `${s.title} · ${s.human}`,
         lease,
-        notify: { title: s.title, icon: "clock", enabled: settings.notifications.taskDone },
+        // the run whose answer turns a deleted file's schedule off: its banner goes out whatever taskDone says, so the
+        // person hears of a change 모시 made on its own; a failed or stopped run follows the setting (DD 2040)
+        notify: { title: s.title, icon: "clock", enabled: (r) => settings.notifications.taskDone || (!!withFile?.gone && toldGone(r)) },
       });
       // the file is gone and the answer that says so is stored: off now, cards too (a failed or stopped run leaves it on)
       if (withFile?.gone && toldGone(res)) {

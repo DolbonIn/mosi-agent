@@ -107,7 +107,9 @@ name, not its text, and the daily log and memory read that too. A file deleted l
 and not to guess at it, and its answer says only three things, briefly: the schedule could not run because its file was
 deleted, the schedule is now off, and uploading the file again and making a new schedule brings it back (DD 2006, 2014).
 Once that answer is stored (not after a failed or stopped run) the schedule goes off with no next run and its stored
-cards' `enabled` with it, in one transaction, and those rows are published; `PATCH {enabled: true}` on a schedule whose
+cards' `enabled` with it, in one transaction, and those rows are published; that run's banner goes out whatever
+`notifications.taskDone` says (the schedule went off on its own; a failed or stopped run follows the setting);
+`PATCH {enabled: true}` on a schedule whose
 file is gone (off by that run or by the person) answers 409 `schedule_file_deleted`, other edits keep it off; cards of that schedule get
 `file: { name, deleted: true }` (`ScheduleCard.file`, `Schedule.file` in `/api/schedules`). Columns
 `schedules.attachment_id` / `attachment_name` came with migration v7 (added only; older schedules have none and run as

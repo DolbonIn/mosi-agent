@@ -1022,7 +1022,8 @@ export async function runSystemTurn(
     stored?: string;
     eventText: string;
     lease: LeaseLike;
-    notify?: { title: string; icon: IconName; enabled: boolean };
+    /** `enabled` may look at the result (a schedule's deleted-file run) */
+    notify?: { title: string; icon: IconName; enabled: boolean | ((res: TurnResult) => boolean) };
     retryable?: boolean;
     /** id for the event row (the scheduler records it before the turn) */
     eventId?: string;
@@ -1071,7 +1072,8 @@ export async function runSystemTurn(
     if (res.message) show();
     else deleteMessageRow(core, eventId);
   }
-  if (o.notify?.enabled && res.message) {
+  const notify = typeof o.notify?.enabled === "function" ? o.notify.enabled(res) : o.notify?.enabled;
+  if (notify && o.notify && res.message) {
     core.events.publish(o.userId, {
       type: "notification",
       title: o.notify.title,
