@@ -1,15 +1,14 @@
 import type { UserSettings } from "@pickle/protocol";
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ScreenProps } from "../../../app/nav";
 import { Screen } from "../../../app/Screen";
 import { useTier } from "../../../motion/tier";
-import { Icon } from "../../../ui/Icon";
 import { LargeTitle } from "../../../ui/LargeTitle";
 import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Slider } from "../../../ui/Slider";
 import { tied } from "../../../ui/Text";
 import { josa } from "../format";
-import { copyOf, Stack, useAgentName } from "../parts";
+import { ChoiceList, copyOf, Stack, useAgentName } from "../parts";
 import { useCurrentSettings, useSettingsPatch } from "./useSetting";
 import "./settings.css";
 
@@ -140,54 +139,5 @@ function Group({ id, title, footer, children }: { id: string; title: string; foo
         <div className="list-footer t-copy">{copyOf(footer)}</div>
       </div>
     </section>
-  );
-}
-
-/**
- * A choice list (HIG): rows, one checkmark on the selected one (a selected state, so accent text is allowed). A real
- * radiogroup: one tab stop on the checked row, arrows move and choose, Space/Enter choose.
- */
-function ChoiceList<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
-  const refs = useRef<(HTMLButtonElement | null)[]>([]);
-  const onKey = (e: KeyboardEvent, i: number) => {
-    const step = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
-    if (!step) return;
-    e.preventDefault();
-    const j = (i + step + options.length) % options.length;
-    refs.current[j]?.focus();
-    onChange(options[j]!.value);
-  };
-  return (
-    <div className="settings-choices" role="radiogroup" aria-label={label}>
-      {options.map((o, i) => {
-        const on = o.value === value;
-        return (
-          <button
-            key={o.value}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            tabIndex={on ? 0 : -1}
-            className="list-row is-clickable settings-choice"
-            onClick={() => !on && onChange(o.value)}
-            onKeyDown={(e) => onKey(e, i)}
-          >
-            <span className="list-row-main">
-              <span className="list-row-text">
-                <span className="list-row-title">{o.label}</span>
-              </span>
-              {on && (
-                <span className="settings-choice__check" aria-hidden="true">
-                  <Icon name="checkmark" size={20} weight="semibold" />
-                </span>
-              )}
-            </span>
-          </button>
-        );
-      })}
-    </div>
   );
 }

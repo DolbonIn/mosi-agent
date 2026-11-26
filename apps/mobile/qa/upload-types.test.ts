@@ -61,6 +61,15 @@ describe("files that go up: types", () => {
     expect(checkFile(f("a.md", "", 10 * 1024 * 1024 + 1))).toBe("10MB보다 큰 파일은 올릴 수 없어요. 크기를 줄여서 다시 올려 주세요.");
     expect(checkFile(f("photo.heic", "image/heic"))).toBeNull();
   });
+  test("edges (DD 2001): only the last extension counts; 10 MiB exactly is taken, one byte more is not", () => {
+    // a double extension with no type: ".md" inside the name never makes it text
+    expect(checkFile(f("a.md.zip", ""))).toBe(NOT_TAKEN);
+    expect(checkFile(f("a.md.zip", "application/octet-stream"))).toBe(NOT_TAKEN);
+    // the limit is binary (10 × 1024 × 1024), as the server's, and the limit itself is allowed
+    expect(checkFile(f("a.md", "", 10 * 1024 * 1024))).toBeNull();
+    expect(checkFile(f("a.md", "", 10 * 1024 * 1024 + 1))).toBe("10MB보다 큰 파일은 올릴 수 없어요. 크기를 줄여서 다시 올려 주세요.");
+    expect(checkFile(f("a.md", "", 10 * 1000 * 1000 + 1))).toBeNull();
+  });
 
   test("the 파일 고르기 picker offers .md and .markdown next to PDF and .txt", () => {
     const parts = FILE_ACCEPT.split(",");

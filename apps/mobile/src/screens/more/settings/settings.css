@@ -122,14 +122,6 @@
 }
 
 /* ── 화면 및 디자인 ── */
-/* theme: a choice list, one checkmark (a selected state: accent text is allowed) */
-.settings-choice__check {
-  flex: none;
-  display: grid;
-  place-items: center;
-  color: var(--accent-text);
-}
-
 /* text size: preview and slider on one paper; the turn drawn the way chat draws it. The preview steps with the slider
    (0.05 steps, no tween: type size never animates) before the app follows on release */
 .text-preview {

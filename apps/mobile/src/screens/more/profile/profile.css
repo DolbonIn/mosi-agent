@@ -379,3 +379,8 @@
   word-break: break-all;
   overflow-wrap: anywhere;
 }
+
+/* 투자 row: the live order mode in red (DD 1935 §3-1); the paper mode shows no value */
+.profile-live {
+  color: var(--danger);
+}

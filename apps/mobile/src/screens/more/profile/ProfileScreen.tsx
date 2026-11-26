@@ -12,7 +12,7 @@ import { LargeTitle } from "../../../ui/LargeTitle";
 import { ListRow, ListSection } from "../../../ui/List";
 import { Odometer } from "../../../ui/Odometer";
 import { ProgressBar } from "../../../ui/ProgressBar";
-import { schedulesRes, useResource } from "../data";
+import { schedulesRes, useInvestLive, useResource } from "../data";
 import { num, untilKo, useCoarseNow } from "../format";
 import { copyOf, InlineError, pushDetail, Stack, useAgentName, useTabVisible } from "../parts";
 import { presentPhone } from "./PhoneSheet";
@@ -46,6 +46,7 @@ export const PROFILE_TARGETS: Record<string, Target> = {
   connections: { screen: "connections", title: "앱 연결" },
   account: { screen: "account", title: "내 계정" },
   friends: { screen: "friends", title: "친구" },
+  invest: { screen: "invest", title: "투자" },
 };
 
 /** section titles for an older ui-definitions payload that sent these sections untitled */
@@ -281,7 +282,8 @@ function DetailRow({ row }: { row: Row }) {
   const profile = useProfile().data;
   const settings = useSettings();
   const schedules = useResource(schedulesRes, row.target === "schedules");
-  const detail = ((): string | undefined => {
+  const live = useInvestLive();
+  const detail = ((): ReactNode => {
     switch (row.target) {
       case "payments":
         return profile ? (profile.paymentMethods ? `${profile.paymentMethods}개` : "없음") : undefined;
@@ -289,6 +291,9 @@ function DetailRow({ row }: { row: Row }) {
         return profile ? (profile.savedLogins ? `${profile.savedLogins}개` : "없음") : undefined;
       case "schedules":
         return schedules.loaded ? (schedules.data.length ? `${schedules.data.filter((s) => s.enabled).length}개 켜짐` : "없음") : undefined;
+      case "invest":
+        // the live mode is said here too (DD 1935 §3-1, before anything else: DD 2010 §7); the paper mode says nothing
+        return live ? <span className="profile-live">실제 주문</span> : undefined;
       case "display": {
         const th = settings?.display.theme ?? "system";
         return th === "system" ? "시스템 따름" : th === "dark" ? "다크" : "라이트";

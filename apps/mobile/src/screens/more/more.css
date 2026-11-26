@@ -225,3 +225,20 @@
 .account-logout > .more-note {
   padding: 0 16px;
 }
+
+/* a choice list (parts ChoiceList): one checkmark on the selected row (a selected state: accent text is allowed) */
+.settings-choice__check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--accent-text);
+}
+/* laid out flat in a sheet: the row class comes from the caller, the title takes the room before the checkmark */
+.more-choices {
+  display: flex;
+  flex-direction: column;
+}
+.more-choice__title {
+  flex: 1 1 auto;
+  min-width: 0;
+}

@@ -1,0 +1,334 @@
+/* 투자 (DD 1935 §3-2, §3-3). Paper and hairlines only; no new glass but the top bar's capsule. Directions are told by
+   sign, never by colour (§0-3): red is for risk, --caution for the worsening cells. The marks, numbers and the closing
+   sentence are ui/Invest's (SignalMark colours itself by its signal). */
+
+/* an empty section: its title and one footnote, no card (DD 2008 §2) */
+.list-footer.iv-empty-foot {
+  padding: 0 16px;
+}
+
+/* a notice row at the top of a group (DD 2010 §4, §7): a SignalMark and one line, in the row's paper */
+.iv-notice .list-row-main {
+  padding-block: 12px;
+}
+.iv-notice-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+}
+.iv-notice-line .iv-mark {
+  margin-top: calc((1.45em - 1em) / 2);
+}
+
+/* ① 시장 단계 */
+.iv-stage-main {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  padding-block: 14px;
+}
+.iv-stage-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.iv-stage-title {
+  font-size: var(--t-title3);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.iv-stage-sub {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.iv-gauges {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+.iv-gauge {
+  display: contents;
+}
+.iv-gauge-word {
+  font-size: var(--t-subhead);
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.iv-gauge-n {
+  font-size: var(--t-subhead);
+  text-align: right;
+}
+.iv-cells {
+  display: flex;
+  gap: 3px;
+}
+.iv-cell {
+  box-sizing: border-box;
+  width: 10px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fill-2);
+}
+.iv-cells.is-caution .iv-cell.is-met {
+  background: var(--caution);
+}
+.iv-cells.is-danger .iv-cell.is-met {
+  background: var(--danger);
+}
+.iv-cells.is-label .iv-cell.is-met {
+  background: var(--label);
+}
+.iv-cell.is-unknown {
+  background: transparent;
+  border: 1px dashed var(--label-2);
+}
+.iv-next {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+/* two lines on one side of a row */
+.iv-two {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.iv-two:first-child {
+  flex: 1 1 auto;
+}
+.iv-two.is-end {
+  flex: none;
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* ② 감시 종목 */
+.iv-watch-row .list-row-main {
+  gap: 12px;
+}
+.iv-symbol {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.iv-second {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+.iv-price {
+  font-size: var(--t-body);
+  line-height: 1.3;
+}
+.iv-change {
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+  color: var(--label-2);
+}
+/* quotes lost: the last change stays, lowered (DD 2010 §7) */
+.iv-change.is-stale {
+  color: var(--label-3);
+}
+
+/* ③ 감시 규칙 */
+/* the right side goes under the title only when the title's price phrase and it do not fit one line (320 / 130 %) */
+.iv-rule-row .list-row-main {
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.iv-rule-title {
+  flex: 1 1 0;
+}
+.iv-rule-row .iv-two.is-end {
+  margin-left: auto;
+}
+/* 규칙 추가's kind: the invisible copy of the segmented control the fit is measured on */
+.iv-kind {
+  position: relative;
+}
+.iv-seg-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* the price and its direction on one line */
+.iv-tie {
+  white-space: nowrap;
+}
+/* the rules footer's two paragraphs */
+.iv-foot-p {
+  margin: 0;
+}
+.iv-foot-p + .iv-foot-p {
+  margin-top: 4px;
+}
+.iv-action {
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+}
+.iv-action.is-live {
+  color: var(--danger);
+}
+.iv-state {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+}
+
+.iv-disclaimer {
+  padding: 0 16px;
+}
+
+/* 규칙 편집 시트 */
+.iv-rule-form,
+.iv-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.iv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.iv-flat {
+  display: flex;
+  flex-direction: column;
+}
+/* flat rows on the sheet's paper, the ticket sheet's grammar: a hairline between, the control at the end */
+.iv-flat-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 0;
+  text-align: left;
+  color: var(--label);
+  font-size: var(--t-body);
+  line-height: 1.35;
+}
+.iv-flat-row + .iv-flat-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+.iv-flat-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* 닿으면 and 종류: parts ChoiceList laid out flat (one checkmark, no circles; DD 2135) */
+.iv-choice:focus-visible,
+.iv-kind-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+/* 기한's date row: the native picker, its text right-aligned like a row's value */
+.iv-date-input {
+  flex: none;
+  min-width: 0;
+  max-width: 60%;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--label);
+  font: inherit;
+  text-align: right;
+}
+.iv-date-input::-webkit-date-and-time-value {
+  text-align: right;
+}
+.iv-date-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* 규칙 지우기: bottom centre, the archive sheet's grammar */
+.iv-danger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 10px;
+  margin-top: 4px;
+  text-align: center;
+}
+.iv-unit {
+  padding-right: 14px;
+  color: var(--label-2);
+}
+/* 장중 버퍼: the % sign, then the price it comes to (the preview's) */
+.iv-buffer-trail {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-right: 4px;
+}
+.iv-buffer-price {
+  color: var(--label-2);
+}
+.iv-buffer-price.is-stale {
+  color: var(--label-3);
+}
+.iv-note {
+  margin: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+.iv-rule-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* the result sentence, its warning and a save's error, pinned over save or at the form's end */
+.iv-result-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.iv-result {
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+}
+/* the sentence of an earlier draft while the next one is read */
+.iv-result.is-stale {
+  color: var(--label-3);
+}
+.iv-result-warn {
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--danger);
+}
+.iv-result-warn.has-mark {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+/* the mark sits on the first line's middle */
+.iv-result-warn.has-mark .iv-mark {
+  margin-top: calc((1.45em - 1em) / 2);
+}

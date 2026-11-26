@@ -1,5 +1,5 @@
 import type { TabId } from "@pickle/protocol";
-import type { CSSProperties, ReactNode } from "react";
+import { useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { useAgent, useSession } from "../../api/store";
 import { BrandIcon, hasBrandIcon } from "../../assets/brands/BrandIcon";
 import { nav, useNav } from "../../app/nav";
@@ -153,6 +153,80 @@ export function Placeholder({ rows = 3, height = 64 }: { rows?: number; height?:
       {Array.from({ length: rows }, (_, i) => (
         <span key={i} style={{ height }} />
       ))}
+    </div>
+  );
+}
+
+/**
+ * A choice list (HIG): rows, one checkmark on the selected one (a selected state, so accent text is allowed); no
+ * circles on the others. A real radiogroup: one tab stop on the checked row, arrows move and choose, Space/Enter choose.
+ * On a paper card by default (화면 및 디자인's 테마); `rowClassName` lays the rows out flat in a sheet instead (투자's
+ * 닿으면 and 종류), with the same structure, keys and checkmark.
+ */
+export function ChoiceList<T extends string>({
+  label,
+  labelledBy,
+  value,
+  options,
+  onChange,
+  rowClassName,
+}: {
+  label?: string;
+  labelledBy?: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+  rowClassName?: string;
+}) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onKey = (e: KeyboardEvent, i: number) => {
+    const step = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const j = (i + step + options.length) % options.length;
+    refs.current[j]?.focus();
+    onChange(options[j]!.value);
+  };
+  return (
+    <div className={rowClassName ? "more-choices" : "settings-choices"} role="radiogroup" aria-label={label} aria-labelledby={labelledBy}>
+      {options.map((o, i) => {
+        const on = o.value === value;
+        const check = on && (
+          <span className="settings-choice__check" aria-hidden="true">
+            <Icon name="checkmark" size={20} weight="semibold" />
+          </span>
+        );
+        return (
+          <button
+            key={o.value}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={on ? 0 : -1}
+            className={rowClassName ? `${rowClassName} settings-choice` : "list-row is-clickable settings-choice"}
+            onClick={() => !on && onChange(o.value)}
+            onKeyDown={(e) => onKey(e, i)}
+          >
+            {rowClassName ? (
+              <>
+                {/* copy that breaks well: a label that wraps (매도(실제 주문이 켜져 있을 때) at 320 / 130 %) leaves no word alone */}
+                <span className="more-choice__title t-copy">{copy(o.label)}</span>
+                {check}
+              </>
+            ) : (
+              <span className="list-row-main">
+                <span className="list-row-text">
+                  <span className="list-row-title">{o.label}</span>
+                </span>
+                {check}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import type {
   ExploreResponse,
   Friend,
   ID,
+  InvestOverview,
   KeepFor,
   Schedule,
   SkillInfo,
@@ -17,6 +18,7 @@ import { onServerEvent } from "../../api/events";
 import { sessionStore } from "../../api/store";
 import { preloadBrandMarks } from "../../assets/brands/BrandIcon";
 import { createStore, useStore, type Store } from "../../lib/createStore";
+import * as investApi from "./invest/api";
 
 /**
  * Screen-level caches for the explore / archive / profile half (owned by screens-more; the foundation store keeps
@@ -105,6 +107,37 @@ export const credentialsRes = resource<CredentialInfo[]>([], () => ep.credential
 export const accessLogRes = resource<AccessRecord[]>([], async () => (await ep.accessLog(100)).sort((a, b) => b.createdAt - a.createdAt));
 export const skillsRes = resource<SkillInfo[]>([], () => ep.skills());
 export const memoriesRes = resource<ep.MemoryItem[]>([], async () => (await ep.memories()).sort((a, b) => b.createdAt - a.createdAt));
+/**
+ * 투자: one read for the whole screen; the `invest` event replaces it whole. A read that answers with an older rev than
+ * the overview already here (an event came in while it was on its way) keeps it.
+ */
+export const investRes: ResourceApi<InvestOverview | null> = resource<InvestOverview | null>(null, async (): Promise<InvestOverview> => {
+  const o = await investApi.overview();
+  const have: InvestOverview | null = investRes.store.get().data;
+  return have && have.rev > o.rev ? have : o;
+});
+
+/** take an overview (a read after a write, or the `invest` event) unless an equal or newer one is already here */
+export function applyInvest(o: InvestOverview) {
+  const s = investRes.store.get();
+  if (s.data && s.data.rev >= o.rev) return;
+  investRes.store.set({ data: o, loading: false, loaded: true, error: undefined, at: Date.now() });
+}
+
+/** after a confirmed write: a fresh read (not the shared in-flight one, which may predate the write), by rev */
+export async function reloadInvest() {
+  applyInvest(await investApi.overview());
+}
+
+/**
+ * The 나의 모시 row's "실제 주문": the overview's mode once one is here (it follows the `invest` event), else the
+ * session's `investMode` (agent-runtime 2006 §5; absent = paper).
+ */
+export function useInvestLive(): boolean {
+  const o = investRes.use().data;
+  const session = useStore(sessionStore).session;
+  return o ? o.mode === "real" : session?.investMode === "real";
+}
 
 // ───────────────────────────── mutations (server first) ─────────────────────────────
 
@@ -208,6 +241,13 @@ export function wireMoreData() {
     } else if (e.type === "connection") {
       if (credentialsRes.store.get().loaded) void credentialsRes.load();
       if (accessLogRes.store.get().loaded) void accessLogRes.load();
+    }
+    // 투자 (agent-runtime 2006 §6): the event carries the whole overview; a reconnect's hello says the server's rev,
+    // and a cached overview behind it is read again
+    if (e.type === "invest") applyInvest(e.overview);
+    else if (e.type === "hello" && typeof e.investRev === "number") {
+      const have = investRes.store.get().data;
+      if (have && have.rev < e.investRev) void reloadInvest().catch(() => undefined);
     }
   });
   // Caches belong to one account: they clear on sign-out ("anon") or when a different account signs in, never on a
