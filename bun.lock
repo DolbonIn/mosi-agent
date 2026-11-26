@@ -73,6 +73,10 @@
       "name": "@pickle/protocol",
       "version": "0.2.0",
     },
+    "packages/quant": {
+      "name": "@pickle/quant",
+      "version": "0.1.0",
+    },
     "packages/skills": {
       "name": "@pickle/skills",
       "version": "0.1.0",
@@ -187,6 +191,8 @@
     "@pickle/protocol": ["@pickle/protocol@workspace:packages/protocol"],
 
     "@pickle/qa": ["@pickle/qa@workspace:qa"],
+
+    "@pickle/quant": ["@pickle/quant@workspace:packages/quant"],
 
     "@pickle/server": ["@pickle/server@workspace:apps/server"],
 
