@@ -71,6 +71,16 @@ export function krw(x: number): string {
   return finite(x) ? `${num(x, 0)}원` : UNKNOWN_TEXT;
 }
 
+/**
+ * a won price axis's tick numbers (DD 2228-b): when every tick is 10,000 or more and a multiple of 1,000 (so the step
+ * is too), in 만: "15만", "18.7만", "125만", "1,250만"; otherwise all in full: "187,500", "9,500". Only ticks: labels and
+ * the current price stay exact.
+ */
+export function wonTicks(ticks: readonly number[]): string[] {
+  const man = ticks.length > 0 && ticks.every((t) => finite(t) && t >= 10_000 && Number.isInteger(t / 1000));
+  return ticks.map((t) => (man ? `${num(t / 10_000, Number.isInteger(t / 10_000) ? 0 : 1)}만` : num(t, 0)));
+}
+
 /** a change in %, always signed: +2.31%, −1.04%, 0.00% */
 export function pct(x: number, digits = 2): string {
   return finite(x) ? `${num(x, digits, { sign: true })}%` : UNKNOWN_TEXT;

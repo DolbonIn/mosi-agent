@@ -132,6 +132,11 @@ describe("each indicator at its boundary", () => {
     const at = (v: number) => one({ coreCpiMoM: series(["2026-10-01", v]) }, 10).signal;
     expect([at(0.3), at(0.29), at(0.2), at(0.19), at(0.1)]).toEqual(["risk", "caution", "caution", "normal", "normal"]);
   });
+  test("reason numbers go through format.ts (DD 2045): a negative month is U+2212, a zero gap has no sign", () => {
+    expect(one({ coreCpiMoM: series(["2026-10-01", -0.1]) }, 10).reason).toBe("MoM −0.1% < 0.2%");
+    const g = one({ dgs2: daily("2026-11-01", [3.749]), fedUpper: [{ t: "2026-10-01", v: 3.75 }] }, 2);
+    expect(g.reason).toBe("3.75% − 3.75% = 0.00%p ≤ 0");
+  });
   test("10 · MoM from the index: a missing month gives no value for the month after it (no two-month change)", () => {
     expect(momFromIndex(series(["2025-09-01", 330], ["2025-10-01", null], ["2025-11-01", 331.32], ["2025-12-01", 331.65]))).toEqual([{ t: "2025-12-01", v: 0.1 }]);
     expect(momFromIndex(series(["2025-12-01", 100], ["2026-01-01", 100.2]))).toEqual([{ t: "2026-01-01", v: 0.2 }]);

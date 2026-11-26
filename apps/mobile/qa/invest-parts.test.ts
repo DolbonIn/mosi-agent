@@ -4,7 +4,9 @@
 import { describe, expect, test } from "bun:test";
 import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { DISCLAIMER, SIGNAL_SHAPES, pct, type Signal } from "@pickle/quant";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { DISCLAIMER, SIGNAL_SHAPES, estimate, pct, usd, type Signal } from "@pickle/quant";
 import { TopBar } from "../src/app/TopBar";
 import { topBarStore } from "../src/app/topBarStore";
 import { InvestNum, IvDisclaimer, IvFoot, IvHero, IvRow, IvRows, ModeWord, SignalLabel, SignalMark } from "../src/ui/Invest";
@@ -64,6 +66,31 @@ describe("figures", () => {
     expect(text(html(createElement(IvHero, { value: null })))).toBe("확인 불가");
     expect(html(createElement(ModeWord, { mode: "real" }))).toBe('<span class="ivmode" data-mode="real">실제</span>');
     expect(html(createElement(ModeWord, { mode: "mock" }))).toBe('<span class="ivmode" data-mode="mock">모의</span>');
+  });
+  test("an estimate: the figure as given, its trailing (추정) in its own --label-2 span (DD 2224)", () => {
+    const v = estimate(usd(1204));
+    for (const el of [createElement(InvestNum, { value: v }), createElement(IvHero, { value: v })]) {
+      const m = html(el);
+      expect(text(m)).toBe("약 $1,204.00(추정)");
+      expect(m).toContain('<span class="ivest">(추정)</span>');
+      expect(m.split("(추정)").length).toBe(2);
+    }
+    for (const v2 of ["(추정)", "약 (추정) $3", "$32.57"]) expect(html(createElement(InvestNum, { value: v2 }))).not.toContain("ivest");
+  });
+  test("a foot's bracketed part and the \" ·\" after it are one box; a foot without one has none (DD 2224)", () => {
+    const m = html(createElement(IvFoot, { children: "관측 11월 27일 00:45(미 동부 10:45) · 토스증권 · A" }));
+    expect(m).toContain('<span class="ivfoot-tie">(미 동부 10:45) ·</span>');
+    expect(m.match(/ivfoot-tie/g)?.length).toBe(1);
+    expect(text(html(createElement(IvFoot, { children: "관측 11월 27일 00:45(미 동부 10:45)" })))).toBe("관측 11월 27일 00:45(미 동부 10:45)");
+    expect(html(createElement(IvFoot, { children: "관측 11월 27일 00:45(미 동부 10:45)" }))).toContain('<span class="ivfoot-tie">(미 동부 10:45)</span>');
+    expect(html(createElement(IvFoot, { children: "관측 11월 27일 09:05 · KRX · A" }))).not.toContain("ivfoot-tie");
+  });
+  test("signal colours ride on the mark and the label only: no bare [data-signal] selector (DD 2224)", () => {
+    const css = readFileSync(join(import.meta.dir, "../src/ui/Invest.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const sels = css.split("{").slice(0, -1).flatMap((b) => b.slice(b.lastIndexOf("}") + 1).split(",")).map((x) => x.trim());
+    const signal = sels.filter((x) => x.includes("[data-signal"));
+    expect(signal.length).toBe(8);
+    for (const x of signal) expect(x).toMatch(/^\.(ivsig|sigmark)\[data-signal="(risk|caution|normal|unknown)"\]$/);
   });
   test("the closing sentence is quant's, word for word", () => {
     expect(html(createElement(IvDisclaimer))).toBe(`<p class="ivdisclaimer">${DISCLAIMER}</p>`);

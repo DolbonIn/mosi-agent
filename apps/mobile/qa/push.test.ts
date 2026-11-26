@@ -11,6 +11,7 @@ import {
   keyBytes,
   messageTarget,
   MSG_OPEN,
+  pushAskable,
   type PushDeps,
   readOpenTarget,
   runPushSync,
@@ -309,6 +310,25 @@ describe("app/push.ts · syncPush", () => {
     d.pushManager = async () => ({ ...(await pm()), subscribe: () => Promise.reject(new Error("NotAllowedError")) });
     expect(await runPushSync(d)).toBe("error");
     expect(log.some((l) => l.startsWith("post"))).toBe(false);
+  });
+  test("pushAskable (DD 2330, DD 2334): supported, never answered, and the server gives a key; the key is asked for last", async () => {
+    const yes = deps({ permission: () => "default" });
+    expect(await pushAskable(yes.d)).toBe(true);
+    expect(yes.log).toEqual(["key"]);
+    for (const p of ["granted", "denied"] as const) {
+      const { d, log } = deps({ permission: () => p });
+      expect(await pushAskable(d)).toBe(false);
+      expect(log).toEqual([]);
+    }
+    const none = deps({ supported: () => false, permission: () => "default" });
+    expect(await pushAskable(none.d)).toBe(false);
+    expect(none.log).toEqual([]);
+    for (const st of [503, 404, 500, 0]) {
+      const { d } = deps({ permission: () => "default", getKey: () => Promise.reject(st ? new ApiError(st, "x", "x") : new TypeError("offline")) });
+      expect(await pushAskable(d)).toBe(false);
+    }
+    const bad = deps({ permission: () => "default", getKey: () => Promise.resolve({ publicKey: "BAEC" }) });
+    expect(await pushAskable(bad.d)).toBe(false);
   });
   test("calls while one runs share it", async () => {
     const { d, log } = deps();

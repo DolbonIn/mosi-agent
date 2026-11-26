@@ -128,22 +128,50 @@ function Trailing({ action }: { action: TopBarAction }) {
 function Center({ title, agent, name, spec, onCenter }: { title: string | null; agent: boolean; name: string; spec: typeof DEFAULT_AVATAR; onCenter: ((el: HTMLElement) => void) | null }) {
   const host = useRef<HTMLDivElement>(null);
 
-  // cap: the centre stays centred in the bar without reaching either side (back/menu circle, trailing control) —
-  // longer titles end in "…"
+  // cap: the centre stays centred in the bar and 8px or more from either side (back/menu circle, trailing control);
+  // longer titles end in "…". When the centred room is under 96px (a wide capsule at 320, text size 130 %: DD 2224),
+  // the cap is the whole room between the two sides and the centre moves off the middle only as far as it must to
+  // keep its 8px (a short title stays centred).
   useLayoutEffect(() => {
-    const bar = host.current?.closest<HTMLElement>(".topbar");
-    if (!bar) return;
+    const el = host.current;
+    const bar = el?.closest<HTMLElement>(".topbar");
+    if (!el || !bar) return;
     const left = bar.querySelector<HTMLElement>(":scope > .tb-circle");
     const right = bar.querySelector<HTMLElement>(":scope > .tb-right-slot");
     const GAP = 8;
+    const MIN = 96;
+    const set = (k: string, v: string) => {
+      if (bar.style.getPropertyValue(k) !== v) bar.style.setProperty(k, v);
+    };
     const update = () => {
-      const side = Math.max(left?.offsetWidth ?? 48, right?.offsetWidth ?? 0);
-      const centre = bar.clientWidth - 2 * (side + GAP);
-      bar.style.setProperty("--tb-center-max", `${Math.max(96, Math.floor(centre))}px`);
+      const w = bar.clientWidth;
+      const lw = left?.offsetWidth ?? 48;
+      const rw = right?.offsetWidth ?? 0;
+      const centred = w - 2 * (Math.max(lw, rw) + GAP);
+      if (centred >= MIN) {
+        set("--tb-center-max", `${Math.floor(centred)}px`);
+        set("--tb-center-shift", "0px");
+        return;
+      }
+      const lo = lw + GAP;
+      const hi = w - rw - GAP;
+      set("--tb-center-max", `${Math.max(0, Math.floor(hi - lo))}px`);
+      // where the grid put it under the new cap (a side wider than its 1fr track pushes it already); the shift is a
+      // transform, so it changes neither number
+      const cw = el.offsetWidth;
+      const start = el.offsetLeft;
+      let shift = 0;
+      if (start + cw > hi) shift = hi - (start + cw);
+      if (start + shift < lo) shift = lo - start;
+      set("--tb-center-shift", `${Math.round(shift * 2) / 2}px`);
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(bar);
+    // the words' box, one level below the sides: the cap resizes it inside a side's callback, and an observed box at
+    // the sides' own depth would end the loop undelivered (WebKit reports "ResizeObserver loop completed …")
+    const words = el.querySelector<HTMLElement>(":scope > .swap-host");
+    if (words) ro.observe(words);
     if (left) ro.observe(left);
     if (right) ro.observe(right);
     return () => ro.disconnect();

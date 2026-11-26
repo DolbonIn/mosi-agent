@@ -664,6 +664,11 @@ markThreadRead(threadId);       // local unread:false (the server clears it on G
     the worker reports a replaced subscription. A screen that asks for the permission can `await syncPush()` for the
     state: `subscribed` · `off` (503 push_off) · `invalid` (400, "이 기기로는 알림을 보낼 수 없어요") · `no_permission`
     · `unsupported` · `error`.
+  - Whether to offer the permission at all is `await pushAskable()` (DD 2330, DD 2334), the one rule for the
+    notification settings card and the invest screen's paper: Web Push exists here (on iOS only in an app added to the
+    home screen), the permission is still `default`, and the server gives its key (503 push_off while it sends nothing,
+    404, unreachable → no offer). Ask only after a press, call `Notification.requestPermission()` inside that press,
+    then `await syncPush()`.
   - A tap opens its target. With a thread, that thread on the chat tab. An invest notification without a thread
     (`invest:blind`) opens `"invest"` on 나의 모시 when that screen is registered. A running app gets a worker message;
     a cold start gets `/?open=thread&thread=…&message=…` or `/?open=invest`, read once and removed from the address.

@@ -7,6 +7,7 @@
  * down, otherwise ⚪. A few companies down are never read as all seven ("일부 기업만 확인 시 전체로 확대 해석 금지").
  */
 import { atOrBefore, changeOver, covers, lastMonths, latest, monthChangePct, monthsBefore, oldest, present, r9, streak } from "./series";
+import { num } from "./format";
 import type { Point, Signal, Tri } from "./types";
 
 export interface Core11Row {
@@ -117,8 +118,9 @@ export interface Core11Result {
   hyRisk: Tri;
 }
 
-const fmt = (x: number, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toFixed(d);
-const sgn = (x: number, d = 2) => (x > 0 ? "+" : x < 0 ? "−" : "") + fmt(Math.abs(x), d);
+/** the reason lines' numbers go through the one formatter (DD 1935 §0-5, DD 2045): grouped, U+2212, no sign on zero */
+const fmt = (x: number, d = 2) => num(x, d);
+const sgn = (x: number, d = 2) => num(x, d, { sign: true });
 const unknown = (no: number, why: string, extras: Record<string, Extra> = {}, mayBeRisk = true): Judgment => ({
   no,
   name: CORE11[no - 1]!.name,

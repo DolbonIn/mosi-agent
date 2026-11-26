@@ -1,6 +1,6 @@
 /** The shared formatter (DD 1935 §0-5) and the signal marks (§0-4). */
 import { describe, expect, test } from "bun:test";
-import { MINUS, UNKNOWN_TEXT, atText, basisNote, delay, easternOffset, estimate, footLine, krw, kst, kstWithEastern, num, pct, pp, rate, shares, usd } from "../src/format";
+import { MINUS, UNKNOWN_TEXT, atText, basisNote, delay, easternOffset, estimate, footLine, krw, kst, kstWithEastern, num, pct, pp, rate, shares, usd, wonTicks } from "../src/format";
 import { SIGNAL_SHAPES, SIGNAL_WORD, TRI_WORD, signalMarkSvg, signalSummary } from "../src/signal";
 
 describe("numbers", () => {
@@ -46,6 +46,22 @@ describe("numbers", () => {
     expect(estimate(usd(1204))).toBe("약 $1,204.00(추정)");
     expect([delay(1, "일"), delay(15, "분")]).toEqual(["1일 지연", "15분 지연"]);
     expect(UNKNOWN_TEXT).toBe("확인 불가");
+  });
+});
+
+describe("won ticks in 만 (DD 2228-b)", () => {
+  test("every tick 10,000 or more and a multiple of 1,000: 만, whole or one decimal, per tick", () => {
+    expect(wonTicks([150_000, 200_000, 250_000])).toEqual(["15만", "20만", "25만"]);
+    expect(wonTicks([185_000, 186_000, 187_000])).toEqual(["18.5만", "18.6만", "18.7만"]);
+    expect(wonTicks([180_000, 185_000, 190_000])).toEqual(["18만", "18.5만", "19만"]);
+    expect(wonTicks([1_250_000])).toEqual(["125만"]);
+    expect(wonTicks([12_500_000, 13_000_000])).toEqual(["1,250만", "1,300만"]);
+  });
+  test("a step that is not a multiple of 1,000, or a tick under 10,000: all in full", () => {
+    expect(wonTicks([187_500, 190_000])).toEqual(["187,500", "190,000"]);
+    expect(wonTicks([9_500, 10_000, 10_500])).toEqual(["9,500", "10,000", "10,500"]);
+    expect(wonTicks([9_000, 10_000, 11_000])).toEqual(["9,000", "10,000", "11,000"]);
+    expect(wonTicks([])).toEqual([]);
   });
 });
 

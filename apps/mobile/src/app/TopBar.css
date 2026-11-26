@@ -75,6 +75,7 @@
 .tb-center {
   grid-column: 2;
   max-width: var(--tb-center-max, none);
+  transform: translateX(var(--tb-center-shift, 0px)); /* off the middle only when the centred room is under 96px */
   height: 48px;
   display: flex;
   align-items: center;

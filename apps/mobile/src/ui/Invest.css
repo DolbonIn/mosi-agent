@@ -15,16 +15,21 @@
   gap: 0.3em;
   white-space: nowrap;
 }
-[data-signal="risk"] {
+/* the colour rides on the mark and the label only (DD 2224): a data-signal on a card or a row colours nothing */
+.ivsig[data-signal="risk"],
+.sigmark[data-signal="risk"] {
   color: var(--danger);
 }
-[data-signal="caution"] {
+.ivsig[data-signal="caution"],
+.sigmark[data-signal="caution"] {
   color: var(--caution);
 }
-[data-signal="normal"] {
+.ivsig[data-signal="normal"],
+.sigmark[data-signal="normal"] {
   color: var(--label);
 }
-[data-signal="unknown"] {
+.ivsig[data-signal="unknown"],
+.sigmark[data-signal="unknown"] {
   color: var(--label-2);
 }
 
@@ -65,6 +70,17 @@
   line-height: 1.45;
   color: var(--label-2);
   word-break: keep-all;
+}
+/* "(미 동부 10:45) ·" whole: a line breaks before "(" or after " · " (DD 2224) */
+.ivfoot-tie {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* an estimate's "(추정)" after its figure (DD 1935 §0-5) */
+.ivest {
+  color: var(--label-2);
+  white-space: nowrap;
 }
 
 /* the fixed closing sentence, once per message under the last 투자 card's foot (DD 1935 §0-7): never folded */

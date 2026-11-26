@@ -49,7 +49,19 @@ export function InvestNum({ value, className }: { value: string | null | undefin
         {UNKNOWN_TEXT}
       </span>
     );
-  return <span className={`tnum ${className ?? ""}`}>{glued(value)}</span>;
+  return <span className={`tnum ${className ?? ""}`}>{figure(value)}</span>;
+}
+
+const EST = "(추정)";
+/** a formatted figure; an estimate's trailing "(추정)" in --label-2 (DD 1935 §0-5, DD 2224): "약 $1,204.00(추정)" */
+function figure(value: string): ReactNode {
+  if (!value.endsWith(EST) || value.length === EST.length) return glued(value);
+  return (
+    <>
+      {glued(value.slice(0, -EST.length))}
+      <span className="ivest">{EST}</span>
+    </>
+  );
 }
 
 /** a card's group of rows: a hairline and 12px above, 6px between rows */
@@ -67,9 +79,26 @@ export function IvRow({ label, value }: { label: string; value: string | null | 
   );
 }
 
-/** the card's foot line: observed time and source (dates and times kept whole by the app's ties) */
+/** a short bracketed part with the " ·" after it: "(미 동부 10:45) ·" */
+const FOOT_GROUP = /\([^()]{1,24}\)(?: ·)?/;
+
+/**
+ * the card's foot line: observed time and source (dates and times kept whole by the app's ties). A bracketed part and
+ * the " ·" after it are one box (DD 2224: "미 동부 / 10:45)" at 320, text size 130 %), so a line breaks before "(" or
+ * after " · ", never inside it.
+ */
 export function IvFoot({ children }: { children: string }) {
-  return <p className="ivfoot">{glued(children)}</p>;
+  const m = FOOT_GROUP.exec(children);
+  if (!m) return <p className="ivfoot">{glued(children)}</p>;
+  const pre = children.slice(0, m.index);
+  const post = children.slice(m.index + m[0].length);
+  return (
+    <p className="ivfoot">
+      {pre && glued(pre)}
+      <span className="ivfoot-tie">{m[0]}</span>
+      {post && glued(post, m[0])}
+    </p>
+  );
 }
 
 /** the fixed closing sentence (A17 = FA9's first), word for word from @pickle/quant; never written by the model */
@@ -79,7 +108,7 @@ export function IvDisclaimer() {
 
 /** the card's one big number */
 export function IvHero({ value }: { value: string | null }) {
-  return <div className="ivhero">{value == null ? <InvestNum value={null} /> : glued(value)}</div>;
+  return <div className="ivhero">{value == null ? <InvestNum value={null} /> : figure(value)}</div>;
 }
 
 /** 모의 / 실제 as a word (13/600), no chip */

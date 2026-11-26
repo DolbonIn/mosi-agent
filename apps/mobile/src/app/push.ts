@@ -8,7 +8,8 @@
  *   state). Calls while one runs share it.
  * - A tap on a notification opens its target: in a running app through a worker message, otherwise through
  *   `/?open=…` on start (`readOpenTarget`), which is removed from the address at once.
- * - Nothing here asks for the permission and nothing is requested before it is granted.
+ * - Nothing here asks for the permission and nothing is requested before it is granted. `pushAskable()` says whether a
+ *   screen may offer to (DD 2330: the notification settings card and the invest screen's paper use the same rule).
  */
 import { ApiError, apiGet, apiPost } from "../api/client";
 import { getScreen, nav } from "./nav";
@@ -105,6 +106,22 @@ export async function runPushSync(deps: PushDeps): Promise<PushState> {
     return status(e) === 400 ? "invalid" : status(e) === 503 ? "off" : "error";
   }
   return "subscribed";
+}
+
+/**
+ * Whether a screen may offer to turn lock-screen notifications on (DD 2330, DD 2334): this device can take Web Push
+ * (on iOS only an app added to the home screen; a Safari tab has no PushManager), the permission was never answered,
+ * and the server gives its key, so nothing is offered while the server sends nothing (key 503 push_off, lead 2331b) or
+ * 404, or cannot be reached. The key is asked for only once the first two hold.
+ */
+export async function pushAskable(deps: Pick<PushDeps, "supported" | "permission" | "getKey"> = browserPush): Promise<boolean> {
+  if (!deps.supported() || deps.permission() !== "default") return false;
+  try {
+    const { publicKey } = await deps.getKey();
+    return isVapidKey(keyBytes(typeof publicKey === "string" ? publicKey : ""));
+  } catch {
+    return false;
+  }
 }
 
 let running: Promise<PushState> | null = null;

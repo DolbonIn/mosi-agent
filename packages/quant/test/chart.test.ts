@@ -208,6 +208,22 @@ describe("price ticks on the left: never clipped", () => {
       for (const t of ts) expect(t.x - labelEm(t.text) * APP_THEME.tick.size).toBeGreaterThanOrEqual(0);
     }
   });
+  test("KRW ticks in 만 (DD 2228-b): 15만 · 20만 · 25만, the column back to 32–40, labels and the price exact", () => {
+    const lv: ChartLevel[] = [{ kind: "target1", price: 211_700 }];
+    const cap = { unit: "원", asOf: "11월 26일 종가 기준", source: "KRX" };
+    for (const layout of [PHONE_CARD, FULL_VIEW, DECK_CHART]) {
+      const theme = layout === DECK_CHART ? DECK_THEME : APP_THEME;
+      const won = levelChart({ bars: scaled(6000), levels: lv, summary: "x", digits: 0, currency: "KRW", ...cap }, theme, layout);
+      const full = levelChart({ bars: scaled(6000), levels: lv, summary: "x", digits: 0, ...cap }, theme, layout);
+      const ts = ticks(won.svg).map((t) => t.text);
+      expect(ts.length).toBeGreaterThan(1);
+      for (const t of ts) expect(t).toMatch(/^\d+(\.\d)?만$/);
+      expect(ticks(full.svg).every((t) => /^\d{2,3},\d{3}$/.test(t.text))).toBe(true);
+      expect(won.plot.x0).toBeLessThan(full.plot.x0);
+      expect(won.plot.x0).toBeLessThanOrEqual(layout === DECK_CHART ? 48 : 40);
+      expect(won.svg.replace(/<[^>]+>/g, "").includes("1차 익절 211,700")).toBe(true);
+    }
+  });
   test("past leftMax the tick numbers go and the grid lines stay", () => {
     const c = levelChart({ bars: scaled(1e6), levels: [], summary: "x", digits: 0 }, APP_THEME, PHONE_CARD);
     expect(c.plot.x0).toBe(72);

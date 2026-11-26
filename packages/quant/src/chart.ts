@@ -19,7 +19,7 @@
  * every dropped or off-scale level in its reason rows.
  */
 import { macd, rsi, sma, vwap } from "./indicators";
-import { num } from "./format";
+import { num, wonTicks } from "./format";
 import { volumeProfile } from "./profile";
 import type { Bar, Num } from "./types";
 
@@ -176,6 +176,8 @@ export interface LevelChartInput {
   source?: string;
   /** price digits on labels and ticks (default 2; 0 for won) */
   digits?: number;
+  /** KRW: the price ticks go in 만 when they can (format.ts wonTicks, DD 2228-b); labels stay exact */
+  currency?: "USD" | "KRW";
 }
 
 /** level_invalid: a level whose price is not a finite number is left out (its row says 확인 불가), never drawn at NaN */
@@ -373,7 +375,9 @@ export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: Ch
   plot.x1 = W - right;
 
   // the price ticks: the left column fits their widest number, or they go
-  const ticks = niceTicks(lo, hi, 4).map((t) => ({ t, label: num(t, Number.isInteger(t) ? 0 : 1) }));
+  const steps = niceTicks(lo, hi, 4);
+  const words = input.currency === "KRW" ? wonTicks(steps) : steps.map((t) => num(t, Number.isInteger(t) ? 0 : 1));
+  const ticks = steps.map((t, i) => ({ t, label: words[i]! }));
   const widestTick = Math.max(0, ...ticks.map((k) => labelEm(k.label) * theme.tick.size));
   const left = Math.min(layout.leftMax, Math.max(layout.left, Math.ceil(widestTick + 8)));
   const tickNumbers = widestTick + 8 <= left;
