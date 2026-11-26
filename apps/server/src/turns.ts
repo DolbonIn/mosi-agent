@@ -1068,6 +1068,7 @@ export async function runSystemTurn(
       title: o.notify.title,
       body: preview(res.message.text || "새 소식이 있어요", 80),
       threadId: o.threadId,
+      messageId: res.message.id,
       icon: o.notify.icon,
     });
   }

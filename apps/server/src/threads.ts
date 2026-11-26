@@ -381,7 +381,7 @@ export function threadRoutes(core: Core) {
       publishThread(core, thread.id);
       const peer = db.userById(peerId);
       if (peer && settingsOf(peer).notifications.friendMessages) {
-        core.events.publish(peerId, { type: "notification", title: `${me.display_name} 님`, body: preview(text, 80), threadId: thread.id, icon: "people" });
+        core.events.publish(peerId, { type: "notification", title: `${me.display_name} 님`, body: preview(text, 80), threadId: thread.id, messageId: id, icon: "people" });
       }
       const userMessage = messageView(core, db.getMessage(id)!, userId);
       if (!lease) return json({ delivered: true, userMessage }, 201);

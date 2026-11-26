@@ -321,16 +321,24 @@ export function applyUi(ui: UiDefinitions | null | undefined) {
   uiStore.set(merged);
 }
 
-/** Install a fresh session (bootstrap, login, signup). */
+/** Install a fresh session (bootstrap, login, signup): its settings and agent are the server copies from here on. */
 export function applySession(session: SessionBootstrap) {
   sessionStore.set({ status: "ready", session });
+  agentRev = revOf(session.agent) ?? -1;
+  settingsRev = revOf(session.settings) ?? -1;
+  settingsPending.length = 0;
+  settingsBase = session.settings ?? null;
   settingsStore.set(session.settings);
-  const display = session.settings?.display;
-  if (display) {
-    const cur = getTier().prefs;
-    if (cur.theme !== display.theme || cur.reduceMotion !== display.reduceMotion || cur.reduceTransparency !== display.reduceTransparency || cur.textScale !== display.textScale) {
-      setDisplayPrefs(display);
-    }
+  alignDisplay(session.settings);
+}
+
+/** the display prefs (motion/tier.ts) follow the settings' display part: theme through its one crossfade, MOTION-SPEC §6.12 */
+function alignDisplay(settings: UserSettings | null | undefined) {
+  const display = settings?.display;
+  if (!display) return;
+  const cur = getTier().prefs;
+  if (cur.theme !== display.theme || cur.reduceMotion !== display.reduceMotion || cur.reduceTransparency !== display.reduceTransparency || cur.textScale !== display.textScale) {
+    setDisplayPrefs(display);
   }
 }
 
@@ -339,9 +347,19 @@ export function applySession(session: SessionBootstrap) {
 let bootPromise: Promise<void> | null = null;
 
 /** Token? → session + ui-definitions in parallel → ready + live events. No token → anon. */
-/** the agent changed (PATCH /api/agent): the session's copy follows, so every avatar re-renders */
-export function applyAgent(agent: AgentProfile) {
+/**
+ * A server copy of the agent (PATCH /api/agent answer, the `agent` event from another device, a session re-read): the
+ * session's copy follows, so every avatar and name re-renders. A copy older than the one held (lower change number) is
+ * dropped: an answer and an event travel on different connections and can arrive in either order. False = dropped.
+ */
+export function applyAgent(agent: AgentProfile): boolean {
+  const rev = revOf(agent);
+  if (rev !== null) {
+    if (rev < agentRev) return false;
+    agentRev = rev;
+  }
   sessionStore.set((s) => (s.session ? { ...s, session: { ...s.session, agent } } : s));
+  return true;
 }
 
 export function bootstrap(): Promise<void> {
@@ -370,14 +388,33 @@ export function bootstrap(): Promise<void> {
   return bootPromise;
 }
 
-/** Re-read the session (e.g. after a ticket was used elsewhere). */
+/**
+ * Re-read the session (a ticket used elsewhere, a reconnect that may have missed events). The same person's re-read
+ * merges: agent and settings go through their change numbers (an event newer than this read stays, settings PATCHes
+ * still waiting for their answer stay on top); everything else is replaced.
+ */
 export async function refreshSession(): Promise<void> {
   if (!getToken()) return;
   try {
-    applySession(await ep.session());
+    const next = await ep.session();
+    const cur = sessionStore.get().session;
+    if (!cur || cur.user.id !== next.user.id) return applySession(next);
+    sessionStore.set({ status: "ready", session: { ...next, agent: cur.agent, settings: settingsStore.get() ?? cur.settings } });
+    applyAgent(next.agent);
+    receiveSettings(next.settings);
   } catch {
     /* keep what we have */
   }
+}
+
+/**
+ * `hello` (every connect and reconnect): the server does not replay events sent while this device was away (a hidden
+ * tab sleeps after 60 s), so when its change numbers moved past the ones held, re-read the session.
+ */
+export function catchUp(hello: { settingsRev?: number; agentRev?: number }) {
+  if (!getToken() || !sessionStore.get().session) return;
+  const moved = (n: number | undefined, held: number) => typeof n === "number" && n !== held;
+  if (moved(hello.settingsRev, settingsRev) || moved(hello.agentRev, agentRev)) void refreshSession();
 }
 
 const turns = new Map<ID, AbortController>();
@@ -414,6 +451,10 @@ export function resetSession(error?: string) {
   connectionsStore.set({ providers: [], connections: [], loading: false, loaded: false });
   profileStore.set({ data: null, loading: false });
   settingsStore.set(null);
+  settingsBase = null;
+  settingsPending.length = 0;
+  settingsRev = -1;
+  agentRev = -1;
   remoteBusy = false;
   lastFailed = null;
   heldError = null;
@@ -593,7 +634,7 @@ export async function loadProfile(): Promise<void> {
   try {
     const data = await ep.profile();
     profileStore.set({ data, loading: false });
-    setSessionSettings(data.settings);
+    receiveSettings(data.settings);
   } catch (e) {
     profileStore.set({ ...profileStore.get(), loading: false, error: toApiError(e).message });
   }
@@ -609,33 +650,81 @@ export async function spendTicket(kind: keyof Tickets): Promise<{ quota: Quota; 
 
 // ───────────────────────────── settings ─────────────────────────────
 
-/** the newest settings PATCH (updateSettings): only its answer may land */
+/** the server's change number on a settings or agent copy (null: a server without them) */
+function revOf(x: unknown): number | null {
+  const r = (x as { rev?: unknown } | null | undefined)?.rev;
+  return typeof r === "number" ? r : null;
+}
+/** change numbers of the settings / agent copies this device holds (-1: none yet) */
+let settingsRev = -1;
+let agentRev = -1;
+/** the newest server copy of the settings; what shows = this with the PATCHes still waiting for an answer on top */
+let settingsBase: UserSettings | null = null;
+/**
+ * the newest answered PATCH from this device: the server applies one device's PATCHes in the order they were sent, so
+ * the copy in that answer (or a newer one) already holds every earlier PATCH of ours, answered or not
+ */
+let settingsBaseSeq = 0;
+/** settings PATCHes sent from this device and not answered yet, oldest first */
+const settingsPending: { seq: number; patch: SettingsPatch }[] = [];
 let settingsSeq = 0;
 
+/** what shows: the server copy with this device's waiting PATCHes it does not hold yet on top (display prefs follow) */
+function showSettings() {
+  if (!settingsBase) return;
+  const shown = settingsPending.filter((p) => p.seq > settingsBaseSeq).reduce<UserSettings>((acc, p) => deepMerge(acc, p.patch), settingsBase);
+  setSessionSettings(shown);
+  alignDisplay(shown);
+}
+
 /**
- * Optimistic settings change. Display prefs apply locally at once (tier.ts), then PATCH; on failure everything rolls
- * back and the ApiError is thrown (show it next to the control). Without a session only the local display applies.
- * Quick changes (arrow keys through the themes, slider keys, quick toggles) overlap: only the answer to the NEWEST
- * request is applied — an older one would put back a value the person has already moved past (the checkmark jumping
- * back, the text size going 1.1 → 1.05 → 1.1) — and the optimistic value stays the truth until it arrives. A failure
- * rolls back only while no newer request has been made (the newer one's answer carries the server's state).
+ * A server copy of the settings: the `settings` event (another device changed them, or this one: same copy as the
+ * answer), a PATCH answer (`seq`), a session or profile read. Applied like a change made here (theme through its one
+ * crossfade, text size and the rest at once) and never sent back: nothing here PATCHes, so two devices cannot echo.
+ * A copy with a lower change number than the one held is dropped; a field a PATCH from this device is still waiting
+ * on keeps this device's value until that answer (a late event must not flip the toggle back).
+ */
+export function receiveSettings(settings: UserSettings, seq?: number) {
+  const rev = revOf(settings);
+  // a server without change numbers: only answers can be ordered (by send number), a read or event always applies
+  const older = rev !== null ? rev < settingsRev : seq !== undefined && seq < settingsBaseSeq;
+  // an answer dropped for a newer event still says the server has this PATCH: the event's copy holds it
+  if (seq !== undefined) settingsBaseSeq = Math.max(settingsBaseSeq, seq);
+  if (!older) {
+    if (rev !== null) settingsRev = rev;
+    settingsBase = settings;
+  }
+  showSettings();
+}
+
+/**
+ * Optimistic settings change. Display prefs apply locally at once (tier.ts), then PATCH; without a session only the
+ * local display applies. What shows is always the newest server copy with the PATCHes still waiting on top, so quick
+ * overlapping changes (arrow keys through the themes, slider keys, quick toggles) never step back to a value the person
+ * has moved past, whatever order the answers and other devices' events arrive in. A failure takes back only that
+ * PATCH's fields (a newer waiting PATCH or a newer server copy keeps its own) and throws the ApiError (say it once).
  */
 export async function updateSettings(patch: SettingsPatch): Promise<UserSettings | null> {
   const prev = settingsStore.get();
-  const prevPrefs = getTier().prefs;
   if (patch.display) setDisplayPrefs(patch.display as Partial<DisplayPrefs>);
   if (!prev || !getToken()) return prev;
+  if (!settingsPending.length) settingsBase = prev;
   const seq = ++settingsSeq;
-  setSessionSettings(deepMerge(prev, patch));
+  const entry = { seq, patch };
+  settingsPending.push(entry);
+  showSettings();
+  const done = () => {
+    const i = settingsPending.indexOf(entry);
+    if (i >= 0) settingsPending.splice(i, 1);
+  };
   try {
     const saved = await ep.patchSettings(patch);
-    if (seq === settingsSeq) setSessionSettings(saved);
+    done();
+    receiveSettings(saved, seq);
     return saved;
   } catch (e) {
-    if (seq === settingsSeq) {
-      setSessionSettings(prev);
-      if (patch.display) setDisplayPrefs(prevPrefs);
-    }
+    done();
+    showSettings();
     throw toApiError(e);
   }
 }

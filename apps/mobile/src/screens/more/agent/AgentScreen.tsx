@@ -2,7 +2,7 @@ import type { AgentProfile, AgentStatus, SkillInfo } from "@pickle/protocol";
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { toApiError } from "../../../api/client";
 import * as ep from "../../../api/endpoints";
-import { loadProfile, sessionStore, useAgent } from "../../../api/store";
+import { applyAgent, loadProfile, sessionStore, useAgent } from "../../../api/store";
 import { island } from "../../../app/island";
 import type { ScreenProps } from "../../../app/nav";
 import { Screen } from "../../../app/Screen";
@@ -17,6 +17,7 @@ import { Sentences } from "../../../ui/Text";
 import { SkillConnectButton } from "../connections/SkillConnectButton";
 import { forgetMemory, memoriesRes, skillsRes, useResource } from "../data";
 import { ago, josa } from "../format";
+import { namePatch, togglePatch, withToggles, type SkillToggle } from "./agentEdits";
 import { Foot, InlineError, Placeholder, StatusPill, Stack, useRouteVisible } from "../parts";
 import "./agent.css";
 
@@ -40,7 +41,8 @@ const STATUS: Record<AgentStatus, { label: string; tone: "ok" | "wait" | "neutra
   error: { label: "문제가 생겼어요", tone: "error" },
 };
 
-const setSessionAgent = (agent: AgentProfile) => sessionStore.set((s) => (s.session ? { ...s, session: { ...s.session, agent } } : s));
+/** the server's copy as it stands now (an `agent` event from another device may have replaced the one rendered) */
+const heldAgent = (fallback: AgentProfile) => sessionStore.get().session?.agent ?? fallback;
 const hueOf = (agent: AgentProfile | null | undefined) => agent?.avatar?.hue ?? DEFAULT_AVATAR.hue;
 
 export function AgentScreen({ route }: ScreenProps) {
@@ -87,11 +89,12 @@ function Head({ id, title, detail }: { id: string; title: ReactNode; detail?: Re
 function Identity({ agent }: { agent: AgentProfile }) {
   const [hue, setHue] = useState(hueOf(agent));
   const seq = useRef(0);
-  const pending = useRef(0);
-  // follow the server while no pick is in flight
+  /** picks sent and not answered yet, oldest first: the last one shows until its answer, whatever the server says meanwhile */
+  const picks = useRef<{ n: number; hue: number }[]>([]);
+  // follow the server (this device's answers, another device's `agent` event) while no pick is in flight
   const saved = hueOf(agent);
   useEffect(() => {
-    if (!pending.current) setHue(saved);
+    if (!picks.current.length) setHue(saved);
   }, [saved]);
 
   // the saved colour is always one of the swatches: it takes the place of the nearest preset
@@ -105,20 +108,21 @@ function Identity({ agent }: { agent: AgentProfile }) {
   const pick = (h: number) => {
     if (h === hue) return;
     const n = ++seq.current;
+    const entry = { n, hue: h };
     setHue(h);
-    pending.current++;
-    ep.patchAgent({ avatar: { ...(agent.avatar ?? DEFAULT_AVATAR), hue: h } })
+    picks.current.push(entry);
+    // only the colour: the server merges it into the avatar it holds (another device may have changed the rest)
+    ep.patchAgent({ avatar: { hue: h } })
       .then((a) => {
-        if (n === seq.current) setSessionAgent(a);
+        if (n === seq.current) applyAgent(a);
       })
       .catch((e) => {
-        if (n !== seq.current) return;
-        // §8.13: back to what the server holds, and say why
-        setHue(hueOf(sessionStore.get().session?.agent));
-        island.errorBanner(toApiError(e).message, "색을 바꾸지 못했어요");
+        // §8.13: say why; the colour goes back below (to a newer pick still waiting, else to what the server holds)
+        if (n === seq.current) island.errorBanner(toApiError(e).message, "색을 바꾸지 못했어요");
       })
       .finally(() => {
-        pending.current--;
+        picks.current = picks.current.filter((p) => p !== entry);
+        setHue(picks.current.at(-1)?.hue ?? hueOf(heldAgent(agent)));
       });
   };
 
@@ -178,8 +182,7 @@ function NameForm({ agent }: { agent: AgentProfile }) {
   const save = async () => {
     setError(undefined);
     try {
-      const next = await ep.patchAgent({ name: trimmed, persona: persona.trim() });
-      setSessionAgent(next);
+      applyAgent(await ep.patchAgent(namePatch(agent, trimmed, persona)));
       void loadProfile();
     } catch (e) {
       setError(toApiError(e).message);
@@ -230,11 +233,13 @@ function NameForm({ agent }: { agent: AgentProfile }) {
 
 function Skills({ agent, active }: { agent: AgentProfile; active: boolean }) {
   const res = useResource(skillsRes, active);
+  /** toggles sent and not answered yet, oldest first: they stay on top of whatever the server says meanwhile */
+  const ops = useRef<SkillToggle[]>([]);
   const [enabled, setEnabled] = useState<string[]>(agent.enabledSkills);
   const [error, setError] = useState<string | null>(null);
-  const pending = useRef(0);
+  // follow the server (answers, another device's `agent` event) with this device's waiting toggles on top
   useEffect(() => {
-    if (!pending.current) setEnabled(agent.enabledSkills);
+    setEnabled(withToggles(agent.enabledSkills, ops.current));
   }, [agent.enabledSkills]);
 
   const groups = useMemo(() => {
@@ -252,16 +257,21 @@ function Skills({ agent, active }: { agent: AgentProfile; active: boolean }) {
     }
     setError(null);
     setEnabled(next);
-    pending.current++;
-    ep.patchAgent({ enabledSkills: next })
-      .then((a) => setSessionAgent(a))
+    const op = { id, on };
+    ops.current.push(op);
+    // a switch flipped on another device meanwhile stays as it is
+    ep.patchAgent(togglePatch(op))
+      .then((a) => applyAgent(a))
       .catch((e) => {
-        setEnabled(prev);
         const msg = toApiError(e).message;
         setError(msg);
         island.errorBanner(msg, "기능을 바꾸지 못했어요");
       })
-      .finally(() => pending.current--);
+      .finally(() => {
+        // a failed switch goes back; the others keep what the server holds plus their own waiting toggles
+        ops.current = ops.current.filter((o) => o !== op);
+        setEnabled(withToggles(heldAgent(agent).enabledSkills, ops.current));
+      });
   };
 
   const count = enabled.length;
@@ -364,7 +374,7 @@ function MemoryRow({ m }: { m: ep.MemoryItem }) {
 function Restart({ agent }: { agent: AgentProfile }) {
   const restart = async () => {
     const r = await ep.restartAgent();
-    if (r && typeof r === "object" && "id" in r) setSessionAgent(r as AgentProfile);
+    if (r && typeof r === "object" && "id" in r) applyAgent(r as AgentProfile);
   };
   return (
     <section className="agent-restart" aria-label="다시 시작">

@@ -983,7 +983,12 @@ export type ServerEvent =
    * 202 / 201, `done`): merge by id, whichever comes first.
    */
   | { type: "message"; threadId: ID; message: Message }
-  | { type: "notification"; title: string; body: string; threadId?: ID; icon: IconName }
+  /**
+   * A banner. `messageId`: the stored row it tells of (a friend's line, a friend's agent's message, a new friend's event
+   * row, a schedule's or briefing's answer, a meeting's approval card), so an app showing that thread can leave the
+   * banner out (the row is on screen). Left out when no row is behind it (a remembered fact, a skipped schedule).
+   */
+  | { type: "notification"; title: string; body: string; threadId?: ID; messageId?: ID; icon: IconName }
   | { type: "quota"; quota: Quota }
   | { type: "connection"; connection: Connection }
   | { type: "agent_status"; status: AgentStatus; text?: string }

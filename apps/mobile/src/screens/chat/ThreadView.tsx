@@ -6,7 +6,7 @@ import { ChromePortal } from "../../app/ChromePortal";
 import { island } from "../../app/island";
 import { Screen, useScroller } from "../../app/Screen";
 import { EXIT, t } from "../../motion/springs";
-import { getTier } from "../../motion/tier";
+import { getTier, tierStore } from "../../motion/tier";
 import { DEFAULT_AVATAR } from "../../ui/Avatar";
 import { Icon } from "../../ui/Icon";
 import { fitAhead } from "./bubbleFit";
@@ -202,6 +202,27 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
     ro.observe(c);
     return () => ro.disconnect();
   }, [scroller]);
+
+  // the text size changes: the list keeps what was being read (followTextScale). At the end it stays at the end — a
+  // newest answer that grows past the screen does not pull the list up to its head — and the next older page keeps its
+  // place from the height after the change (load-older), not the one before it
+  useEffect(
+    () =>
+      followTextScale(
+        () => {
+          const el = scroller?.current;
+          const c = content.current;
+          if (!el || !c || !positioned.current) return null;
+          if (pinned.current) head.current.spent = true;
+          return { el, c, atEnd: pinned.current };
+        },
+        (el, top) => {
+          put(el, top, wrote);
+          lastHeight.current = el.scrollHeight;
+        },
+      ),
+    [scroller],
+  );
 
   // something new arrived (a message, streamed text, a card) while reading above → offer "새 메시지"
   // (a card the person expanded also grows the list, but that is not news; nor is a row going away: arrivedBelow)
@@ -496,6 +517,223 @@ function put(el: HTMLElement, top: number, wrote: { current: number }) {
   const before = el.scrollTop;
   el.scrollTop = top;
   if (el.scrollTop !== before) wrote.current = el.scrollTop;
+}
+
+/**
+ * The text size changes (화면 및 디자인 on this device, or another device's settings): the list keeps what was being read.
+ * At the end (`atEnd`) it stays at the end; otherwise what is at the top of the view stays at the same y (readPlace: a
+ * short row's top, or, inside a long one, the character at the top line). tierStore tells its listeners before tier.ts
+ * writes --text-scale, so that place is read at the old size; it is put back once the new size is in (a microtask,
+ * still the same task: no frame is drawn in between), then while late layout still moves the list: on each frame, up
+ * to 12, until two in a row leave its height alone or the person touches the list, and from a ResizeObserver made at
+ * the change (late layout in that same frame, a bubble re-fit above among it, is put back before the frame is drawn).
+ * scrollTop is whole pixels and engines floor a fraction (WebKit left a row 0.96 px off), so the target is rounded.
+ * The next change (the slider's next step) keeps the same place at the same y while nothing but this has moved the list
+ * since, rather than re-reading what was just put back: rounding at every step added up to a pixel over 1.0 → 1.3.
+ * Returns the unsubscribe.
+ */
+export function followTextScale(at: () => { el: HTMLElement; c: HTMLElement; atEnd: boolean } | null, put: (el: HTMLElement, top: number) => void): () => void {
+  let scale = tierStore.get().textScale;
+  let frame = 0;
+  // the place being kept, and where this left the list (`top`): any other scroll since makes the next change read anew
+  let held: { el: HTMLElement; atEnd: boolean; mark: Place | null; top: number } | null = null;
+  let release = () => {};
+  const stopFollowing = () => {
+    cancelAnimationFrame(frame);
+    release();
+    release = () => {};
+  };
+  const touched = () => {
+    stopFollowing();
+    held = null;
+  };
+  const unsub = tierStore.subscribe(() => {
+    const next = tierStore.get().textScale;
+    if (next === scale) return;
+    scale = next;
+    stopFollowing();
+    const where = at();
+    if (!where) return void (held = null);
+    const { el, c, atEnd } = where;
+    const same = held && held.el === el && held.atEnd === atEnd && held.top === el.scrollTop && (!held.mark || placeMoved(el, held.mark) !== null);
+    const place = same && held ? held : { el, atEnd, mark: atEnd ? null : readPlace(el, c), top: el.scrollTop };
+    held = place;
+    const { mark } = place;
+    const keep = () => {
+      if (held !== place) return;
+      if (atEnd) put(el, el.scrollHeight);
+      else if (mark) {
+        const dy = placeMoved(el, mark);
+        if (dy !== null) put(el, Math.round(el.scrollTop + dy));
+      }
+      place.top = el.scrollTop;
+    };
+    queueMicrotask(keep);
+    let height = -1;
+    let still = 0;
+    let n = 0;
+    const again = () => {
+      keep();
+      still = el.scrollHeight === height ? still + 1 : 0;
+      height = el.scrollHeight;
+      if (++n < 12 && still < 2) frame = requestAnimationFrame(again);
+      else stopFollowing();
+    };
+    frame = requestAnimationFrame(again);
+    const ro = typeof ResizeObserver === "function" ? new ResizeObserver(keep) : null;
+    ro?.observe(c);
+    el.addEventListener("wheel", touched, { passive: true });
+    el.addEventListener("touchstart", touched, { passive: true });
+    release = () => {
+      ro?.disconnect();
+      el.removeEventListener("wheel", touched);
+      el.removeEventListener("touchstart", touched);
+    };
+  });
+  return () => {
+    unsub();
+    touched();
+  };
+}
+
+/** what is kept at its y: a row's top · a character (inside a long row) · a point inside an element (no text there) */
+type Place = { row: Element; y: number } | { text: Text; offset: number; y: number } | { part: Element; ratio: number };
+
+/** where the view starts: the scroller's top padding, under the top bar where a thread's first row rests (what is above
+ * it fades out under the bar) */
+const viewTop = (el: HTMLElement, box: DOMRect) => box.top + (parseFloat(getComputedStyle(el).paddingTop) || 0);
+/** how far below the top line the text being read is looked for: the text line most of which shows */
+const READ_DEPTH = 8;
+
+/**
+ * What is at the top of the view: the first row reaching below the top line. A row starting there: its top. A row the
+ * line runs through: the character just below the line (caretRangeFromPoint where the engine has it, else the first
+ * character there in reading order), so the text being read stays where it was; keeping the row's top instead pushed
+ * that text down by all that grew above it (DD 0007: +688 px at 30 % into a 40-paragraph answer, +67 px at 40 % into
+ * a 390 px one). A short row (it fits in the view) cut in its first or last text line, or with no text at the line,
+ * is read as a whole: its top while more of it shows than hides above the line, else the next row's top. A long row
+ * with no text at the line (a card, an image): the point the line crosses in the innermost element there, as a share
+ * of its height.
+ */
+function readPlace(el: HTMLElement, c: HTMLElement): Place | null {
+  const box = el.getBoundingClientRect();
+  const line = viewTop(el, box);
+  let cut: Element | null = null;
+  for (const row of c.children) {
+    const r = row.getBoundingClientRect();
+    if (!r.height || r.bottom <= line) continue;
+    if (r.top >= line - 0.5) return { row, y: r.top - box.top };
+    const short = r.height <= box.bottom - line;
+    const y = Math.min(line + READ_DEPTH, r.bottom - 1);
+    const text = charAt(row, r, y);
+    if (short && (!text || onEdgeLine(row, text))) {
+      if (line - r.top < r.height / 2) return { row, y: r.top - box.top };
+      cut ??= row;
+      continue;
+    }
+    if (text) return { text: text.text, offset: text.offset, y: text.top - box.top };
+    let part = (document.elementFromPoint?.((r.left + r.right) / 2, y) as Element | null) ?? null;
+    if (!part || !row.contains(part)) part = row;
+    const pr = part.getBoundingClientRect();
+    return pr.height ? { part, ratio: (line - pr.top) / pr.height } : { part: row, ratio: (line - r.top) / r.height };
+  }
+  return cut ? { row: cut, y: cut.getBoundingClientRect().top - box.top } : null;
+}
+
+/** how far a place has moved since it was read (px, + = down); null when it is gone */
+function placeMoved(el: HTMLElement, p: Place): number | null {
+  const box = el.getBoundingClientRect();
+  if ("row" in p) return p.row.isConnected ? p.row.getBoundingClientRect().top - box.top - p.y : null;
+  if ("text" in p) {
+    const g = p.text.isConnected ? glyph(p.text, p.offset) : null;
+    return g ? g.top - box.top - p.y : null;
+  }
+  if (!p.part.isConnected) return null;
+  const r = p.part.getBoundingClientRect();
+  return r.top + p.ratio * r.height - viewTop(el, box);
+}
+
+/** one character's box (null for one that draws nothing: a collapsed space, a line break) */
+function glyph(text: Text, offset: number): DOMRect | null {
+  if (offset < 0 || offset >= text.length) return null;
+  const range = document.createRange();
+  range.setStart(text, offset);
+  range.setEnd(text, offset + 1);
+  const r = range.getBoundingClientRect();
+  return r.height ? r : null;
+}
+
+/** the first character from `offset` on that draws (a few tried: a long run of collapsed spaces gives up) */
+function drawnFrom(text: Text, offset: number): Drawn | null {
+  for (let i = Math.max(0, offset); i < Math.min(text.length, offset + 8); i++) {
+    const g = glyph(text, i);
+    if (g) return { text, offset: i, top: g.top, bottom: g.bottom };
+  }
+  return null;
+}
+
+type Drawn = { text: Text; offset: number; top: number; bottom: number };
+
+/** whether a character is on its row's first or last text line (the row's first / last character that draws) */
+function onEdgeLine(row: Element, at: Drawn): boolean {
+  const walk = document.createTreeWalker(row, 4 /* NodeFilter.SHOW_TEXT */);
+  let first: Drawn | null = null;
+  let last: Drawn | null = null;
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    const t = n as Text;
+    first ??= drawnFrom(t, 0);
+    for (let i = t.length - 1; i >= Math.max(0, t.length - 8); i--) {
+      const g = glyph(t, i);
+      if (g) {
+        last = { text: t, offset: i, top: g.top, bottom: g.bottom };
+        break;
+      }
+    }
+  }
+  const same = (e: Drawn | null) => !!e && Math.abs(e.top - at.top) < Math.min(e.bottom - e.top, at.bottom - at.top) / 2;
+  return same(first) || same(last);
+}
+
+/** the character at height `y` in a row: where the engine puts the caret (the row's left side), else the first one there */
+function charAt(row: Element, r: DOMRect, y: number): Drawn | null {
+  const doc = document as Document & { caretRangeFromPoint?: (x: number, y: number) => Range | null; caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null };
+  for (const dx of [24, 40, 60, 90, 130]) {
+    const x = r.left + dx;
+    let node: Node | null = null;
+    let offset = 0;
+    if (doc.caretRangeFromPoint) {
+      const hit = doc.caretRangeFromPoint(x, y);
+      if (hit) [node, offset] = [hit.startContainer, hit.startOffset];
+    } else if (doc.caretPositionFromPoint) {
+      const hit = doc.caretPositionFromPoint(x, y);
+      if (hit) [node, offset] = [hit.offsetNode, hit.offset];
+    }
+    if (node?.nodeType === 3 && row.contains(node)) {
+      const t = node as Text;
+      const at = drawnFrom(t, Math.min(offset, t.length - 1));
+      if (at && at.top < r.bottom) return at;
+    }
+  }
+  // reading order: the first character whose box reaches below y (boxes never go up along a text node)
+  const walk = document.createTreeWalker(row, 4 /* NodeFilter.SHOW_TEXT */);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    const t = n as Text;
+    const all = document.createRange();
+    all.selectNodeContents(t);
+    const b = all.getBoundingClientRect();
+    if (!b.height || b.bottom <= y) continue;
+    let lo = 0;
+    let hi = t.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      const g = drawnFrom(t, mid);
+      if (g && g.bottom > y) hi = mid;
+      else lo = mid + 1;
+    }
+    const at = drawnFrom(t, lo);
+    if (at) return at;
+  }
+  return null;
 }
 
 /**

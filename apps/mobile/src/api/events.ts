@@ -2,7 +2,7 @@ import type { ID, ServerEvent } from "@pickle/protocol";
 import { island } from "../app/island";
 import { koreanMessage } from "./client";
 import { eventsUrl } from "./endpoints";
-import { appendMessage, failRemoteTurn, noteRemoteActivity, removeMessage, setQuota, setRemoteAgentStatus, upsertConnection, upsertThread } from "./store";
+import { appendMessage, applyAgent, catchUp, failRemoteTurn, noteRemoteActivity, receiveSettings, removeMessage, setQuota, setRemoteAgentStatus, upsertConnection, upsertThread } from "./store";
 
 /**
  * Server push (GET /api/events?token= — EventSource has no headers; `: connected` / `: hb` comments are ignored by
@@ -14,6 +14,8 @@ import { appendMessage, failRemoteTurn, noteRemoteActivity, removeMessage, setQu
  *   turn_error (a turn the person's steered line went into failed → thread error; island 다시 시도 on the device that
  *   sent the line). steers_dropped goes to screens/chat/composerStore through onServerEvent (lines steered into an app turn
  *   that stopped or failed, which nothing will answer, lose "하던 일에 이어서 전했어요").
+ *   agent · settings (the person changed them on another device, or this one: applied like a change made here, never
+ *   sent back) · hello carries the server's change numbers for both; a reconnect that missed some re-reads the session.
  */
 
 const listeners = new Set<(e: ServerEvent) => void>();
@@ -46,6 +48,13 @@ function dispatch(e: ServerEvent) {
   switch (e.type) {
     case "hello":
       attempt = 0;
+      catchUp(e);
+      break;
+    case "agent":
+      applyAgent(e.agent);
+      break;
+    case "settings":
+      receiveSettings(e.settings);
       break;
     case "thread_updated":
       upsertThread(e.thread);

@@ -930,5 +930,5 @@ function postApproval(core: Core, userId: string, threadId: string, call: LlmToo
   });
   publishMessage(core, messageId);
   publishThread(core, threadId);
-  core.events.publish(userId, { type: "notification", title: "회의에서 부탁받은 일", body: spec.title.slice(0, 80), threadId, icon: "people" });
+  core.events.publish(userId, { type: "notification", title: "회의에서 부탁받은 일", body: spec.title.slice(0, 80), threadId, messageId, icon: "people" });
 }

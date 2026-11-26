@@ -84,11 +84,15 @@ the model reads of the thread does not change.
 - Events: `GET /api/events?token=<session token>` (EventSource can't send headers) → `: connected`,
   `{type:"hello", at, settingsRev, agentRev}`, then `message {threadId, message}` (other tabs, friend side, steer
   follow-ups, schedule turns, card status flips), `thread_updated {thread}`, `agent_status {status, text?}`,
-  `quota {quota}`, `notification {title, body, threadId?, icon}`, `connection {connection}`, `settings {settings}`,
+  `quota {quota}`, `notification {title, body, threadId?, messageId?, icon}`, `connection {connection}`, `settings {settings}`,
   `agent {agent}`. 401 without a valid token. `hello`'s revs are read after the stream is registered, so events
   published meanwhile may come before it; a device that slept re-reads `GET /api/session` when a rev differs from the
   one it has seen. `?token=` also works on `/api/blobs/:id` and
   `/api/attachments/:id/raw` (for `<img src>` / PDFs).
+- `notification.messageId`: the id of the stored row a banner tells of. Set on a friend's line, a friend's agent's
+  message, a new friend's event row, a schedule's or briefing's answer and a meeting's approval card; that row is
+  pushed (`message`) before the banner. An app showing that thread leaves the banner out, since the row is on screen.
+  A banner with no row behind it (a remembered fact, a skipped schedule) has none.
 
 ## Stop (cancel a turn)
 There is no stop endpoint: **Stop = abort the fetch that carries the turn's SSE stream** (message send or approval

@@ -44,7 +44,11 @@ export function DisplayScreen({ route }: ScreenProps) {
   // without a session (or before it loads) the local prefs are the truth
   const d: Display = s?.display ?? tier.prefs;
   const [scale, setScale] = useState(d.textScale);
-  useEffect(() => setScale(d.textScale), [d.textScale]);
+  /** the knob is held (drag, between its first change and the release): a text size from another device waits */
+  const holding = useRef(false);
+  useEffect(() => {
+    if (!holding.current) setScale(d.textScale);
+  }, [d.textScale]);
   const setDisplay = (p: Partial<Display>) => patch({ display: p }, "화면 설정");
   const pctLabel = (v: number) => `${Math.round(v * 100)}%`;
 
@@ -76,9 +80,14 @@ export function DisplayScreen({ route }: ScreenProps) {
               showValue
               minIcon="minus"
               maxIcon="plus"
-              onChange={setScale}
+              onChange={(v) => {
+                holding.current = true;
+                setScale(v);
+              }}
               onCommit={(v) => {
+                holding.current = false;
                 if (Math.abs(v - d.textScale) > 0.001) setDisplay({ textScale: Math.round(v * 100) / 100 });
+                else setScale(d.textScale);
               }}
             />
           </div>

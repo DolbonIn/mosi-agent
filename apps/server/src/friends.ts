@@ -122,7 +122,7 @@ export async function messageFriend(core: Core, userId: string, target: string, 
   publishThread(core, threadId);
   const friendUser = core.db.userById(match.friend_id);
   if (friendUser && settingsOf(friendUser).notifications.friendMessages) {
-    core.events.publish(match.friend_id, { type: "notification", title: `${me.display_name} 님의 모시`, body: preview(body, 80), threadId, icon: "people" });
+    core.events.publish(match.friend_id, { type: "notification", title: `${me.display_name} 님의 모시`, body: preview(body, 80), threadId, messageId: id, icon: "people" });
   }
   return { ok: true, detail: `${match.display_name} 님에게 전했어요` };
 }
@@ -183,7 +183,7 @@ export function friendRoutes(core: Core) {
       // both friends, every device: the inviter's and the accepter's, the accepting one too (the 201 carries no rows)
       publishMessage(core, eventId);
       publishThread(core, threadId);
-      core.events.publish(inviterId, { type: "notification", title: "새 친구", body: `${me.display_name} 님과 친구가 되었어요`, threadId, icon: "people" });
+      core.events.publish(inviterId, { type: "notification", title: "새 친구", body: `${me.display_name} 님과 친구가 되었어요`, threadId, messageId: eventId, icon: "people" });
       return json(await friendView(core, joinOf(core, userId, inviterId)!), 201);
     },
 
