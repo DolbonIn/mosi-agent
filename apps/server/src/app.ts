@@ -33,6 +33,7 @@ import { defaultConnections, stopKskill } from "./kskill.ts";
 import { friendRoutes } from "./friends.ts";
 import { scheduleRoutes, Scheduler } from "./schedules.ts";
 import { InvestHub } from "./invest/hub.ts";
+import { proposalRoutes } from "./invest/proposals.ts";
 import { investRoutes } from "./invest/routes.ts";
 import { PushHub, pushRoutes } from "./push.ts";
 import { uiDefinitions } from "./sdui.ts";
@@ -143,6 +144,7 @@ export function createApp(deps: AppDeps): App {
   const friends = friendRoutes(core);
   const schedules = scheduleRoutes(core);
   const invest = investRoutes(core);
+  const proposals = proposalRoutes(core);
   const push = pushRoutes(core);
   const speech = ttsRoutes(core);
   const meeting = meetRoutes(core);
@@ -321,6 +323,8 @@ export function createApp(deps: AppDeps): App {
   r.on("POST", "/api/invest/events", authed(invest.addEvent));
   r.on("PATCH", "/api/invest/events/:id", authed(invest.patchEvent));
   r.on("DELETE", "/api/invest/events/:id", authed(invest.removeEvent));
+  // invest B2b-1: the person's decision on the model's rule proposal (A12: nothing changes before it)
+  r.on("POST", "/api/invest/proposals/:id", authed(proposals.decide));
   // Web Push (B1c): the VAPID public key and this session's subscription; the service worker is the app's
   r.on("GET", "/api/push/key", authed(push.key));
   r.on("POST", "/api/push/subscriptions", authedFull(push.save));

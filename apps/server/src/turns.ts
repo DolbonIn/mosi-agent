@@ -13,6 +13,8 @@ import { quotaDay } from "./kst.ts";
 import { makeToolStore } from "./toolstore.ts";
 import { phoneTools } from "./phone.ts";
 import { meetPromptNote, meetTools } from "./meet.ts";
+import { settleInvestCards } from "./invest/proposals.ts";
+import { investTools } from "./invest/tools.ts";
 import { newId, preview, safeJson } from "./util.ts";
 import { errInfo } from "./log.ts";
 import { SseChannel } from "./events.ts";
@@ -267,6 +269,8 @@ export function buildTools(core: Core, kind: ThreadKind, enabledSkills: string[]
     // shared threads never get access to the owner's messengers or the phone
     add("messengers", () => core.deps.hub.tools());
     add("server", () => [...phoneTools(core), ...meetTools(core, userId)]);
+    // the owner's watch, rules and ledger: never read out where someone else is in the thread
+    if (!others) add("invest", () => investTools(core, userId));
   }
   return out;
 }
@@ -703,6 +707,8 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     if (outcome?.pendingCredential) finalCards = ensureCredentialCard(finalCards, outcome.pendingCredential);
     // k-skill login cards: connected after the turn's wait (no await from here to the insert, see kskill.ts)
     finalCards = loginCards.settle(finalCards);
+    // rule-change cards as their proposals stand now, and the A17 line on the last invest card only
+    finalCards = settleInvestCards(core, o.userId, finalCards);
 
     const produced = finalText.trim().length > 0 || finalCards.length > 0 || finalTools.length > 0;
     const bare = !finalText.trim() && !finalCards.length;

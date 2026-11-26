@@ -1100,6 +1100,10 @@ export const ROUTES = {
   investWatchlist: "POST /api/invest/watchlist {symbol} → InvestSymbolRow (404 unknown_symbol) | DELETE /api/invest/watchlist/:symbol?withRules=1 (409 has_rules {count})",
   investToss: "GET /api/invest/toss → InvestTossStatus | POST /api/invest/toss/check → InvestTossStatus (429 toss_check_too_soon); keys go through POST /api/connections/toss-investment or POST /api/credentials (service toss-investment, 연결 › 토스증권과 같은 연결)",
   investSettings: "PATCH /api/invest/settings InvestSettingsPatch → InvestSettingsView",
+  investLedger: "GET /api/invest/ledger?id&limit → {items: InvestLedgerEntry[]} | POST /api/invest/ledger InvestLedgerDraft → InvestLedgerEntry (409 ledger_locked, 400 ledger_reserved)",
+  investForecasts: "GET /api/invest/forecasts → InvestForecastList | POST /api/invest/forecasts InvestForecastDraft → InvestForecast | PATCH /api/invest/forecasts/:id InvestForecastJudgement → InvestForecast (409 forecast_changed {forecast})",
+  investEvents: "GET /api/invest/events?from&to → {items: InvestEvent[]} | POST /api/invest/events InvestEventDraft → InvestEvent (409 event_exists {event}) | PATCH /api/invest/events/:id {remind} → InvestEvent | DELETE /api/invest/events/:id",
+  investProposals: "POST /api/invest/proposals/:id {decision: 'apply' | 'keep'} → {card: InvestRuleChangeCard} (409 proposal_stale {card} / proposal_decided {card}, 410 proposal_expired {card}, 404 proposal_not_found)",
   push: "GET /api/push/key → {publicKey} | POST /api/push/subscriptions PushSubscription.toJSON() → {ok:true} (400 invalid_subscription) | DELETE /api/push/subscriptions {endpoint} → {ok:true, removed} — while the server sends nothing (no PICKLE_PUSH_SUBJECT) the key and POST answer 503 {error:'push_off'}, DELETE works",
 } as const;
 

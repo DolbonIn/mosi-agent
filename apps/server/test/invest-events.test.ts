@@ -6,7 +6,7 @@
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import type { InvestEvent, InvestEventCard, ServerEvent } from "@pickle/protocol";
-import { claimReminder, MAX_EVENTS, type EventRow } from "../src/invest/events.ts";
+import { claimReminder, createEvent, MAX_EVENTS, type EventRow } from "../src/invest/events.ts";
 import { InvestHub } from "../src/invest/hub.ts";
 import { makeHarness, type Harness } from "./helpers.ts";
 
@@ -108,7 +108,28 @@ describe("the event calendar", () => {
     expect(await words({ ...SAMSUNG, day: "2026-12-25", time: null, title: "배당 기준일" })).toEqual(["005930 배당 기준일", "12월 25일 · 시각 미정", "삼성전자 IR · A", "2026-12-24"]);
     // a title that starts with its symbol keeps one; daylight time: the US offset of the event's own day
     expect(await words({ ...NVDA, title: "NVDA 투자자의 날" })).toEqual(["NVDA 투자자의 날", "11월 26일 06:20(미 동부 16:20)", "NVIDIA IR · A", "2026-11-24"]);
-    expect(await words({ ...NVDA, day: "2027-05-26", title: "1분기 실적 발표" })).toEqual(["NVDA 1분기 실적 발표", "5월 27일 05:20(미 동부 16:20)", "NVIDIA IR · A", "2027-05-25"]);
+    expect(await words({ ...NVDA, day: "2027-05-26", title: "1분기 실적 발표" })).toEqual(["NVDA 1분기 실적 발표", "2027년 5월 27일 05:20(미 동부 16:20)", "NVIDIA IR · A", "2027-05-25"]);
+  });
+
+  test("DD 0405 E: another KST year names it — the KST date's year with a time, the market date's without; this year's has none", async () => {
+    const { h, person, api, remind, cards } = await setup();
+    const a = await person("alice");
+    const when = async (body: Record<string, unknown>) => (await api<InvestEvent>(a, "POST", "/api/invest/events", body)).body.when;
+    expect(await when({ ...NVDA, day: "2026-12-30", title: "올해" })).toBe("12월 31일 06:20(미 동부 16:20)");
+    // US 12-31 16:20 is KST 2027-01-01 06:20: the KST date decides; without a time the market's date does
+    expect(await when({ ...NVDA, day: "2026-12-31", title: "해 넘김" })).toBe("2027년 1월 1일 06:20(미 동부 16:20)");
+    expect(await when({ ...FOMC, day: "2026-12-31", title: "해 넘김 시각 미정" })).toBe("미 동부 12월 31일 · 시각 미정");
+    expect(await when({ ...NVDA, day: "2027-01-04", title: "다음 해" })).toBe("2027년 1월 5일 06:20(미 동부 16:20)");
+    expect(await when({ ...FOMC, day: "2027-01-05", title: "다음 해 시각 미정" })).toBe("미 동부 2027년 1월 5일 · 시각 미정");
+    expect(await when({ ...SAMSUNG, day: "2027-01-05", title: "다음 해 국내" })).toBe("2027년 1월 5일 10:00");
+    expect(await when({ ...SAMSUNG, day: "2027-01-05", time: null, title: "다음 해 국내 시각 미정" })).toBe("2027년 1월 5일 · 시각 미정");
+    // the D-1 card of 12-31 for a 01-01 event carries the year (DD: fine); in 2027 the list drops it
+    await api(a, "POST", "/api/invest/events", { ...SAMSUNG, day: "2027-01-01", title: "새해 일정" });
+    expect(await remind(KST(2026, 12, 31, 8, 0))).toBe(1);
+    expect(cards(a).map((c) => [c.card.title, c.card.rows.map((r) => r.when)])).toEqual([["005930 새해 일정", ["2027년 1월 1일 10:00"]]]);
+    h.clock.t = KST(2027, 1, 1, 9, 0);
+    const list = (await api<{ items: InvestEvent[] }>(a, "GET", "/api/invest/events")).body.items;
+    expect(list.filter((e) => e.title === "새해 일정" || e.title === "다음 해 국내").map((e) => e.when)).toEqual(["1월 1일 10:00", "1월 5일 10:00"]);
   });
 
   test("each field is checked (400 invalid_event); one event per person, market, day and title (409 with it)", async () => {
@@ -255,15 +276,56 @@ describe("D-1 (team-lead 0056: 08:00 KST the day before the event's market date)
     await api(a, "DELETE", `/api/invest/events/${id}`);
     const back = (await api<InvestEvent>(a, "POST", "/api/invest/events", NVDA)).body;
     expect([back.id === id, back.reminded]).toEqual([false, true]);
+    // dated before 08:00 so that only the claim keeps it from going (DD 0405 F holds back one added after 08:00 anyway)
+    const before8 = (eventId: string) => h.db.sql.query("UPDATE invest_events SET created_at = $t WHERE id = $id").run({ t: KST(2026, 11, 24, 7, 0), id: eventId });
+    before8(back.id);
     expect(await remind(KST(2026, 11, 24, 10, 0))).toBe(0);
     // the daily report (B2c) claiming first leaves no card
-    await api(a, "POST", "/api/invest/events", SAMSUNG);
+    before8((await api<InvestEvent>(a, "POST", "/api/invest/events", SAMSUNG)).body.id);
     const row = h.db.sql.query("SELECT * FROM invest_events WHERE title = $t").get({ t: SAMSUNG.title }) as EventRow;
     expect(claimReminder(h.db, row, "daily", h.clock.t)).toBe(true);
     expect(claimReminder(h.db, row, "card", h.clock.t)).toBe(false);
     expect(await remind(KST(2026, 11, 24, 10, 1))).toBe(0);
     expect(cards(a)).toHaveLength(1);
     expect(a.pushes).toHaveLength(1);
+  });
+
+  test("DD 0405 F: added after 08:00 on its eve — by the person or the model: no D-1; by code: the next beat; before 08:00: at 08:00", async () => {
+    const { h, person, api, remind, cards } = await setup();
+    const a = await person("alice");
+    // 07:59, the person: goes at 08:00
+    h.clock.t = KST(2026, 11, 24, 7, 59);
+    await api(a, "POST", "/api/invest/events", { ...SAMSUNG, title: "07:59 사람" });
+    expect(await remind(KST(2026, 11, 24, 8, 0))).toBe(1);
+    // 08:00 itself is not before 08:00
+    await api(a, "POST", "/api/invest/events", { ...SAMSUNG, title: "08:00 사람" });
+    expect(await remind(KST(2026, 11, 24, 8, 0) + 30_000)).toBe(0);
+    // 08:30, the person and the model: nothing at the next beat or later that day
+    h.clock.t = KST(2026, 11, 24, 8, 30);
+    const mine = (await api<InvestEvent>(a, "POST", "/api/invest/events", { ...SAMSUNG, title: "08:30 사람" })).body;
+    createEvent(h.db, a.uid, { ...SAMSUNG, title: "08:30 모델" }, "model", h.clock.t);
+    expect(await remind(KST(2026, 11, 24, 8, 30) + 30_000)).toBe(0);
+    expect(await remind(KST(2026, 11, 24, 23, 59))).toBe(0);
+    // 08:30, code (a later event source): the next beat
+    h.clock.t = KST(2026, 11, 24, 8, 30);
+    createEvent(h.db, a.uid, { ...SAMSUNG, title: "08:30 코드" }, "code", h.clock.t);
+    h.clock.t += 30_000;
+    await h.app.core.invest.beat();
+    await h.app.core.idle();
+    expect(cards(a).map((c) => c.card.rows.map((r) => r.title))).toEqual([["005930 07:59 사람"], ["005930 08:30 코드"]]);
+    const list = (await api<{ items: InvestEvent[] }>(a, "GET", "/api/invest/events")).body.items;
+    expect(list.filter((e) => e.day === "2026-11-25").map((e) => [e.title, e.author, e.reminded])).toEqual([
+      ["07:59 사람", "person", true],
+      ["08:00 사람", "person", false],
+      ["08:30 모델", "model", false],
+      ["08:30 사람", "person", false],
+      ["08:30 코드", "code", true],
+    ]);
+    expect(mine.reminded).toBe(false);
+    // a server off at 08:00: an event added at 07:59 still goes when it comes back at 08:05
+    h.clock.t = KST(2026, 11, 25, 7, 59);
+    await api(a, "POST", "/api/invest/events", { ...SAMSUNG, day: "2026-11-26", title: "다음 날 07:59" });
+    expect(await remind(KST(2026, 11, 25, 8, 5))).toBe(1);
   });
 
   test("not sent: switched off, its day already here, another day; switched back on before 08:00 it goes", async () => {
@@ -281,7 +343,7 @@ describe("D-1 (team-lead 0056: 08:00 KST the day before the event's market date)
   });
 
   test("isolation: each person's card holds their own events in their own thread; the same event for two people is two D-1s; nobody else switches or deletes mine", async () => {
-    const { person, api, remind, cards } = await setup();
+    const { h, person, api, remind, cards } = await setup();
     const a = await person("alice");
     const b = await person("bob");
     const mine = (await api<InvestEvent>(a, "POST", "/api/invest/events", NVDA)).body;
@@ -302,9 +364,10 @@ describe("D-1 (team-lead 0056: 08:00 KST the day before the event's market date)
     expect([a.pushes.map((p) => p.title), b.pushes.map((p) => p.title)]).toEqual([["일정 2개"], ["NVDA 3분기 실적 발표"]]);
     expect(a.events.filter((e) => e.type === "notification")).toHaveLength(1);
     expect(b.events.filter((e) => e.type === "notification")).toHaveLength(1);
-    // a third person adds the same event after the others' D-1 went: theirs is still to go, and goes
+    // code adds the same event for a third person after the others' D-1 went (DD 0405 F: code's go after 08:00): theirs
+    // is still to go, and goes
     const c = await person("carol");
-    const late = (await api<InvestEvent>(c, "POST", "/api/invest/events", NVDA)).body;
+    const late = createEvent(h.db, c.uid, NVDA, "code", h.clock.t);
     expect(late.reminded).toBe(false);
     expect(await remind(KST(2026, 11, 24, 9, 0))).toBe(1);
     expect(cards(c).map((x) => x.card.title)).toEqual(["NVDA 3분기 실적 발표"]);

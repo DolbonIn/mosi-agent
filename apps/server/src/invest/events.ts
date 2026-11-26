@@ -68,11 +68,21 @@ export function eventAt(r: Pick<EventRow, "market" | "day" | "time">): number | 
   return r.market === "US" ? etToEpoch(r.day, h, m) : kstToEpochDay(r.day, h, m);
 }
 
-/** KST first, the US market's time in brackets: 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00; no time: the market's date */
-export function eventWhen(r: Pick<EventRow, "market" | "day" | "time">): string {
+/**
+ * KST first, the US market's time in brackets: 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00; no time: the market's
+ * date. Another year than this KST one names it (DD 0405 E): 2027년 1월 5일 06:20(미 동부 16:20) · 미 동부 2027년 1월 5일 ·
+ * 시각 미정 — the KST date's year for a timed event, the market date's without a time.
+ */
+export function eventWhen(r: Pick<EventRow, "market" | "day" | "time">, now: number): string {
+  const thisYear = kstDay(now).slice(0, 4);
   const at = eventAt(r);
-  if (at != null) return r.market === "US" ? kstWithEastern(at) : kst(at);
-  return r.market === "US" ? `미 동부 ${md(r.day)} · 시각 미정` : `${md(r.day)} · 시각 미정`;
+  if (at != null) {
+    const y = kstDay(at).slice(0, 4);
+    const s = r.market === "US" ? kstWithEastern(at) : kst(at);
+    return y === thisYear ? s : `${Number(y)}년 ${s}`;
+  }
+  const d = r.day.slice(0, 4) === thisYear ? md(r.day) : `${Number(r.day.slice(0, 4))}년 ${md(r.day)}`;
+  return r.market === "US" ? `미 동부 ${d} · 시각 미정` : `${d} · 시각 미정`;
 }
 
 export const eventFoot = (r: Pick<EventRow, "source" | "confidence">) => `${r.source} · ${r.confidence}`;
@@ -108,7 +118,7 @@ export function createEvent(db: Db, userId: string, body: unknown, author: Inves
   const e = checkEvent(body, now);
   return db.tx(() => {
     const same = db.sql.query("SELECT * FROM invest_events WHERE user_id = $u AND market = $m AND day = $d AND title = $t").get({ u: userId, m: e.market, d: e.day, t: e.title }) as EventRow | null;
-    if (same) throw new HttpError(409, "event_exists", "같은 날 같은 제목의 일정이 있어요.", undefined, { event: eventView(db, same) });
+    if (same) throw new HttpError(409, "event_exists", "같은 날 같은 제목의 일정이 있어요.", undefined, { event: eventView(db, same, now) });
     const n = (db.sql.query("SELECT COUNT(*) AS n FROM invest_events WHERE user_id = $u AND day >= $d").get({ u: userId, d: shift(kstDay(now), -1) }) as { n: number }).n;
     if (n >= MAX_EVENTS) throw bad(`다가오는 일정은 ${MAX_EVENTS}개까지 둘 수 있어요.`, "too_many_events");
     const row: EventRow = {
@@ -131,7 +141,7 @@ export function createEvent(db: Db, userId: string, body: unknown, author: Inves
     };
     const cols = Object.keys(row);
     db.sql.query(`INSERT INTO invest_events (${cols.join(", ")}) VALUES (${cols.map((c) => `$${c}`).join(", ")})`).run(row as unknown as Record<string, string | number | null>);
-    return eventView(db, row);
+    return eventView(db, row, now);
   });
 }
 
@@ -147,7 +157,7 @@ export function setEventRemind(db: Db, userId: string, id: string | undefined, b
   const b = (body ?? {}) as Record<string, unknown>;
   if (typeof b.remind !== "boolean") throw invalid("D-1 알림은 켜기와 끄기로 정해 주세요.");
   db.sql.query("UPDATE invest_events SET remind = $r, updated_at = $n WHERE id = $id AND user_id = $u").run({ r: b.remind ? 1 : 0, n: now, id: r.id, u: userId });
-  return eventView(db, { ...r, remind: b.remind ? 1 : 0, updated_at: now });
+  return eventView(db, { ...r, remind: b.remind ? 1 : 0, updated_at: now }, now);
 }
 
 export function deleteEvent(db: Db, userId: string, id: string | undefined): void {
@@ -163,7 +173,7 @@ export function listEvents(db: Db, userId: string, q: { from?: string | null; to
   if (to < from) throw invalid("to가 from보다 앞이에요.");
   if (dayNumber(to) - dayNumber(from) > EVENT_SPAN_MAX_DAYS) throw invalid(`한 번에 ${EVENT_SPAN_MAX_DAYS}일까지 볼 수 있어요.`);
   const rows = db.sql.query("SELECT * FROM invest_events WHERE user_id = $u AND day BETWEEN $f AND $t").all({ u: userId, f: from, t: to }) as EventRow[];
-  return sortEvents(rows).map((r) => eventView(db, r));
+  return sortEvents(rows).map((r) => eventView(db, r, now));
 }
 
 /** by day, then timed events by instant, untimed last (by market, then title) */
@@ -175,7 +185,7 @@ function reminded(db: Db, r: EventRow): boolean {
   return !!db.sql.query("SELECT 1 FROM invest_event_reminders WHERE user_id = $u AND market = $m AND day = $d AND title = $t").get({ u: r.user_id, m: r.market, d: r.day, t: r.title });
 }
 
-export function eventView(db: Db, r: EventRow): InvestEvent {
+export function eventView(db: Db, r: EventRow, now: number): InvestEvent {
   return {
     id: r.id,
     market: r.market as InvestMarket,
@@ -185,7 +195,7 @@ export function eventView(db: Db, r: EventRow): InvestEvent {
     title: r.title,
     symbol: r.symbol,
     heading: eventHeading(r),
-    when: eventWhen(r),
+    when: eventWhen(r, now),
     source: r.source,
     sourceTier: r.source_tier as InvestTier,
     url: r.url,
@@ -202,16 +212,22 @@ export function eventView(db: Db, r: EventRow): InvestEvent {
 
 // ───────────── D-1 ─────────────
 
-/** from 08:00 KST: each person's events dated tomorrow (KST), switched on, whose D-1 has not gone */
+/**
+ * from 08:00 KST: each person's events dated tomorrow (KST), switched on, whose D-1 has not gone — added before 08:00
+ * today, or by code (DD 0405 F: one the person or the model added after 08:00 was just said in that very turn or
+ * screen; one a code source found later the person does not know yet)
+ */
 export function dueReminders(db: Db, now: number): Map<string, EventRow[]> {
   const out = new Map<string, EventRow[]>();
-  if (Math.floor((((now + 9 * HOUR) % DAY) + DAY) % DAY / HOUR) < REMIND_HOUR_KST) return out;
+  const sinceMidnight = (((now + 9 * HOUR) % DAY) + DAY) % DAY;
+  if (Math.floor(sinceMidnight / HOUR) < REMIND_HOUR_KST) return out;
+  const cut = now - sinceMidnight + REMIND_HOUR_KST * HOUR;
   const rows = db.sql
     .query(
-      `SELECT e.* FROM invest_events e WHERE e.day = $t AND e.remind = 1
+      `SELECT e.* FROM invest_events e WHERE e.day = $t AND e.remind = 1 AND (e.author = 'code' OR e.created_at < $cut)
        AND NOT EXISTS (SELECT 1 FROM invest_event_reminders r WHERE r.user_id = e.user_id AND r.market = e.market AND r.day = e.day AND r.title = e.title)`,
     )
-    .all({ t: shift(kstDay(now), 1) }) as EventRow[];
+    .all({ t: shift(kstDay(now), 1), cut }) as EventRow[];
   for (const r of sortEvents(rows)) {
     const list = out.get(r.user_id);
     if (list) list.push(r);
@@ -234,8 +250,8 @@ export function noteReminderMessage(db: Db, rows: readonly EventRow[], messageId
     db.sql.query("UPDATE invest_event_reminders SET message_id = $mid WHERE user_id = $u AND market = $m AND day = $d AND title = $t").run({ mid: messageId, u: r.user_id, m: r.market, d: r.day, t: r.title });
 }
 
-export function eventCard(rows: readonly EventRow[]): InvestEventCard {
-  const items = rows.map((r) => ({ eventId: r.id, title: eventHeading(r), when: eventWhen(r), foot: eventFoot(r) }));
+export function eventCard(rows: readonly EventRow[], now: number): InvestEventCard {
+  const items = rows.map((r) => ({ eventId: r.id, title: eventHeading(r), when: eventWhen(r, now), foot: eventFoot(r) }));
   return { type: "invest_event", title: items.length === 1 ? items[0]!.title : `일정 ${items.length}개`, rows: items, disclaimer: true };
 }
 

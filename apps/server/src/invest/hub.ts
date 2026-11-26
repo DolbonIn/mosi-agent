@@ -27,6 +27,7 @@ import {
 } from "./calendar.ts";
 import { claimReminder, dueReminders, eventCard, eventRecord, noteReminderMessage } from "./events.ts";
 import { writeLedger } from "./ledger.ts";
+import { expireProposals } from "./proposals.ts";
 import {
   alertBanner,
   alertCallLine,
@@ -129,8 +130,13 @@ export class InvestHub {
     this.timer ??= setInterval(() => void this.beat(), 30_000);
   }
 
-  /** one beat of the clock: the watch's slot when one is due, and the D-1 reminders */
+  /** one beat of the clock: the watch's slot when one is due, the D-1 reminders, and proposals past their time */
   async beat(now = this.core.now()): Promise<void> {
+    try {
+      expireProposals(this.core, now);
+    } catch (err) {
+      this.core.log.error("invest proposal expiry failed", { err: errInfo(err) });
+    }
     await Promise.all([
       this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
       this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
@@ -701,7 +707,7 @@ export class InvestHub {
         sent += core.db.tx(() => {
           const rows = due.filter((r) => claimReminder(core.db, r, "card", now));
           if (!rows.length) return 0;
-          const card = eventCard(rows);
+          const card = eventCard(rows, now);
           const { messageId } = this.post(userId, card, eventRecord(card), { title: card.title, body: "" }, `event:${rows[0]!.day}`);
           noteReminderMessage(core.db, rows, messageId);
           return rows.length;

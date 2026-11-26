@@ -2,7 +2,9 @@
  * Invest wire types (agent-runtime 2006 §5–§7, 2039, 2052; DD 1935, 2008, 2010, 2015-b, 2042-b). B1 serves the
  * overview, symbols, rules, watchlist, Toss status, settings, the `invest` event and the alert and mock stop cards; the
  * other card types are here so every board shares one shape (B2: rule change, daily, level chart; C: deck; B4: real).
- * B2a adds the indicator ledger, the forecast ledger, the event calendar and the D-1 card (`invest_event`).
+ * B2a adds the indicator ledger, the forecast ledger, the event calendar and the D-1 card (`invest_event`). B2b-1 sends
+ * the rule change card from the model's proposals (decided with POST /api/invest/proposals/:proposalId) and fills
+ * `InvestForecast.proposal`.
  *
  * Every figure and time text is made by the server with @pickle/quant format.ts; screens show `text` as it comes and
  * never format a number again (DD 1935 §0-5). A `v: null` figure reads "확인 불가".
@@ -276,6 +278,12 @@ export interface InvestStopCard {
   disclaimer?: true;
 }
 
+/**
+ * The model's proposal to move rules (A12 · G8-5, DD 1935 §2-3): nothing changed until the person decides with POST
+ * /api/invest/proposals/:proposalId {decision: "apply" | "keep"} → {card}; 409 proposal_stale / proposal_decided and 410
+ * proposal_expired carry the card too. The stored message's card follows the decision (`message` event). A change row
+ * reads `$30.00 → $30.50`; a new rule's `없음 → $30.50`, a rule taken away `$30.50 → 없음` (DD 0405 G).
+ */
 export interface InvestRuleChangeCard {
   type: "invest_rule_change";
   proposalId: ID;
@@ -425,19 +433,20 @@ export interface InvestForecast {
   interval: { lo: number; hi: number; unit: InvestLedgerUnit; text: string } | null;
   /** KST day; the forecast is judged by it */
   dueOn: string;
-  /** 12월 31일까지 */
+  /** 12월 31일까지 · 2027년 3월 31일까지 (another KST year names it, DD 0405 E) */
   dueText: string;
   criterion: string;
   status: InvestForecastStatus;
   /** 기한 전 · 판정 기다림 · 적중 · 빗나감 · 부분 적중 (DD 0109 §2) */
   statusText: string;
   actual: { v: number; text: string } | null;
-  /** how far the actual value fell outside the interval, in its unit; 0 inside */
+  /** how far the actual value fell outside the interval, in its unit, signed (above +); 0 inside. text: 구간 안 ·
+   * 구간보다 0.20%p 위 · 구간보다 $0.30 아래 (DD 0405 D) */
   intervalError: { v: number; text: string } | null;
   errorCause: InvestErrorCause | null;
   /** 데이터 · 해석 · 모델 · 시기 · 이야기 */
   errorCauseText: string | null;
-  /** the model's proposed judgement (B2b): 모시 제안: 빗나감 · 시기 */
+  /** the model's proposed judgement (B2b-1), the agent's own name first: 모시 제안: 빗나감 · 시기; never the outcome */
   proposal: { outcome: InvestOutcome; errorCause: InvestErrorCause | null; text: string } | null;
   ledgerIds: string[];
   author: InvestAuthor;
@@ -471,12 +480,13 @@ export interface InvestForecastJudgement {
  * score for 12 months, partial hits left out of both. The sentences are the server's.
  */
 export interface InvestForecastScore {
-  /** 방향 적중률 3개월 64% · 목표 65% / 방향 적중률 12개월 … / Brier 점수 0.21 · 목표 0.25 이하 (with its foot); a
-   * window with nothing judged in it has no row */
+  /** 방향 적중률 3개월 64% · 11건 · 목표 65% / 방향 적중률 12개월 … / Brier 점수 0.21 · 목표 0.25 이하 (with its
+   * foot); the count is the window's hits and misses (DD 0405 B); a window with nothing judged in it has no row */
   rows: { key: "hit3m" | "hit12m" | "brier"; text: string; foot?: string }[];
-  /** 부분 적중 2건은 두 점수에 넣지 않았어요. */
+  /** 부분 적중 2건은 두 점수에 넣지 않았어요. — beside rows only */
   partialFoot?: string;
-  /** 아직 판정한 예측이 없어요. — when nothing is judged */
+  /** when, and only when, rows is empty (DD 0405 C): 아직 판정한 예측이 없어요. · 부분 적중 2건뿐이라 아직 점수를 내지
+   * 않아요. · 최근 12개월에 판정한 예측이 없어요. */
   empty?: string;
   hitRate3m: number | null;
   hitRate12m: number | null;
@@ -510,7 +520,8 @@ export interface InvestEvent {
   symbol: string | null;
   /** the title as cards show it, the symbol first (DD 0109 §1) */
   heading: string;
-  /** 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00 · 미 동부 11월 25일 · 시각 미정 · 11월 26일 · 시각 미정 */
+  /** 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00 · 미 동부 11월 25일 · 시각 미정 · 11월 26일 · 시각 미정; another
+   * KST year names it: 2027년 1월 5일 06:20(미 동부 16:20) · 미 동부 2027년 1월 5일 · 시각 미정 (DD 0405 E) */
   when: string;
   source: string;
   sourceTier: InvestTier;

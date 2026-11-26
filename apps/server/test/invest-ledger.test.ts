@@ -7,7 +7,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import type { InvestForecast, InvestForecastList, InvestLedgerEntry } from "@pickle/protocol";
 import { join } from "node:path";
 import { Db } from "../src/db/index.ts";
-import { createForecast, MAX_FORECASTS, monthsBack } from "../src/invest/forecasts.ts";
+import { createForecast, MAX_FORECASTS, monthsBack, proposeJudgement } from "../src/invest/forecasts.ts";
 import { MAX_LEDGER_ROWS, writeLedger } from "../src/invest/ledger.ts";
 import { makeHarness, type Harness } from "./helpers.ts";
 
@@ -209,13 +209,13 @@ describe("the ledger's nine fields", () => {
     const { h, person, api } = await setup();
     const a = await person("alice");
     h.db.sql.exec(
-      "DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
+      "DROP TABLE invest_proposals; DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
     );
     h.db.sql
       .query("INSERT INTO invest_ledger (user_id, id, as_of, value, unit, definition, source_tier, url, confidence, author, created_at) VALUES ($u, 'quote.NVDA', '2026-11-26T15:00:00.000Z', 180.5, 'usd', '5분 감시 가격', '토스증권', NULL, 'A', 'code', 5)")
       .run({ u: a.uid });
     const again = new Db(join(h.dir, "pickle.db"));
-    expect(again.schemaVersion).toBe(10);
+    expect(again.schemaVersion).toBe(11); // v10, then v11 (B2b-1 proposals)
     expect(again.sql.query("SELECT source, source_tier, confidence FROM invest_ledger WHERE id = 'quote.NVDA'").get()).toEqual({ source: "토스증권", source_tier: "T2", confidence: "A" });
     again.close();
     const [e] = (await api<{ items: InvestLedgerEntry[] }>(a, "GET", "/api/invest/ledger?id=quote.NVDA")).body.items;
@@ -289,6 +289,34 @@ describe("the forecast ledger", () => {
     expect((await api(a, "POST", "/api/invest/forecasts", { ...FORECAST, dueOn: "2026-11-27", interval: null })).status).toBe(201);
   });
 
+  test("DD 0405 E: a due day in this KST year has no year; another year names it, also once the year turns", async () => {
+    const { h, person, api } = await setup();
+    const a = await person("alice");
+    const due = async (dueOn: string) => (await api<InvestForecast>(a, "POST", "/api/invest/forecasts", { ...FORECAST, claim: `기한 ${dueOn}`, dueOn })).body.dueText;
+    expect(await due("2026-12-31")).toBe("12월 31일까지");
+    expect(await due("2027-03-31")).toBe("2027년 3월 31일까지");
+    expect(await due("2029-01-05")).toBe("2029년 1월 5일까지");
+    // 2027-01-01 00:00 KST: the 2026 one now names its year, the 2027 one no longer does
+    h.clock.t = KST(2027, 1, 1, 0, 0);
+    const list = (await api<InvestForecastList>(a, "GET", "/api/invest/forecasts")).body.items;
+    expect(list.map((f) => [f.dueOn, f.dueText])).toEqual([
+      ["2026-12-31", "2026년 12월 31일까지"],
+      ["2027-03-31", "3월 31일까지"],
+      ["2029-01-05", "2029년 1월 5일까지"],
+    ]);
+    // the model's early judgement names the day the same way
+    const early = (dueOn: string) => {
+      try {
+        proposeJudgement(h.db, a.uid, list.find((f) => f.dueOn === dueOn)!.id, { outcome: "hit" }, "모시", h.clock.t);
+        return "judged";
+      } catch (err) {
+        return (err as Error).message;
+      }
+    };
+    expect(early("2029-01-05")).toBe("2029년 1월 5일이 지나야 판정할 수 있어요.");
+    expect(early("2027-03-31")).toBe("3월 31일이 지나야 판정할 수 있어요.");
+  });
+
   test("statuses and the person's judgement: words, causes only for a miss or partial hit, the interval error, a stale screen", async () => {
     const { h, person, api } = await setup();
     const a = await person("alice");
@@ -305,7 +333,7 @@ describe("the forecast ledger", () => {
     expect((await judge({ outcome: "miss", errorCause: "luck" })).body.message).toBe("오차 원인은 data, interpretation, model, timing, narrative 가운데 하나예요.");
     const miss = await judge({ outcome: "miss", errorCause: "timing", actual: 4.7, rev: 1 });
     expect(miss.body).toMatchObject({ status: "miss", statusText: "빗나감", errorCause: "timing", errorCauseText: "시기", actual: { v: 4.7, text: "4.70%" }, resolvedAt: KST(2027, 1, 1, 0, 0), rev: 2 });
-    expect(miss.body.intervalError!.text).toBe("+0.20%p");
+    expect(miss.body.intervalError!.text).toBe("구간보다 0.20%p 위");
     expect(miss.body.intervalError!.v).toBeCloseTo(0.2, 10);
     const stale = await judge({ outcome: "hit", rev: 1 });
     expect([stale.status, stale.body.error, stale.body.forecast?.status]).toEqual([409, "forecast_changed", "miss"]);
@@ -316,6 +344,32 @@ describe("the forecast ledger", () => {
     const back = await judge({ outcome: null });
     expect(back.body).toMatchObject({ status: "waiting", statusText: "판정 기다림", errorCause: null, resolvedAt: null, rev: 5 });
     expect((await api(a, "PATCH", "/api/invest/forecasts/if_nope", { outcome: "hit" })).status).toBe(404);
+  });
+
+  test("DD 0405 D: the interval error says which end in words, the size as its unit writes it; v stays signed", async () => {
+    const { h, person, api } = await setup();
+    const a = await person("alice");
+    const err = async (interval: { lo: number; hi: number; unit: string }, actual: number) => {
+      h.clock.t = KST(2026, 11, 27, 9, 0);
+      const f = (await api<InvestForecast>(a, "POST", "/api/invest/forecasts", { ...FORECAST, claim: `${interval.unit} ${actual}`, interval, dueOn: "2026-11-27" })).body;
+      return (await api<InvestForecast>(a, "PATCH", `/api/invest/forecasts/${f.id}`, { outcome: "miss", actual })).body.intervalError!;
+    };
+    const pctBand = { lo: 4, hi: 4.5, unit: "pct" };
+    const usdBand = { lo: 30, hi: 31, unit: "usd" };
+    const above = await err(pctBand, 4.7);
+    expect([above.text, above.v > 0]).toEqual(["구간보다 0.20%p 위", true]);
+    const below = await err(pctBand, 3.8);
+    expect([below.text, below.v < 0]).toEqual(["구간보다 0.20%p 아래", true]);
+    expect(below.v).toBeCloseTo(-0.2, 10);
+    const up = await err(usdBand, 31.3);
+    expect([up.text, up.v > 0]).toEqual(["구간보다 $0.30 위", true]);
+    expect(up.v).toBeCloseTo(0.3, 10);
+    const down = await err(usdBand, 29.7);
+    expect([down.text, down.v < 0]).toEqual(["구간보다 $0.30 아래", true]);
+    expect(down.v).toBeCloseTo(-0.3, 10);
+    expect((await err({ lo: 100_000, hi: 120_000, unit: "krw" }, 98_500)).text).toBe("구간보다 1,500원 아래");
+    expect((await err({ lo: 1, hi: 1.5, unit: "pctp" }, 1.62)).text).toBe("구간보다 0.12%p 위");
+    expect(await err(usdBand, 31)).toEqual({ v: 0, text: "구간 안" });
   });
 
   test("the score, by due day: 3- and 12-month hit rates and the 12-month Brier score without partial hits (worked by hand)", async () => {
@@ -343,8 +397,8 @@ describe("the forecast ledger", () => {
     const list = (await api<InvestForecastList>(a, "GET", "/api/invest/forecasts")).body;
     // 3m: 1 hit of 2 = 50%; 12m: 3 of 4 = 75%; Brier (0.04 + 0.36 + 0.09 + 0.01) / 4 = 0.125 → 0.13
     expect(list.score.rows).toEqual([
-      { key: "hit3m", text: "방향 적중률 3개월 50% · 목표 65%" },
-      { key: "hit12m", text: "방향 적중률 12개월 75% · 목표 65%" },
+      { key: "hit3m", text: "방향 적중률 3개월 50% · 2건 · 목표 65%" },
+      { key: "hit12m", text: "방향 적중률 12개월 75% · 4건 · 목표 65%" },
       { key: "brier", text: "Brier 점수 0.13 · 목표 0.25 이하", foot: "0에 가까울수록 잘 맞힌 거예요." },
     ]);
     expect(list.score.partialFoot).toBe("부분 적중 1건은 두 점수에 넣지 않았어요.");
@@ -368,22 +422,36 @@ describe("the forecast ledger", () => {
     ]);
   });
 
-  test("nothing judged: no score rows, one sentence; partial hits alone: their foot, no score", async () => {
+  test("DD 0405 C: no row → always one sentence (nothing judged, partial hits only, all older than 12 months), and the partial foot only beside rows", async () => {
     const { h, person, api } = await setup();
     const a = await person("alice");
-    expect((await api<InvestForecastList>(a, "GET", "/api/invest/forecasts")).body.score).toEqual({ rows: [], empty: "아직 판정한 예측이 없어요.", hitRate3m: null, hitRate12m: null, brier: null, judged: 0, partial: 0 });
-    const f = (await api<InvestForecast>(a, "POST", "/api/invest/forecasts", FORECAST)).body;
-    await api(a, "PATCH", `/api/invest/forecasts/${f.id}`, { outcome: "partial" });
-    h.clock.t += 1;
-    expect((await api<InvestForecastList>(a, "GET", "/api/invest/forecasts")).body.score).toEqual({
-      rows: [],
-      partialFoot: "부분 적중 1건은 두 점수에 넣지 않았어요.",
-      hitRate3m: null,
-      hitRate12m: null,
-      brier: null,
-      judged: 0,
-      partial: 1,
-    });
+    const score = async () => {
+      h.clock.t += 1;
+      const s = (await api<InvestForecastList>(a, "GET", "/api/invest/forecasts")).body.score;
+      expect(s.rows.length === 0).toBe(s.empty !== undefined); // empty ⇔ no row
+      return s;
+    };
+    // nothing judged
+    expect(await score()).toEqual({ rows: [], empty: "아직 판정한 예측이 없어요.", hitRate3m: null, hitRate12m: null, brier: null, judged: 0, partial: 0 });
+    // partial hits only in 12 months: their own sentence, no foot
+    const made = (dueOn: string) => createForecast(h.db, a.uid, { ...FORECAST, interval: null, claim: `기한 ${dueOn}`, dueOn }, "person", KST(2024, 6, 1)).id;
+    const p1 = made("2026-10-31");
+    const p2 = made("2026-05-31");
+    for (const id of [p1, p2]) await api(a, "PATCH", `/api/invest/forecasts/${id}`, { outcome: "partial" });
+    expect(await score()).toEqual({ rows: [], empty: "부분 적중 2건뿐이라 아직 점수를 내지 않아요.", hitRate3m: null, hitRate12m: null, brier: null, judged: 0, partial: 2 });
+    // a judged forecast from before the 12-month window adds no row: still the partial sentence
+    const old = made("2025-06-30");
+    await api(a, "PATCH", `/api/invest/forecasts/${old}`, { outcome: "hit" });
+    expect((await score()).empty).toBe("부분 적중 2건뿐이라 아직 점수를 내지 않아요.");
+    // the partial hits taken back: everything judged is older than 12 months
+    for (const id of [p1, p2]) await api(a, "PATCH", `/api/invest/forecasts/${id}`, { outcome: null });
+    expect(await score()).toEqual({ rows: [], empty: "최근 12개월에 판정한 예측이 없어요.", hitRate3m: null, hitRate12m: null, brier: null, judged: 0, partial: 0 });
+    // one row in 12 months (not 3) and a partial hit: rows, the foot, no sentence
+    await api(a, "PATCH", `/api/invest/forecasts/${p2}`, { outcome: "miss" });
+    await api(a, "PATCH", `/api/invest/forecasts/${p1}`, { outcome: "partial" });
+    const s = await score();
+    expect(s.rows.map((r) => r.text)).toEqual(["방향 적중률 12개월 0% · 1건 · 목표 65%", "Brier 점수 0.42 · 목표 0.25 이하"]);
+    expect([s.partialFoot, s.empty]).toEqual(["부분 적중 1건은 두 점수에 넣지 않았어요.", undefined]);
   });
 
   test("isolation: another person neither sees, judges nor counts my forecasts", async () => {

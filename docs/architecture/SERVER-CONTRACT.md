@@ -788,19 +788,59 @@ Each person's own rows (team-lead 0052); no model call behind any route. Code: `
   `rev` → 409 `forecast_changed {forecast}`; another person's id → 404 `forecast_not_found`. `GET /api/invest/forecasts`
   → `InvestForecastList {items, score, outcomes, causes}`: waiting first, then open (by due day), then judged; the
   statuses' words 기한 전 · 판정 기다림 · 적중 · 빗나감 · 부분 적중 and the causes' words and sentences are the server's (DD 0109
-  §2). Score by due day: direction hit rate over 3 and 12 months, the 12-month Brier score, partial hits out of both
-  (`partialFoot`); a window with nothing judged has no row; nothing judged → `empty` "아직 판정한 예측이 없어요.".
+  §2). Score by due day: direction hit rate over 3 and 12 months with the window's count (hits and misses: "방향 적중률
+  3개월 64% · 11건 · 목표 65%"), the 12-month Brier score, partial hits out of both (`partialFoot`, beside rows only); a
+  window with nothing judged has no row. `empty` when, and only when, there is no row (DD 0405 C): nothing judged "아직
+  판정한 예측이 없어요." · only partial hits in 12 months "부분 적중 N건뿐이라 아직 점수를 내지 않아요." · everything judged
+  older "최근 12개월에 판정한 예측이 없어요.". `dueText` "12월 31일까지", another KST year "2027년 3월 31일까지";
+  `intervalError.text` "구간 안" / "구간보다 0.20%p 위" / "구간보다 $0.30 아래" (`v` signed, DD 0405 D).
 - **Events**: `POST /api/invest/events InvestEventDraft {market, day (the market's date, today to 2 years), time? (the
   market's HH:MM), kind (earnings macro policy contract other), title ≤ 80, symbol? (its market), source, sourceTier,
   confidence, url?, remind?}` → 201 `InvestEvent` (`heading` symbol first, `when` "11월 26일 06:20(미 동부 16:20)" /
-  "11월 25일 10:00" / "미 동부 11월 26일 · 시각 미정", `foot` "출처 · 등급", `remindOn`, `reminded`). One per person, market,
+  "11월 25일 10:00" / "미 동부 11월 26일 · 시각 미정", another KST year "2027년 1월 5일 06:20(미 동부 16:20)" / "미 동부
+  2027년 1월 5일 · 시각 미정", `foot` "출처 · 등급", `remindOn`, `reminded`). One per person, market,
   day and title (409 `event_exists {event}`); 200 upcoming. `PATCH /api/invest/events/:id {remind}` is the only change;
   `DELETE /api/invest/events/:id`. `GET /api/invest/events?from&to` (default yesterday KST + 60 days, 400 at most).
 - **D-1** (team-lead 0056, DD 0109 §1): from 08:00 KST on the day before the event's market date (whatever the market
   does that day), one `invest_event` card per person in the invest thread with every event of theirs due (one row each,
   KST order; title the heading, or "일정 N개"), `disclaimer: true`, no buttons; banner and push title alone, push tag
   `invest:event:<day>`. Once per person, market, day and title by any path: the claim and the card are one transaction;
-  a deleted event added back sends nothing again; B2c's daily report takes the same claim when it carries the line.
+  a deleted event added back sends nothing again; B2c's daily report takes the same claim when it carries the line. An
+  event the person or the model added at or after that 08:00 gets no D-1 (it was just said); one code added (author
+  `code`) goes at the next beat (DD 0405 F).
+
+## Invest (B2b-1) — the agent's invest tools and rule proposals
+
+The model reads figures code computed and writes only through the person's paths, as author `model`; it never changes a
+rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
+- **Tools** (offered in the owner's own threads once they watch a symbol or have invest settings; never in a friend
+  thread or with others present): `invest_watch_list` (the screen's rows, every rule's id and rev), `invest_technicals
+  {symbol}` (from the daily bars by @pickle/quant: MA 20/50/200 and the distance from them, RSI 14, MACD, ATR 14,
+  Bollinger 20, 20-day VWAP, drawdown from the high, the 60-day volume bands, a 2-ATR stop level; each `{v, text}` with
+  the bars' day, source and grade; no bars → no figures), `invest_ledger_add`, `invest_forecast_add`, `invest_event_add`
+  (the POST paths above, author `model`), `invest_events` (the GET), `invest_forecast_judge {forecastId, outcome,
+  errorCause?}` (due and not judged only: 409 `forecast_not_due` / `forecast_judged`; it sets `InvestForecast.proposal`
+  — "{agent name} 제안: 빗나감 · 시기" — never the outcome or the rev), `invest_watch_propose`.
+- **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120), basisAsOf, basisSource,
+  basisGrade}` stores a proposal and puts an `invest_rule_change` card in the turn's message (DD 1935 §2-3: the question
+  title, `changes` rows 낱말 · 지금 → 바꿀 값, `reason` and `reasonFoot` "11-27 기준, 출처 · 등급", the result sentence of
+  each rule — a real sell stop's with the sellable quantity — and `warning` for a stop above the price; `confirm: "hold"`
+  for a real sell stop, else `tap`; `expiresAt` 24 hours on). A change names an existing rule of the symbol `{ruleId,
+  price | lo, hi | direction (price alerts)}`, takes one away `{ruleId, remove: true}`, or makes a new rule `{kind,
+  level?, price | lo, hi, direction?}` that only notifies (`created_by: "proposal"`; resistance and invalidation rules
+  come this way). It never sets the action, the buffer, the deadline or "once" (400 `invalid_proposal`). Rows (DD 0405
+  G): a new rule `없음 → $30.50`, a rule taken away `$30.50 → 없음`; one change's title "SOXL 손절선을 $30.50으로
+  올릴까요?/내릴까요?" (a value before), "SOXL 손절선을 $30.50으로 둘까요?" (new), "SOXL 손절선을 지울까요?". Voice turns
+  get no card.
+- `POST /api/invest/proposals/:id {decision: "apply" | "keep"}` → `{card}` (status `applied` / `kept`, `decidedAt`).
+  Applying writes every change in one transaction: the line moves, the rest of the rule stays, and the rule is watched
+  afresh (state armed, its earlier state unknown); a rule taken away is deleted. Refused, nothing written, the card in the body: 409 `proposal_stale`
+  (a named rule's rev moved, it was deleted or its deadline passed, the symbol left the watch, the order mode changed, or
+  a real sell stop's sellable quantity is not the one the card said), 410 `proposal_expired`, 409 `proposal_decided`
+  (the other decision already made; the same one again answers 200). Another person's id → 404 `proposal_not_found`.
+  The messages showing the card get its new state (`message` events), and the 30-second beat turns waiting cards past
+  their time to `expired`. A turn stores each rule-change card as its proposal stands at the insert, and the A17 line
+  only on the message's last invest card.
 
 ## Web Push (B1c) — the lock-screen line
 

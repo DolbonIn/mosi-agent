@@ -1,0 +1,311 @@
+/**
+ * The agent's invest tools (B2b-1, team-lead 0052 · agent-runtime 0212 split). Every figure a tool returns is computed
+ * here from stored or fetched data and written by @pickle/quant's formatters, with its day, source and grade; the model
+ * reads them and never makes a number up (PLAN §2 "숫자는 코드가 계산해요"). The model writes only through the person's
+ * own paths, marked author "model": ledger rows, forecasts, events, a proposed forecast judgement. It never changes a
+ * rule: invest_watch_propose stores a proposal and shows a card, and only the person's tap applies it (A12 · G8-5).
+ *
+ * Offered in the owner's own threads only (buildTools leaves them out of friend threads) and only once the person uses
+ * invest (a watched symbol or invest settings), so other turns carry none of these schemas.
+ */
+import type { JsonSchemaProp, ToolContext, ToolDef, ToolResult } from "@pickle/agent";
+import { atr, bollinger, deviation, drawdownFromHigh, macd, num, pct, rate, rsi, sma, volumeProfile, vwap, type Bar } from "@pickle/quant";
+import type { Core } from "../core.ts";
+import { HttpError } from "../http.ts";
+import { marketOf, normalizeSymbol, type Market } from "./calendar.ts";
+import * as idb from "./db.ts";
+import { createEvent, listEvents } from "./events.ts";
+import { createForecast, proposeJudgement } from "./forecasts.ts";
+import { writeLedger } from "./ledger.ts";
+import { createProposal } from "./proposals.ts";
+import { money } from "./rules.ts";
+import { SOURCE_TABLE } from "./sources.ts";
+
+/** an error the person's route would answer (400/404/409) → a failed tool call the model can read and fix */
+async function attempt(fn: () => Promise<ToolResult> | ToolResult, failSummary: string): Promise<ToolResult> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err instanceof HttpError) return { ok: false, summary: failSummary, data: { error: err.code, message: err.message } };
+    throw err;
+  }
+}
+
+/** a figure for the model: the value rounded as written, and its text; no value → 확인 불가 */
+type Fig = { v: number | null; text: string };
+const UNKNOWN: Fig = { v: null, text: "확인 불가" };
+const priceFig = (m: Market, x: number | null | undefined): Fig => (x == null || !Number.isFinite(x) ? UNKNOWN : { v: Math.round(x * (m === "US" ? 100 : 1)) / (m === "US" ? 100 : 1), text: money(m, x) });
+const numFig = (x: number | null | undefined, digits: number): Fig => (x == null || !Number.isFinite(x) ? UNKNOWN : { v: Number(x.toFixed(digits)), text: num(x, digits) });
+const pctFig = (x: number | null | undefined, digits = 1): Fig => (x == null || !Number.isFinite(x) ? UNKNOWN : { v: Number(x.toFixed(digits)), text: pct(x, digits) });
+const rateFig = (x: number | null | undefined, digits = 1): Fig => (x == null || !Number.isFinite(x) ? UNKNOWN : { v: Number(x.toFixed(digits)), text: rate(x, digits) });
+const last = <T>(xs: readonly T[]): T | undefined => xs[xs.length - 1];
+
+/** the technical figures of one symbol's daily bars (B2b-1: MA, RSI, MACD, ATR, Bollinger, VWAP, drawdown, volume profile) */
+export function technicals(market: Market, bars: readonly Bar[]) {
+  const close = bars.map((b) => b.c);
+  const c = last(close)!;
+  const ma = (n: number) => (close.length >= n ? last(sma(close, n)) : null);
+  const dev = (n: number) => (close.length >= n ? last(deviation(close, sma(close, n))) : null);
+  const m = macd(close);
+  const bb = bollinger(close, 20, 2);
+  const a = last(atr(bars, 14));
+  const ddDays = Math.min(250, close.length);
+  const hi = Math.max(...close.slice(-ddDays));
+  const vp = volumeProfile(bars, { days: 60 });
+  return {
+    close: priceFig(market, c),
+    ma: { d20: priceFig(market, ma(20)), d50: priceFig(market, ma(50)), d200: priceFig(market, ma(200)) },
+    vsMa: { d20: pctFig(dev(20)), d50: pctFig(dev(50)), d200: pctFig(dev(200)) },
+    rsi14: numFig(last(rsi(close, 14)), 1),
+    macd: { line: numFig(last(m.macd), 2), signal: numFig(last(m.signal), 2), hist: numFig(last(m.hist), 2) },
+    atr14: priceFig(market, a),
+    atr14Pct: rateFig(a != null && c ? (a / c) * 100 : null),
+    bollinger20: { upper: priceFig(market, last(bb.upper)), mid: priceFig(market, last(bb.mid)), lower: priceFig(market, last(bb.lower)), pctB: numFig(last(bb.pctB), 2) },
+    vwap20: priceFig(market, close.length >= 20 ? last(vwap(bars, 20)) : null),
+    drawdown: { days: ddDays, high: priceFig(market, hi), fromHigh: pctFig(drawdownFromHigh(close, ddDays).at(-1)) },
+    /** the 60-day volume profile's three heaviest price bands, heaviest first */
+    volumeBands: vp ? vp.top.map((b) => ({ lo: priceFig(market, b.lo), hi: priceFig(market, b.hi), share: rateFig(b.share) })) : [],
+    /** a stop two ATRs under the close: a level for a proposal, not advice */
+    atrStop2x: priceFig(market, a != null ? c - 2 * a : null),
+  };
+}
+
+const str: JsonSchemaProp = { type: "string" };
+const grade: JsonSchemaProp = { type: "string", enum: ["A", "B+", "B", "C"] };
+const tier: JsonSchemaProp = { type: "string", enum: ["T1", "T2", "T3", "T4"], description: "T1 official/primary, T2 market data or company filing, T3 press, T4 social (grade C only)" };
+const day: JsonSchemaProp = { type: "string", description: "YYYY-MM-DD" };
+const numProp: JsonSchemaProp = { type: "number" };
+
+export function investTools(core: Core, userId: string | undefined): ToolDef[] {
+  if (!userId) return [];
+  if (!idb.getSettings(core.db, userId) && !idb.watchlist(core.db, userId).length) return [];
+  const hub = core.invest;
+
+  const watchList: ToolDef = {
+    name: "invest_watch_list",
+    description:
+      "The person's watched symbols with their last price, change, holding and price rules (id, rev, kind, line, action, state), as the invest screen shows them. Read this before proposing a rule change. Figures carry their source and time.",
+    parameters: { type: "object", properties: {}, additionalProperties: false },
+    icon: "chart",
+    title: () => "감시 종목 확인",
+    maxResultBytes: 16 * 1024,
+    async run(_a, ctx: ToolContext) {
+      const ov = await hub.overview(ctx.userId);
+      const rules = ov.rules.map((r) => ({ id: r.id, rev: r.rev, symbol: r.symbol, kind: r.kind, level: r.level ?? null, line: r.left, action: r.actionText, state: r.state, until: r.until }));
+      return {
+        ok: true,
+        summary: `감시 종목 ${ov.watchlist.length}개 · 규칙 ${rules.length}개`,
+        data: {
+          mode: ov.mode,
+          quotes: ov.quotesFoot,
+          watch: ov.watch,
+          symbols: ov.watchlist.map((w) => ({ symbol: w.symbol, name: w.name, market: w.market, price: w.price?.text ?? "확인 불가", change: w.change?.text ?? "확인 불가", holding: w.holding?.line ?? null, stale: !!w.stale })),
+          rules,
+        },
+      };
+    },
+  };
+
+  const technicalsTool: ToolDef<{ symbol: string }> = {
+    name: "invest_technicals",
+    description:
+      "Technical figures computed by code from the symbol's daily bars: moving averages 20/50/200 and the close's distance from them, RSI 14, MACD, ATR 14, Bollinger 20, 20-day VWAP, drawdown from the high, the 60-day volume bands, and a 2-ATR stop level. Quote these figures with their asOf and source; never compute or invent your own. US tickers (SOXL) or 6-digit KR codes (005930).",
+    parameters: { type: "object", properties: { symbol: str }, required: ["symbol"], additionalProperties: false },
+    icon: "chart",
+    title: (a) => `${String(a.symbol ?? "").toUpperCase()} 지표 계산`,
+    maxResultBytes: 12 * 1024,
+    async run(a, ctx) {
+      const symbol = normalizeSymbol(a.symbol);
+      if (!symbol) return { ok: false, summary: "종목 기호를 확인하지 못했어요", data: { error: "unknown_symbol" } };
+      const market = marketOf(symbol);
+      const got = await hub.dailyBars(symbol, market, ctx.userId);
+      if (!got || got.bars.length < 15) return { ok: false, summary: `${symbol} 일봉을 받지 못했어요`, data: { error: "no_bars", note: "No daily bars now: say the figures are 확인 불가, do not estimate them." } };
+      const src = SOURCE_TABLE[got.source];
+      return {
+        ok: true,
+        summary: `${symbol} 지표 · ${got.bars.at(-1)!.t} · ${src.name}`,
+        data: { symbol, market, asOf: got.bars.at(-1)!.t, source: src.name, grade: src.grade, bars: got.bars.length, ...technicals(market, got.bars) },
+      };
+    },
+  };
+
+  const ledgerAdd: ToolDef = {
+    name: "invest_ledger_add",
+    description:
+      "Save one figure you found (a macro number, a filing value, a contract) to the person's indicator ledger with its nine fields: id (series name like fred.DGS10 or soxl.contract.2026q4), asOf, value or valueText, unit, definition, source, sourceTier, url, confidence (grade), leadClass. Only figures you read in a source this turn; T4 sources take grade C. Rows written by code (quote.*, atr14.*) are not yours.",
+    parameters: {
+      type: "object",
+      properties: {
+        id: str,
+        asOf: { type: "string", description: "YYYY-MM-DD or an ISO time" },
+        publishedAt: str,
+        value: { type: "number" },
+        valueText: str,
+        unit: { type: "string", enum: ["usd", "krw", "index", "pct", "pctp", "qty", "bp", "count", "T", "GW", "$B", "text"] },
+        definition: str,
+        source: str,
+        sourceTier: tier,
+        url: str,
+        revision: str,
+        confidence: grade,
+        leadClass: { type: "string", enum: ["L1", "L2", "G", "T"] },
+      },
+      required: ["id", "asOf", "unit", "definition", "source", "sourceTier", "confidence"],
+      additionalProperties: false,
+    },
+    icon: "doc",
+    title: (a) => `지표 원장에 ${String(a.id ?? "")} 기록`,
+    run: (a, ctx) =>
+      attempt(() => {
+        const e = writeLedger(core.db, ctx.userId, a, "model", core.now());
+        return { ok: true, summary: `지표 원장 · ${e.id} ${e.valueText}`, data: { id: e.id, value: e.valueText, asOf: e.asOf, source: e.source, grade: e.confidence } };
+      }, "지표 원장에 넣지 못했어요"),
+  };
+
+  const forecastAdd: ToolDef = {
+    name: "invest_forecast_add",
+    description:
+      "Record a forecast you are making in the person's forecast ledger: claim (one line), p (probability strictly between 0 and 1), optional interval (intervalLo, intervalHi, intervalUnit together), dueOn (YYYY-MM-DD, within 3 years), criterion (how it will be judged), ledgerIds it rests on. It cannot be edited or deleted afterwards; the person judges it when due.",
+    parameters: {
+      type: "object",
+      properties: {
+        claim: str,
+        p: { type: "number" },
+        intervalLo: { type: "number", description: "optional interval: low end" },
+        intervalHi: { type: "number", description: "optional interval: high end" },
+        intervalUnit: { type: "string", enum: ["usd", "krw", "index", "pct", "pctp", "qty", "bp", "count", "T", "GW", "$B"] },
+        dueOn: day,
+        criterion: str,
+        ledgerIds: { type: "array", items: str },
+      },
+      required: ["claim", "p", "dueOn", "criterion"],
+      additionalProperties: false,
+    },
+    icon: "chart",
+    title: () => "예측 기록",
+    run: (a, ctx) =>
+      attempt(() => {
+        const { intervalLo, intervalHi, intervalUnit, ...rest } = a as Record<string, unknown>;
+        const interval = intervalLo !== undefined || intervalHi !== undefined || intervalUnit !== undefined ? { lo: intervalLo, hi: intervalHi, unit: intervalUnit } : null;
+        const f = createForecast(core.db, ctx.userId, { ...rest, interval }, "model", core.now());
+        return { ok: true, summary: `예측 기록 · ${f.dueText}`, data: { id: f.id, claim: f.claim, probability: f.probability.text, due: f.dueOn } };
+      }, "예측을 기록하지 못했어요"),
+  };
+
+  const forecastJudge: ToolDef = {
+    name: "invest_forecast_judge",
+    description:
+      "Propose how a due forecast went: outcome hit, miss or partial, and for miss or partial an errorCause (data, interpretation, model, timing, narrative). This only shows your proposal next to the forecast; the person makes the judgement. Only for forecasts past their due day and not judged yet.",
+    parameters: {
+      type: "object",
+      properties: {
+        forecastId: str,
+        outcome: { type: "string", enum: ["hit", "miss", "partial"] },
+        errorCause: { type: "string", enum: ["data", "interpretation", "model", "timing", "narrative"] },
+      },
+      required: ["forecastId", "outcome"],
+      additionalProperties: false,
+    },
+    icon: "checkmark",
+    title: () => "예측 판정 제안",
+    run: (a, ctx) =>
+      attempt(() => {
+        const f = proposeJudgement(core.db, ctx.userId, a.forecastId, a, ctx.agentName, core.now());
+        return { ok: true, summary: f.proposal!.text, data: { id: f.id, proposed: a.outcome, note: "Proposal only. The person judges it." } };
+      }, "판정 제안을 남기지 못했어요"),
+  };
+
+  const events: ToolDef<{ from?: string; to?: string }> = {
+    name: "invest_events",
+    description: "The person's investment calendar (earnings, macro releases, policy, contracts) between from and to (YYYY-MM-DD; default yesterday to 60 days ahead), with KST times and sources.",
+    parameters: { type: "object", properties: { from: day, to: day }, additionalProperties: false },
+    icon: "calendar",
+    title: () => "투자 일정 확인",
+    maxResultBytes: 12 * 1024,
+    run: (a, ctx) =>
+      attempt(() => {
+        const list = listEvents(core.db, ctx.userId, { from: a.from ?? null, to: a.to ?? null }, core.now());
+        return { ok: true, summary: `투자 일정 ${list.length}개`, data: list.map((e) => ({ id: e.id, title: e.heading, when: e.when, source: e.foot, remind: e.remind })) };
+      }, "투자 일정을 읽지 못했어요"),
+  };
+
+  const eventAdd: ToolDef = {
+    name: "invest_event_add",
+    description:
+      "Add an event you found in a source to the person's investment calendar: market (US or KR), day (the market's own date), time (HH:MM in that market's local time, or omit if not announced), kind, title, symbol, source, sourceTier, url, confidence. The person gets a reminder the day before at 08:00 KST.",
+    parameters: {
+      type: "object",
+      properties: {
+        market: { type: "string", enum: ["US", "KR"] },
+        day,
+        time: { type: "string", description: "HH:MM local to the market" },
+        kind: { type: "string", enum: ["earnings", "macro", "policy", "contract", "other"] },
+        title: str,
+        symbol: str,
+        source: str,
+        sourceTier: tier,
+        url: str,
+        confidence: grade,
+      },
+      required: ["market", "day", "kind", "title", "source", "sourceTier", "confidence"],
+      additionalProperties: false,
+    },
+    icon: "calendar",
+    title: (a) => `투자 일정에 ${String(a.title ?? "")} 추가`,
+    run: (a, ctx) =>
+      attempt(() => {
+        try {
+          const e = createEvent(core.db, ctx.userId, a, "model", core.now());
+          return { ok: true, summary: `투자 일정 · ${e.heading}`, data: { id: e.id, title: e.heading, when: e.when } };
+        } catch (err) {
+          if (err instanceof HttpError && err.code === "event_exists") return { ok: true, summary: "이미 있는 일정이에요", data: { exists: true } };
+          throw err;
+        }
+      }, "투자 일정에 넣지 못했어요"),
+  };
+
+  const propose: ToolDef = {
+    name: "invest_watch_propose",
+    description:
+      "Propose moving the person's price rules for one watched symbol. Nothing changes now: the person gets a card and decides. Each change is either {ruleId, price | lo,hi | direction} for an existing rule (ids from invest_watch_list), {ruleId, remove: true} to take one away, or a new notify-only rule {kind, level?, price | lo,hi, direction?} (kind stop, target, buy_zone, alert, resistance, invalidate; alert and invalidate need direction below or above). You cannot set sell, call, buffer or deadline. Take the prices from invest_technicals or the ledger, give a one-line reason and the basis (basisAsOf, basisSource, basisGrade) of the figure it rests on. At most 6 changes.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: str,
+        changes: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              ruleId: str,
+              kind: { type: "string", enum: ["stop", "target", "buy_zone", "alert", "resistance", "invalidate"] },
+              level: { type: "integer", minimum: 1, maximum: 3 },
+              price: numProp,
+              lo: numProp,
+              hi: numProp,
+              direction: { type: "string", enum: ["below", "above"] },
+              remove: { type: "boolean" },
+            },
+          },
+        },
+        reason: str,
+        basisAsOf: { type: "string", description: "YYYY-MM-DD of the figure the reason rests on" },
+        basisSource: str,
+        basisGrade: grade,
+      },
+      required: ["symbol", "changes", "reason", "basisAsOf", "basisSource", "basisGrade"],
+      additionalProperties: false,
+    },
+    icon: "bell",
+    title: (a) => `${String(a.symbol ?? "").toUpperCase()} 규칙 바꾸기 제안`,
+    run: (a, ctx) =>
+      attempt(async () => {
+        if (ctx.mode === "voice") return { ok: false, summary: "통화 중에는 제안 카드를 보낼 수 없어요", data: { error: "voice", note: "Cards cannot be shown in a call. Offer to send it in chat." } };
+        const { basisAsOf, basisSource, basisGrade, ...rest } = a as Record<string, unknown>;
+        const { id, card } = await createProposal(core, ctx.userId, ctx.threadId, { ...rest, basis: { asOf: basisAsOf, source: basisSource, grade: basisGrade } });
+        return { ok: true, summary: card.title, card, data: { proposalId: id, changes: card.changes, note: "Nothing changed yet. The person decides on the card." } };
+      }, "제안을 만들지 못했어요"),
+  };
+
+  return [watchList, technicalsTool, ledgerAdd, forecastAdd, forecastJudge, events, eventAdd, propose] as ToolDef[];
+}

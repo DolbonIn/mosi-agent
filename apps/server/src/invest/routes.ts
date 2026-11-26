@@ -58,7 +58,7 @@ function limitOf(c: Ctx): number | undefined {
 const hasRules = (n: number) => `이 종목에 규칙이 ${n}개 있어요. 규칙과 함께 뺄지 다시 골라 주세요.`;
 const invalid = (message: string) => bad(message, "invalid_rule");
 
-function priceOf(v: unknown, label: string): number {
+export function priceOf(v: unknown, label: string): number {
   if (typeof v !== "number" || !Number.isFinite(v)) throw invalid(`${label}을 숫자로 넣어 주세요.`);
   if (!(v > 0)) throw invalid(`${label}은 0보다 커야 해요.`);
   if (v > MAX_PRICE) throw invalid(`${label}이 너무 커요.`);

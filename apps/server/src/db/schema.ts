@@ -546,4 +546,25 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (user_id, market, day, title)
   );
   `,
+  // v11 (B2b-1, A12 · G8-5, DD 1935 §2-3): the model's rule proposals. A proposal changes nothing until the person taps
+  // 바꾸기 on its card; it keeps the rules' revs it was made against (stale when any moved), the order mode and sellable
+  // quantity its result sentence promised, and the card as shown (status and decidedAt follow the decision)
+  `
+  CREATE TABLE invest_proposals (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    thread_id TEXT,
+    symbol TEXT NOT NULL,
+    items_json TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    qty INTEGER,
+    card_json TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    expires_at INTEGER NOT NULL,
+    decided_at INTEGER,
+    created_at INTEGER NOT NULL
+  );
+  CREATE INDEX invest_proposals_open ON invest_proposals(status, expires_at);
+  CREATE INDEX invest_proposals_user ON invest_proposals(user_id, created_at);
+  `,
 ];

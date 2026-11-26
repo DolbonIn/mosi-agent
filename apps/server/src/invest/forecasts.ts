@@ -14,7 +14,7 @@ import type {
   InvestLedgerUnit,
   InvestOutcome,
 } from "@pickle/protocol";
-import { brier, civilDate, dayNumber, hitRate, intervalError, MINUS, num, pp, rate, TARGETS } from "@pickle/quant";
+import { brier, civilDate, dayNumber, hitRate, intervalError, num, rate, TARGETS } from "@pickle/quant";
 import type { Db } from "../db/index.ts";
 import { bad, HttpError } from "../http.ts";
 import { newId } from "../util.ts";
@@ -40,6 +40,9 @@ export const ERROR_CAUSE_WORD: Readonly<Record<InvestErrorCause, { word: string;
   narrative: { word: "이야기", sentence: "그럴듯한 이야기에 기댔어요" },
 };
 export const SCORE_EMPTY = "아직 판정한 예측이 없어요.";
+/** DD 0405 C: no row in the score, and why */
+export const SCORE_ONLY_PARTIAL = (n: number) => `부분 적중 ${n}건뿐이라 아직 점수를 내지 않아요.`;
+export const SCORE_NONE_RECENT = "최근 12개월에 판정한 예측이 없어요.";
 export const BRIER_FOOT = "0에 가까울수록 잘 맞힌 거예요.";
 
 export interface ForecastRow {
@@ -70,6 +73,8 @@ const NUMERIC_UNITS = LEDGER_UNITS.filter((u) => u !== "text");
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const md = (day: string) => `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일`;
+/** DD 0405 E: 12월 31일 this KST year, 2027년 3월 31일 in another */
+export const dayWords = (day: string, now: number) => (day.slice(0, 4) === kstDay(now).slice(0, 4) ? md(day) : `${Number(day.slice(0, 4))}년 ${md(day)}`);
 
 /** the same day `months` calendar months earlier, the day clamped to the month's last (05-31 − 3 → 02-28) */
 export function monthsBack(day: string, months: number): string {
@@ -168,6 +173,42 @@ export function judgeForecast(db: Db, userId: string, id: string | undefined, bo
   return forecastView(next, now);
 }
 
+// ───────────── the model's judgement proposal (A12: it proposes, the person judges) ─────────────
+
+/**
+ * The model's proposed judgement of a forecast that is due and not judged yet (DD 0109: "모시 제안: 빗나감 · 시기", the
+ * agent's own name first). It never sets the outcome: the person judges with PATCH. A newer proposal replaces the last;
+ * the rev (the person's stale-screen guard) does not move.
+ */
+export function proposeJudgement(db: Db, userId: string, id: unknown, body: unknown, agentName: string, now: number): InvestForecast {
+  const row = typeof id === "string" ? forecastRow(db, userId, id) : null;
+  if (!row) throw new HttpError(404, "forecast_not_found", "찾을 수 없는 예측이에요.");
+  if (row.outcome) throw new HttpError(409, "forecast_judged", "이미 판정한 예측이에요.");
+  if (row.due_on > kstDay(now)) throw new HttpError(409, "forecast_not_due", `${dayWords(row.due_on, now)}이 지나야 판정할 수 있어요.`);
+  if (!body || typeof body !== "object" || Array.isArray(body)) throw invalid("판정이 올바르지 않아요.");
+  const b = body as Record<string, unknown>;
+  const outcome = oneOf(b.outcome, OUTCOMES, "판정", invalid);
+  let cause: InvestErrorCause | null = null;
+  if (b.errorCause !== undefined && b.errorCause !== null) {
+    cause = oneOf(b.errorCause, ERROR_CAUSES, "오차 원인", invalid);
+    if (outcome !== "miss" && outcome !== "partial") throw invalid("오차 원인은 빗나감이나 부분 적중일 때만 골라요.");
+  }
+  const who = agentName.trim() || "모시";
+  const proposal = { outcome, errorCause: cause, text: `${who} 제안: ${OUTCOME_WORD[outcome]}${cause ? ` · ${ERROR_CAUSE_WORD[cause].word}` : ""}` };
+  db.sql.query("UPDATE invest_forecasts SET proposal_json = $p WHERE id = $id AND user_id = $u").run({ p: JSON.stringify(proposal), id: row.id, u: userId });
+  return forecastView({ ...row, proposal_json: JSON.stringify(proposal) }, now);
+}
+
+function proposalOf(r: ForecastRow): InvestForecast["proposal"] {
+  if (!r.proposal_json) return null;
+  try {
+    const p = JSON.parse(r.proposal_json) as InvestForecast["proposal"];
+    return p && OUTCOMES.includes(p.outcome) && typeof p.text === "string" ? p : null;
+  } catch {
+    return null;
+  }
+}
+
 // ───────────── read ─────────────
 
 export function forecastRow(db: Db, userId: string, id: string): ForecastRow | null {
@@ -204,8 +245,9 @@ export function forecastView(r: ForecastRow, now: number): InvestForecast {
   let err: InvestForecast["intervalError"] = null;
   if (interval && r.actual != null) {
     const e = intervalError(r.actual, interval.lo, interval.hi);
-    const text = e === 0 ? "구간 안" : unit === "pct" || unit === "pctp" ? pp(e, 2) : `${e > 0 ? "+" : MINUS}${unitText(unit!, Math.abs(e))}`;
-    err = { v: e, text };
+    // DD 0405 D: which end, in words; the size as the unit writes it (pct and pctp in %p, two places)
+    const size = unit === "pct" || unit === "pctp" ? `${num(Math.abs(e), 2)}%p` : unitText(unit!, Math.abs(e));
+    err = { v: e, text: e === 0 ? "구간 안" : `구간보다 ${size} ${e > 0 ? "위" : "아래"}` };
   }
   const cause = r.error_cause as InvestErrorCause | null;
   return {
@@ -215,7 +257,7 @@ export function forecastView(r: ForecastRow, now: number): InvestForecast {
     probability: { v: r.p, text: rate(r.p * 100, 0) },
     interval,
     dueOn: r.due_on,
-    dueText: `${md(r.due_on)}까지`,
+    dueText: `${dayWords(r.due_on, now)}까지`,
     criterion: r.criterion,
     status,
     statusText: STATUS_WORD[status],
@@ -223,7 +265,7 @@ export function forecastView(r: ForecastRow, now: number): InvestForecast {
     intervalError: err,
     errorCause: cause,
     errorCauseText: cause ? ERROR_CAUSE_WORD[cause].word : null,
-    proposal: null,
+    proposal: proposalOf(r),
     ledgerIds: JSON.parse(r.ledger_ids) as string[],
     author: r.author as InvestAuthor,
     resolvedAt: r.resolved_at,
@@ -245,13 +287,15 @@ export function forecastScore(rows: readonly ForecastRow[], now: number): Invest
   const b = brier(in12.filter((r) => r.outcome !== "partial").map((r) => ({ p: r.p, outcome: r.outcome === "hit" ? (1 as const) : (0 as const) })));
   const target = rate(TARGETS.hitRate12m * 100, 0);
   const rows_: InvestForecastScore["rows"] = [];
-  if (h3.rate != null) rows_.push({ key: "hit3m", text: `방향 적중률 3개월 ${rate(h3.rate * 100, 0)} · 목표 ${target}` });
-  if (h12.rate != null) rows_.push({ key: "hit12m", text: `방향 적중률 12개월 ${rate(h12.rate * 100, 0)} · 목표 ${target}` });
+  // DD 0405 B: the count beside the rate (hits and misses, partial hits out); the Brier row counts the 12-month ones again
+  if (h3.rate != null) rows_.push({ key: "hit3m", text: `방향 적중률 3개월 ${rate(h3.rate * 100, 0)} · ${h3.hits + h3.misses}건 · 목표 ${target}` });
+  if (h12.rate != null) rows_.push({ key: "hit12m", text: `방향 적중률 12개월 ${rate(h12.rate * 100, 0)} · ${h12.hits + h12.misses}건 · 목표 ${target}` });
   if (b != null) rows_.push({ key: "brier", text: `Brier 점수 ${num(b, 2)} · 목표 ${num(TARGETS.brier, 2)} 이하`, foot: BRIER_FOOT });
   return {
     rows: rows_,
-    ...(h12.partial ? { partialFoot: `부분 적중 ${h12.partial}건은 두 점수에 넣지 않았어요.` } : {}),
-    ...(judged.length ? {} : { empty: SCORE_EMPTY }),
+    // DD 0405 C: `empty` when, and only when, there is no row; the partial foot only beside rows
+    ...(rows_.length && h12.partial ? { partialFoot: `부분 적중 ${h12.partial}건은 두 점수에 넣지 않았어요.` } : {}),
+    ...(rows_.length ? {} : { empty: !judged.length ? SCORE_EMPTY : h12.partial ? SCORE_ONLY_PARTIAL(h12.partial) : SCORE_NONE_RECENT }),
     hitRate3m: h3.rate,
     hitRate12m: h12.rate,
     brier: b,
