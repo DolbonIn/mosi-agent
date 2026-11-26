@@ -748,10 +748,16 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   ("앱에서 인증한 번호로 걸어요. 하루 10통까지예요." or why not) and `settings.bufferPctDefault` the operating default
   buffer (`5%`), so screens hold no copy of either (DD 2341).
 - Toss (paths and bodies as the public openapi.json 1.2.28: `POST /oauth2/token` client credentials, `GET /api/v1/prices`,
-  `/api/v1/holdings`, `/api/v1/sellable-quantity`, `/api/v1/candles?interval=1d&count=200`,
-  `/api/v1/market-calendar/{US|KR}?date=` with `X-Tossinvest-Account`, every body `{result}`; prices carry no previous
-  close; a person's key serves that person's watch only): keys go through `POST /api/credentials` (service `tossinvest`, envelope fields clientKey, secretKey, accountSeq);
-  saving one runs one holdings read; deleting it turns real off and forgets holdings. `GET /api/invest/toss`,
+  `/api/v1/candles?interval=1d&count=200`, `/api/v1/market-calendar/{US|KR}?date=` bearer only; `/api/v1/holdings` and
+  `/api/v1/sellable-quantity` also with `X-Tossinvest-Account`, the account from `/api/v1/accounts` (BROKERAGE, else the
+  first); every body `{result}`; prices carry no previous close; a person's key serves that person's watch only).
+  **One Toss login in the app** (team-lead 0059): the k-skill connection `toss-investment` (fields clientId, clientSecret),
+  saved through `POST /api/connections/toss-investment` (연결 › 토스증권, and the invest settings row opens the same
+  sheet) or `POST /api/credentials`. Its token and account live in that login's ConnectionRegistry session (memory only),
+  shared by the agent's Toss tools and the invest watch: whichever asks first, the other sends that token; a new one
+  taken after a refusal is the other's too. The login connecting (its check passed) runs one holdings read with the
+  check's token; disconnecting it (`DELETE /api/connections/toss-investment`) or deleting it turns real off, forgets
+  holdings and drops the session for both. `GET /api/invest/toss`,
   `POST /api/invest/toss/check` (429 `toss_check_too_soon` within a minute) → `InvestTossStatus`. A 403 asked again with a
   new token is `ip_not_allowed` (never "expired"); the person's Toss calls rest an hour. 401 `auth`, 429 `rate_limited`
   (5 minutes), else `down`. Keys and tokens never reach logs, cards, events or rows; a failure keeps its code alone.

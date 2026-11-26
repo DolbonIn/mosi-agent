@@ -1098,7 +1098,7 @@ export const ROUTES = {
   investRules:
     "POST /api/invest/rules/preview InvestRuleDraft & {ruleId?, changes?} → InvestRulePreview | POST /api/invest/rules {draft, previewId?} → InvestRuleRow | PATCH /api/invest/rules/:id {changes, ifRev, previewId?} → InvestRuleRow (409 rule_changed {rule} / preview_stale {preview}) | DELETE /api/invest/rules/:id",
   investWatchlist: "POST /api/invest/watchlist {symbol} → InvestSymbolRow (404 unknown_symbol) | DELETE /api/invest/watchlist/:symbol?withRules=1 (409 has_rules {count})",
-  investToss: "GET /api/invest/toss → InvestTossStatus | POST /api/invest/toss/check → InvestTossStatus (429 toss_check_too_soon); keys go through POST /api/credentials (service tossinvest)",
+  investToss: "GET /api/invest/toss → InvestTossStatus | POST /api/invest/toss/check → InvestTossStatus (429 toss_check_too_soon); keys go through POST /api/connections/toss-investment or POST /api/credentials (service toss-investment, 연결 › 토스증권과 같은 연결)",
   investSettings: "PATCH /api/invest/settings InvestSettingsPatch → InvestSettingsView",
   push: "GET /api/push/key → {publicKey} | POST /api/push/subscriptions PushSubscription.toJSON() → {ok:true} (400 invalid_subscription) | DELETE /api/push/subscriptions {endpoint} → {ok:true, removed} — while the server sends nothing (no PICKLE_PUSH_SUBJECT) the key and POST answer 503 {error:'push_off'}, DELETE works",
 } as const;

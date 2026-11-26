@@ -22,6 +22,7 @@ import { ConnectionRegistry } from "@pickle/agent";
 import type { Card, Connection, ConnectResponse, CredentialInfo, ProviderInfo } from "@pickle/protocol";
 import { publishMessage, publishThread, type Core } from "./core.ts";
 import type { AppDeps, ConnectionsLike, Timers } from "./deps.ts";
+import { TOSS_SERVICE } from "./invest/toss.ts";
 import { errInfo } from "./log.ts";
 import { safeJson } from "./util.ts";
 
@@ -324,6 +325,8 @@ async function connected(core: Core, userId: string, service: string, credential
   }
   markConnectionCardsConnected(core, userId, service, { woke, live, only: stored });
   core.log.info("connection", { user: userId, provider: service, status: "connected", woke });
+  // the one Toss login also serves the invest watch: one holdings read, reusing the token the check just got
+  if (service === TOSS_SERVICE) core.track(core.invest.onTossSaved(userId));
   return woke;
 }
 
@@ -511,6 +514,7 @@ export function skillsWithoutLogins(core: Core, enabled: string[]): string[] | u
 /** DELETE /api/connections/:service: upstream sign-out (best effort), then every row and cached session of it goes. */
 export async function kskillDisconnect(core: Core, userId: string, service: string): Promise<{ removed: number }> {
   const res = await core.connections.revoke(userId, service);
+  if (service === TOSS_SERVICE) await core.invest.onTossRemoved(userId);
   const now = core.now();
   core.events.publish(userId, {
     type: "connection",

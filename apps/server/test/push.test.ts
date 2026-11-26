@@ -156,8 +156,8 @@ const api = async <T = Record<string, unknown>>(w: World, method: string, path: 
 };
 
 async function connectToss(w: World): Promise<void> {
-  const envelope = { v: 1, alg: "ECDH-P256+HKDF-SHA256+A256GCM", kid: "kid-test", epk: { kty: "EC" }, iv: "aXY", ct: "Y3Q", aad: `${w.uid}:tossinvest:token` };
-  expect((await api(w, "POST", "/api/credentials", { service: "tossinvest", label: "토스증권", kind: "token", hint: "계좌 1개", keepFor: "forever", envelope })).status).toBe(201);
+  const envelope = { v: 1, alg: "ECDH-P256+HKDF-SHA256+A256GCM", kid: "kid-test", epk: { kty: "EC" }, iv: "aXY", ct: "Y3Q", aad: `${w.uid}:toss-investment:token` };
+  expect((await api(w, "POST", "/api/credentials", { service: "toss-investment", label: "토스증권", kind: "token", hint: "계좌 1개", keepFor: "forever", envelope })).status).toBe(201);
   await w.h.app.core.idle();
 }
 

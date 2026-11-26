@@ -5,8 +5,8 @@
 import type { Bar } from "@pickle/quant";
 
 export const FAKE_TOSS_BASE = "https://toss.fake.test";
-/** bogus key material: a test asserts these strings never reach events, rows or logs */
-export const BOGUS_TOSS_SECRET = { clientKey: "ck-bogus-7f3a", secretKey: "sk-bogus-91c2", accountSeq: "7" };
+/** bogus key material (the k-skill login's fields): a test asserts these strings never reach events, rows or logs */
+export const BOGUS_TOSS_SECRET = { clientId: "ci-bogus-7f3a", clientSecret: "cs-bogus-91c2" };
 
 export interface FakeCall {
   host: string;
@@ -36,6 +36,8 @@ export interface YahooQuote {
 export function makeInvestUpstream() {
   const calls: FakeCall[] = [];
   let tokenN = 0;
+  /** every token this fake gave out → the client_id it went to; a token not here (or revoked) answers 401 */
+  const tokens = new Map<string, string>();
   const state = {
     /** Toss: per symbol */
     tossPrices: new Map<string, TossQuote>(),
@@ -51,6 +53,10 @@ export function makeInvestUpstream() {
      * a closed day; `krxClosed` = NXT trades, KRX does not (no closing auction). A day not set answers 404.
      */
     tossCalendar: new Map<string, { open: string; close: string; krxClosed?: boolean } | null>(),
+    /** GET /api/v1/accounts (openapi.json: {result: [{accountNo, accountSeq, accountType}]}) */
+    tossAccounts: [{ accountNo: "12345678901", accountSeq: 7, accountType: "BROKERAGE" }] as { accountNo: string; accountSeq: number; accountType: string }[],
+    /** tokens Toss no longer takes (another one was issued, or it was revoked): 401 */
+    tossRevoked: new Set<string>(),
     yahoo: new Map<string, YahooQuote | "not_found" | number>(),
     yahooDaily: new Map<string, Bar[]>(),
   };
@@ -74,9 +80,21 @@ export function makeInvestUpstream() {
     if (url.origin === FAKE_TOSS_BASE) {
       if (url.pathname === "/oauth2/token") {
         if (state.tokenStatus) return json({ error: "nope" }, state.tokenStatus);
-        return json({ access_token: `tok-${++tokenN}`, token_type: "Bearer", expires_in: 3600 });
+        const client = new URLSearchParams(body ?? "").get("client_id") ?? "";
+        const t = `tok-${++tokenN}`;
+        tokens.set(t, client);
+        return json({ access_token: t, token_type: "Bearer", expires_in: 3600 });
       }
       if (state.tossStatus) return json({ error: { code: "x" } }, state.tossStatus);
+      const bearer = /^Bearer (.+)$/.exec(headers.get("authorization") ?? "")?.[1] ?? "";
+      if (!tokens.has(bearer) || state.tossRevoked.has(bearer)) return json({ error: { code: "invalid_token" } }, 401);
+      // the account surfaces need X-Tossinvest-Account (openapi.json AccountSeq, required); market data does not
+      if (["/api/v1/holdings", "/api/v1/sellable-quantity", "/api/v1/buying-power"].includes(url.pathname)) {
+        const acct = headers.get("x-tossinvest-account");
+        if (!acct || !state.tossAccounts.some((a) => String(a.accountSeq) === acct)) return json({ error: { code: "invalid_account" } }, 400);
+      }
+      if (url.pathname === "/api/v1/accounts") return json({ result: state.tossAccounts });
+      if (url.pathname === "/api/v1/buying-power") return json({ result: { currency: "KRW", cashBuyingPower: "1000000" } });
       if (url.pathname === "/api/v1/prices") {
         const syms = (url.searchParams.get("symbols") ?? "").split(",").filter(Boolean);
         // the shapes of the public openapi.json (1.2.28), synthetic values
@@ -171,7 +189,7 @@ export function makeInvestUpstream() {
     throw new Error(`fake upstream: unexpected ${url.host}`);
   }) as typeof fetch;
 
-  return { fetch: fetchFn, calls, state };
+  return { fetch: fetchFn, calls, state, tokens };
 }
 
 /** `n` synthetic daily bars ending the day before `lastDay` (weekdays only), around `close` with a high-low range `range` */

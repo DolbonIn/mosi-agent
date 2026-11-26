@@ -522,15 +522,17 @@ export class InvestHub {
     return "done";
   }
 
+  /** a Toss login connected (k-skill connect, or a vault save): one holdings read, with the token its check just got */
   async onTossSaved(userId: string): Promise<void> {
-    this.toss.forget(userId);
+    this.connectedMemo.delete(userId);
     await this.checkToss(userId, { floor: false });
   }
 
-  /** the key was deleted: real orders back to mock at once, holdings forgotten */
+  /** the login was deleted or disconnected: real orders back to mock at once, holdings and its session forgotten */
   async onTossRemoved(userId: string): Promise<void> {
     const { core } = this;
     this.toss.forget(userId);
+    this.connectedMemo.delete(userId);
     this.holdingsByUser.delete(userId);
     const s = idb.getSettings(core.db, userId);
     if (s) idb.updateSettings(core.db, userId, { mode: "mock", real_since: null, toss_ok_at: null, toss_error: null, toss_error_at: null, toss_paused_until: null }, core.now());

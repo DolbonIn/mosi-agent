@@ -198,6 +198,7 @@ function withRegistry(reg: ConnectionRegistry, patch: Partial<ConnectionsLike>):
     notifyConnected: (u, svc, o) => reg.notifyConnected(u, svc, o),
     revoke: (u, svc) => reg.revoke(u, svc),
     forget: (u, svc) => reg.forget(u, svc),
+    sessionFor: (u, svc) => reg.sessionFor(u, svc),
     ...patch,
   };
 }

@@ -789,6 +789,17 @@ export class ConnectionRegistry {
     for (const k of [...this.#sessions.keys()]) if (k.startsWith(prefix)) this.#sessions.delete(k);
   }
 
+  /**
+   * A server job's handle on the newest usable login of `service` (the invest watch's Toss reads): its id and the same
+   * per-credential session cache the agent's tools use, so both share one live token. The vault is not opened (no
+   * access record); the job unseals the login itself, as its own actor, only when it needs a new token. null: no login.
+   */
+  async sessionFor(userId: string, service: string): Promise<{ credentialId: string; session: ConnectionSession } | null> {
+    if (!CONNECTION_SERVICE_RE.test(service)) return null;
+    const f = await this.#vault.access(userId, { actor: "system" }).find(service);
+    return f ? { credentialId: f.id, session: this.#session(userId, service, f.id) } : null;
+  }
+
   /** test/ops hook: number of live cached sessions */
   get sessionCount(): number {
     return this.#sessions.size;

@@ -134,8 +134,9 @@ export function credentialRoutes(core: Core) {
         throw packageError(err, { status: 500, code: "vault_failed", message: "보안 금고에 저장하지 못했어요. 다시 시도해 주세요." });
       }
       markCredentialCardsSaved(core, userId, req.service);
-      // a Toss key: one holdings read in the background (the invest overview shows the result)
-      if (req.service === TOSS_SERVICE) core.track(core.invest.onTossSaved(userId));
+      // a Toss login that is no catalog service here (a server without the k-skill catalog): one holdings read in the
+      // background; a catalog one reads after its check passes (kskill.ts), with the token that check got
+      if (req.service === TOSS_SERVICE && !kskill) core.track(core.invest.onTossSaved(userId));
       if (kskill) {
         // a k-skill login saved from the vault screen connects like POST /api/connections/:service
         const r = await afterKskillSave(core, userId, info, { created: true });

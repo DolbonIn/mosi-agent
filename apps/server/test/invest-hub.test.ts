@@ -79,8 +79,8 @@ const api = async <T = unknown>(w: World, method: string, path: string, body?: u
 };
 
 async function connectToss(w: World): Promise<string> {
-  const envelope = { v: 1, alg: "ECDH-P256+HKDF-SHA256+A256GCM", kid: "kid-test", epk: { kty: "EC" }, iv: "aXY", ct: "Y3Q", aad: `${w.uid}:tossinvest:token` };
-  const r = await api<{ id: string }>(w, "POST", "/api/credentials", { service: "tossinvest", label: "토스증권", kind: "token", hint: "계좌 1개", keepFor: "forever", envelope });
+  const envelope = { v: 1, alg: "ECDH-P256+HKDF-SHA256+A256GCM", kid: "kid-test", epk: { kty: "EC" }, iv: "aXY", ct: "Y3Q", aad: `${w.uid}:toss-investment:token` };
+  const r = await api<{ id: string }>(w, "POST", "/api/credentials", { service: "toss-investment", label: "토스증권", kind: "token", hint: "계좌 1개", keepFor: "forever", envelope });
   expect(r.status).toBe(201);
   await w.h.app.core.idle();
   return r.body.id;
@@ -674,7 +674,7 @@ describe("invest Toss status", () => {
     await tickAt(w, 9, 45);
     w.up.state.tossStatus = 401;
     await tickAt(w, 9, 50);
-    const secrets = [BOGUS_TOSS_SECRET.clientKey, BOGUS_TOSS_SECRET.secretKey];
+    const secrets = [BOGUS_TOSS_SECRET.clientId, BOGUS_TOSS_SECRET.clientSecret];
     const dump = [
       JSON.stringify(w.events),
       w.logs.join("\n"),
@@ -684,7 +684,7 @@ describe("invest Toss status", () => {
     ].join("\n");
     for (const s of secrets) expect(dump).not.toContain(s);
     // the key went only into token request bodies (the 401 asked for one new token, then stopped)
-    const withKey = w.up.calls.filter((c) => c.body?.includes(BOGUS_TOSS_SECRET.secretKey)).map((c) => c.path);
+    const withKey = w.up.calls.filter((c) => c.body?.includes(BOGUS_TOSS_SECRET.clientSecret)).map((c) => c.path);
     expect(withKey).toEqual(["/oauth2/token", "/oauth2/token"]);
   });
 });
@@ -823,7 +823,7 @@ describe("invest G8 boundaries", () => {
   test("G8-1: the Toss client has no order method (B1 reads only)", async () => {
     const { TossClient } = await import("../src/invest/toss.ts");
     const names = Object.getOwnPropertyNames(TossClient.prototype).sort();
-    expect(names).toEqual(["base", "candles", "connected", "constructor", "forget", "get", "holdings", "marketDay", "prices", "sellable", "token"]);
+    expect(names).toEqual(["account", "base", "candles", "connected", "constructor", "drop", "findAccount", "forget", "get", "holdings", "issue", "login", "marketDay", "prices", "sellable", "send", "token"]);
     expect(names.some((n) => /order|sell$|buy|cancel/i.test(n))).toBe(false);
   });
 

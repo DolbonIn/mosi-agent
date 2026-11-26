@@ -23,7 +23,8 @@ export const TOSS: SkillConnection = {
   reason: "토스증권 계좌와 시세를 보려면 토스증권 연결이 필요해요",
 };
 
-interface TossSession {
+/** the login's session value (ConnectionRegistry, memory only); the server's invest watch reads and writes the same shape */
+export interface TossSession {
   token: string;
   exp: number;
   accountSeq?: string;

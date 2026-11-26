@@ -109,7 +109,7 @@ export interface SkillsLike {
  */
 export type ConnectionsLike = Pick<
   ConnectionRegistry,
-  "catalog" | "service" | "isService" | "serviceName" | "forUser" | "status" | "verify" | "notifyConnected" | "revoke" | "forget"
+  "catalog" | "service" | "isService" | "serviceName" | "forUser" | "status" | "verify" | "notifyConnected" | "revoke" | "forget" | "sessionFor"
 >;
 
 /** Bound helpers over the agent package's LlmClient (null when no key is configured). */

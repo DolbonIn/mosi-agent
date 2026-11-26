@@ -3,23 +3,34 @@
  * stop sell only, never a buy (G8-1).
  *
  * - Off unless PICKLE_TOSS_BASE is set (cfg.invest.tossBase): QA and tests cannot reach the real API.
- * - Keys live in the vault (service `tossinvest`, kind token; envelope fields clientKey, secretKey, accountSeq). They
- *   are opened only to get a token (`vault.access(…, {actor: "system"}).use`, one access record per token, not per
- *   check); the token stays in memory and is fetched again on expiry or one 401 (G1: one live token per client).
- * - 403: asked again once with a new token; the same 403 again = the allowed IP (D6, never "expired": G8-6), and the
- *   person's Toss calls stop until they check again or an hour passes. 401 = auth, 429 = rate_limited (until the next
- *   check), 5xx and timeouts = down.
+ * - One Toss login in the app (team-lead 0059, agent-runtime 0057): the k-skill connection `toss-investment`
+ *   (packages/skills connected/toss.ts; fields clientId, clientSecret), saved from 연결 › 토스증권 or the invest
+ *   settings row. The token lives in that login's ConnectionRegistry session (memory only), the same one the agent's
+ *   Toss tools read and write (`TossSession`): whichever side asks first, the other uses its token (G1: one live token
+ *   per client). The vault is opened only to get a new token (`vault.access(…, {actor: "system"}).use`, one access
+ *   record per token, not per check); one request at a time per login here.
+ * - The account: GET /api/v1/accounts, the BROKERAGE one, else the first (the k-skill rule), kept in the same session.
+ *   Only the account surfaces carry X-Tossinvest-Account (holdings, sellable quantity; openapi.json): market data
+ *   (prices, candles, the market calendar) is bearer only.
+ * - 401 and 403: asked again once with a new token (a newer one already in the session counts); the same 403 again =
+ *   the allowed IP (D6, never "expired": G8-6), and the person's Toss calls stop until they check again or an hour
+ *   passes. 401 = auth, 429 = rate_limited (until the next check), 5xx and timeouts = down.
  * - Bodies, error texts, keys and tokens never reach logs, cards, events or the model: a failure keeps its code alone.
  *
  * The response shapes follow the public openapi.json (1.2.28, read 2026-11-26; test/fake-toss.ts serves the same shapes
  * with synthetic values). The token, and so every read here, is the person's own: it serves their watch only
  * (team-lead 2253).
  */
+import type { ConnectionSession } from "@pickle/agent";
 import type { Bar } from "@pickle/quant";
+import type { TossSession } from "@pickle/skills";
 import type { Core } from "../core.ts";
 import type { Market } from "./calendar.ts";
 
-export const TOSS_SERVICE = "tossinvest";
+/** the k-skill connection id of 토스증권 (packages/skills connected/toss.ts `TOSS.id`; a test holds them equal) */
+export const TOSS_SERVICE = "toss-investment";
+/** the token is taken as expired this long before Toss says (the k-skill tools use the same) */
+export const TOSS_TOKEN_SKEW_MS = 60_000;
 export const TOSS_TIMEOUT_MS = 10_000;
 export const TOSS_IP_PAUSE_MS = 3_600_000;
 
@@ -39,10 +50,10 @@ export interface TossHolding {
   avgPrice: number | null;
 }
 
-interface TokenEntry {
-  token: string;
-  expiresAt: number;
-  account: string;
+/** a person's Toss login as a server job sees it: its vault row and its session (no secret) */
+interface TossLogin {
+  credentialId: string;
+  session: ConnectionSession;
 }
 
 const num = (x: unknown): number | null => {
@@ -150,7 +161,10 @@ export function readSellable(j: unknown): number | null {
 }
 
 export class TossClient {
-  private tokens = new Map<string, TokenEntry>();
+  /** a token request in flight, per login (several reads in one check share it) */
+  private issuing = new Map<string, Promise<TossResult<string>>>();
+  /** an account lookup in flight, per login */
+  private finding = new Map<string, Promise<TossResult<string>>>();
 
   constructor(
     private core: Core,
@@ -161,9 +175,13 @@ export class TossClient {
     return this.core.cfg.invest.tossBase;
   }
 
-  /** drop the in-memory token (the key was deleted or replaced) */
+  /** the login went away: its session (token, account) goes, the agent's tools' copy with it */
   forget(userId: string): void {
-    this.tokens.delete(userId);
+    try {
+      this.core.connections.forget(userId, TOSS_SERVICE);
+    } catch {
+      /* nothing cached */
+    }
   }
 
   async connected(userId: string): Promise<boolean> {
@@ -174,19 +192,44 @@ export class TossClient {
     }
   }
 
-  private async token(userId: string, fresh: boolean): Promise<TossResult<TokenEntry>> {
+  private async login(userId: string): Promise<TossLogin | null> {
+    try {
+      return await this.core.connections.sessionFor(userId, TOSS_SERVICE);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * The login's live token: the session's (whoever got it), else a new one. `stale`: the token a call was just refused
+   * with: a different one already in the session is used as the new token; the same one is asked for again.
+   */
+  private async token(userId: string, login: TossLogin, stale: string | null): Promise<TossResult<string>> {
+    const have = login.session.get<TossSession>();
+    if (have?.token && have.token !== stale) return { ok: true, value: have.token };
+    const key = `${userId}\u0000${login.credentialId}`;
+    const busy = this.issuing.get(key);
+    if (busy) return busy;
+    const p = this.issue(userId, login).finally(() => this.issuing.delete(key));
+    this.issuing.set(key, p);
+    return p;
+  }
+
+  private async issue(userId: string, login: TossLogin): Promise<TossResult<string>> {
     const base = this.base();
     if (!base) return { ok: false, error: "off" };
-    const have = this.tokens.get(userId);
-    if (have && !fresh && have.expiresAt > this.core.now() + 60_000) return { ok: true, value: have };
-    const access = this.core.deps.vault.access(userId, { actor: "system" });
-    const cred = await access.find(TOSS_SERVICE).catch(() => null);
-    if (!cred) return { ok: false, error: "not_connected" };
     let status = 0;
-    let entry: TokenEntry | null = null;
+    let got: { token: string; ttl: number } | null = null;
     try {
-      entry = await access.use(cred.id, { action: "toss_token", purpose: "투자 시세 확인(토스증권 읽기)" }, async (secret) => {
-        const body = new URLSearchParams({ grant_type: "client_credentials", client_id: secret.clientKey ?? "", client_secret: secret.secretKey ?? "" });
+      got = await this.core.deps.vault.access(userId, { actor: "system" }).use(login.credentialId, { action: "toss_token", purpose: "투자 시세 확인(토스증권 읽기)" }, async (secret) => {
+        const clientId = (secret.clientId ?? "").trim();
+        const clientSecret = (secret.clientSecret ?? "").trim();
+        // an empty field is the person's to fix: no request with it
+        if (!clientId || !clientSecret) {
+          status = 401;
+          return null;
+        }
+        const body = new URLSearchParams({ grant_type: "client_credentials", client_id: clientId, client_secret: clientSecret });
         const res = await this.fetchFn(`${base}/oauth2/token`, {
           method: "POST",
           headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -201,31 +244,77 @@ export class TossClient {
         const j = (await res.json().catch(() => null)) as Record<string, unknown> | null;
         const token = str(j?.access_token);
         if (!token) return null;
-        const ttl = num(j?.expires_in) ?? 3600;
-        return { token, expiresAt: this.core.now() + Math.max(60, ttl) * 1000, account: str(secret.accountSeq) ?? "1" };
+        const ttl = Math.max(60_000, (num(j?.expires_in) ?? 3600) * 1000 - TOSS_TOKEN_SKEW_MS);
+        return { token, ttl };
       });
     } catch {
       return { ok: false, error: "down" };
     }
-    if (!entry) return { ok: false, error: status === 403 ? "ip_not_allowed" : status === 429 ? "rate_limited" : status === 401 || status === 400 ? "auth" : "down" };
-    this.tokens.set(userId, entry);
-    return { ok: true, value: entry };
+    if (!got) return { ok: false, error: status === 403 ? "ip_not_allowed" : status === 429 ? "rate_limited" : status === 401 || status === 400 ? "auth" : "down" };
+    // the session expires it (the registry's clock); `exp` is wall-clock ms, as the k-skill tools compare it
+    const prev = login.session.get<TossSession>();
+    login.session.set({ token: got.token, exp: Date.now() + got.ttl, accountSeq: prev?.accountSeq } satisfies TossSession, got.ttl);
+    return { ok: true, value: got.token };
   }
 
-  private async get(userId: string, path: string): Promise<TossResult<unknown>> {
+  /** a refused token leaves the session (the account stays), so neither side sends it again */
+  private drop(login: TossLogin, token: string): void {
+    const cur = login.session.get<TossSession>();
+    if (cur?.token === token) login.session.set({ token: "", exp: 0, accountSeq: cur.accountSeq } satisfies TossSession, 1000);
+  }
+
+  /** the account the person's account reads go to: the session's, else GET /api/v1/accounts (BROKERAGE, else the first) */
+  private async account(userId: string, login: TossLogin): Promise<TossResult<string>> {
+    const seq = login.session.get<TossSession>()?.accountSeq;
+    if (seq) return { ok: true, value: seq };
+    const key = `${userId}\u0000${login.credentialId}`;
+    const busy = this.finding.get(key);
+    if (busy) return busy;
+    const p = this.findAccount(userId, login).finally(() => this.finding.delete(key));
+    this.finding.set(key, p);
+    return p;
+  }
+
+  private async findAccount(userId: string, login: TossLogin): Promise<TossResult<string>> {
+    const r = await this.send(userId, login, "/api/v1/accounts", null);
+    if (!r.ok) return r;
+    const list = Array.isArray(rec(r.value)?.result) ? (rec(r.value)!.result as unknown[]).map(rec).filter((a): a is Record<string, unknown> => !!a) : [];
+    const pick = list.find((a) => a.accountType === "BROKERAGE") ?? list[0];
+    const raw = pick?.accountSeq;
+    const seq = typeof raw === "number" && Number.isFinite(raw) ? String(raw) : str(raw);
+    if (!seq) return { ok: false, error: "down" };
+    const cur = login.session.get<TossSession>();
+    // kept with the live token (an account with no token would outlive the login's next sign-in check)
+    if (cur?.token) login.session.set({ ...cur, accountSeq: seq } satisfies TossSession, Math.max(1000, cur.exp - Date.now()));
+    return { ok: true, value: seq };
+  }
+
+  private async get(userId: string, path: string, o: { account?: boolean } = {}): Promise<TossResult<unknown>> {
+    if (!this.base()) return { ok: false, error: "off" };
+    const login = await this.login(userId);
+    if (!login) return { ok: false, error: "not_connected" };
+    let account: string | null = null;
+    if (o.account) {
+      const a = await this.account(userId, login);
+      if (!a.ok) return a;
+      account = a.value;
+    }
+    return this.send(userId, login, path, account);
+  }
+
+  private async send(userId: string, login: TossLogin, path: string, account: string | null): Promise<TossResult<unknown>> {
     const base = this.base();
     if (!base) return { ok: false, error: "off" };
-    let fresh = false;
+    let stale: string | null = null;
     let lastStatus = 0;
     for (let attempt = 0; attempt < 2; attempt++) {
-      const t = await this.token(userId, fresh);
+      const t = await this.token(userId, login, stale);
       if (!t.ok) return t;
       let res: Response;
       try {
-        res = await this.fetchFn(`${base}${path}`, {
-          headers: { authorization: `Bearer ${t.value.token}`, "X-Tossinvest-Account": t.value.account },
-          signal: AbortSignal.timeout(TOSS_TIMEOUT_MS),
-        });
+        const headers: Record<string, string> = { authorization: `Bearer ${t.value}` };
+        if (account) headers["X-Tossinvest-Account"] = account;
+        res = await this.fetchFn(`${base}${path}`, { headers, signal: AbortSignal.timeout(TOSS_TIMEOUT_MS) });
       } catch {
         return { ok: false, error: "down" };
       }
@@ -237,17 +326,15 @@ export class TossClient {
       await res.body?.cancel().catch(() => undefined);
       // 401 and 403: once more with a new token (D6: the same 403 with old and new tokens = the allowed IP)
       if ((res.status === 401 || res.status === 403) && attempt === 0) {
-        this.tokens.delete(userId);
-        fresh = true;
+        stale = t.value;
         continue;
       }
+      // the new token refused too: the app's key is (401), so neither side sends that token again
+      if (res.status === 401) this.drop(login, t.value);
       break;
     }
     if (lastStatus === 403) return { ok: false, error: "ip_not_allowed" };
-    if (lastStatus === 401) {
-      this.tokens.delete(userId);
-      return { ok: false, error: "auth" };
-    }
+    if (lastStatus === 401) return { ok: false, error: "auth" };
     if (lastStatus === 429) return { ok: false, error: "rate_limited" };
     return { ok: false, error: "down" };
   }
@@ -258,7 +345,7 @@ export class TossClient {
   }
 
   async holdings(userId: string): Promise<TossResult<TossHolding[]>> {
-    const r = await this.get(userId, "/api/v1/holdings");
+    const r = await this.get(userId, "/api/v1/holdings", { account: true });
     return r.ok ? { ok: true, value: readHoldings(r.value) } : r;
   }
 
@@ -275,7 +362,7 @@ export class TossClient {
   }
 
   async sellable(userId: string, symbol: string): Promise<TossResult<number | null>> {
-    const r = await this.get(userId, `/api/v1/sellable-quantity?symbol=${encodeURIComponent(symbol)}`);
+    const r = await this.get(userId, `/api/v1/sellable-quantity?symbol=${encodeURIComponent(symbol)}`, { account: true });
     return r.ok ? { ok: true, value: readSellable(r.value) } : r;
   }
 }
