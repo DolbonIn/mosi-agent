@@ -56,6 +56,8 @@ qa/*.test.ts             bun unit tests (sse, hangul, api contract, agent state,
     top/¼/mid/¾/bottom of a list and of a thread with cards under the bar, and fails when the worst case is below
     4.5:1, or when the droplet's luminance is within ×1.1 of the bar's).
   - The Dynamic Island is the only pure black. Labels use `--label` #1D1D1F and `--label-2` #6E6E73.
+  - `--caution` (투자 only, DD 1935 §0-3): the 경계 signal and worsening figures, light #9A5B00 (5.43:1 on paper),
+    dark #FFB340. 투자 has no up/down colour; `--danger` there means risk (위험, 실제 주문), never a falling price.
 - **Never use:** emoji, particle bursts, neon glows, gradients on chrome, or `will-change` on scaled text.
 - **Accessibility and type.**
   - Targets ≥ 44 px and inputs ≥ 16 px.
@@ -163,7 +165,10 @@ export function ExploreScreen({ route }: ScreenProps) {
   that opened it, put the same `layoutId` on the row (`ListRow layoutId`) and pass it as `titleLayoutId` when you
   push.
 - **Top bar API** (`app/topBarStore.ts`):
-  - `useTopBarRight({ label?, icon?, ariaLabel?, onPress(el) } | null)` sets the trailing capsule.
+  - `useTopBarRight({ label?, icon?, ariaLabel?, tone?, onPress?(el) } | null)` sets the trailing capsule.
+    - `tone: "danger"` draws the label in `--danger` (투자's 실제 주문).
+    - A new label or tone re-shapes the same capsule (FB4-1): the width springs to the new words' (`morph`, measured on a hidden copy), the colour eases, and the words swap.
+    - Without `onPress` it is a status, not a button (DD 2008 §1): no press, cursor, role or tabindex. Assistive tech reads `ariaLabel`, and the words are hidden from it.
   - `useTopBarCenter((el) => …)` makes the avatar capsule tappable (for example, to open the agent profile sheet).
   - The left circle is the menu, or a back chevron when the tab has a pushed screen.
 - **Composer:** don't add your own floating bar. Portal into the bottom chrome group so it shares that group's
@@ -308,6 +313,7 @@ Sheet behaviour:
 | `EmptyState` | `icon` (a bare glyph, no plate), `title`, `body?`, `action?` | with action |
 | `Text` | `copy(node, { sentences, clamp })`, `<Sentences text sentences? clamp?>`, `tied(text, { clamp })`, `glued(text)` (flowing text), `sentencesOf(text)`, `emWidth(text)` (an upper bound in em); class `.t-copy` on the slot (Line breaks) | 줄바꿈: the old lines in every foundation slot |
 | `AdaptivePointer` | — (fine pointers only, its own chunk — phones never load it; nothing renders and the system cursor stays until a real mouse moves: ≥ 4 moves, ≤ 100 ms apart, ≥ 6 px, no press between — so no dot at first paint, on touch or from automated clicks; hides after 4 s still; snaps into controls ≤ 160×96, I-beam over inputs; `data-pointer="none"` opts out) | desktop screenshot |
+| `Invest` (투자 parts, DD 1935 §0-4, §1) | `SignalMark {signal}` (quant's 16×16 shape, currentColor, aria-hidden) · `SignalLabel {signal}` (mark + 위험/경계/정상/확인 불가 in the signal's colour) · `InvestNum {value}` (a string from `@pickle/quant`'s formatter, tabular; missing → the 확인 불가 mark + words) · `IvRows` / `IvRow {label, value}` (subhead, word `--label-2` left, value right, hairline + 12 above, 6 between) · `IvFoot` (footnote) · `IvHero` (28/600) · `IvDisclaimer` (quant's `DISCLAIMER`, word for word) · `ModeWord {mode}` (모의 `--label-2` / 실제 `--danger`, 13/600). No screen formats a number itself | gallery 투자 · 신호 · 행 (with the capsule switch 초대 / 모의 / 실제) |
 | `geometry` | `concentric(outer, inset)`, `capsule(h)`, `R` (device 55, sheet 38/28, card 24, tile 12, group 20, tabbar 34, droplet 28, composer 28, control 22, field 14), `MIN_TARGET` | — |
 
 ## Line breaks (`src/ui/Text.tsx`)

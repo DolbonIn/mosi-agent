@@ -1,12 +1,13 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useAgent } from "../api/store";
 import { ContentSwap } from "../motion/ContentSwap";
+import { t } from "../motion/springs";
 import { Avatar, DEFAULT_AVATAR } from "../ui/Avatar";
 import { BlurGroup, Glass } from "../ui/Glass";
 import { R } from "../ui/geometry";
 import { Icon } from "../ui/Icon";
 import { nav, useNav } from "./nav";
-import { useTopBar } from "./topBarStore";
+import { useTopBar, type TopBarAction } from "./topBarStore";
 import "./TopBar.css";
 
 /**
@@ -46,24 +47,81 @@ export function TopBar() {
       </Glass>
       <Center title={title} agent={chatRoot} name={name} spec={spec} onCenter={onCenter} />
       <div className="tb-right-slot">
-        {right && (
-          <Glass
-            as="button"
-            blur="group"
-            text
-            radius={R.topbar}
-            interactive
-            lens
-            className={right.label ? "tb-capsule" : "tb-circle"}
-            aria-label={right.ariaLabel ?? right.label}
-            onClick={(e: React.MouseEvent<HTMLElement>) => right.onPress(e.currentTarget)}
-          >
-            {right.icon && <Icon name={right.icon} size={20} weight="medium" />}
-            {right.label && <span className="tb-capsule-label">{right.label}</span>}
-          </Glass>
-        )}
+        {right && <Trailing action={right} />}
       </div>
     </BlurGroup>
+  );
+}
+
+/**
+ * The trailing control: a circle (icon only) or a capsule. A new label or tone re-shapes the same capsule (FB4-1, never
+ * a second capsule faded in): its width springs to the new words' (`morph`, measured on a hidden copy), its colour
+ * eases, and the words swap (content swap). With no onPress it is a status: plain glass, no press, no role, its
+ * ariaLabel read in place of the label (DD 2008 §1).
+ */
+function Trailing({ action }: { action: TopBarAction }) {
+  const { label, icon, tone, onPress } = action;
+  const sizer = useRef<HTMLSpanElement>(null);
+  const [width, setWidth] = useState<number | null>(null);
+  // the capsule's resting width = a hidden copy's (same class, so the same padding, gap and type, and text scale)
+  useLayoutEffect(() => {
+    const el = sizer.current;
+    if (!el) return setWidth(null);
+    const update = () => setWidth(el.offsetWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [label]);
+  const inner = (
+    <>
+      {icon && <Icon name={icon} size={20} weight="medium" />}
+      {label && (
+        <ContentSwap swapKey={label} className="tb-capsule-label">
+          {label}
+        </ContentSwap>
+      )}
+    </>
+  );
+  const shape = label ? "tb-capsule" : "tb-circle";
+  const size = label && width ? { initial: false as const, animate: { width }, transition: t("morph") } : {};
+  const copy = label && (
+    <span ref={sizer} className="tb-capsule tb-sizer" aria-hidden="true">
+      {icon && <Icon name={icon} size={20} weight="medium" />}
+      <span className="tb-capsule-label">{label}</span>
+    </span>
+  );
+  if (!onPress)
+    return (
+      <>
+        <Glass as="div" blur="group" text radius={R.topbar} className={`${shape} tb-status`} data-tone={tone} {...size}>
+          <span className="sr-only">{action.ariaLabel ?? label}</span>
+          <span className="tb-status-face" aria-hidden="true">
+            {inner}
+          </span>
+        </Glass>
+        {copy}
+      </>
+    );
+  return (
+    <>
+      <Glass
+        as="button"
+        blur="group"
+        text
+        radius={R.topbar}
+        interactive
+        lens
+        className={shape}
+        data-tone={tone}
+        aria-label={action.ariaLabel ?? label}
+        onClick={(e: React.MouseEvent<HTMLElement>) => onPress(e.currentTarget)}
+        {...size}
+      >
+        {inner}
+      </Glass>
+      {copy}
+    </>
   );
 }
 

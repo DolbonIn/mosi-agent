@@ -18,6 +18,7 @@ import { EmptyState } from "../ui/EmptyState";
 import { BlurGroup, Glass } from "../ui/Glass";
 import { R } from "../ui/geometry";
 import { Icon, ICON_NAMES } from "../ui/Icon";
+import { IvDisclaimer, IvFoot, IvHero, IvRow, IvRows, ModeWord, SignalLabel } from "../ui/Invest";
 import { LargeTitle } from "../ui/LargeTitle";
 import { List, ListRow } from "../ui/List";
 import { Odometer } from "../ui/Odometer";
@@ -29,7 +30,10 @@ import { Spotlight } from "../ui/Spotlight";
 import { copy } from "../ui/Text";
 import { TextField } from "../ui/TextField";
 import { Toggle } from "../ui/Toggle";
+import { estimate, footLine, krw, kstWithEastern, pct, pp, rate, shares, usd, type Signal } from "@pickle/quant";
 import "./Gallery.css";
+
+const SIGNALS: Signal[] = ["risk", "caution", "normal", "unknown"];
 
 /**
  * Dev gallery (/?gallery=1): every primitive in every state inside the real shell (top bar, tab bar, island,
@@ -249,8 +253,16 @@ export default function Gallery() {
   const [swap, setSwap] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [composer, setComposer] = useState(false);
+  const [capsule, setCapsule] = useState<"invite" | "mock" | "real">("invite");
 
-  useTopBarRight({ label: "초대", onPress: () => island.banner({ icon: "people", title: "초대 링크를 복사했어요", body: "친구가 가입하면 티켓 3장을 드려요." }) });
+  // 초대 (a button), or 투자's order-mode capsule (a status, DD 2008 §1): 모의 ↔ 실제 morphs the same capsule
+  useTopBarRight(
+    capsule === "invite"
+      ? { label: "초대", onPress: () => island.banner({ icon: "people", title: "초대 링크를 복사했어요", body: "친구가 가입하면 티켓 3장을 드려요." }) }
+      : capsule === "real"
+        ? { label: "실제 주문", tone: "danger", ariaLabel: "지금은 실제 주문이에요" }
+        : { label: "모의 주문", ariaLabel: "지금은 모의 주문이에요" },
+  );
   // the centre's agent (at the top, before the large title scrolls under the bar) opens a sheet like 채팅's: a source
   // with its own opacity transition (foundation.spec "close": it is whole on the first close frame)
   useTopBarCenter((el) => presentSheet({ source: el, title: "나의 모시", render: () => <p className="label-2">상단 바 가운데에서 열린 시트예요. 닫으면 이름이 그 자리에 바로 있어요.</p> }));
@@ -713,6 +725,45 @@ export default function Gallery() {
               <span className="gal-icon-name">{n}</span>
             </span>
           ))}
+        </div>
+      </Section>
+
+      {/* 투자's shared parts (DD 1935 §0-4, §1): synthetic figures, formatted by @pickle/quant */}
+      <Section id="invest" title="투자 · 신호 · 행" note="숫자는 모두 합성 값이에요." bare>
+        <div className="gal-stack">
+          <SegmentedControl
+            role="radiogroup"
+            label="상단 바 캡슐"
+            value={capsule}
+            onChange={setCapsule}
+            options={[
+              { value: "invite", label: "초대" },
+              { value: "mock", label: "모의" },
+              { value: "real", label: "실제" },
+            ]}
+          />
+          <Card padding={16} className="gal-invest">
+            <div className="gal-invest-signals">
+              {SIGNALS.map((s) => (
+                <SignalLabel key={s} signal={s} />
+              ))}
+            </div>
+            <IvHero value={usd(32.57)} />
+            <IvRows>
+              <IvRow label="오늘" value={pct(-1.04)} />
+              <IvRow label="손절선까지" value={pct(-7.39)} />
+              <IvRow label="보유" value={shares(47)} />
+              <IvRow label="평가액" value={estimate(usd(1204))} />
+              <IvRow label="HY 스프레드" value={rate(4.12)} />
+              <IvRow label="전월 대비" value={pp(0.24)} />
+              <IvRow label="삼성전자" value={krw(189_400)} />
+              <IvRow label="시장 단계" value={<SignalLabel signal="caution" />} />
+              <IvRow label="공매도 잔고" value={null} />
+              <IvRow label="주문 모드" value={<ModeWord mode={capsule === "real" ? "real" : "mock"} />} />
+            </IvRows>
+            <IvFoot>{footLine(kstWithEastern(Date.UTC(2026, 10, 26, 15, 45)), "토스증권", "A")}</IvFoot>
+            <IvDisclaimer />
+          </Card>
         </div>
       </Section>
     </Screen>

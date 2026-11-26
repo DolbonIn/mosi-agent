@@ -32,6 +32,9 @@
      white on it is 5.38:1 (dark --danger #ff6961 would be 2.82:1). Not redefined under [data-theme="dark"]. */
   --danger-solid: #d70015;
   --danger-fill: rgb(255 59 48 / 0.12);
+  /* 경계 (caution) in 투자 only: the caution and worsening signals, never a direction (DD 1935 §0-3) — 5.43:1 on paper,
+     4.98:1 on --bg */
+  --caution: #9a5b00;
   --island: #000000; /* the ONLY pure-black element */
   --island-label: #f5f5f7;
   --call-end: #d70015; /* end-call red on the island and the call card, both themes (always black): label 4.9:1 */
@@ -155,6 +158,7 @@
   --accent-wash: rgb(10 132 255 / 0.2);
   --danger: #ff6961;
   --danger-fill: rgb(255 69 58 / 0.18);
+  --caution: #ffb340; /* 9.54:1 on dark paper */
   --press-tint: rgb(235 235 245 / 0.12);
   --hover-tint: rgb(235 235 245 / 0.06);
   --scrim: rgb(0 0 0 / 0.5);

@@ -1,0 +1,107 @@
+/* 투자's shared parts (DD 1935 §0-3, §0-4, §1). Cards keep the .ccard frame: paper, r24, padding 16, gap 12, no shadow;
+   inside a card, hairlines and space divide, never a card or a plate. Every size follows --text-scale; nothing is
+   under 13px. */
+
+/* a signal: the mark (1em, currentColor) beside its word, both in the signal's colour. Colour is never the only cue */
+.sigmark {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  vertical-align: -0.125em;
+}
+.ivsig {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: nowrap;
+}
+[data-signal="risk"] {
+  color: var(--danger);
+}
+[data-signal="caution"] {
+  color: var(--caution);
+}
+[data-signal="normal"] {
+  color: var(--label);
+}
+[data-signal="unknown"] {
+  color: var(--label-2);
+}
+
+/* the rows of a card: word left (--label-2), value right (--label, tabular); a hairline and 12px above the group */
+.ivrows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--separator);
+}
+.ivrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+}
+.ivrow-label {
+  flex: none;
+  max-width: 55%;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+.ivrow-value {
+  min-width: 0;
+  color: var(--label);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  word-break: keep-all;
+}
+
+/* the card's foot: observed time and source in one line */
+.ivfoot {
+  margin: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+
+/* the fixed closing sentence, once per message under the last 투자 card's foot (DD 1935 §0-7): never folded */
+.ivdisclaimer {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--separator);
+  font-size: var(--t-footnote);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+
+/* the one big number of a card */
+.ivhero {
+  font-family: var(--font-display);
+  font-size: var(--t-title1);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* where a number is missing: the 확인 불가 mark and words, in its place */
+.ivunknown {
+  color: var(--label-2);
+}
+
+/* 모의 / 실제: text, no chip or plate */
+.ivmode {
+  font-size: var(--t-footnote);
+  font-weight: 600;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.ivmode[data-mode="real"] {
+  color: var(--danger);
+}

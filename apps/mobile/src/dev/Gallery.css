@@ -159,3 +159,16 @@
   font-size: var(--t-subhead);
   line-height: 1.5;
 }
+
+/* 투자 parts: chat's .ccard frame (paper, r24, padding 16, gap 12) */
+.gal-invest {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gal-invest-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: var(--t-subhead);
+}

@@ -44,6 +44,31 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--label);
+  transition: color var(--dur-fade) var(--ease-fade);
+}
+/* a state the person must not miss (투자's 실제 주문): the words in --danger; the change eases on the same capsule */
+.tb-capsule[data-tone="danger"] {
+  color: var(--danger);
+}
+/* a status capsule (no onPress): not a button, so no pointer cursor and nothing to press */
+.tb-status {
+  cursor: default;
+  user-select: none;
+}
+.tb-status-face {
+  display: contents;
+}
+/* the hidden copy that gives the capsule its resting width (TopBar's Trailing): laid out, never painted */
+.tb-sizer {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tb-capsule {
+  white-space: nowrap;
+  overflow: hidden;
+  justify-content: center;
 }
 /* the centre: plain text on the scroll edge, never a capsule (MOTION-SPEC §8.17). Only the agent button takes taps;
    an empty centre or a title lets them through like the rest of the bar's free space. */

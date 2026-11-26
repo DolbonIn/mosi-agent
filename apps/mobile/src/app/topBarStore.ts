@@ -14,7 +14,12 @@ export interface TopBarAction {
   label?: string;
   icon?: AppIconName;
   ariaLabel?: string;
-  onPress: (el: HTMLElement) => void;
+  /** the label's colour: "danger" for a state the person must not miss (투자's "실제 주문", DD 1935 §3-1); default
+   * --label. A new label or tone on the same capsule morphs it (colour + content swap), never a second capsule. */
+  tone?: "danger";
+  /** what a tap does; absent, the capsule is a status, not a button: no press, no cursor, no role (DD 2008 §1), and
+   * `ariaLabel` is what assistive tech reads in place of the label */
+  onPress?: (el: HTMLElement) => void;
 }
 
 export interface TopBarState {
@@ -45,6 +50,8 @@ export function useTopBarRight(action: TopBarAction | null) {
   ref.current = action;
   const label = action?.label;
   const icon = action?.icon;
+  const tone = action?.tone;
+  const pressable = !!action?.onPress;
   const has = !!action;
   const src = useRouteActiveSource();
   useEffect(() => {
@@ -52,8 +59,9 @@ export function useTopBarRight(action: TopBarAction | null) {
     const stable: TopBarAction = {
       label,
       icon,
+      tone,
       ariaLabel: ref.current?.ariaLabel,
-      onPress: (el) => ref.current?.onPress(el),
+      onPress: pressable ? (el) => ref.current?.onPress?.(el) : undefined,
     };
     const release = () => {
       if (topBarStore.get().right === stable) topBarStore.patch({ right: null });
@@ -65,7 +73,7 @@ export function useTopBarRight(action: TopBarAction | null) {
       off();
       release();
     };
-  }, [has, label, icon, src]);
+  }, [has, label, icon, tone, pressable, src]);
 }
 
 /** Set what tapping the centre's agent (face + name, shown at 채팅's root) does while this screen is the visible route. */

@@ -16,6 +16,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@pickle/protocol": "workspace:*",
+        "@pickle/quant": "workspace:*",
         "@pickle/vault": "workspace:*",
         "@react-three/fiber": "^9.8.2",
         "framer-motion": "^14.12.0",
