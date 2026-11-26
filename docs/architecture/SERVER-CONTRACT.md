@@ -767,6 +767,41 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   to the person for Toss's allowed-IP list (never looked up). A 403 or 429 from a public source rests it until the next
   day; a 200 that is not its data (a block page) too. Default User-Agent, one request at a time per host, 10 s limit.
 
+## Invest (B2a) — the ledger, forecasts and events
+
+Each person's own rows (team-lead 0052); no model call behind any route. Code: `apps/server/src/invest/ledger.ts`,
+`forecasts.ts`, `events.ts`. Field errors are 400 with the field's Korean sentence (`invalid_ledger`, `invalid_forecast`,
+`invalid_event`).
+- **Ledger** (B2's nine fields): `GET /api/invest/ledger?id=&limit=` → `{items: InvestLedgerEntry[]}` (one id's rows by
+  as_of, newest first, or the latest written; the person's own and the shared rows, `shared: true`, never another's).
+  `POST /api/invest/ledger InvestLedgerDraft` → 201 entry (author `person`). id `[letters digits . _ -]` ≤ 64; asOf and
+  publishedAt a day or an ISO time with its zone, not past two days ahead; unit usd krw index pct pctp qty bp count T GW
+  $B text (text: `valueText` only; else a finite `value`); a definition always (L2: no definition, no row); source,
+  `sourceTier` T1–T4, `confidence` A/B+/B/C (T4 is C only), url http(s) without credentials; `leadClass` L1/L2/G/T. The
+  same id and asOf again replaces the row; a person's rewrite without `revision` gets "{KST day} 고침". The code's series
+  (`quote.*`, `atr14.*`) answer 400 `ledger_reserved`, a row code wrote 409 `ledger_locked`. 5,000 own rows (400
+  `too_many_ledger_rows`). The watch writes its quote and ATR rows through the same path (author `code`, tier T2).
+- **Forecasts** (B6): `POST /api/invest/forecasts InvestForecastDraft {claim, p (0–1, ends out), interval?, dueOn (KST,
+  today to 3 years), criterion, ledgerIds? ≤ 10}` → 201 `InvestForecast`. Made once: no edit, no delete (500 per person).
+  `PATCH /api/invest/forecasts/:id {outcome: hit|miss|partial|null, actual?, errorCause?, rev?}` — the person's judgement
+  (null takes it back); `errorCause` (data interpretation model timing narrative) only with miss or partial; a stale
+  `rev` → 409 `forecast_changed {forecast}`; another person's id → 404 `forecast_not_found`. `GET /api/invest/forecasts`
+  → `InvestForecastList {items, score, outcomes, causes}`: waiting first, then open (by due day), then judged; the
+  statuses' words 기한 전 · 판정 기다림 · 적중 · 빗나감 · 부분 적중 and the causes' words and sentences are the server's (DD 0109
+  §2). Score by due day: direction hit rate over 3 and 12 months, the 12-month Brier score, partial hits out of both
+  (`partialFoot`); a window with nothing judged has no row; nothing judged → `empty` "아직 판정한 예측이 없어요.".
+- **Events**: `POST /api/invest/events InvestEventDraft {market, day (the market's date, today to 2 years), time? (the
+  market's HH:MM), kind (earnings macro policy contract other), title ≤ 80, symbol? (its market), source, sourceTier,
+  confidence, url?, remind?}` → 201 `InvestEvent` (`heading` symbol first, `when` "11월 26일 06:20(미 동부 16:20)" /
+  "11월 25일 10:00" / "미 동부 11월 26일 · 시각 미정", `foot` "출처 · 등급", `remindOn`, `reminded`). One per person, market,
+  day and title (409 `event_exists {event}`); 200 upcoming. `PATCH /api/invest/events/:id {remind}` is the only change;
+  `DELETE /api/invest/events/:id`. `GET /api/invest/events?from&to` (default yesterday KST + 60 days, 400 at most).
+- **D-1** (team-lead 0056, DD 0109 §1): from 08:00 KST on the day before the event's market date (whatever the market
+  does that day), one `invest_event` card per person in the invest thread with every event of theirs due (one row each,
+  KST order; title the heading, or "일정 N개"), `disclaimer: true`, no buttons; banner and push title alone, push tag
+  `invest:event:<day>`. Once per person, market, day and title by any path: the claim and the card are one transaction;
+  a deleted event added back sends nothing again; B2c's daily report takes the same claim when it carries the line.
+
 ## Web Push (B1c) — the lock-screen line
 
 - Nothing is sent unless the server env has `PICKLE_PUSH_SUBJECT` (`mailto:` or `https:`, the VAPID contact; team-lead

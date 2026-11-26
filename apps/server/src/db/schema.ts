@@ -483,4 +483,67 @@ export const MIGRATIONS: string[] = [
   CREATE INDEX push_subscriptions_user ON push_subscriptions(user_id, created_at);
   CREATE INDEX push_subscriptions_session ON push_subscriptions(session_hash);
   `,
+  // v10 (B2a, team-lead 0052 · 0056, DD 0109): the ledger's source name apart from its tier (T1–T4; v8 rows were all
+  // quotes and ATRs from 토스증권 or Yahoo, both T2); the forecast ledger (B6: probability, interval, due day, criterion,
+  // outcome, error cause); the event calendar and its D-1 reminders, one per person, event (market and title) and day
+  // whichever way it went (a card now, the daily report's line in B2c)
+  `
+  ALTER TABLE invest_ledger ADD COLUMN source TEXT;
+  UPDATE invest_ledger SET source = source_tier, source_tier = 'T2' WHERE source IS NULL;
+  CREATE INDEX invest_ledger_recent ON invest_ledger(user_id, created_at);
+  CREATE TABLE invest_forecasts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    made_on TEXT NOT NULL,
+    claim TEXT NOT NULL,
+    p REAL NOT NULL,
+    lo REAL,
+    hi REAL,
+    unit TEXT,
+    due_on TEXT NOT NULL,
+    criterion TEXT NOT NULL,
+    outcome TEXT,
+    actual REAL,
+    error_cause TEXT,
+    resolved_at INTEGER,
+    author TEXT NOT NULL,
+    ledger_ids TEXT NOT NULL DEFAULT '[]',
+    proposal_json TEXT,
+    rev INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE INDEX invest_forecasts_user ON invest_forecasts(user_id, due_on);
+  CREATE TABLE invest_events (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    market TEXT NOT NULL,
+    day TEXT NOT NULL,
+    time TEXT,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    symbol TEXT,
+    source TEXT NOT NULL,
+    source_tier TEXT NOT NULL,
+    confidence TEXT NOT NULL,
+    url TEXT,
+    author TEXT NOT NULL,
+    remind INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE UNIQUE INDEX invest_events_one ON invest_events(user_id, market, day, title);
+  CREATE INDEX invest_events_day ON invest_events(day, user_id);
+  CREATE TABLE invest_event_reminders (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    market TEXT NOT NULL,
+    day TEXT NOT NULL,
+    title TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    via TEXT NOT NULL,
+    message_id TEXT,
+    sent_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, market, day, title)
+  );
+  `,
 ];

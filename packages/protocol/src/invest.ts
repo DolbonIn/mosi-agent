@@ -2,6 +2,7 @@
  * Invest wire types (agent-runtime 2006 §5–§7, 2039, 2052; DD 1935, 2008, 2010, 2015-b, 2042-b). B1 serves the
  * overview, symbols, rules, watchlist, Toss status, settings, the `invest` event and the alert and mock stop cards; the
  * other card types are here so every board shares one shape (B2: rule change, daily, level chart; C: deck; B4: real).
+ * B2a adds the indicator ledger, the forecast ledger, the event calendar and the D-1 card (`invest_event`).
  *
  * Every figure and time text is made by the server with @pickle/quant format.ts; screens show `text` as it comes and
  * never format a number again (DD 1935 §0-5). A `v: null` figure reads "확인 불가".
@@ -337,7 +338,210 @@ export interface InvestDeckCard {
   disclaimer?: true;
 }
 
-export type InvestCard = InvestAlertCard | InvestStopCard | InvestRuleChangeCard | InvestDailyCard | InvestLevelChartCard | InvestDeckCard;
+/**
+ * The D-1 reminder (DD 0109 §1; team-lead 0056: 08:00 KST the day before the event's market date). One card per person
+ * and send: one row for one event, several rows under "일정 N개". No buttons, no tap target; A17 at the end.
+ */
+export interface InvestEventCard {
+  type: "invest_event";
+  /** the event's heading (symbol first) when one row; "일정 N개" when several */
+  title: string;
+  rows: { eventId: ID; title: string; when: string; foot: string }[];
+  disclaimer?: true;
+}
+
+export type InvestCard = InvestAlertCard | InvestStopCard | InvestRuleChangeCard | InvestDailyCard | InvestLevelChartCard | InvestDeckCard | InvestEventCard;
+
+// ───────────── B2a: the indicator ledger, the forecast ledger, the event calendar ─────────────
+
+/**
+ * A source's tier (B1): T1 primary (filings, rules, contracts, official series), T2 measured (APIs that measure, such
+ * as 토스증권 and Yahoo), T3 analysis (brokers, research), T4 field (posts, videos, interviews: grade C until a T1 or T2
+ * source confirms it)
+ */
+export type InvestTier = "T1" | "T2" | "T3" | "T4";
+/** B1.2: L1 leads alone, L2 leads only in a pair, G moves with, T trails (checks only) */
+export type InvestLeadClass = "L1" | "L2" | "G" | "T";
+/** a ledger value's unit: the invest units, 조 tokens (T), GW, $B, or a worded value (text) */
+export type InvestLedgerUnit = InvestUnit | "T" | "GW" | "$B" | "text";
+/** who wrote a ledger, forecast or event row: the server's code, the model (B2b tools), or the person (these APIs) */
+export type InvestAuthor = "code" | "model" | "person";
+
+/** one row of the indicator ledger (B2's nine fields). GET /api/invest/ledger */
+export interface InvestLedgerEntry {
+  id: string;
+  /** the day or time the figure describes: YYYY-MM-DD or an ISO time */
+  asOf: string;
+  /** when it was published or read, when that differs */
+  publishedAt: string | null;
+  /** a number and its text in `unit` (format.ts); null for a worded value */
+  value: { v: number; text: string } | null;
+  valueText: string | null;
+  unit: InvestLedgerUnit;
+  definition: string;
+  source: string;
+  sourceTier: InvestTier;
+  url: string | null;
+  revision: string | null;
+  confidence: InvestGrade;
+  leadClass: InvestLeadClass | null;
+  author: InvestAuthor;
+  /** a row the server keeps for everyone (a public series), not this person's */
+  shared: boolean;
+  createdAt: Millis;
+}
+
+/** POST /api/invest/ledger (author person; the same checks guard the model's tool) */
+export interface InvestLedgerDraft {
+  id: string;
+  asOf: string;
+  publishedAt?: string | null;
+  value?: number | null;
+  valueText?: string | null;
+  unit: InvestLedgerUnit;
+  definition: string;
+  source: string;
+  sourceTier: InvestTier;
+  url?: string | null;
+  revision?: string | null;
+  confidence: InvestGrade;
+  leadClass?: InvestLeadClass | null;
+}
+
+export type InvestOutcome = "hit" | "miss" | "partial";
+export type InvestErrorCause = "data" | "interpretation" | "model" | "timing" | "narrative";
+/** open: on or before its due day (기한 전); waiting: past it, not judged (판정 기다림); or the person's judgement */
+export type InvestForecastStatus = "open" | "waiting" | InvestOutcome;
+
+/** one forecast (B6). The person judges it; the model only proposes (B2b) */
+export interface InvestForecast {
+  id: ID;
+  /** KST day it was made */
+  madeOn: string;
+  claim: string;
+  /** the stated probability, 0–1, and its text (65%) */
+  probability: { v: number; text: string };
+  /** the stated interval, both ends in one unit */
+  interval: { lo: number; hi: number; unit: InvestLedgerUnit; text: string } | null;
+  /** KST day; the forecast is judged by it */
+  dueOn: string;
+  /** 12월 31일까지 */
+  dueText: string;
+  criterion: string;
+  status: InvestForecastStatus;
+  /** 기한 전 · 판정 기다림 · 적중 · 빗나감 · 부분 적중 (DD 0109 §2) */
+  statusText: string;
+  actual: { v: number; text: string } | null;
+  /** how far the actual value fell outside the interval, in its unit; 0 inside */
+  intervalError: { v: number; text: string } | null;
+  errorCause: InvestErrorCause | null;
+  /** 데이터 · 해석 · 모델 · 시기 · 이야기 */
+  errorCauseText: string | null;
+  /** the model's proposed judgement (B2b): 모시 제안: 빗나감 · 시기 */
+  proposal: { outcome: InvestOutcome; errorCause: InvestErrorCause | null; text: string } | null;
+  ledgerIds: string[];
+  author: InvestAuthor;
+  resolvedAt: Millis | null;
+  rev: number;
+  createdAt: Millis;
+  updatedAt: Millis;
+}
+
+/** POST /api/invest/forecasts */
+export interface InvestForecastDraft {
+  claim: string;
+  /** 0–1, both ends left out */
+  p: number;
+  interval?: { lo: number; hi: number; unit: InvestLedgerUnit } | null;
+  dueOn: string;
+  criterion: string;
+  ledgerIds?: string[];
+}
+
+/** PATCH /api/invest/forecasts/:id — the person's judgement; outcome null takes it back. `rev` (optional) guards a stale screen */
+export interface InvestForecastJudgement {
+  outcome: InvestOutcome | null;
+  actual?: number | null;
+  errorCause?: InvestErrorCause | null;
+  rev?: number;
+}
+
+/**
+ * The score (B6, DD 0109 §2), over judged forecasts by due day: direction hit rate for 3 and 12 months and the Brier
+ * score for 12 months, partial hits left out of both. The sentences are the server's.
+ */
+export interface InvestForecastScore {
+  /** 방향 적중률 3개월 64% · 목표 65% / 방향 적중률 12개월 … / Brier 점수 0.21 · 목표 0.25 이하 (with its foot); a
+   * window with nothing judged in it has no row */
+  rows: { key: "hit3m" | "hit12m" | "brier"; text: string; foot?: string }[];
+  /** 부분 적중 2건은 두 점수에 넣지 않았어요. */
+  partialFoot?: string;
+  /** 아직 판정한 예측이 없어요. — when nothing is judged */
+  empty?: string;
+  hitRate3m: number | null;
+  hitRate12m: number | null;
+  brier: number | null;
+  /** hits and misses in the 12-month window, and the partial hits beside them */
+  judged: number;
+  partial: number;
+}
+
+/** GET /api/invest/forecasts: the forecasts, the score, and the words of the judging sheet (the app keeps no copy) */
+export interface InvestForecastList {
+  items: InvestForecast[];
+  score: InvestForecastScore;
+  outcomes: { value: InvestOutcome; word: string }[];
+  /** picked for a miss or a partial hit: the short word for tables and counts, the sentence for the list */
+  causes: { value: InvestErrorCause; word: string; sentence: string }[];
+}
+
+export type InvestEventKind = "earnings" | "macro" | "policy" | "contract" | "other";
+
+/** one calendar event. GET /api/invest/events */
+export interface InvestEvent {
+  id: ID;
+  market: InvestMarket;
+  /** the market's date */
+  day: string;
+  /** the market's wall-clock time, HH:MM */
+  time: string | null;
+  kind: InvestEventKind;
+  title: string;
+  symbol: string | null;
+  /** the title as cards show it, the symbol first (DD 0109 §1) */
+  heading: string;
+  /** 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00 · 미 동부 11월 25일 · 시각 미정 · 11월 26일 · 시각 미정 */
+  when: string;
+  source: string;
+  sourceTier: InvestTier;
+  url: string | null;
+  confidence: InvestGrade;
+  /** 출처 · 등급 */
+  foot: string;
+  remind: boolean;
+  /** the KST day its D-1 goes, the day before `day` */
+  remindOn: string;
+  /** its D-1 went (by any path) */
+  reminded: boolean;
+  author: InvestAuthor;
+  createdAt: Millis;
+  updatedAt: Millis;
+}
+
+/** POST /api/invest/events */
+export interface InvestEventDraft {
+  market: InvestMarket;
+  day: string;
+  time?: string | null;
+  kind: InvestEventKind;
+  title: string;
+  symbol?: string | null;
+  source: string;
+  sourceTier: InvestTier;
+  url?: string | null;
+  confidence: InvestGrade;
+  remind?: boolean;
+}
 
 /** PATCH /api/invest/settings */
 export interface InvestSettingsPatch {

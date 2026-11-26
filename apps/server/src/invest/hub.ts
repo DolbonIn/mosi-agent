@@ -18,12 +18,15 @@ import {
   marketDate,
   marketDay,
   marketDaysAfter,
+  marketOf,
   prevSlot,
   type DayInfo,
   type DayOverride,
   type Market,
   type Slot,
 } from "./calendar.ts";
+import { claimReminder, dueReminders, eventCard, eventRecord, noteReminderMessage } from "./events.ts";
+import { writeLedger } from "./ledger.ts";
 import {
   alertBanner,
   alertCallLine,
@@ -95,10 +98,6 @@ export const TOSS_ERROR_TEXT: Readonly<Record<Exclude<TossErrorCode, "not_connec
   off: "지금은 토스증권에 연결할 수 없어요",
 };
 
-export function marketOf(symbol: string): Market {
-  return /^\d{6}$/.test(symbol) ? "KR" : "US";
-}
-
 function kstDayStart(now: number): number {
   const p = kstParts(now);
   return kstToEpoch(p.year, p.month, p.day, 0, 0);
@@ -116,6 +115,7 @@ export class InvestHub {
   private tossTried = new Map<string, number>();
   private connectedMemo = new Map<string, { at: number; v: boolean }>();
   private ticking: Promise<{ slots: number; alerts: number }> | null = null;
+  private reminding: Promise<number> | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private core: Core) {
@@ -126,13 +126,22 @@ export class InvestHub {
 
   /** the 30-second clock; a check runs once per slot (calendar.ts) */
   start(): void {
-    this.timer ??= setInterval(() => void this.tick().catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })), 30_000);
+    this.timer ??= setInterval(() => void this.beat(), 30_000);
+  }
+
+  /** one beat of the clock: the watch's slot when one is due, and the D-1 reminders */
+  async beat(now = this.core.now()): Promise<void> {
+    await Promise.all([
+      this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
+      this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
+    ]);
   }
 
   async stop(): Promise<void> {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     await this.ticking?.catch(() => undefined);
+    await this.reminding?.catch(() => undefined);
   }
 
   // ───────────────────────────── settings and views ─────────────────────────────
@@ -669,6 +678,41 @@ export class InvestHub {
     return alerts;
   }
 
+  // ───────────────────────────── D-1 (team-lead 0056, DD 0109 §1) ─────────────────────────────
+
+  /**
+   * The D-1 reminders due now (events.ts): per person one card with every event of theirs due, each event's reminder
+   * claimed in the same transaction that stores the card, so a second tick, a restart or a later path sends nothing.
+   * B2c: a person whose 08:00 daily report is on gets the line in it instead (the same claim, via "daily").
+   */
+  remindEvents(now = this.core.now()): Promise<number> {
+    if (this.reminding) return this.reminding;
+    this.reminding = Promise.resolve()
+      .then(() => this.sendReminders(now))
+      .finally(() => (this.reminding = null));
+    return this.reminding;
+  }
+
+  private sendReminders(now: number): number {
+    const { core } = this;
+    let sent = 0;
+    for (const [userId, due] of dueReminders(core.db, now)) {
+      try {
+        sent += core.db.tx(() => {
+          const rows = due.filter((r) => claimReminder(core.db, r, "card", now));
+          if (!rows.length) return 0;
+          const card = eventCard(rows);
+          const { messageId } = this.post(userId, card, eventRecord(card), { title: card.title, body: "" }, `event:${rows[0]!.day}`);
+          noteReminderMessage(core.db, rows, messageId);
+          return rows.length;
+        });
+      } catch (err) {
+        core.log.error("invest D-1 failed", { user: userId, err: errInfo(err) });
+      }
+    }
+    return sent;
+  }
+
   // ───────────────────────────── alerts ─────────────────────────────
 
   private ensureThread(userId: string): string {
@@ -767,32 +811,18 @@ export class InvestHub {
       return ok;
     });
     if (!fresh) return false;
-    idb.ledgerPut(db, {
-      userId,
-      id: `quote.${r.symbol}`,
-      asOf: new Date(o.at).toISOString(),
-      value: o.price,
-      unit: market === "US" ? "usd" : "krw",
-      definition: slot.close ? "마감 뒤 확인 가격" : "5분 감시 가격",
-      source: SOURCE_TABLE[o.source].name,
-      url: null,
-      confidence: SOURCE_TABLE[o.source].grade,
-      now,
-    });
+    // both quote sources measure (T2); the ledger checks code's rows like anyone's, and a refused one is logged, never
+    // in the alert's way
+    const ledger = (row: { id: string; asOf: string; value: number; definition: string; source: SourceKey }) => {
+      try {
+        writeLedger(db, userId, { id: row.id, asOf: row.asOf, value: row.value, unit: market === "US" ? "usd" : "krw", definition: row.definition, source: SOURCE_TABLE[row.source].name, sourceTier: "T2", confidence: SOURCE_TABLE[row.source].grade }, "code", now);
+      } catch (err) {
+        core.log.error("invest ledger write failed", { user: userId, id: row.id, err: errInfo(err) });
+      }
+    };
+    ledger({ id: `quote.${r.symbol}`, asOf: new Date(o.at).toISOString(), value: o.price, definition: slot.close ? "마감 뒤 확인 가격" : "5분 감시 가격", source: o.source });
     // the ATR behind a stop's basis, with the day of its last bar (a kept one is up to ATR_KEEP_DAYS market days old)
-    if (stopAtr?.atr)
-      idb.ledgerPut(db, {
-        userId,
-        id: `atr14.${r.symbol}`,
-        asOf: stopAtr.atr.asOf,
-        value: stopAtr.atr.value,
-        unit: market === "US" ? "usd" : "krw",
-        definition: "ATR14 (일봉 14일 평균 실제 범위)",
-        source: SOURCE_TABLE[stopAtr.atr.source].name,
-        url: null,
-        confidence: SOURCE_TABLE[stopAtr.atr.source].grade,
-        now,
-      });
+    if (stopAtr?.atr) ledger({ id: `atr14.${r.symbol}`, asOf: stopAtr.atr.asOf, value: stopAtr.atr.value, definition: "ATR14 (일봉 14일 평균 실제 범위)", source: stopAtr.atr.source });
     if (sellStop) {
       let qty: number | null = null;
       if (this.tossUsable(s, now) && (await this.toss.connected(userId))) {

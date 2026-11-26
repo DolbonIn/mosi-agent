@@ -248,7 +248,7 @@ export function insertCall(db: Db, c: { id: string; user_id: string; ref: string
   db.sql.query("INSERT INTO invest_calls (id, user_id, ref, state, at) VALUES ($id, $user_id, $ref, $state, $at)").run(c);
 }
 
-// ───────────── quotes / ledger ─────────────
+// ───────────── quotes ─────────────
 
 export function quotes(db: Db, userId: string): QuoteRow[] {
   return db.sql.query("SELECT * FROM invest_quotes WHERE user_id = $u").all({ u: userId }) as QuoteRow[];
@@ -267,18 +267,7 @@ export function deleteQuote(db: Db, userId: string, symbol: string): void {
   db.sql.query("DELETE FROM invest_quotes WHERE user_id = $u AND symbol = $s").run({ u: userId, s: symbol });
 }
 
-/** a code-written observation (author code; B2 adds the model's and the person's) */
-export function ledgerPut(
-  db: Db,
-  e: { userId: string; id: string; asOf: string; value: number; unit: string; definition: string; source: string; url: string | null; confidence: string; now: number },
-): void {
-  db.sql
-    .query(
-      `INSERT OR REPLACE INTO invest_ledger (user_id, id, as_of, value, unit, definition, source_tier, url, confidence, author, created_at)
-       VALUES ($u, $id, $asOf, $v, $unit, $def, $src, $url, $conf, 'code', $now)`,
-    )
-    .run({ u: e.userId, id: e.id, asOf: e.asOf, v: e.value, unit: e.unit, def: e.definition, src: e.source, url: e.url, conf: e.confidence, now: e.now });
-}
+// the ledger's one write path is ledger.ts (B2a)
 
 // ───────────── shared cache / source state / previews ─────────────
 

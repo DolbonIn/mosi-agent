@@ -1031,8 +1031,8 @@ describe("B1b daily bars (team-lead 2253)", () => {
     w.up.state.tossPrices.set("SOXL", { price: 26.9 });
     await tickAt(w, 9, 50);
     expect(alerts(w)).toHaveLength(1);
-    const led = w.h.db.sql.query("SELECT as_of, source_tier, confidence FROM invest_ledger WHERE user_id = $u AND id = 'atr14.SOXL'").get({ u: w.uid });
-    expect(led).toEqual({ as_of: "2026-11-27", source_tier: "토스증권", confidence: "A" });
+    const led = w.h.db.sql.query("SELECT as_of, source, source_tier, confidence, author FROM invest_ledger WHERE user_id = $u AND id = 'atr14.SOXL'").get({ u: w.uid });
+    expect(led).toEqual({ as_of: "2026-11-27", source: "토스증권", source_tier: "T2", confidence: "A", author: "code" });
     // Alice's Toss figure under her key; Bob's Yahoo one (public data) is the shared key
     expect(cacheKeys(w, "atr:%")).toEqual(["atr:US:SOXL", `atr:toss:${w.uid}:US:SOXL`]);
   });

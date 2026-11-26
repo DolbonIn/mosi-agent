@@ -21,6 +21,17 @@ import { civilDate, dayNumber, easternOffset, weekday } from "@pickle/quant";
 
 export type Market = "US" | "KR";
 
+/** US: letters first, then letters, digits, "." or "-" (BRK.B); KR: six digits */
+export function normalizeSymbol(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim().toUpperCase();
+  return /^\d{6}$/.test(s) || /^[A-Z][A-Z0-9.-]{0,9}$/.test(s) ? s : null;
+}
+
+export function marketOf(symbol: string): Market {
+  return /^\d{6}$/.test(symbol) ? "KR" : "US";
+}
+
 export interface Session {
   market: Market;
   /** the trading day, YYYY-MM-DD in the market's own time zone */

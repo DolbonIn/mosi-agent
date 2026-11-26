@@ -311,6 +311,16 @@ export function createApp(deps: AppDeps): App {
   r.on("GET", "/api/invest/toss", authed(invest.toss));
   r.on("POST", "/api/invest/toss/check", authed(invest.tossCheck));
   r.on("PATCH", "/api/invest/settings", authed(invest.settings));
+  // invest B2a: the ledger, forecasts and events — no model call behind any of them
+  r.on("GET", "/api/invest/ledger", authed(invest.ledger));
+  r.on("POST", "/api/invest/ledger", authed(invest.addLedger));
+  r.on("GET", "/api/invest/forecasts", authed(invest.forecasts));
+  r.on("POST", "/api/invest/forecasts", authed(invest.addForecast));
+  r.on("PATCH", "/api/invest/forecasts/:id", authed(invest.judgeForecast));
+  r.on("GET", "/api/invest/events", authed(invest.events));
+  r.on("POST", "/api/invest/events", authed(invest.addEvent));
+  r.on("PATCH", "/api/invest/events/:id", authed(invest.patchEvent));
+  r.on("DELETE", "/api/invest/events/:id", authed(invest.removeEvent));
   // Web Push (B1c): the VAPID public key and this session's subscription; the service worker is the app's
   r.on("GET", "/api/push/key", authed(push.key));
   r.on("POST", "/api/push/subscriptions", authedFull(push.save));

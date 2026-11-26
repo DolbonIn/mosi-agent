@@ -8,9 +8,11 @@ import { shares } from "@pickle/quant";
 import type { Core } from "../core.ts";
 import { bad, HttpError, json, notFound, readJson, type Ctx } from "../http.ts";
 import { newId } from "../util.ts";
-import { marketDate } from "./calendar.ts";
+import { marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import * as idb from "./db.ts";
-import { marketOf } from "./hub.ts";
+import { createEvent, deleteEvent, listEvents, setEventRemind } from "./events.ts";
+import { createForecast, ERROR_CAUSES, ERROR_CAUSE_WORD, forecastRows, forecastScore, judgeForecast, listForecasts, OUTCOMES, OUTCOME_WORD } from "./forecasts.ts";
+import { LEDGER_ID_RE, readLedger, writeLedger } from "./ledger.ts";
 import {
   bufferFoot,
   bufferPct,
@@ -47,15 +49,14 @@ export const INVEST_ERRORS = {
   too_many_rules: `규칙은 ${MAX_RULES}개까지 둘 수 있어요.`,
 } as const;
 
+/** ?limit=N, a whole number; anything else is the route's default */
+function limitOf(c: Ctx): number | undefined {
+  const v = c.url.searchParams.get("limit");
+  return v !== null && /^\d{1,4}$/.test(v) ? Number(v) : undefined;
+}
+
 const hasRules = (n: number) => `이 종목에 규칙이 ${n}개 있어요. 규칙과 함께 뺄지 다시 골라 주세요.`;
 const invalid = (message: string) => bad(message, "invalid_rule");
-
-/** US: letters first, then letters, digits, "." or "-" (BRK.B); KR: six digits */
-export function normalizeSymbol(v: unknown): string | null {
-  if (typeof v !== "string") return null;
-  const s = v.trim().toUpperCase();
-  return /^\d{6}$/.test(s) || /^[A-Z][A-Z0-9.-]{0,9}$/.test(s) ? s : null;
-}
 
 function priceOf(v: unknown, label: string): number {
   if (typeof v !== "number" || !Number.isFinite(v)) throw invalid(`${label}을 숫자로 넣어 주세요.`);
@@ -429,6 +430,41 @@ export function investRoutes(core: Core) {
       }
       await hub().publish(userId);
       return json(await hub().settingsView(userId));
+    },
+
+    // ── B2a: the ledger, the forecast ledger, the event calendar (each person's own; the model writes through B2b) ──
+
+    ledger: async (c: Ctx, userId: string) => {
+      const id = c.url.searchParams.get("id");
+      if (id !== null && !LEDGER_ID_RE.test(id)) throw bad("id가 올바르지 않아요.", "invalid_ledger");
+      return json({ items: readLedger(core.db, userId, { id: id ?? undefined, limit: limitOf(c) }) });
+    },
+
+    addLedger: async (c: Ctx, userId: string) => json(writeLedger(core.db, userId, await readJson(c.req), "person", core.now()), 201),
+
+    forecasts: async (c: Ctx, userId: string) => {
+      const now = core.now();
+      return json({
+        items: listForecasts(core.db, userId, now, limitOf(c) ?? 100),
+        score: forecastScore(forecastRows(core.db, userId), now),
+        outcomes: OUTCOMES.map((value) => ({ value, word: OUTCOME_WORD[value] })),
+        causes: ERROR_CAUSES.map((value) => ({ value, ...ERROR_CAUSE_WORD[value] })),
+      });
+    },
+
+    addForecast: async (c: Ctx, userId: string) => json(createForecast(core.db, userId, await readJson(c.req), "person", core.now()), 201),
+
+    judgeForecast: async (c: Ctx, userId: string) => json(judgeForecast(core.db, userId, c.params.id, await readJson(c.req), core.now())),
+
+    events: async (c: Ctx, userId: string) => json({ items: listEvents(core.db, userId, { from: c.url.searchParams.get("from"), to: c.url.searchParams.get("to") }, core.now()) }),
+
+    addEvent: async (c: Ctx, userId: string) => json(createEvent(core.db, userId, await readJson(c.req), "person", core.now()), 201),
+
+    patchEvent: async (c: Ctx, userId: string) => json(setEventRemind(core.db, userId, c.params.id, await readJson(c.req), core.now())),
+
+    removeEvent: async (c: Ctx, userId: string) => {
+      deleteEvent(core.db, userId, c.params.id);
+      return json({ ok: true });
     },
   };
 }
