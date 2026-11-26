@@ -1,8 +1,8 @@
 import type { ID, ServerEvent } from "@pickle/protocol";
 import { island } from "../app/island";
-import { koreanMessage } from "./client";
+import { koreanMessage, QUOTA_RESET } from "./client";
 import { eventsUrl } from "./endpoints";
-import { appendMessage, applyAgent, catchUp, failRemoteTurn, noteRemoteActivity, receiveSettings, removeMessage, setQuota, setRemoteAgentStatus, upsertConnection, upsertThread } from "./store";
+import { appendMessage, applyAgent, catchUp, failRemoteTurn, noteRemoteActivity, QUOTA_TITLE, receiveSettings, removeMessage, setQuota, setRemoteAgentStatus, upsertConnection, upsertThread } from "./store";
 
 /**
  * Server push (GET /api/events?token= — EventSource has no headers; `: connected` / `: hb` comments are ignored by
@@ -88,9 +88,19 @@ function dispatch(e: ServerEvent) {
       break;
     case "turn_error": {
       const threadId = e.threadId;
-      // their line isn't on this device (thread not loaded here): an error banner that opens the thread instead
-      if (!failRemoteTurn(threadId, e.error, e.message))
-        island.banner({ icon: "bolt", tone: "error", title: "답하지 못했어요", body: e.message || koreanMessage(0, e.error), onPress: openThread ? () => openThread?.(threadId) : undefined });
+      // their line isn't on this device (thread not loaded here): an error banner that opens the thread instead. The day's
+      // quota: its title and when it fills again (the banner body is two lines: the server's 76-character message lost its
+      // ticket hint there); the thread's error row keeps the whole message, ticket and all (DD 0026)
+      if (!failRemoteTurn(threadId, e.error, e.message)) {
+        const quota = e.error === "quota_exceeded";
+        island.banner({
+          icon: "bolt",
+          tone: "error",
+          title: quota ? QUOTA_TITLE : "답하지 못했어요",
+          body: quota ? QUOTA_RESET : e.message || koreanMessage(0, e.error),
+          onPress: openThread ? () => openThread?.(threadId) : undefined,
+        });
+      }
       break;
     }
   }

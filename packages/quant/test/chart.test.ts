@@ -1,0 +1,174 @@
+/** The level chart (D10, DD 1935 §4 + DD 1949): geometry read back from the SVG string. Synthetic bars only. */
+import { describe, expect, test } from "bun:test";
+import { APP_THEME, DECK_CHART, DECK_THEME, FULL_VIEW, LABEL_PRIORITY, PHONE_CARD, labelEm, levelChart, niceTicks, stack, type ChartLevel } from "../src/chart";
+import type { Bar } from "../src/types";
+import { addDays } from "./fixtures";
+
+/** 260 trading-ish days from 2025-11-03: a slow drift, a dip, a rebound (deterministic) */
+function bars(n = 260): Bar[] {
+  const out: Bar[] = [];
+  let c = 30;
+  for (let i = 0; i < n; i++) {
+    const wave = Math.sin(i / 9) * 0.6 + (i > 200 && i < 230 ? -0.25 : i >= 230 ? 0.3 : 0.02);
+    const o = c;
+    c = Math.max(5, c + wave * 0.5);
+    out.push({ t: addDays("2025-11-03", Math.floor(i * 1.4)), o, h: Math.max(o, c) + 0.4, l: Math.min(o, c) - 0.4, c, v: 100 + (i % 7) * 10 });
+  }
+  return out;
+}
+const B = bars();
+const last = B.at(-1)!.c;
+const LV: ChartLevel[] = [
+  { kind: "stop", price: Math.round((last - 3) * 100) / 100 },
+  { kind: "target1", price: Math.round((last + 2) * 100) / 100 },
+  { kind: "support", price: Math.round((last - 1.5) * 100) / 100 },
+  { kind: "buyZone", price: Math.round((last - 1) * 100) / 100, hi: Math.round((last - 0.5) * 100) / 100 },
+];
+const attrs = (svg: string, sel: RegExp) => [...svg.matchAll(sel)].map((m) => m[0]);
+const num = (el: string, a: string) => Number(el.match(new RegExp(` ${a}="([-0-9.]+)"`))![1]);
+const lines = (svg: string) => attrs(svg, /<line [^>]*data-level="[a-z0-9]+"[^>]*\/>/g).map((l) => ({ kind: l.match(/data-level="(\w+)"/)![1]!, y: num(l, "y1") }));
+const labels = (svg: string) => attrs(svg, /<text [^>]*data-label="\w+"[^>]*>.*?<\/text>/g).map((t) => ({ kind: t.match(/data-label="(\w+)"/)![1]!, y: num(t, "y"), text: t.replace(/<[^>]+>/g, "") }));
+
+describe("helpers", () => {
+  test("stack: labels stay on their lines when they fit, and part evenly around a crowd when they do not", () => {
+    expect(stack([10, 40, 70], 18, 0, 100)).toEqual([10, 40, 70]);
+    expect(stack([50, 50], 18, 0, 100)).toEqual([41, 59]);
+    expect(stack([0, 5], 18, 4, 100)).toEqual([4, 22]);
+    expect(stack([95, 99], 18, 0, 100)).toEqual([82, 100]);
+    const s = stack([10, 12, 14, 60], 18, 0, 200);
+    expect(s.every((v, i) => i === 0 || v - s[i - 1]! >= 18 - 1e-9)).toBe(true);
+  });
+  test("niceTicks: at most four lines on 1 / 2 / 2.5 / 5 steps", () => {
+    expect(niceTicks(23.4, 38.9)).toEqual([25, 30, 35]);
+    expect(niceTicks(181_000, 204_000)).toEqual([185_000, 190_000, 195_000, 200_000]);
+    for (const [a, b] of [[0.3, 0.9], [9, 41], [1200, 1290]] as const) expect(niceTicks(a, b).length).toBeLessThanOrEqual(4);
+  });
+  test("labelEm × size is at least the width measured in Chrome and WebKit on macOS (word at the label weight, price 400)", () => {
+    // getComputedTextLength, 11-26, app font (tokens.css --font-text); both engines gave the same widths to 0.1 px
+    const measured: [string, number, number][] = [
+      ["1차 익절 39.87", 13, 85.4], ["1차 익절 136.50", 13, 93.5], ["손절 189,400", 13, 78.5], ["1차 익절 1,234.50", 13, 105.4],
+      ["매수 검토", 13, 48.4], ["2차 익절 ↑", 13, 59.3], ["1차 익절 39.87", 15, 97.5], ["1차 익절 1,234.50", 15, 120.1], ["2차 익절 ↑", 15, 67.9],
+      // the current price, all at the label weight
+      ["189,400", 13, 55.1], ["1,234,567.89", 13, 88.9], ["1,234,567.89", 15, 103.5],
+    ];
+    for (const [text, size, px] of measured) expect(labelEm(text) * size).toBeGreaterThanOrEqual(px);
+    // and not so loose that a two-digit target loses its price on the phone card (room 90 px)
+    expect(labelEm("1차 익절 39.87") * 13).toBeLessThanOrEqual(90);
+    expect(labelEm("1차 익절 136.50") * 13).toBeGreaterThan(90);
+  });
+  test("priority: 손절 > 현재가 > 1차 익절 > 매수 검토 > 저항 > 지지 > 2·3차 익절", () => {
+    expect(LABEL_PRIORITY).toEqual(["stop", "current", "target1", "buyZone", "resistance", "support", "target2", "target3"]);
+  });
+});
+
+describe("phone card", () => {
+  const c = levelChart({ bars: B, levels: LV, summary: "합성 & 예시 <차트>" }, APP_THEME, PHONE_CARD);
+  test("326 × 264, plot 194 wide (left 32, right 100), role img with the server's sentence escaped", () => {
+    expect([c.width, c.height]).toEqual([326, 264]);
+    expect(c.plot.x1 - c.plot.x0).toBe(194);
+    expect(c.svg).toContain('role="img" aria-label="합성 &amp; 예시 &lt;차트&gt;"');
+  });
+  test("60 candles, body max(2, floor(slot × 0.6)); no volume profile, no MACD", () => {
+    const candles = attrs(c.svg, /<rect [^>]*data-role="candle"[^>]*\/>/g);
+    expect(candles.length).toBe(60);
+    expect(new Set(candles.map((r) => num(r, "width")))).toEqual(new Set([Math.max(2, Math.floor((194 / 60) * 0.6))]));
+    expect(c.svg).not.toContain('data-role="profile"');
+    expect(c.svg).not.toContain('data-role="macd"');
+    expect(["ma20", "ma50", "ma200", "vwap", "rsi"].every((k) => c.svg.includes(`data-role="${k}"`))).toBe(true);
+  });
+  test("every level line inside the plot box; the band too", () => {
+    for (const l of lines(c.svg)) {
+      expect(l.y).toBeGreaterThanOrEqual(c.plot.y0);
+      expect(l.y).toBeLessThanOrEqual(c.plot.y1);
+    }
+    expect(lines(c.svg).map((l) => l.kind).sort()).toEqual(["stop", "support", "target1"]);
+    const band = attrs(c.svg, /<rect [^>]*data-level="buyZone"[^>]*\/>/g);
+    expect(band.length).toBe(1);
+    expect(num(band[0]!, "y")).toBeGreaterThanOrEqual(c.plot.y0);
+    expect(num(band[0]!, "y") + num(band[0]!, "height")).toBeLessThanOrEqual(c.plot.y1);
+  });
+  test("labels: one line each, ≥ 18 apart, inside the main panel; the band's word alone; the current price a bare number", () => {
+    const ls = labels(c.svg).sort((a, b) => a.y - b.y);
+    expect(ls.every((l, i) => i === 0 || l.y - ls[i - 1]!.y >= 18 - 0.11)).toBe(true);
+    expect(ls.every((l) => l.y >= c.plot.y0 && l.y <= c.plot.y1 + 13)).toBe(true);
+    const by = Object.fromEntries(ls.map((l) => [l.kind, l.text]));
+    expect(by.stop).toBe(`손절 ${LV[0]!.price.toFixed(2)}`);
+    expect(by.buyZone).toBe("매수 검토");
+    expect(by.current).toBe(last.toFixed(2));
+    expect(c.issues).toEqual([]);
+  });
+  test("app colours are CSS variables only (no hex), month ticks in Korean", () => {
+    expect(c.svg.match(/#[0-9a-fA-F]{3,6}\b/g)).toBeNull();
+    expect(c.svg).toMatch(/data-role="date">\d{1,2}월</);
+  });
+});
+
+describe("off-scale levels and crowded labels", () => {
+  test("a level that would squeeze the candles under half the plot: no line, its word + arrow, level_offscale", () => {
+    const far = levelChart({ bars: B, levels: [...LV, { kind: "target2", price: last * 3 }], summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(lines(far.svg).some((l) => l.kind === "target2")).toBe(false);
+    expect(labels(far.svg).find((l) => l.kind === "target2")?.text).toBe("2차 익절 ↑");
+    expect(far.issues).toContainEqual({ code: "level_offscale", kind: "target2", price: last * 3 });
+    const low = levelChart({ bars: B, levels: [...LV, { kind: "support", price: 0.01 }], summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(labels(low.svg).some((l) => l.text === "지지 ↓")).toBe(true);
+    for (const l of lines(low.svg)) expect(l.y).toBeLessThanOrEqual(low.plot.y1);
+  });
+  test("a level just outside the candles is taken into the range and drawn", () => {
+    const hi = Math.max(...B.slice(-60).map((b) => b.h));
+    const near = levelChart({ bars: B, levels: [{ kind: "resistance", price: hi + 0.2 }], summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(lines(near.svg).map((l) => l.kind)).toEqual(["resistance"]);
+    expect(near.issues).toEqual([]);
+  });
+  test("too many labels for the column: the lowest priority goes first, never 손절 or the current price", () => {
+    const tiny = { ...PHONE_CARD, mainH: 90 };
+    const all: ChartLevel[] = [
+      ...LV,
+      { kind: "resistance", price: last + 1 },
+      { kind: "target2", price: last + 2.5 },
+      { kind: "target3", price: last + 2.8 },
+    ];
+    const c = levelChart({ bars: B, levels: all, summary: "x" }, APP_THEME, tiny);
+    const dropped = c.issues.filter((i) => i.code === "label_dropped").map((i) => i.kind);
+    expect(dropped.length).toBeGreaterThan(0);
+    const kept = labels(c.svg).map((l) => l.kind);
+    expect(kept).toContain("stop");
+    expect(kept).toContain("current");
+    const rank = (k: string) => LABEL_PRIORITY.indexOf(k as never);
+    expect(Math.min(...dropped.map(rank))).toBeGreaterThan(Math.max(...kept.map(rank)));
+  });
+  test("the column's room is right − 10: 1차 익절 136.50 (93.5 px measured) loses its price on the phone card", () => {
+    const k = 136.5 / (last + 2);
+    const big = levelChart({ bars: B.map((b) => ({ ...b, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k })), levels: [{ kind: "target1", price: 136.5 }], summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(labels(big.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절");
+    expect(big.issues).toContainEqual({ code: "label_price_dropped", kind: "target1", price: 136.5 });
+  });
+  test("a label too wide for the column keeps its word and loses its price (label_price_dropped)", () => {
+    const won = levelChart({ bars: B.map((b) => ({ ...b, o: b.o * 6000, h: b.h * 6000, l: b.l * 6000, c: b.c * 6000 })), levels: [{ kind: "target1", price: Math.round(last * 6000 + 9000) }], summary: "x", digits: 0 }, APP_THEME, PHONE_CARD);
+    expect(labels(won.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절");
+    expect(won.issues.map((i) => i.code)).toContain("label_price_dropped");
+  });
+});
+
+describe("full view and deck", () => {
+  test("full view: 358 × 420 with the volume profile and the MACD histogram", () => {
+    const f = levelChart({ bars: B, levels: LV, summary: "x" }, APP_THEME, FULL_VIEW);
+    expect([f.width, f.height]).toEqual([358, 420]);
+    expect(f.svg).toContain('data-role="profile"');
+    expect(f.svg).toContain('data-role="macd"');
+    const prof = attrs(f.svg, /<rect [^>]*data-role="profile"[^>]*\/>/g);
+    expect(prof.length).toBeLessThanOrEqual(3);
+    expect(prof.every((r) => num(r, "width") <= 48 + 0.05 && num(r, "y") >= f.plot.y0 - 0.05)).toBe(true);
+  });
+  test("deck: 1152 × 400, deck colours only from its theme, caption with unit · basis · source, M/D dates", () => {
+    const d = levelChart({ bars: B, levels: LV, summary: "x", unit: "USD", asOf: "11월 26일 종가 기준", source: "Yahoo" }, DECK_THEME, DECK_CHART);
+    expect([d.width, d.height]).toEqual([1152, 400]);
+    const palette = new Set(JSON.stringify(DECK_THEME).match(/#[0-9A-F]{6}/gi)!.map((h) => h.toUpperCase()));
+    expect([...d.svg.matchAll(/#[0-9a-fA-F]{6}\b/g)].every((m) => palette.has(m[0].toUpperCase()))).toBe(true);
+    expect(d.svg).toContain('data-role="caption">USD · 11월 26일 종가 기준 · Yahoo</text>');
+    expect(d.svg).toMatch(/data-role="date">\d{1,2}\/\d{1,2}</);
+    expect(labels(d.svg).every((l, i, a) => i === 0 || Math.abs(l.y - a[i - 1]!.y) >= 0)).toBe(true);
+  });
+  test("deck refuses to draw without unit, basis and source (FA4 #8)", () => {
+    expect(() => levelChart({ bars: B, levels: LV, summary: "x" }, DECK_THEME, DECK_CHART)).toThrow();
+  });
+});

@@ -2,7 +2,8 @@
  * D4, the 120-day volume profile in 24 equal price bins between the window's lowest low and highest high, and its three
  * largest nodes (a node's price is its bin's middle). How a day's volume is spread is a choice the master prompt leaves
  * open. "range" (the default) spreads it evenly over the day's low–high range. "typical" puts it all in the bin of
- * (H + L + C) / 3, and "close" in the close's bin.
+ * (H + L + C) / 3, and "close" in the close's bin. "range" is an unsettled default (미확정 기본값, lead 2058) until the
+ * prompt's D4 table is reproduced from its price history.
  */
 import type { Bar } from "./types";
 

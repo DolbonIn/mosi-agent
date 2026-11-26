@@ -31,9 +31,10 @@ const sends: { threadId: string; text: string }[] = [];
 const pages = new Map<string, Message[]>();
 /**
  * how the server answers the next POSTs, in order: 202 steered (the line joins a running turn; its id), a turn stream
- * (start with the line, then done), or nothing queued: the request hangs until stopped
+ * (start with the line, then done), a refusal before any turn (status, the server's error code and message), or nothing
+ * queued: the request hangs until stopped
  */
-const answers: ({ steer: ID } | { stream: ID })[] = [];
+const answers: ({ steer: ID } | { stream: ID } | { refuse: { status: number; error: string; message: string } })[] = [];
 
 const MSG = "지금 요청이 많아요. 잠시 후 다시 시도해 주세요.";
 let at = 1_800_000_000_000;
@@ -62,6 +63,7 @@ const fakeFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const text = JSON.parse(String(init.body)).text as string;
     sends.push({ threadId, text });
     const a = answers.shift();
+    if (a && "refuse" in a) return new Response(JSON.stringify({ error: a.refuse.error, message: a.refuse.message }), { status: a.refuse.status, headers: { "Content-Type": "application/json" } });
     if (a && "steer" in a) return new Response(JSON.stringify({ steered: true, userMessage: row(threadId, a.steer, "user", text) }), { status: 202, headers: { "Content-Type": "application/json" } });
     if (a && "stream" in a) {
       const events = [
@@ -286,6 +288,71 @@ describe("turn_error: a failed turn the person's line went into", () => {
     expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "답하지 못했어요", body: koreanMessage(0, "timeout") });
     expect(messagesStore.get().t_cold2!.error).toBe(koreanMessage(0, "timeout"));
     island.clearBanners();
+  });
+
+  test("the day's quota, no line of theirs on this device: the banner says the quota and when it fills again, the row keeps the whole message (DD 0026)", async () => {
+    const { messagesStore, QUOTA_TITLE } = await import("../src/api/store");
+    const { koreanMessage, QUOTA_RESET } = await import("../src/api/client");
+    const { island, islandStore } = await import("../src/app/island");
+    island.idle();
+    island.clearBanners();
+    // the server's QUOTA_MESSAGE (76 characters): the banner's two lines cut its ticket hint
+    const QUOTA = "오늘 사용량 한도를 다 썼어요. 매일 새벽 4시에 초기화되고, 지금 바로 이어서 쓰려면 나의 모시에서 한도 초기화 티켓을 사용해 주세요.";
+    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA });
+    expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "오늘 사용량을 다 썼어요", body: "새벽 4시에 다시 채워져요." });
+    expect(messagesStore.get().t_quota!.error).toBe(QUOTA);
+    expect(islandStore.get().banner?.title).toBe(QUOTA_TITLE);
+    expect(islandStore.get().banner?.body).toBe(QUOTA_RESET);
+    // no message text: the same banner; the row says koreanMessage's whole quota message
+    island.clearBanners();
+    push({ type: "turn_error", threadId: "t_quota2", error: "quota_exceeded", message: "" });
+    expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "오늘 사용량을 다 썼어요", body: "새벽 4시에 다시 채워져요." });
+    expect(messagesStore.get().t_quota2!.error).toBe(koreanMessage(0, "quota_exceeded"));
+    island.clearBanners();
+  });
+
+  test("the quota wording stays as it was: client.ts's quota_exceeded message word for word, its second sentence QUOTA_RESET; the send-refused banner's title QUOTA_TITLE", async () => {
+    const { QUOTA_TITLE } = await import("../src/api/store");
+    const { koreanMessage, QUOTA_RESET } = await import("../src/api/client");
+    expect(QUOTA_RESET).toBe("새벽 4시에 다시 채워져요.");
+    expect(koreanMessage(0, "quota_exceeded")).toBe("오늘 사용량을 모두 썼어요. 새벽 4시에 다시 채워져요.");
+    expect(koreanMessage(0, "quota_exceeded").endsWith(` ${QUOTA_RESET}`)).toBe(true);
+    expect(QUOTA_TITLE).toBe("오늘 사용량을 다 썼어요");
+  });
+
+  test("a send refused for the day's quota: the server's 429 keeps the failed bubble with the whole message in the row (no banner); a quota refusal that reaches the refused-send banner is titled 오늘 사용량을 다 썼어요", async () => {
+    const { messagesStore, sendMessage } = await import("../src/api/store");
+    const { island, islandStore } = await import("../src/app/island");
+    const QUOTA = "오늘 사용량 한도를 다 썼어요. 매일 새벽 4시에 초기화되고, 지금 바로 이어서 쓰려면 나의 모시에서 한도 초기화 티켓을 사용해 주세요.";
+    island.idle();
+    island.clearBanners();
+    // the server's quota refusal (threads.ts: 429 quota_exceeded before any turn): the row, not the banner
+    answers.push({ refuse: { status: 429, error: "quota_exceeded", message: QUOTA } });
+    const r429 = await sendMessage("t_qsend", "오늘 일정 알려줘");
+    expect(r429).toMatchObject({ status: "failed", keepText: false });
+    expect(messagesStore.get().t_qsend!.error).toBe(QUOTA);
+    expect(islandStore.get().banner).toBeNull();
+    // the refused-send banner (rejectionBanner: a refusal before streaming that is not 429/5xx/401): quota_exceeded gets
+    // the quota title word for word, the server's message as its body, and the text goes back to the composer
+    island.clearBanners();
+    answers.push({ refuse: { status: 403, error: "quota_exceeded", message: QUOTA } });
+    const r403 = await sendMessage("t_qsend2", "오늘 일정 알려줘");
+    expect(r403).toMatchObject({ status: "rejected", keepText: true });
+    expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "오늘 사용량을 다 썼어요", body: QUOTA });
+    expect(messagesStore.get().t_qsend2?.error).toBeUndefined();
+    island.clearBanners();
+    island.idle();
+  });
+
+  test("the day's quota in a thread whose line is on this device: the error row, no banner (as before)", async () => {
+    const { appendMessage, messagesStore } = await import("../src/api/store");
+    const { island, islandStore } = await import("../src/app/island");
+    island.idle();
+    island.clearBanners();
+    appendMessage("t_quota3", row("t_quota3", "m_q3", "user", "다른 폰에서 보낸 말"));
+    push({ type: "turn_error", threadId: "t_quota3", error: "quota_exceeded", message: MSG });
+    expect(messagesStore.get().t_quota3!.error).toBe(MSG);
+    expect(islandStore.get().banner).toBeNull();
   });
 
   test("a send of theirs still in flight keeps the island on it, and is not the line 다시 시도 sends again", async () => {

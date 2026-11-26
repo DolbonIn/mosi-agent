@@ -8,11 +8,14 @@
  * - EMA starts from the simple average of its first n values.
  * - RSI, ATR and ADX use Wilder's smoothing (the first value a simple average, then (prev × (n − 1) + x) / n).
  * - Stochastic (14, 3): %K over 14 bars, %D the 3-bar simple average of %K.
- * - Z-score and Bollinger bands use the population standard deviation.
- * - VWAP weights the typical price (high + low + close) / 3 by volume.
+ * - Z-score and Bollinger bands use the population standard deviation (미확정 기본값, below).
+ * - VWAP weights the typical price (high + low + close) / 3 by volume (미확정 기본값, below).
  * - The MACD histogram's 5-day slope is the least-squares slope of its last five values, per day.
  * - Realized volatility: the sample standard deviation of daily log returns × √252.
  * - Drawdown from the 250-day high: the close against the highest close of the last 250 (the current one included).
+ *
+ * The σ and the VWAP price are unsettled defaults (미확정 기본값, lead 2058): the master prompt's D3 table was to settle
+ * them from the same price history, and that history could not be fetched (Yahoo 429, Stooq a script check, 11-26).
  */
 import type { Bar, Num } from "./types";
 

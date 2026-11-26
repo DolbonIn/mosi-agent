@@ -58,6 +58,10 @@ export class ApiError extends Error {
   }
 }
 
+/** when the day's quota fills again: the second sentence of quota_exceeded's message, and the whole body of the banner a
+ *  quota turn_error raises on a device without the thread (events.ts, DD 0026) */
+export const QUOTA_RESET = "새벽 4시에 다시 채워져요.";
+
 const CODE_MESSAGES: Record<string, string> = {
   network: "서버에 연결하지 못했어요. 네트워크를 확인해 주세요.",
   timeout: "응답이 늦어지고 있어요. 다시 시도해 주세요.",
@@ -76,7 +80,7 @@ const CODE_MESSAGES: Record<string, string> = {
   approval_expired: "승인 시간이 지났어요.",
   already_decided: "이미 처리한 승인이에요.",
   rate_limited: "요청이 많아요. 잠시 후 다시 시도해 주세요.",
-  quota_exceeded: "오늘 사용량을 모두 썼어요. 새벽 4시에 다시 채워져요.",
+  quota_exceeded: `오늘 사용량을 모두 썼어요. ${QUOTA_RESET}`,
   invalid_credentials: "아이디나 비밀번호가 맞지 않아요.",
   handle_taken: "이미 쓰고 있는 아이디예요.",
   llm_missing: "AI 연결이 아직 설정되지 않았어요.",

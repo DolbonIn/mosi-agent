@@ -867,6 +867,10 @@ function applyEvent(ctx: TurnCtx, e: AgentEvent) {
   }
 }
 
+/** the title of a quota banner: a send refused for the day's quota (rejectionBanner), and a quota turn_error on a device
+ *  without the thread (events.ts, DD 0026) */
+export const QUOTA_TITLE = "오늘 사용량을 다 썼어요";
+
 /** banner for a request the server refused before streaming; `busy` is not an error (it's the agent being busy) */
 function rejectionBanner(err: ApiError) {
   if (err.code === "busy") {
@@ -874,7 +878,7 @@ function rejectionBanner(err: ApiError) {
     return;
   }
   const titles: Record<string, string> = {
-    quota_exceeded: "오늘 사용량을 다 썼어요",
+    quota_exceeded: QUOTA_TITLE,
     message_too_long: "메시지가 너무 길어요",
     payload_too_large: "보내려는 내용이 너무 커요",
     empty_message: "보낼 내용이 없어요",
