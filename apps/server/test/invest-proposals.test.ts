@@ -411,6 +411,20 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     };
     // the request: a fixed line, no source, no grade letter
     expect(await foot("request")).toBe("요청으로 만든 제안이에요.");
+    // DD 0717: a request with no reason the person gave makes a card without the reason line; any other basis needs one
+    const bare = (basis: unknown, reason: unknown, t = ts) => t.invest_watch_propose!.run({ symbol: "SOXL", changes: [{ ruleId: r.id, price: 22 }], reason, basis }, ctxOf(w));
+    for (const empty of ["", "   ", null, undefined]) {
+      const out = await bare("request", empty);
+      expect([out.ok, Object.keys(out.card ?? {}).includes("reason"), (out.card as InvestRuleChangeCard | undefined)?.reasonFoot]).toEqual([true, false, REQUEST_FOOT]);
+      expect((out.data as { foot: string }).foot).toBe(REQUEST_FOOT);
+      const stored = proposalRow(w.h.app.core, w.uid, (out.card as InvestRuleChangeCard).proposalId)!;
+      expect(Object.keys(JSON.parse(stored.card_json))).not.toContain("reason");
+    }
+    row("soxl.ma20", "2026-11-27");
+    for (const basis of ["soxl.ma20", "technicals"]) {
+      const out = await bare(basis, "");
+      expect([basis, out.ok, out.data]).toEqual([basis, false, { error: "invalid_proposal", message: "이유를 넣어 주세요." }]);
+    }
     expect(REQUEST_FOOT).not.toMatch(/[A-Z]/);
     // a ledger id: its newest row's as-of, source and grade, whatever the model might have said
     row("soxl.ma20", "2026-11-20", { source: "옛 출처", confidence: "B" });
@@ -472,7 +486,11 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
       expect(d(name)).toMatch(/If a date is refused, correct it and (add|record) it once more; ask the person only when the date really reads two ways\./);
     }
     const p = d("invest_watch_propose");
-    for (const s of ["reason: one line on why, without the prices the card's rows already show and without a source, grade or as-of day (the foot says those).", '"technicals" (only after invest_technicals answered for this symbol in this turn)', '"request" (only when the person said those prices or that change in this turn)', "After the card, say in one line that you sent it; do not repeat its rows or its result."]) expect(p).toContain(s);
+    for (const s of [
+      // DD 0717: the reason rests on the basis only, nothing unread; a request's reason is the person's or empty
+      "reason: one line on why, resting only on what basis points to: no price, trend or market move you did not read in this turn, none of the prices the card's rows already show, and no source, grade or as-of day (the foot says those).",
+      'With "request", only a reason the person gave in this turn, without prices, sources or dates; if they gave none, send reason as "".',
+      '"technicals" (only after invest_technicals answered for this symbol in this turn)', '"request" (only when the person said those prices or that change in this turn)', "After the card, say in one line that you sent it; do not repeat its rows or its result."]) expect(p).toContain(s);
     expect(p).not.toContain(REQUEST_FOOT); // the foot's words stay code's
     const schema = tools(w).invest_watch_propose!.parameters as { properties: Record<string, unknown>; required: string[] };
     expect([Object.keys(schema.properties), schema.required]).toEqual([["symbol", "changes", "reason", "basis"], ["symbol", "changes", "reason", "basis"]]);

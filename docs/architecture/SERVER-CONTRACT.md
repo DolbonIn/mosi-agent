@@ -824,9 +824,11 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
   — "{agent name} 제안: 빗나감 · 시기" — never the outcome or the rev), `invest_watch_propose`. The descriptions (DD
   0521): with quotes off or blind the model passes on the server's watch words and never offers to turn quotes on; a
   date said without a year is the next one from today, and a refused date is corrected and tried once more; `"request"`
-  only when the person said those prices in the turn, a reason with no source, grade or day, and the watch list never
-  redrawn as an html card (DD 0524, 0600).
-- **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120, not the rows' prices), basis}`
+  only when the person said those prices in the turn, a reason with no source, grade or day that rests only on the
+  basis (no price, trend or market move not read in the turn; a request's reason only the person's own, else empty,
+  DD 0717), and the watch list never redrawn as an html card (DD 0524, 0600).
+- **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120, not the rows' prices; may be
+  empty only with basis "request", and then the card has no `reason`, DD 0717; else 400), basis}`
   stores a proposal and puts an `invest_rule_change` card in the turn's message (DD 1935 §2-3: the question title,
   `changes` rows 낱말 · 지금 → 바꿀 값, `reason` and `reasonFoot`, the result sentence of
   each rule — a real sell stop's with the sellable quantity — and `warning` for a stop above the price; `confirm: "hold"`
@@ -889,14 +891,17 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   settled stage has its name ("탈출 3단계", "방어 준비"); a floor has the least stage and no name ("탈출 최소 1단계"); the
   recovery may be "회복 단계 미확정" (outcomes include hold) or "회복 판정 보류" (stage null for both). `pending` counts,
   never numbers indicators: "지표 4개 값이 없어서 2단계 여부는 아직 몰라요." (`quiet`), "오늘 지표 2개를 받지 못해서 …"
-  (`caution`), both together (`caution`). `judgedText` "12월 2일 08:00 판정 · 어제와 같아요 | 12월 2일 판정과 같아요 |
-  탈출 최소 1단계 → 탈출 3단계"; `stale` when today's 08:00 row is missing ("오늘 08:00 판정을 하지 못했어요. 12월 2일
-  판정이에요.").
+  (`caution`), both together (`caution`). `judgedText` "12월 2일 08:00 판정 · 어제와 같아요 | 12월 1일 판정과 같아요 |
+  탈출 최소 1단계 → 탈출 3단계"; 어제 only when the judged day is today (KST) and the row before it is the day before,
+  otherwise the earlier row's day (DD 0710); a day of another KST year is named with its year ("2026년 12월 31일 08:00
+  판정"), here, in `stale` and in the as-of days of `GET /api/invest/stages`; `stale` when today's 08:00 row is missing
+  ("오늘 08:00 판정을 하지 못했어요. 12월 2일 판정이에요."), never before today's 08:00.
 - `GET /api/invest/stages` → `InvestStagesDetail {stages, core11[11] {no, name, signal, value | null, basis, reason},
   groups[worse A1–A8, severe D1–D5, recover R1–R6] {rows {id, text, state, stateText, detail}, next}, method[],
   disclaimer: true}`; off or before the first row: empty core11 and groups.
 - **`invest_snapshot`** (same offer as B2b-1's tools): the stored heads, next lines, judgedText, stale, core11 and the
-  conditions as the screen words them; its description: "단계는 판정본만 말해요. 지금 값은 값으로만 말해요."
+  conditions as the screen words them; its description: "단계는 판정본만 말해요. 지금 값은 값으로만 말해요.", and off is
+  the server's setting: the model never asks the person to turn it on nor promises to tell them later (DD 0717).
 - **The model's ledger figures**: `invest_ledger_add` saves a figure only with the address of a page web_read gave this
   turn or in the thread's recent history (`ToolContext.pages`, filled by the server from web_read results) and only if
   the number is written on that page (sign aside; numbers inside addresses do not count). Else 400-style

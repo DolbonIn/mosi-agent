@@ -8,7 +8,7 @@ import { assessStages, momFromIndex, num, pct, pp, rate, type Point, type StageI
 import type { Core } from "../core.ts";
 import { dayWords } from "./forecasts.ts";
 import { fredSeries, indexBars, type FredId } from "./macro.ts";
-import { LEDGER_KEYS, ledgerFeed, type LedgerKey } from "./stage-ledger.ts";
+import { BREADTH_STALE_US_DAYS, LEDGER_KEYS, ledgerFeed, QUARTERLY_STALE_DAYS, type LedgerKey } from "./stage-ledger.ts";
 
 /** which FRED series feeds which input (CPILFESL feeds coreCpiMoM through momFromIndex) */
 export const FRED_FEEDS = {
@@ -287,7 +287,6 @@ export async function judgeDay(core: Core, now: number): Promise<number> {
   return n;
 }
 
-const md = (day: string) => `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일`;
 const hm = (ms: number) => new Date(ms + 9 * HOUR).toISOString().slice(11, 16);
 
 /** · 탈출 2 → 3단계 / · 회복 판정 보류 → 회복 2단계 */
@@ -326,15 +325,17 @@ export function stagesView(core: Core, userId: string, now: number): StagesView 
   const j = JSON.parse(row.json) as Judged;
   const { escape, recovery } = headsOf(j);
   const prevRow = judgmentBefore(core, userId, row.day);
-  let judgedText = `${md(row.day)} ${hm(row.at)} 판정`;
+  const today = kstDayOf(now);
+  // DD 0710 2: 어제 only when the judged day is today and the row before it is the day before; another year names it
+  let judgedText = `${dayWords(row.day, now)} ${hm(row.at)} 판정`;
   if (prevRow) {
     const p = headsOf(JSON.parse(prevRow.json) as Judged);
     const changes = [moved("탈출", p.escape, escape), moved("회복", p.recovery, recovery)].filter(Boolean);
-    const same = prevRow.day === kstDayOf(Date.parse(`${row.day}T12:00:00Z`) - DAY_MS - 9 * HOUR) ? "어제와 같아요" : `${md(prevRow.day)} 판정과 같아요`;
+    const yesterday = row.day === today && prevRow.day === kstDayOf(Date.parse(`${row.day}T12:00:00Z`) - DAY_MS - 9 * HOUR);
+    const same = yesterday ? "어제와 같아요" : `${dayWords(prevRow.day, now)} 판정과 같아요`;
     judgedText += changes.length ? ` · ${changes.join(" · ")}` : ` · ${same}`;
   }
   const nx = nextLines(j);
-  const today = kstDayOf(now);
   return {
     kind: "judged",
     escape,
@@ -343,7 +344,7 @@ export function stagesView(core: Core, userId: string, now: number): StagesView 
     next: [nx.escape, nx.recovery].filter((s): s is string => !!s),
     judgedAt: row.at,
     judgedText,
-    ...(row.day < today && kstHour(now) >= JUDGE_HOUR_KST ? { stale: `오늘 08:00 판정을 하지 못했어요. ${md(row.day)} 판정이에요.` } : {}),
+    ...(row.day < today && kstHour(now) >= JUDGE_HOUR_KST ? { stale: `오늘 08:00 판정을 하지 못했어요. ${dayWords(row.day, now)} 판정이에요.` } : {}),
   };
 }
 
@@ -382,7 +383,7 @@ export const METHOD_LINES: readonly string[] = [
   "삼성전자·SK하이닉스 이익 전망은 앞으로 12개월의 가운데가 든 회계연도 값을, 같은 회계연도의 3개월 전(앞뒤 15일 안) 값과 비교해요.",
   "빅테크 내년 설비투자 증가율은 회사가 쓰는 회계연도 이름으로 내년 값과 올해 값을 비교해요.",
   "M7 이익 전망은 회사마다 최근 3개월 변화가 0 미만이면 하향으로 봐요.",
-  "원장 값은 등급 C를 쓰지 않아요. 이익 전망, M7, 설비투자 값은 기준일이 120일, 시장 폭은 5거래일을 넘으면 확인 불가예요.",
+  `원장 값은 등급 C를 쓰지 않아요. 이익 전망, M7, 설비투자 값은 기준일이 ${QUARTERLY_STALE_DAYS}일, 시장 폭은 ${BREADTH_STALE_US_DAYS}거래일을 넘으면 확인 불가예요.`, // DD 0710 D13: the rule's own numbers
 ];
 
 const STATE_WORD = { met: "충족", unmet: "미충족", unknown: "확인 불가" } as const;
@@ -455,7 +456,7 @@ function basisText(j: Judged, keys: readonly InputKey[], asOf: string | null, at
     if (keys.some((k) => j.missing[k] === "today")) return "오늘 받지 못했어요";
     return keys.some(fromLedger) ? "값이 없어요" : "받을 곳이 아직 없어요";
   }
-  return `${md(asOf)} · ${[...new Set(present.map((b) => `${b.source} · ${b.grade}`))].join(", ")}`;
+  return `${dayWords(asOf, at)} · ${[...new Set(present.map((b) => `${b.source} · ${b.grade}`))].join(", ")}`;
 }
 
 const COMPANY: Readonly<Record<string, string>> = { samsung: "삼성전자", hynix: "SK하이닉스" };

@@ -363,7 +363,8 @@ export interface InvestRuleChangeCard {
   symbol: string;
   title: string;
   changes: { label: string; from: string; to: string }[];
-  reason: string;
+  /** absent only on a request card whose person gave no reason in that turn (DD 0717): no line is drawn */
+  reason?: string;
   reasonFoot: string;
   result: string;
   warning?: string;

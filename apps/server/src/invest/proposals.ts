@@ -144,7 +144,7 @@ function newSpec(symbol: string, c: Record<string, unknown>): RuleSpec {
 const MOVES = ["price", "lo", "hi", "direction"] as const;
 
 /** the model's arguments → the symbol, its items and the reason line; throws the 400s */
-export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: number, saw: ProposalSeen = {}): { symbol: string; items: ProposalItem[]; reason: string; reasonFoot: string } {
+export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: number, saw: ProposalSeen = {}): { symbol: string; items: ProposalItem[]; reason: string | null; reasonFoot: string } {
   const symbol = normalizeSymbol(a.symbol);
   if (!symbol) throw bad(INVEST_ERRORS.unknown_symbol, "unknown_symbol");
   if (!idb.watchRow(core.db, userId, symbol)) throw bad(INVEST_ERRORS.not_watched, "not_watched");
@@ -181,7 +181,8 @@ export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: 
   }
   const added = items.filter((i) => !i.ruleId).length;
   if (added && idb.rules(core.db, userId).length + added - items.filter((i) => i.remove).length > MAX_RULES) throw bad(INVEST_ERRORS.too_many_rules, "too_many_rules");
-  const reason = lineOf(a.reason, "이유", REASON_MAX, invalid)!;
+  // DD 0717: a request may come with no reason (the person gave none in this turn); any other basis needs one
+  const reason = lineOf(a.reason, "이유", REASON_MAX, invalid, a.basis === "request");
   return { symbol, items, reason, reasonFoot: footOf(core, userId, symbol, a.basis, saw) };
 }
 
@@ -334,7 +335,7 @@ export async function createProposal(core: Core, userId: string, threadId: strin
     symbol,
     title: titleOf(symbol, items),
     changes: changeRows(items),
-    reason,
+    ...(reason ? { reason } : {}),
     reasonFoot,
     result,
     ...(warning ? { warning } : {}),

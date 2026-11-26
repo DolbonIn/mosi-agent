@@ -10,7 +10,7 @@ import { etToEpoch } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
 import { pctChange } from "../src/invest/stage-ledger.ts";
-import { FRED_FEEDS, readStages, recoveryHead, STAGES_OFF, type Assessed } from "../src/invest/stages.ts";
+import { FRED_FEEDS, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
 import { investTools } from "../src/invest/tools.ts";
 import { makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
 import { makeHarness, type Harness } from "./helpers.ts";
@@ -177,12 +177,34 @@ describe("the day's judgment (v12)", () => {
     // the next day: the same reading, said so; a day missed is named; a missed 08:00 is stale until it comes
     await judgeAt(h, KST(2026, 12, 2, 8, 0));
     expect(((await alice.overview()).stages as { judgedText: string }).judgedText).toBe("12월 2일 08:00 판정 · 어제와 같아요");
+    // DD 0710: before the next 08:00 nothing is stale, and 어제 is said only on the judged day (to the reader, 어제 is 12월 2일)
+    h.clock.t = KST(2026, 12, 3, 7, 0);
+    const early = (await alice.overview()).stages as { stale?: string; judgedText: string };
+    expect([early.stale, early.judgedText]).toEqual([undefined, "12월 2일 08:00 판정 · 12월 1일 판정과 같아요"]);
     h.clock.t = KST(2026, 12, 4, 9, 0);
-    const late = (await alice.overview()).stages as { stale?: string };
+    const late = (await alice.overview()).stages as { stale?: string; judgedText: string };
     expect(late.stale).toBe("오늘 08:00 판정을 하지 못했어요. 12월 2일 판정이에요.");
+    expect(late.judgedText).toBe("12월 2일 08:00 판정 · 12월 1일 판정과 같아요");
     await judgeAt(h, KST(2026, 12, 4, 9, 0));
     const caught = (await alice.overview()).stages as { stale?: string; judgedText: string };
     expect([caught.stale, caught.judgedText]).toEqual([undefined, "12월 4일 09:00 판정 · 12월 2일 판정과 같아요"]);
+  });
+
+  test("a day of another KST year is named with its year (DD 0710 2, DD 0405 E)", async () => {
+    const { h } = await world(calm());
+    const { alice } = await people(h);
+    await judgeAt(h, KST(2026, 12, 30, 8, 0));
+    await judgeAt(h, KST(2026, 12, 31, 8, 0));
+    expect(((await alice.overview()).stages as { judgedText: string }).judgedText).toBe("12월 31일 08:00 판정 · 어제와 같아요");
+    h.clock.t = KST(2027, 1, 1, 7, 0);
+    const early = (await alice.overview()).stages as { stale?: string; judgedText: string };
+    expect([early.stale, early.judgedText]).toEqual([undefined, "2026년 12월 31일 08:00 판정 · 2026년 12월 30일 판정과 같아요"]);
+    h.clock.t = KST(2027, 1, 1, 9, 0);
+    expect(((await alice.overview()).stages as { stale?: string }).stale).toBe("오늘 08:00 판정을 하지 못했어요. 2026년 12월 31일 판정이에요.");
+    await judgeAt(h, KST(2027, 1, 1, 9, 0));
+    expect(((await alice.overview()).stages as { judgedText: string }).judgedText).toBe("1월 1일 09:00 판정 · 어제와 같아요");
+    // an as-of day of the year before the judgment names its year too
+    expect((await alice.detail()).core11.find((r) => r.no === 1)?.basis).toBe("2026년 11월 27일 · FRED · A");
   });
 
   test("a stage that moved is said with its old and new number", async () => {
@@ -201,8 +223,9 @@ describe("the day's judgment (v12)", () => {
     const { alice } = await people(h);
     expect(await judgeAt(h, KST(2026, 12, 1, 8, 0))).toBe(0);
     expect([rows(h), up.calls]).toEqual([[], []]);
-    expect((await alice.overview()).stages).toEqual({ kind: "off", off: STAGES_OFF });
-    expect(await alice.detail()).toEqual({ stages: { kind: "off", off: STAGES_OFF }, core11: [], groups: [], method: expect.any(Array), disclaimer: true });
+    const OFF = "지금은 지표를 받지 않아서 단계를 판정하지 않아요."; // DD 0710 D10: the words, not the constant
+    expect((await alice.overview()).stages).toEqual({ kind: "off", off: OFF });
+    expect(await alice.detail()).toEqual({ stages: { kind: "off", off: OFF }, core11: [], groups: [], method: expect.any(Array), disclaimer: true });
   });
 });
 
@@ -263,6 +286,8 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(d.groups[0]!.rows.find((r) => r.id === "A1")!.detail).toBe("3.60% · 6개월 최저보다 +0.60%p · 11월 27일 · FRED · A");
     expect(d.groups.map((g) => g.next)).toEqual(["2단계 조건에 악화 신호가 2개 이상이면 탈출 3단계예요. 지금 2개예요.", "심각 신호가 2개 이상이면 탈출 4단계예요. 지금 0개예요.", expect.any(String)]);
     expect(d.method.length).toBeGreaterThan(3);
+    // DD 0710 D13: the stale rule in its numbers (120 days, 5 US trading days)
+    expect(d.method).toContain("원장 값은 등급 C를 쓰지 않아요. 이익 전망, M7, 설비투자 값은 기준일이 120일, 시장 폭은 5거래일을 넘으면 확인 불가예요.");
     expect(d.disclaimer).toBe(true);
     expect(JSON.stringify(d)).not.toMatch(/\*\*|`/); // the master prompt's marks never reach the screen
     // bob: no row of his own
@@ -274,6 +299,8 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     const { alice } = await people(h);
     const tool = investTools(h.app.core, alice.id).find((t) => t.name === "invest_snapshot")!;
     expect(tool.description).toContain("단계는 판정본만 말해요. 지금 값은 값으로만 말해요."); // team-lead 0437 2
+    // DD 0717 1: off is the server's setting: nothing to turn on, no promise to tell later
+    expect(tool.description).toContain("When the board is off, that is how this server is set up, not a setting the person can change: do not ask them to turn anything on, and do not promise to check again or tell them later.");
     const ctx = { userId: alice.id, threadId: null, now: () => new Date(h.clock.t) } as never;
     h.clock.t = KST(2026, 12, 1, 7, 0);
     expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: "첫 판정은 오늘 08:00에 나와요.", data: { stages: { kind: "none", none: "첫 판정은 오늘 08:00에 나와요." } } });
