@@ -12,11 +12,13 @@ import { bollinger, sma, usd, type Bar } from "@pickle/quant";
 import { etToEpoch } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { MAX_RULES } from "../src/invest/routes.ts";
-import { PROPOSAL_TTL_MS, proposalRow, settleInvestCards } from "../src/invest/proposals.ts";
+import { writeLedger } from "../src/invest/ledger.ts";
+import { PROPOSAL_TTL_MS, proposalRow, REQUEST_FOOT, settleInvestCards } from "../src/invest/proposals.ts";
+import { ieyo } from "../src/invest/rules.ts";
 import { investTools } from "../src/invest/tools.ts";
 import { buildTools } from "../src/turns.ts";
 import { BOGUS_TOSS_SECRET, FAKE_TOSS_BASE, makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
-import { makeFakeVault, makeHarness, type Harness } from "./helpers.ts";
+import { makeFakeVault, makeHarness, outcome, readSse, type Harness } from "./helpers.ts";
 
 const DAY = "2026-11-30"; // a Monday, a full session
 const ET = (h: number, m: number, day = DAY) => etToEpoch(day, h, m);
@@ -87,7 +89,7 @@ async function run(w: World, name: string, args: Record<string, unknown>, o: Par
   if (!t) throw new Error(`no tool ${name}`);
   return t.run(args, ctxOf(w, o));
 }
-const BASIS = { basisAsOf: "2026-11-27", basisSource: "Yahoo(지연 시세)", basisGrade: "B+" };
+const BASIS = { basis: "request" };
 async function propose(w: World, changes: Record<string, unknown>[], symbol = "SOXL", o: Partial<ToolContext> = {}) {
   return run(w, "invest_watch_propose", { symbol, changes, reason: "ATR 두 배 아래로 손절을 올려요", ...BASIS }, o);
 }
@@ -217,7 +219,7 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
       title: "SOXL 손절선을 $30.50으로 올릴까요?",
       changes: [{ label: "손절", from: "$25.80", to: "$30.50" }],
       reason: "ATR 두 배 아래로 손절을 올려요",
-      reasonFoot: "11-27 기준, Yahoo(지연 시세) · B+",
+      reasonFoot: REQUEST_FOOT,
       result: "장중에 $30.50 이하로 내려가면 알려요.",
       confirm: "tap",
       status: "pending",
@@ -304,6 +306,106 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     expect(storedCards(w, msg)[0]).toMatchObject({ status: "expired" });
   });
 
+  test("DD 0521 §1: the card's foot is code's — a ledger row the person can read, this turn's technicals, or the request", async () => {
+    const w = await world({ sources: true });
+    await watch(w, "SOXL");
+    await watch(w, "QQQ");
+    const r = await addRule(w, { symbol: "SOXL", kind: "stop", price: 25.8, action: "notify" });
+    const q = await addRule(w, { symbol: "QQQ", kind: "stop", price: 20, action: "notify" });
+    const row = (id: string, asOf: string, o: Record<string, unknown> = {}, uid = w.uid) =>
+      writeLedger(w.h.db, uid, { id, asOf, value: 26.1, unit: "usd", definition: "SOXL 20일선", source: "Yahoo 일봉", sourceTier: "T2", confidence: "B+", ...o }, "person", w.h.clock.t);
+    const ts = tools(w); // one turn's tools
+    const ask = (basis: unknown, t = ts, symbol = "SOXL") => t.invest_watch_propose!.run({ symbol, changes: [{ ruleId: symbol === "SOXL" ? r.id : q.id, price: 22 }], reason: "20일선 아래로 마감했어요", basis }, ctxOf(w));
+    const foot = async (basis: unknown, t = ts, symbol = "SOXL") => {
+      const out = await ask(basis, t, symbol);
+      return out.ok ? (out.card as InvestRuleChangeCard).reasonFoot : (out.data as { error: string }).error;
+    };
+    // the request: a fixed line, no source, no grade letter
+    expect(await foot("request")).toBe("요청으로 만든 제안이에요.");
+    expect(REQUEST_FOOT).not.toMatch(/[A-Z]/);
+    // a ledger id: its newest row's as-of, source and grade, whatever the model might have said
+    row("soxl.ma20", "2026-11-20", { source: "옛 출처", confidence: "B" });
+    row("soxl.ma20", "2026-11-27");
+    expect(await foot("soxl.ma20")).toBe("11-27 기준, Yahoo 일봉 · B+");
+    row("soxl.rumor", "2026-11-27", { source: "커뮤니티 글", sourceTier: "T4", confidence: "C" });
+    expect(await foot("soxl.rumor")).toBe("invalid_proposal"); // grade C rests nothing
+    const bob = await w.h.signup("bob");
+    row("bob.only", "2026-11-27", {}, bob.session.user.id);
+    expect(await foot("bob.only")).toBe("invalid_proposal"); // someone else's row is not there
+    for (const b of ["nothing.here", "bad id", "", 5, null, undefined, { asOf: "2026-11-27", source: "Yahoo 일봉", grade: "B+" }]) expect([b, await foot(b)]).toEqual([b, "invalid_proposal"]);
+    // technicals: only after invest_technicals answered for this symbol in this turn
+    expect(await foot("technicals")).toBe("invalid_proposal");
+    const failed = await ts.invest_technicals!.run({ symbol: "SOXL" }, ctxOf(w)); // no bars: rm-b2b1 turn 1
+    expect([failed.ok, await foot("technicals")]).toEqual([false, "invalid_proposal"]);
+    const bars: Bar[] = syntheticBars(DAY, 60, 28, 3).map((b, i) => ({ t: b.t, o: 25, h: 27, l: 24, c: 25 + (i % 4) * 0.3, v: 1000 }));
+    w.up.state.yahooDaily.set("QQQ", bars);
+    expect((await ts.invest_technicals!.run({ symbol: "qqq" }, ctxOf(w))).ok).toBe(true);
+    expect(await foot("technicals")).toBe("invalid_proposal"); // another symbol's figures
+    expect(await foot("technicals", ts, "QQQ")).toBe(`${bars.at(-1)!.t.slice(5)} 기준, Yahoo(지연 시세) · B+`);
+    expect(await foot("technicals", tools(w), "QQQ")).toBe("invalid_proposal"); // the next turn's tools saw nothing
+    expect([rule(w, r.id).rev, rule(w, q.id).rev]).toEqual([1, 1]);
+  });
+
+  test("DD 0521 §1: in a real turn the technicals one call saw carry to the proposal, and end with the turn", async () => {
+    const w = await world({ sources: true });
+    await watch(w, "SOXL");
+    const r = await addRule(w, { symbol: "SOXL", kind: "stop", price: 25.8, action: "notify" });
+    w.up.state.yahooDaily.set("SOXL", syntheticBars(DAY, 60, 28, 3).map((b) => ({ t: b.t, o: 27, h: 28, l: 26, c: 27, v: 1000 })));
+    const out: ToolResult[] = [];
+    const say = async (text: string, calls: string[]) => {
+      w.h.turns.set(async (input) => {
+        for (const name of calls) {
+          const a = name === "invest_technicals" ? { symbol: "SOXL" } : { symbol: "SOXL", changes: [{ ruleId: r.id, price: 26.5 }], reason: "2 ATR 아래예요", basis: "technicals" };
+          out.push(await input.tools.find((t) => t.name === name)!.run(a, input.ctx));
+        }
+        return outcome("보냈어요.");
+      });
+      await readSse(await w.h.req("POST", `/api/threads/${w.thread}/messages`, { token: w.token, body: { text } }));
+      await w.h.app.core.idle();
+    };
+    await say("지표 보고 제안해 줘", ["invest_technicals", "invest_watch_propose"]);
+    await say("한 번 더", ["invest_watch_propose"]);
+    expect(out.map((o) => [o.ok, o.ok ? (o.card as InvestRuleChangeCard | undefined)?.reasonFoot ?? "" : (o.data as { error: string }).error])).toEqual([
+      [true, ""],
+      [true, `${syntheticBars(DAY, 60, 28, 3).at(-1)!.t.slice(5)} 기준, Yahoo(지연 시세) · B+`],
+      [false, "invalid_proposal"],
+    ]);
+  });
+
+  test("DD 0521 §2–4: the tool descriptions — the server's quote words only, the date's year, one try more, a reason without the rows' prices", async () => {
+    const w = await world();
+    await watch(w, "SOXL");
+    const d = (name: string) => tools(w)[name]!.description;
+    expect(d("invest_watch_list")).toContain("When watch.state is off or blind, pass on watch.text and watch.foot as the server wrote them: quotes are the server's setting, so never offer to turn them on.");
+    for (const name of ["invest_event_add", "invest_forecast_add"]) {
+      expect(d(name)).toContain("A date said without a year is the next such date from today");
+      expect(d(name)).toMatch(/If a date is refused, correct it and (add|record) it once more; ask the person only when the date really reads two ways\./);
+    }
+    const p = d("invest_watch_propose");
+    for (const s of ["reason: one line on why, without the prices the card's rows already show.", '"technicals" (only after invest_technicals answered for this symbol in this turn)', '"request" (the person named the prices)', "After the card, say in one line that you sent it; do not repeat its rows or its result."]) expect(p).toContain(s);
+    expect(p).not.toContain(REQUEST_FOOT); // the foot's words stay code's
+    const schema = tools(w).invest_watch_propose!.parameters as { properties: Record<string, unknown>; required: string[] };
+    expect([Object.keys(schema.properties), schema.required]).toEqual([["symbol", "changes", "reason", "basis"], ["symbol", "changes", "reason", "basis"]]);
+    // 이에요/예요 as digits are read (the past-day sentences)
+    expect(["2026-11-27", "2026-11-25", "2026-11-20", "2026-11-22"].map(ieyo)).toEqual(["2026-11-27이에요", "2026-11-25예요", "2026-11-20이에요", "2026-11-22예요"]);
+  });
+
+  test("DD 0452 H4: a card lasts 24 hours — made with expiresAt = createdAt + 24h; 23:59 later it applies, 24:00:01 later it is 410", async () => {
+    const w = await world();
+    await watch(w, "SOXL");
+    const r = await addRule(w, { symbol: "SOXL", kind: "stop", price: 25.8, action: "notify" });
+    const t0 = w.h.clock.t;
+    const a = (await propose(w, [{ ruleId: r.id, price: 27 }])).card as InvestRuleChangeCard;
+    const b = (await propose(w, [{ ruleId: r.id, price: 26 }])).card as InvestRuleChangeCard;
+    expect([a.expiresAt - t0, proposalRow(w.h.app.core, w.uid, a.proposalId)!.expires_at - proposalRow(w.h.app.core, w.uid, a.proposalId)!.created_at]).toEqual([24 * 3_600_000, 24 * 3_600_000]);
+    w.h.clock.t = t0 + 23 * 3_600_000 + 59 * 60_000;
+    expect((await decide(w, a.proposalId, "apply")).status).toBe(200);
+    w.h.clock.t = t0 + 24 * 3_600_000 + 1000;
+    const late = await decide(w, b.proposalId, "apply");
+    expect([late.status, (late.body as { error: string }).error]).toEqual([410, "proposal_expired"]);
+    expect(rule(w, r.id).price).toBe(27);
+  });
+
   test("a real sell stop: hold to confirm, the quantity in the sentence, stale when the quantity changes", async () => {
     const w = await world();
     await connectToss(w);
@@ -336,7 +438,7 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
       { label: "저항", from: "없음", to: "$34.10" },
       { label: "전략 무효화", from: "없음", to: "$24.00 이하" },
     ]);
-    expect(card.result).toBe("손절은 장중에 $27.00 이하로 내려가면 전화로 알려요. 저항은 $34.10을 넘으면 알려요. 전략 무효화는 $24.00 이하로 내려가면 알려요.");
+    expect(card.result).toBe("손절은 장중에 $27.00 이하로 내려가면 전화로 알려요.\n저항은 $34.10을 넘으면 알려요.\n전략 무효화는 $24.00 이하로 내려가면 알려요.");
     expect((await decide(w, card.proposalId, "apply")).status).toBe(200);
     const rs = idb.rules(w.h.db, w.uid).map((x) => [x.kind, x.price, x.action, x.created_by]).sort();
     expect(rs).toEqual([
@@ -362,7 +464,7 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     expect((await one({ ruleId: r.id, price: 24 })).title).toBe("SOXL 손절선을 $24.00으로 내릴까요?");
     // taken away: the row, the title, the sentence; nothing until the tap; applied, the rule is gone
     const gone = await one({ ruleId: r.id, remove: true });
-    expect(gone).toMatchObject({ title: "SOXL 손절선을 지울까요?", changes: [{ label: "손절", from: "$25.80", to: "없음" }], result: "지우면 이 가격에 닿아도 알리지 않아요.", confirm: "tap" });
+    expect(gone).toMatchObject({ title: "SOXL 손절선을 지울까요?", changes: [{ label: "손절", from: "$25.80", to: "없음" }], result: "지우면 SOXL이 손절선에 닿아도 알리지 않아요.", confirm: "tap" });
     expect(rule(w, r.id).rev).toBe(1);
     expect((await decide(w, gone.proposalId, "apply")).body.card).toMatchObject({ status: "applied" });
     expect(idb.rule(w.h.db, w.uid, r.id)).toBeNull();
@@ -372,14 +474,34 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     const z = await addRule(w, { symbol: "SOXL", kind: "buy_zone", lo: 28, hi: 29, action: "notify" });
     const alGone = await one({ ruleId: al.id, remove: true });
     expect([alGone.title, alGone.changes]).toEqual(["SOXL 알림 가격을 지울까요?", [{ label: "가격 알림", from: "$35.00 이상", to: "없음" }]]);
-    expect((await one({ ruleId: call.id, remove: true })).result).toBe("지우면 이 가격에 닿아도 전화하지 않아요.");
-    expect((await one({ ruleId: z.id, remove: true })).title).toBe("SOXL 매수 검토 구간을 지울까요?");
+    expect((await one({ ruleId: call.id, remove: true })).result).toBe("지우면 SOXL이 손절선에 닿아도 전화하지 않아요.");
+    expect(alGone.result).toBe("지우면 SOXL이 알림 가격에 닿아도 알리지 않아요.");
+    const zGone = await one({ ruleId: z.id, remove: true });
+    expect([zGone.title, zGone.result]).toEqual(["SOXL 매수 검토 구간을 지울까요?", "지우면 SOXL이 매수 검토 구간에 들어와도 알리지 않아요."]);
+    // DD 0452 §3–4: one taken away among several → 규칙 N개를 바꿀까요; each line on its own, a removal without the kind first
     const both = (await propose(w, [{ ruleId: z.id, remove: true }, { kind: "resistance", price: 34.1 }])).card as InvestRuleChangeCard;
+    expect(both.title).toBe("SOXL 규칙 2개를 바꿀까요?");
     expect(both.changes).toEqual([
       { label: "매수 검토", from: "$28.00–29.00", to: "없음" },
       { label: "저항", from: "없음", to: "$34.10" },
     ]);
-    expect(both.result).toBe("매수 검토는 지우면 이 구간에 들어와도 알리지 않아요. 저항은 $34.10을 넘으면 알려요.");
+    expect(both.result).toBe("지우면 SOXL이 매수 검토 구간에 들어와도 알리지 않아요.\n저항은 $34.10을 넘으면 알려요.");
+    const allGone = (await propose(w, [{ ruleId: z.id, remove: true }, { ruleId: call.id, remove: true }])).card as InvestRuleChangeCard;
+    expect([allGone.title, allGone.result]).toEqual(["SOXL 규칙 2개를 지울까요?", "지우면 SOXL이 매수 검토 구간에 들어와도 알리지 않아요.\n지우면 SOXL이 손절선에 닿아도 전화하지 않아요."]);
+    // DD 0452 §6: the direction alone names the alert with its price
+    const flip = await one({ ruleId: al.id, direction: "below" });
+    expect([flip.title, flip.changes]).toEqual(["SOXL 알림을 $35.00 이하로 바꿀까요?", [{ label: "가격 알림 방향", from: "이상", to: "이하" }]]);
+    // DD 0452 §2: a resistance rule that calls, taken away
+    const res = (await propose(w, [{ kind: "resistance", price: 36 }])).card as InvestRuleChangeCard;
+    expect((await decide(w, res.proposalId, "apply")).status).toBe(200);
+    const resRule = idb.rules(w.h.db, w.uid).find((x) => x.kind === "resistance")!;
+    w.h.db.sql.query("UPDATE invest_rules SET action = 'call' WHERE id = $id").run({ id: resRule.id });
+    expect((await one({ ruleId: resRule.id, remove: true })).result).toBe("지우면 SOXL이 저항 가격에 닿아도 전화하지 않아요.");
+    // 이/가 as the symbol is read (the sheet's subjectOf): KORU(유)가
+    await watch(w, "KORU");
+    const k = await addRule(w, { symbol: "KORU", kind: "stop", price: 50, action: "notify" });
+    const kGone = (await propose(w, [{ ruleId: k.id, remove: true }], "KORU")).card as InvestRuleChangeCard;
+    expect(kGone.result).toBe("지우면 KORU가 손절선에 닿아도 알리지 않아요.");
     // stale: moved since, or already deleted by the person
     const moved = await one({ ruleId: call.id, remove: true });
     expect((await api(w, "PATCH", `/api/invest/rules/${call.id}`, { changes: { price: 24 }, ifRev: 1 })).status).toBe(200);
@@ -408,10 +530,10 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     w.up.state.tossSellable.set("SOXL", 47);
     const r = await addRule(w, { symbol: "SOXL", kind: "stop", price: 25.8, action: "sell" });
     const mock = (await propose(w, [{ ruleId: r.id, remove: true }])).card as InvestRuleChangeCard;
-    expect([mock.confirm, mock.result]).toEqual(["tap", "지우면 이 가격에 닿아도 기록하지 않아요."]);
+    expect([mock.confirm, mock.result]).toEqual(["tap", "지우면 SOXL이 손절선에 닿아도 기록하지 않아요."]);
     idb.updateSettings(w.h.db, w.uid, { mode: "real" }, w.h.clock.t);
     const real = (await propose(w, [{ ruleId: r.id, remove: true }])).card as InvestRuleChangeCard;
-    expect([real.confirm, real.result, real.warning]).toEqual(["tap", "지우면 이 가격에 닿아도 팔지 않아요.", undefined]);
+    expect([real.confirm, real.result, real.warning]).toEqual(["tap", "지우면 SOXL이 손절선에 닿아도 팔지 않아요.", undefined]); // the sheet's deleteNote, letter for letter
     expect(proposalRow(w.h.app.core, w.uid, real.proposalId)!.qty).toBeNull();
     w.up.state.tossSellable.set("SOXL", 40); // the quantity does not matter to taking it away
     expect((await decide(w, real.proposalId, "apply")).status).toBe(200);
@@ -449,8 +571,8 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     expect(await err(Array.from({ length: 7 }, (_, i) => ({ kind: "alert", price: 30 + i, direction: "above" })))).toBe("invalid_proposal");
     expect(await err([{ kind: "alert", price: 30, direction: "above" }], "NVDA")).toBe("not_watched");
     expect(await err([{ kind: "alert", price: 30 }])).toBe("invalid_proposal"); // an alert needs its direction
-    const noBasis = await run(w, "invest_watch_propose", { symbol: "SOXL", changes: [{ ruleId: r.id, price: 27 }], reason: "이유", basisAsOf: "2026-12-30", basisSource: "x", basisGrade: "A" });
-    expect((noBasis.data as { error: string }).error).toBe("invalid_proposal"); // a basis day still to come
+    const oldShape = await run(w, "invest_watch_propose", { symbol: "SOXL", changes: [{ ruleId: r.id, price: 27 }], reason: "이유", basisAsOf: "2026-11-27", basisSource: "Yahoo 일봉", basisGrade: "B+" });
+    expect((oldShape.data as { error: string }).error).toBe("invalid_proposal"); // DD 0521 §1: the model no longer writes the foot
     const voice = await propose(w, [{ ruleId: r.id, price: 27 }], "SOXL", { mode: "voice" });
     expect(voice.ok).toBe(false);
     expect(w.h.db.sql.query("SELECT COUNT(*) AS n FROM invest_proposals").get()).toEqual({ n: 0 });

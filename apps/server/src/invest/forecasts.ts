@@ -20,6 +20,7 @@ import { bad, HttpError } from "../http.ts";
 import { newId } from "../util.ts";
 import { kstDay } from "./calendar.ts";
 import { invalidOf, isDay, LEDGER_ID_RE, LEDGER_UNITS, lineOf, oneOf, unitText } from "./ledger.ts";
+import { eunNeun, ieyo } from "./rules.ts";
 
 export const MAX_FORECASTS = 500;
 /** a due day up to three years ahead */
@@ -107,7 +108,7 @@ export function createForecast(db: Db, userId: string, body: unknown, author: In
     hi = iv.hi;
   }
   if (!isDay(b.dueOn)) throw invalid("기한은 날짜(YYYY-MM-DD)로 넣어 주세요.");
-  if (b.dueOn < today) throw invalid("기한이 이미 지났어요.");
+  if (b.dueOn < today) throw invalid(`기한 ${eunNeun(b.dueOn)} 이미 지났어요. 오늘은 ${ieyo(today)}.`); // DD 0521 §2
   if (dayNumber(b.dueOn) - dayNumber(today) > FORECAST_MAX_DAYS) throw invalid("기한은 3년 안으로 정해 주세요.");
   const criterion = lineOf(b.criterion, "판정 기준", 300, invalid)!;
   let ledgerIds: string[] = [];

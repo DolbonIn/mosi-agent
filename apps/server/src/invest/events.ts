@@ -17,6 +17,7 @@ import { bad, HttpError } from "../http.ts";
 import { newId } from "../util.ts";
 import { etToEpoch, kstDay, kstToEpochDay, marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import { invalidOf, isDay, lineOf, oneOf, sourceOf } from "./ledger.ts";
+import { eunNeun, ieyo } from "./rules.ts";
 
 export const MAX_EVENTS = 200;
 /** a day up to two years ahead */
@@ -95,7 +96,7 @@ function checkEvent(body: unknown, now: number) {
   const market = oneOf(b.market, ["US", "KR"] as const, "시장", invalid);
   if (!isDay(b.day)) throw invalid("날짜는 YYYY-MM-DD로 넣어 주세요.");
   const today = marketDate(market, now);
-  if (b.day < today) throw invalid("지난 날짜예요.");
+  if (b.day < today) throw invalid(`${eunNeun(b.day)} 지난 날이에요. ${market === "US" ? `오늘은 ${today}(미 동부)예요.` : `오늘은 ${ieyo(today)}.`}`); // DD 0521 §2
   if (dayNumber(b.day) - dayNumber(today) > EVENT_MAX_DAYS) throw invalid("일정은 2년 안으로 넣어 주세요.");
   let time: string | null = null;
   if (b.time !== undefined && b.time !== null && b.time !== "") {

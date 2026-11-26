@@ -771,7 +771,8 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
 
 Each person's own rows (team-lead 0052); no model call behind any route. Code: `apps/server/src/invest/ledger.ts`,
 `forecasts.ts`, `events.ts`. Field errors are 400 with the field's Korean sentence (`invalid_ledger`, `invalid_forecast`,
-`invalid_event`).
+`invalid_event`); a day already past names today (DD 0521 §2): "2025-12-10은 지난 날이에요. 오늘은 2026-11-27이에요." (a
+US event: "오늘은 2026-11-26(미 동부)예요."), "기한 2025-12-10은 이미 지났어요. 오늘은 2026-11-27이에요."
 - **Ledger** (B2's nine fields): `GET /api/invest/ledger?id=&limit=` → `{items: InvestLedgerEntry[]}` (one id's rows by
   as_of, newest first, or the latest written; the person's own and the shared rows, `shared: true`, never another's).
   `POST /api/invest/ledger InvestLedgerDraft` → 201 entry (author `person`). id `[letters digits . _ -]` ≤ 64; asOf and
@@ -820,18 +821,27 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
   the bars' day, source and grade; no bars → no figures), `invest_ledger_add`, `invest_forecast_add`, `invest_event_add`
   (the POST paths above, author `model`), `invest_events` (the GET), `invest_forecast_judge {forecastId, outcome,
   errorCause?}` (due and not judged only: 409 `forecast_not_due` / `forecast_judged`; it sets `InvestForecast.proposal`
-  — "{agent name} 제안: 빗나감 · 시기" — never the outcome or the rev), `invest_watch_propose`.
-- **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120), basisAsOf, basisSource,
-  basisGrade}` stores a proposal and puts an `invest_rule_change` card in the turn's message (DD 1935 §2-3: the question
-  title, `changes` rows 낱말 · 지금 → 바꿀 값, `reason` and `reasonFoot` "11-27 기준, 출처 · 등급", the result sentence of
+  — "{agent name} 제안: 빗나감 · 시기" — never the outcome or the rev), `invest_watch_propose`. The descriptions (DD
+  0521): with quotes off or blind the model passes on the server's watch words and never offers to turn quotes on; a
+  date said without a year is the next one from today, and a refused date is corrected and tried once more.
+- **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120, not the rows' prices), basis}`
+  stores a proposal and puts an `invest_rule_change` card in the turn's message (DD 1935 §2-3: the question title,
+  `changes` rows 낱말 · 지금 → 바꿀 값, `reason` and `reasonFoot`, the result sentence of
   each rule — a real sell stop's with the sellable quantity — and `warning` for a stop above the price; `confirm: "hold"`
-  for a real sell stop, else `tap`; `expiresAt` 24 hours on). A change names an existing rule of the symbol `{ruleId,
+  for a real sell stop, else `tap`; `expiresAt` 24 hours on). The foot is code's (DD 0521 §1): `basis` is a ledger id
+  (its newest row the person can read: "11-27 기준, 출처 · 등급"; none, another's or grade C → 400 `invalid_proposal`),
+  `"technicals"` (only after `invest_technicals` answered for that symbol in the same turn: its last bar's day, source
+  and grade; else 400) or `"request"` (the person named the prices: "요청으로 만든 제안이에요.", no grade). A change names an existing rule of the symbol `{ruleId,
   price | lo, hi | direction (price alerts)}`, takes one away `{ruleId, remove: true}`, or makes a new rule `{kind,
   level?, price | lo, hi, direction?}` that only notifies (`created_by: "proposal"`; resistance and invalidation rules
   come this way). It never sets the action, the buffer, the deadline or "once" (400 `invalid_proposal`). Rows (DD 0405
   G): a new rule `없음 → $30.50`, a rule taken away `$30.50 → 없음`; one change's title "SOXL 손절선을 $30.50으로
-  올릴까요?/내릴까요?" (a value before), "SOXL 손절선을 $30.50으로 둘까요?" (new), "SOXL 손절선을 지울까요?". Voice turns
-  get no card.
+  올릴까요?/내릴까요?" (a value before), "SOXL 손절선을 $30.50으로 둘까요?" (new), "SOXL 손절선을 지울까요?", "SOXL 알림을
+  $35.00 이상으로 바꿀까요?" (the direction alone); several (DD 0452): "SOXL 새 전략 가격 N개를 적용할까요?", "SOXL 규칙 N개를
+  바꿀까요?" when one is taken away, "SOXL 규칙 N개를 지울까요?" when all are. The result has one line per change (`\n`;
+  with several, a line putting or changing a price starts "손절은 …"); taking one away reads as the rule sheet does: "지우면
+  SOXL이 손절선에 닿아도 팔지 않아요." (기록하지 않아요 for a mock sale, 전화하지 않아요, 알리지 않아요; a buy zone "구간에
+  들어와도"). Voice turns get no card.
 - `POST /api/invest/proposals/:id {decision: "apply" | "keep"}` → `{card}` (status `applied` / `kept`, `decidedAt`).
   Applying writes every change in one transaction: the line moves, the rest of the rule stays, and the rule is watched
   afresh (state armed, its earlier state unknown); a rule taken away is deleted. Refused, nothing written, the card in the body: 409 `proposal_stale`

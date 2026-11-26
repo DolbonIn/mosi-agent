@@ -9,15 +9,19 @@
  * action (sell, call), the buffer, the deadline or "once": those stay the person's, in the edit sheet. It is stale when
  * any rule it names moved since (its rev), the symbol left the watch, the order mode changed, or — a real sell stop —
  * the sellable quantity its result sentence promised changed. It expires after PROPOSAL_TTL_MS.
+ *
+ * The card's foot (as-of, source, grade) is code's (DD 0521 §1): the model names what the reason rests on — a ledger id
+ * (its newest row the person can read; grade C is refused), "technicals" (this turn's invest_technicals answer for the
+ * symbol) or "request" (the person named the prices: REQUEST_FOOT, no grade) — and never writes the foot's words.
  */
-import type { Card, InvestGrade, InvestRuleChangeCard, InvestRuleKind } from "@pickle/protocol";
+import type { Card, InvestRuleChangeCard, InvestRuleKind } from "@pickle/protocol";
 import { basisNote } from "@pickle/quant";
 import { publishMessage, publishThread, type Core } from "../core.ts";
 import { bad, HttpError, json, notFound, readJson, type Ctx } from "../http.ts";
 import { newId, safeJson } from "../util.ts";
-import { kstDay, marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
+import { marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import * as idb from "./db.ts";
-import { invalidOf, isDay, lineOf, oneOf } from "./ledger.ts";
+import { invalidOf, LEDGER_ID_RE, lineOf, oneOf, readLedger } from "./ledger.ts";
 import { INVEST_ERRORS, MAX_RULES, priceOf, specWithChanges } from "./routes.ts";
 import {
   bufferPct,
@@ -25,6 +29,7 @@ import {
   eulReul,
   eunNeun,
   euroRo,
+  iGa,
   kindWord,
   money,
   resultSentence,
@@ -38,7 +43,8 @@ import {
 export const PROPOSAL_TTL_MS = 24 * 60 * 60_000;
 export const MAX_PROPOSAL_ITEMS = 6;
 const REASON_MAX = 120;
-const SOURCE_MAX = 40;
+/** the foot of a proposal made from the person's own prices (DD 0521 §1): no source, no grade */
+export const REQUEST_FOOT = "요청으로 만든 제안이에요.";
 
 export const PROPOSAL_ERRORS = {
   proposal_not_found: "이미 없어진 제안이에요.",
@@ -49,7 +55,6 @@ export const PROPOSAL_ERRORS = {
 
 const invalid = invalidOf("invalid_proposal");
 const KINDS: readonly InvestRuleKind[] = ["stop", "target", "buy_zone", "alert", "resistance", "invalidate"];
-const GRADES: readonly InvestGrade[] = ["A", "B+", "B", "C"];
 
 /**
  * one change: an existing rule (ruleId, the rev it was proposed against, its spec then) or a new rule (before null);
@@ -78,12 +83,33 @@ export interface ProposalRow {
   created_at: number;
 }
 
-/** what invest_watch_propose sends */
+/** what invest_watch_propose sends; basis is a ledger id, "technicals" or "request" */
 export interface ProposalArgs {
   symbol?: unknown;
   changes?: unknown;
   reason?: unknown;
   basis?: unknown;
+}
+
+/** what code saw in this turn that a proposal may rest on */
+export interface ProposalSeen {
+  /** the symbol's invest_technicals answer in this turn: its last bar's day, the source's name and grade */
+  technicals?(symbol: string): { asOf: string; source: string; grade: string } | null;
+}
+
+/** the card's foot from what the model named; throws the 400 when code cannot find it */
+function footOf(core: Core, userId: string, symbol: string, basis: unknown, saw: ProposalSeen): string {
+  if (basis === "request") return REQUEST_FOOT;
+  if (basis === "technicals") {
+    const t = saw.technicals?.(symbol) ?? null;
+    if (!t) throw invalid(`이번 턴에 ${symbol} 지표를 받지 못했어요. invest_technicals가 답한 뒤에 넣거나, 사람이 말한 가격이면 "request"로 넣어 주세요.`);
+    return basisNote(t.asOf, t.source, t.grade);
+  }
+  if (typeof basis !== "string" || !LEDGER_ID_RE.test(basis)) throw invalid('근거는 원장 id, "technicals", "request" 가운데 하나로 넣어 주세요.');
+  const row = readLedger(core.db, userId, { id: basis, limit: 1 })[0];
+  if (!row) throw invalid("원장에 그 id가 없어요. 원장에 있는 id를 넣어 주세요.");
+  if (row.confidence === "C") throw invalid("등급 C 값은 근거로 쓰지 않아요.");
+  return basisNote(row.asOf.slice(0, 10), row.source, row.confidence);
 }
 
 // ───────────────────────────── checks ─────────────────────────────
@@ -118,7 +144,7 @@ function newSpec(symbol: string, c: Record<string, unknown>): RuleSpec {
 const MOVES = ["price", "lo", "hi", "direction"] as const;
 
 /** the model's arguments → the symbol, its items and the reason line; throws the 400s */
-export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: number): { symbol: string; items: ProposalItem[]; reason: string; reasonFoot: string } {
+export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: number, saw: ProposalSeen = {}): { symbol: string; items: ProposalItem[]; reason: string; reasonFoot: string } {
   const symbol = normalizeSymbol(a.symbol);
   if (!symbol) throw bad(INVEST_ERRORS.unknown_symbol, "unknown_symbol");
   if (!idb.watchRow(core.db, userId, symbol)) throw bad(INVEST_ERRORS.not_watched, "not_watched");
@@ -156,12 +182,7 @@ export function checkProposal(core: Core, userId: string, a: ProposalArgs, now: 
   const added = items.filter((i) => !i.ruleId).length;
   if (added && idb.rules(core.db, userId).length + added - items.filter((i) => i.remove).length > MAX_RULES) throw bad(INVEST_ERRORS.too_many_rules, "too_many_rules");
   const reason = lineOf(a.reason, "이유", REASON_MAX, invalid)!;
-  const b = a.basis && typeof a.basis === "object" && !Array.isArray(a.basis) ? (a.basis as Record<string, unknown>) : null;
-  if (!b) throw invalid("근거의 기준일과 출처를 넣어 주세요.");
-  if (!isDay(b.asOf) || b.asOf > kstDay(now)) throw invalid("근거의 기준일은 오늘이나 그 전의 날짜(YYYY-MM-DD)로 넣어 주세요.");
-  const source = lineOf(b.source, "출처", SOURCE_MAX, invalid)!;
-  const grade = oneOf(b.grade, GRADES, "등급", invalid);
-  return { symbol, items, reason, reasonFoot: basisNote(b.asOf, source, grade) };
+  return { symbol, items, reason, reasonFoot: footOf(core, userId, symbol, a.basis, saw) };
 }
 
 const SPEC_KEYS = ["symbol", "kind", "level", "price", "lo", "hi", "direction", "action", "once", "buffer_pct", "until_day"] as const;
@@ -201,15 +222,27 @@ function changeRows(items: readonly ProposalItem[]): InvestRuleChangeCard["chang
   return out;
 }
 
+/** the rule's word in the title and in the sentence of taking it away: 손절선, 알림 가격, 저항 가격, 매수 검토 구간 */
+function ruleWord(s: RuleSpec): string {
+  const k = kindWord(s.kind, s.level);
+  return s.kind === "stop" ? "손절선" : s.kind === "buy_zone" ? `${k} 구간` : s.kind === "alert" ? "알림 가격" : `${k} 가격`;
+}
+
 /**
- * DD 1935 §2-3 1 and DD 0405 G: SOXL 손절선을 $30.50으로 올릴까요? (올릴까요/내릴까요 only beside a value before) /
- * SOXL 손절선을 $30.50으로 둘까요? (a new rule) / SOXL 손절선을 지울까요? / SOXL 새 전략 가격 4개를 적용할까요?
+ * DD 1935 §2-3 1, DD 0405 G and DD 0452: SOXL 손절선을 $30.50으로 올릴까요? (올릴까요/내릴까요 only beside a value
+ * before) / SOXL 손절선을 $30.50으로 둘까요? (a new rule) / SOXL 손절선을 지울까요? / SOXL 알림을 $35.00 이상으로
+ * 바꿀까요? (the direction alone) / several: SOXL 새 전략 가격 4개를 적용할까요?, with one taken away SOXL 규칙 N개를
+ * 바꿀까요?, all taken away SOXL 규칙 N개를 지울까요?
  */
 function titleOf(symbol: string, items: readonly ProposalItem[]): string {
-  if (items.length > 1) return `${symbol} 새 전략 가격 ${items.length}개를 적용할까요?`;
+  if (items.length > 1) {
+    const gone = items.filter((i) => i.remove).length;
+    if (!gone) return `${symbol} 새 전략 가격 ${items.length}개를 적용할까요?`;
+    return `${symbol} 규칙 ${items.length}개를 ${gone === items.length ? "지울까요?" : "바꿀까요?"}`;
+  }
   const { before, after, remove } = items[0]!;
   const k = kindWord(after.kind, after.level);
-  const what = after.kind === "stop" ? "손절선" : after.kind === "buy_zone" ? `${k} 구간` : after.kind === "alert" ? "알림 가격" : `${k} 가격`;
+  const what = ruleWord(after);
   if (!before) return `${symbol} ${eulReul(what)} ${euroRo(valueText(after, true))} 둘까요?`;
   if (remove) return `${symbol} ${eulReul(what)} 지울까요?`;
   if (after.kind !== "buy_zone" && before.price !== after.price) {
@@ -217,7 +250,7 @@ function titleOf(symbol: string, items: readonly ProposalItem[]): string {
     return `${symbol} ${eulReul(what)} ${euroRo(valueText(after, false))} ${up ? "올릴까요?" : "내릴까요?"}`;
   }
   if (after.kind === "buy_zone") return `${symbol} ${eulReul(what)} ${euroRo(valueText(after, false))} 바꿀까요?`;
-  return `${symbol} ${k} 방향을 ${euroRo(DIR[after.direction])} 바꿀까요?`;
+  return `${symbol} ${eulReul(after.kind === "alert" ? "알림" : k)} ${euroRo(valueText(after, true))} 바꿀까요?`;
 }
 
 async function sellable(core: Core, userId: string, symbol: string): Promise<number | null> {
@@ -227,14 +260,20 @@ async function sellable(core: Core, userId: string, symbol: string): Promise<num
   return r.ok ? r.value : null;
 }
 
-/** what stops when a rule goes: 지우면 이 가격에 닿아도 팔지 않아요. (a real sell stop) */
+/**
+ * what stops when a rule goes, in the sheet's words (DD 0452 §2; rules.ts deleteNote): 지우면 SOXL이 손절선에 닿아도
+ * 팔지 않아요. / 지우면 SOXL이 매수 검토 구간에 들어와도 알리지 않아요.
+ */
 function removedSentence(r: RuleSpec, mode: "mock" | "real"): string {
-  const where = r.kind === "buy_zone" ? "이 구간에 들어와도" : "이 가격에 닿아도";
+  const reach = r.kind === "buy_zone" ? "들어와도" : "닿아도";
   const what = isSell(r) ? (mode === "real" ? "팔지 않아요." : "기록하지 않아요.") : r.action === "call" ? "전화하지 않아요." : "알리지 않아요.";
-  return `지우면 ${where} ${what}`;
+  return `지우면 ${iGa(r.symbol)} ${ruleWord(r)}에 ${reach} ${what}`;
 }
 
-/** the result sentences (DD 1935 §2-3 4): each item's, the kind named first when there are several */
+/**
+ * the result sentences (DD 1935 §2-3 4, DD 0452 §4): each item's on its own line; with several, a line that puts or
+ * changes a price names its kind first (a line taking one away already names it)
+ */
 async function resultOf(core: Core, userId: string, items: readonly ProposalItem[], mode: "mock" | "real", qty: number | null): Promise<{ result: string; warning?: string }> {
   const symbol = items[0]!.after.symbol;
   const ctx = await core.invest.previewContext(userId, symbol);
@@ -243,8 +282,7 @@ async function resultOf(core: Core, userId: string, items: readonly ProposalItem
   let warning: string | undefined;
   for (const { after, remove } of items) {
     if (remove) {
-      const s = removedSentence(after, mode);
-      lines.push(items.length > 1 ? `${eunNeun(kindWord(after.kind, after.level))} ${s}` : s);
+      lines.push(removedSentence(after, mode));
       continue;
     }
     let basis: "intraday" | "close_and_intraday" = "intraday";
@@ -258,7 +296,7 @@ async function resultOf(core: Core, userId: string, items: readonly ProposalItem
     lines.push(items.length > 1 ? `${eunNeun(kindWord(after.kind, after.level))} ${s}` : s);
     warning ??= stopWarning(market, after, ctx.price, true) ?? undefined;
   }
-  return { result: lines.join(" "), warning };
+  return { result: lines.join("\n"), warning };
 }
 
 // ───────────────────────────── rows ─────────────────────────────
@@ -282,9 +320,9 @@ function settle(core: Core, r: ProposalRow, status: Exclude<InvestRuleChangeCard
  * Store a proposal and return its card (the tool's result carries it into the turn's message). The order mode, the
  * sellable quantity a real sell stop's sentence promises, and every named rule's rev are kept for the stale check.
  */
-export async function createProposal(core: Core, userId: string, threadId: string | null, a: ProposalArgs): Promise<{ id: string; card: InvestRuleChangeCard }> {
+export async function createProposal(core: Core, userId: string, threadId: string | null, a: ProposalArgs, saw: ProposalSeen = {}): Promise<{ id: string; card: InvestRuleChangeCard }> {
   const now = core.now();
-  const { symbol, items, reason, reasonFoot } = checkProposal(core, userId, a, now);
+  const { symbol, items, reason, reasonFoot } = checkProposal(core, userId, a, now, saw);
   const mode = idb.ensureSettings(core.db, userId, now).mode;
   const sells = items.some(sellsAfter);
   const qty = sells && mode === "real" ? await sellable(core, userId, symbol) : null;

@@ -92,6 +92,7 @@ export const iGa = (w: string) => w + (finalSound(w) === "none" ? "가" : "이")
 export const eulReul = (w: string) => w + (finalSound(w) === "none" ? "를" : "을");
 export const euroRo = (w: string) => w + (finalSound(w) === "other" ? "으로" : "로");
 export const eunNeun = (w: string) => w + (finalSound(w) === "none" ? "는" : "은");
+export const ieyo = (w: string) => w + (finalSound(w) === "none" ? "예요" : "이에요");
 
 // ───────────────────────────── names ─────────────────────────────
 

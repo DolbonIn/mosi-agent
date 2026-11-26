@@ -137,7 +137,8 @@ describe("the event calendar", () => {
     const a = await person("alice");
     const cases: [Record<string, unknown>, string][] = [
       [{ market: "JP" }, "시장은 US, KR 가운데 하나예요."],
-      [{ day: "2026-11-22" }, "지난 날짜예요."],
+      [{ day: "2026-11-22" }, "2026-11-22는 지난 날이에요. 오늘은 2026-11-23(미 동부)예요."], // DD 0521 §2: the US date at 07:00 KST
+      [{ market: "KR", day: "2026-11-23" }, "2026-11-23은 지난 날이에요. 오늘은 2026-11-24예요."],
       [{ day: "2026-13-01" }, "날짜는 YYYY-MM-DD로 넣어 주세요."],
       [{ day: "2029-01-01" }, "일정은 2년 안으로 넣어 주세요."],
       [{ time: "24:00" }, "시각은 그 시장 시각 HH:MM으로 넣어 주세요."],

@@ -17,7 +17,7 @@ import * as idb from "./db.ts";
 import { createEvent, listEvents } from "./events.ts";
 import { createForecast, proposeJudgement } from "./forecasts.ts";
 import { writeLedger } from "./ledger.ts";
-import { createProposal } from "./proposals.ts";
+import { createProposal, type ProposalArgs } from "./proposals.ts";
 import { money } from "./rules.ts";
 import { SOURCE_TABLE } from "./sources.ts";
 
@@ -80,11 +80,13 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   if (!userId) return [];
   if (!idb.getSettings(core.db, userId) && !idb.watchlist(core.db, userId).length) return [];
   const hub = core.invest;
+  /** this turn's invest_technicals answers by symbol: a proposal's "technicals" basis rests only on one of these */
+  const answered = new Map<string, { asOf: string; source: string; grade: string }>();
 
   const watchList: ToolDef = {
     name: "invest_watch_list",
     description:
-      "The person's watched symbols with their last price, change, holding and price rules (id, rev, kind, line, action, state), as the invest screen shows them. Read this before proposing a rule change. Figures carry their source and time.",
+      "The person's watched symbols with their last price, change, holding and price rules (id, rev, kind, line, action, state), as the invest screen shows them. Read this before proposing a rule change. Figures carry their source and time. When watch.state is off or blind, pass on watch.text and watch.foot as the server wrote them: quotes are the server's setting, so never offer to turn them on.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
     icon: "chart",
     title: () => "감시 종목 확인",
@@ -121,6 +123,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
       const got = await hub.dailyBars(symbol, market, ctx.userId);
       if (!got || got.bars.length < 15) return { ok: false, summary: `${symbol} 일봉을 받지 못했어요`, data: { error: "no_bars", note: "No daily bars now: say the figures are 확인 불가, do not estimate them." } };
       const src = SOURCE_TABLE[got.source];
+      answered.set(symbol, { asOf: got.bars.at(-1)!.t, source: src.name, grade: src.grade });
       return {
         ok: true,
         summary: `${symbol} 지표 · ${got.bars.at(-1)!.t} · ${src.name}`,
@@ -165,7 +168,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const forecastAdd: ToolDef = {
     name: "invest_forecast_add",
     description:
-      "Record a forecast you are making in the person's forecast ledger: claim (one line), p (probability strictly between 0 and 1), optional interval (intervalLo, intervalHi, intervalUnit together), dueOn (YYYY-MM-DD, within 3 years), criterion (how it will be judged), ledgerIds it rests on. It cannot be edited or deleted afterwards; the person judges it when due.",
+      "Record a forecast you are making in the person's forecast ledger: claim (one line), p (probability strictly between 0 and 1), optional interval (intervalLo, intervalHi, intervalUnit together), dueOn (YYYY-MM-DD, within 3 years), criterion (how it will be judged), ledgerIds it rests on. It cannot be edited or deleted afterwards; the person judges it when due. A date said without a year is the next such date from today (KST). If a date is refused, correct it and record it once more; ask the person only when the date really reads two ways.",
     parameters: {
       type: "object",
       properties: {
@@ -232,7 +235,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const eventAdd: ToolDef = {
     name: "invest_event_add",
     description:
-      "Add an event you found in a source to the person's investment calendar: market (US or KR), day (the market's own date), time (HH:MM in that market's local time, or omit if not announced), kind, title, symbol, source, sourceTier, url, confidence. The person gets a reminder the day before at 08:00 KST.",
+      "Add an event you found in a source to the person's investment calendar: market (US or KR), day (the market's own date), time (HH:MM in that market's local time, or omit if not announced), kind, title, symbol, source, sourceTier, url, confidence. The person gets a reminder the day before at 08:00 KST. A date said without a year is the next such date from today. If a date is refused, correct it and add it once more; ask the person only when the date really reads two ways.",
     parameters: {
       type: "object",
       properties: {
@@ -267,7 +270,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const propose: ToolDef = {
     name: "invest_watch_propose",
     description:
-      "Propose moving the person's price rules for one watched symbol. Nothing changes now: the person gets a card and decides. Each change is either {ruleId, price | lo,hi | direction} for an existing rule (ids from invest_watch_list), {ruleId, remove: true} to take one away, or a new notify-only rule {kind, level?, price | lo,hi, direction?} (kind stop, target, buy_zone, alert, resistance, invalidate; alert and invalidate need direction below or above). You cannot set sell, call, buffer or deadline. Take the prices from invest_technicals or the ledger, give a one-line reason and the basis (basisAsOf, basisSource, basisGrade) of the figure it rests on. At most 6 changes.",
+      "Propose moving the person's price rules for one watched symbol. Nothing changes now: the person gets a card and decides. Each change is either {ruleId, price | lo,hi | direction} for an existing rule (ids from invest_watch_list), {ruleId, remove: true} to take one away, or a new notify-only rule {kind, level?, price | lo,hi, direction?} (kind stop, target, buy_zone, alert, resistance, invalidate; alert and invalidate need direction below or above). You cannot set sell, call, buffer or deadline. Take the prices from invest_technicals or the ledger, or the ones the person named. reason: one line on why, without the prices the card's rows already show. basis: what the reason rests on; the server writes the card's foot (as-of, source, grade) from it: a ledger id (its newest row; grade C is refused), \"technicals\" (only after invest_technicals answered for this symbol in this turn) or \"request\" (the person named the prices). At most 6 changes. After the card, say in one line that you sent it; do not repeat its rows or its result.",
     parameters: {
       type: "object",
       properties: {
@@ -289,11 +292,9 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
           },
         },
         reason: str,
-        basisAsOf: { type: "string", description: "YYYY-MM-DD of the figure the reason rests on" },
-        basisSource: str,
-        basisGrade: grade,
+        basis: { type: "string", description: 'a ledger id, "technicals" or "request"' },
       },
-      required: ["symbol", "changes", "reason", "basisAsOf", "basisSource", "basisGrade"],
+      required: ["symbol", "changes", "reason", "basis"],
       additionalProperties: false,
     },
     icon: "bell",
@@ -301,8 +302,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
     run: (a, ctx) =>
       attempt(async () => {
         if (ctx.mode === "voice") return { ok: false, summary: "통화 중에는 제안 카드를 보낼 수 없어요", data: { error: "voice", note: "Cards cannot be shown in a call. Offer to send it in chat." } };
-        const { basisAsOf, basisSource, basisGrade, ...rest } = a as Record<string, unknown>;
-        const { id, card } = await createProposal(core, ctx.userId, ctx.threadId, { ...rest, basis: { asOf: basisAsOf, source: basisSource, grade: basisGrade } });
+        const { id, card } = await createProposal(core, ctx.userId, ctx.threadId, a as ProposalArgs, { technicals: (s) => answered.get(s) ?? null });
         return { ok: true, summary: card.title, card, data: { proposalId: id, changes: card.changes, note: "Nothing changed yet. The person decides on the card." } };
       }, "제안을 만들지 못했어요"),
   };
