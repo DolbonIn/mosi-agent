@@ -51,6 +51,19 @@ describe("B3.6 composite", () => {
     ]);
     expect(groups).toEqual([["rpo", "capex", "guide"], ["orders"]]);
   });
+  test("B3.6 \"0.7 이상\": two indicators correlated 0.75 count once; 0.65 apart (lead mutant Q6: 0.7 → 0.8)", () => {
+    // y = x + b·z with z orthogonal to x (both centred): r = |x| / √(|x|² + b²|z|²); |x|² = 10, |z|² = 14
+    const x = [1, 2, 3, 4, 5];
+    const z = [2, -1, -2, -1, 2];
+    const withR = (r: number) => {
+      const b = Math.sqrt((10 / r ** 2 - 10) / 14);
+      return x.map((v, i) => v + b * z[i]!);
+    };
+    expect(correlation(x, withR(0.75))).toBeCloseTo(0.75, 9);
+    expect(correlation(x, withR(0.65))).toBeCloseTo(0.65, 9);
+    expect(correlationGroups([{ id: "a", values: x }, { id: "b", values: withR(0.75) }])).toEqual([["a", "b"]]);
+    expect(correlationGroups([{ id: "a", values: x }, { id: "b", values: withR(0.65) }])).toEqual([["a"], ["b"]]);
+  });
   test("demand 40 · supply 30 · credit 30; a group counts once; two axes the same way allow a change", () => {
     const inds = [
       { id: "rpo", axis: "demand" as const, signal: 1 as const },

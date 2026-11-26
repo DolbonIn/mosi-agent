@@ -135,9 +135,15 @@ export interface ChartLayout {
   rsiH: number;
   /** 0: no MACD panel */
   macdH: number;
-  /** the price-tick column on the left and the label column on the right */
+  /** the price-tick column on the left; the label column on the right is at least `right`, and widens to the widest label
+   * the chart draws + 10, up to `rightMax` (DD 2145): two-digit dollar charts keep `right`, three-digit and won charts
+   * get the room their prices need, and past `rightMax` a price gives way to its word (label_price_dropped) */
   left: number;
+  /** the left column widens the same way to the widest price tick + 8, up to `leftMax`; past it the tick numbers are left
+   * out (the grid lines stay), so a tick is never drawn clipped ("250,000" cut to "0,000") */
+  leftMax: number;
   right: number;
+  rightMax: number;
   /** trading days drawn */
   days: number;
   profile: boolean;
@@ -148,12 +154,13 @@ export interface ChartLayout {
   caption: boolean;
 }
 
-/** the phone card: 326 wide at 390 (the card's inner width), 200 + 8 + 56 = 264 high, 60 days, plot 194 */
-export const PHONE_CARD: ChartLayout = { width: 326, mainH: 200, gap: 8, rsiH: 56, macdH: 0, left: 32, right: 100, days: 60, profile: false, minGap: 18, dates: "month", caption: false };
+/** the phone card: 326 wide at 390 (the card's inner width), 200 + 8 + 56 = 264 high, 60 days, plot 194 (166 at the
+ * widest label column) */
+export const PHONE_CARD: ChartLayout = { width: 326, mainH: 200, gap: 8, rsiH: 56, macdH: 0, left: 32, leftMax: 72, right: 100, rightMax: 128, days: 60, profile: false, minGap: 18, dates: "month", caption: false };
 /** the full-view sheet: 358 × 420 with all six elements */
-export const FULL_VIEW: ChartLayout = { width: 358, mainH: 292, gap: 8, rsiH: 56, macdH: 56, left: 32, right: 100, days: 60, profile: true, minGap: 18, dates: "month", caption: false };
+export const FULL_VIEW: ChartLayout = { width: 358, mainH: 292, gap: 8, rsiH: 56, macdH: 56, left: 32, leftMax: 72, right: 100, rightMax: 128, days: 60, profile: true, minGap: 18, dates: "month", caption: false };
 /** the deck's level-chart slide: 1152 × 400 */
-export const DECK_CHART: ChartLayout = { width: 1152, mainH: 248, gap: 12, rsiH: 64, macdH: 64, left: 48, right: 120, days: 60, profile: true, minGap: 24, dates: "md", caption: true };
+export const DECK_CHART: ChartLayout = { width: 1152, mainH: 248, gap: 12, rsiH: 64, macdH: 64, left: 48, leftMax: 96, right: 120, rightMax: 160, days: 60, profile: true, minGap: 24, dates: "md", caption: true };
 
 export interface LevelChartInput {
   /** oldest first; MA200 needs `days` + 199 bars to cover the window */
@@ -171,7 +178,8 @@ export interface LevelChartInput {
   digits?: number;
 }
 
-export type ChartIssue = { code: "label_dropped" | "level_offscale" | "label_price_dropped"; kind: LevelKind | "current"; price: number };
+/** level_invalid: a level whose price is not a finite number is left out (its row says 확인 불가), never drawn at NaN */
+export type ChartIssue = { code: "label_dropped" | "level_offscale" | "label_price_dropped" | "level_invalid"; kind: LevelKind | "current"; price: number };
 
 export interface LevelChart {
   svg: string;
@@ -272,18 +280,27 @@ function path(xs: readonly number[], ys: readonly Num[], y: (p: number) => numbe
 }
 
 export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: ChartLayout = PHONE_CARD): LevelChart {
-  const { bars, levels } = input;
+  const { bars } = input;
+  const issues: ChartIssue[] = [];
+  const bad = bars.find((b) => ![b.o, b.h, b.l, b.c, b.v].every(Number.isFinite));
+  if (bad) throw new Error(`levelChart: a bar with a price or volume that is not a number (${bad.t})`);
+  const levels = input.levels.filter((lv) => {
+    const ok = Number.isFinite(lv.price) && (lv.hi == null || Number.isFinite(lv.hi));
+    if (!ok) issues.push({ code: "level_invalid", kind: lv.kind, price: lv.price });
+    return ok;
+  });
   const digits = input.digits ?? 2;
   if (layout.caption && !(input.unit && input.asOf && input.source)) throw new Error("levelChart: the deck chart needs unit, asOf and source");
   const show = bars.slice(-layout.days);
   if (show.length < 2) throw new Error("levelChart: at least two bars");
   const start = bars.length - show.length;
   const current = input.current ?? show.at(-1)!.c;
-  const issues: ChartIssue[] = [];
+  if (!Number.isFinite(current)) throw new Error("levelChart: the current price is not a number");
   const W = layout.width;
   const H = layout.mainH + layout.gap + layout.rsiH + (layout.macdH ? layout.gap + layout.macdH : 0);
   const capH = layout.caption ? theme.tick.size + 10 : 0;
   const dateH = theme.tick.size + 6;
+  // the plot's right edge waits for the label column's width (below); the vertical scale does not depend on it
   const plot = { x0: layout.left, x1: W - layout.right, y0: 8 + capH, y1: layout.mainH - dateH };
   const plotH = plot.y1 - plot.y0;
 
@@ -317,6 +334,51 @@ export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: Ch
   lo -= margin;
   hi += margin;
   const y = (p: number) => plot.y0 + (1 - (p - lo) / (hi - lo)) * plotH;
+
+  // labels in the right column: which are drawn (priority, slots) does not depend on the column's width, so they are
+  // chosen first, the column is sized to the widest of them, and only then does a price that still does not fit give way
+  const look = (k: LevelKind): Stroke => (k === "stop" ? theme.stop : k === "resistance" ? theme.resistance : k === "support" ? theme.support : theme.target);
+  const size = theme.label.size;
+  const colour = (k: LevelKind | "current") => (k === "current" ? theme.current.color : k === "buyZone" ? theme.zone.label : look(k).color);
+  const rank = (k: LevelKind | "current") => LABEL_PRIORITY.indexOf(k);
+  type Lab = { kind: LevelKind | "current"; price: number; want: number; word: string; withPrice: boolean; arrow?: "↑" | "↓" };
+  const labs: Lab[] = [];
+  labs.push({ kind: "current", price: current, want: y(current), word: "", withPrice: true });
+  for (const lv of levels) {
+    const word = LEVEL_WORD[lv.kind];
+    if (off.has(lv)) {
+      const up = Math.max(lv.price, lv.hi ?? lv.price) > ch;
+      issues.push({ code: "level_offscale", kind: lv.kind, price: lv.price });
+      labs.push({ kind: lv.kind, price: lv.price, want: up ? -Infinity : Infinity, word, withPrice: false, arrow: up ? "↑" : "↓" });
+      continue;
+    }
+    const mid = lv.kind === "buyZone" ? (lv.price + (lv.hi ?? lv.price)) / 2 : lv.price;
+    labs.push({ kind: lv.kind, price: lv.price, want: y(mid), word, withPrice: lv.kind !== "buyZone" });
+  }
+  const top = plot.y0 + size / 2;
+  const bottom = plot.y1 - size / 2;
+  const slots = Math.floor((bottom - top) / layout.minGap) + 1;
+  const kept = [...labs].sort((a, b) => rank(a.kind) - rank(b.kind) || a.want - b.want);
+  for (const d of kept.splice(slots)) issues.push({ code: "label_dropped", kind: d.kind, price: d.price });
+  kept.sort((a, b) => a.want - b.want);
+  const full = (l: Lab) => (l.arrow ? `${l.word} ${l.arrow}` : l.kind === "current" ? num(l.price, digits) : l.withPrice ? `${l.word} ${num(l.price, digits)}` : l.word);
+  const widest = Math.max(0, ...kept.map((l) => labelEm(full(l)) * size));
+  const right = Math.min(layout.rightMax, Math.max(layout.right, Math.ceil(widest + 10)));
+  const room = right - 10;
+  for (const l of kept) {
+    if (!l.withPrice || l.kind === "current" || labelEm(full(l)) * size <= room) continue;
+    l.withPrice = false;
+    issues.push({ code: "label_price_dropped", kind: l.kind, price: l.price });
+  }
+  plot.x1 = W - right;
+
+  // the price ticks: the left column fits their widest number, or they go
+  const ticks = niceTicks(lo, hi, 4).map((t) => ({ t, label: num(t, Number.isInteger(t) ? 0 : 1) }));
+  const widestTick = Math.max(0, ...ticks.map((k) => labelEm(k.label) * theme.tick.size));
+  const left = Math.min(layout.leftMax, Math.max(layout.left, Math.ceil(widestTick + 8)));
+  const tickNumbers = widestTick + 8 <= left;
+  plot.x0 = left;
+
   const slot = (plot.x1 - plot.x0) / show.length;
   const xs = show.map((_, i) => plot.x0 + slot * (i + 0.5));
   const body = Math.max(2, Math.floor(slot * 0.6));
@@ -330,10 +392,10 @@ export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: Ch
   if (layout.caption) s.push(text(plot.x0, 8 + theme.tick.size / 2, `${input.unit} · ${input.asOf} · ${input.source}`, theme.tick.color, theme.tick.size, ' data-role="caption"'));
 
   // grid and price ticks
-  for (const t of niceTicks(lo, hi, 4)) {
+  for (const { t, label } of ticks) {
     const ty = y(t);
     s.push(`<line x1="${plot.x0}" x2="${plot.x1}" y1="${f1(ty)}" y2="${f1(ty)}" ${stroke(theme.grid)} data-role="grid"/>`);
-    s.push(text(plot.x0 - 6, ty, num(t, Number.isInteger(t) ? 0 : 1), theme.tick.color, theme.tick.size, ' text-anchor="end"'));
+    if (tickNumbers) s.push(text(plot.x0 - 6, ty, label, theme.tick.color, theme.tick.size, ' text-anchor="end" data-role="tick"'));
   }
 
   // date ticks at month starts
@@ -394,40 +456,13 @@ export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: Ch
   s.push(`<line x1="${plot.x0}" x2="${plot.x1}" y1="${f1(y(current))}" y2="${f1(y(current))}" ${stroke(theme.current.line)} data-role="current"/>`);
 
   // level lines (never outside the plot box: off-scale levels have none)
-  const look = (k: LevelKind): Stroke => (k === "stop" ? theme.stop : k === "resistance" ? theme.resistance : k === "support" ? theme.support : theme.target);
   for (const lv of levels) {
     if (lv.kind === "buyZone" || off.has(lv)) continue;
     const ly = y(lv.price);
     s.push(`<line x1="${plot.x0}" x2="${plot.x1}" y1="${f1(ly)}" y2="${f1(ly)}" ${stroke(look(lv.kind))} data-level="${lv.kind}"/>`);
   }
 
-  // labels in the right column
-  const size = theme.label.size;
-  const room = layout.right - 10;
-  const colour = (k: LevelKind | "current") => (k === "current" ? theme.current.color : k === "buyZone" ? theme.zone.label : look(k).color);
-  const rank = (k: LevelKind | "current") => LABEL_PRIORITY.indexOf(k);
-  type Lab = { kind: LevelKind | "current"; price: number; want: number; word: string; withPrice: boolean; arrow?: "↑" | "↓" };
-  const labs: Lab[] = [];
-  labs.push({ kind: "current", price: current, want: y(current), word: "", withPrice: true });
-  for (const lv of levels) {
-    const word = LEVEL_WORD[lv.kind];
-    if (off.has(lv)) {
-      const up = Math.max(lv.price, lv.hi ?? lv.price) > ch;
-      issues.push({ code: "level_offscale", kind: lv.kind, price: lv.price });
-      labs.push({ kind: lv.kind, price: lv.price, want: up ? -Infinity : Infinity, word, withPrice: false, arrow: up ? "↑" : "↓" });
-      continue;
-    }
-    const mid = lv.kind === "buyZone" ? (lv.price + (lv.hi ?? lv.price)) / 2 : lv.price;
-    const fits = labelEm(`${word} ${num(lv.price, digits)}`) * size <= room;
-    if (lv.kind !== "buyZone" && !fits) issues.push({ code: "label_price_dropped", kind: lv.kind, price: lv.price });
-    labs.push({ kind: lv.kind, price: lv.price, want: y(mid), word, withPrice: lv.kind !== "buyZone" && fits });
-  }
-  const top = plot.y0 + size / 2;
-  const bottom = plot.y1 - size / 2;
-  const slots = Math.floor((bottom - top) / layout.minGap) + 1;
-  const kept = [...labs].sort((a, b) => rank(a.kind) - rank(b.kind) || a.want - b.want);
-  for (const d of kept.splice(slots)) issues.push({ code: "label_dropped", kind: d.kind, price: d.price });
-  kept.sort((a, b) => a.want - b.want);
+  // the labels, stacked and drawn
   const placed = stack(
     kept.map((l) => (l.want === -Infinity ? top : l.want === Infinity ? bottom : l.want)),
     layout.minGap,

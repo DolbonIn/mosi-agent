@@ -368,4 +368,3 @@ export function capexBelowTwo(input: Core11Input): { status: Tri; risk: number; 
   }
   return { status: risk >= 2 ? "met" : risk + missing >= 2 ? "unknown" : "unmet", risk, missing };
 }
-

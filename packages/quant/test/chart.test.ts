@@ -136,16 +136,120 @@ describe("off-scale levels and crowded labels", () => {
     const rank = (k: string) => LABEL_PRIORITY.indexOf(k as never);
     expect(Math.min(...dropped.map(rank))).toBeGreaterThan(Math.max(...kept.map(rank)));
   });
-  test("the column's room is right − 10: 1차 익절 136.50 (93.5 px measured) loses its price on the phone card", () => {
-    const k = 136.5 / (last + 2);
-    const big = levelChart({ bars: B.map((b) => ({ ...b, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k })), levels: [{ kind: "target1", price: 136.5 }], summary: "x" }, APP_THEME, PHONE_CARD);
-    expect(labels(big.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절");
-    expect(big.issues).toContainEqual({ code: "label_price_dropped", kind: "target1", price: 136.5 });
+});
+
+describe("label column width (DD 2145): clamp(widest drawn label + 10, right, rightMax)", () => {
+  const scaled = (k: number) => B.map((b) => ({ ...b, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k }));
+  const rightOf = (c: { width: number; plot: { x1: number } }) => c.width - c.plot.x1;
+  const at = (price: number, digits = 2) => {
+    const k = price / (last + 2);
+    return levelChart({ bars: scaled(k), levels: [{ kind: "target1", price }], summary: "x", digits }, APP_THEME, PHONE_CARD);
+  };
+  test("two-digit dollars keep 100 (plot 194)", () => {
+    const c = levelChart({ bars: B, levels: LV, summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(rightOf(c)).toBe(100);
+    expect(c.plot.x1 - c.plot.x0).toBe(194);
   });
-  test("a label too wide for the column keeps its word and loses its price (label_price_dropped)", () => {
-    const won = levelChart({ bars: B.map((b) => ({ ...b, o: b.o * 6000, h: b.h * 6000, l: b.l * 6000, c: b.c * 6000 })), levels: [{ kind: "target1", price: Math.round(last * 6000 + 9000) }], summary: "x", digits: 0 }, APP_THEME, PHONE_CARD);
-    expect(labels(won.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절");
-    expect(won.issues.map((i) => i.code)).toContain("label_price_dropped");
+  test("1차 익절 136.50 (93.5 px measured): the column widens to about 107 and the price stays", () => {
+    const c = at(136.5);
+    expect(rightOf(c)).toBe(Math.ceil(labelEm("1차 익절 136.50") * 13 + 10));
+    expect(rightOf(c)).toBeGreaterThan(100);
+    expect(rightOf(c)).toBeLessThan(112);
+    expect(labels(c.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절 136.50");
+    expect(c.issues).toEqual([]);
+  });
+  test("won 189,400: about 116, the price stays", () => {
+    const c = at(189_400, 0);
+    expect(rightOf(c)).toBeGreaterThan(108);
+    expect(rightOf(c)).toBeLessThanOrEqual(120);
+    expect(labels(c.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절 189,400");
+  });
+  test("past the cap: 128, the price gives way to its word, label_price_dropped", () => {
+    const c = at(12_345_678, 0);
+    expect(rightOf(c)).toBe(128);
+    expect(labels(c.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절");
+    expect(c.issues).toContainEqual({ code: "label_price_dropped", kind: "target1", price: 12_345_678 });
+  });
+  test("the deck: 120 at least, 160 at most; 1차 익절 1,234.50 (120.1 px) fits", () => {
+    const k = 1234.5 / (last + 2);
+    const d = levelChart({ bars: scaled(k), levels: [{ kind: "target1", price: 1234.5 }], summary: "x", unit: "USD", asOf: "11월 26일 종가 기준", source: "Yahoo" }, DECK_THEME, DECK_CHART);
+    expect(rightOf(d)).toBeGreaterThan(120);
+    expect(rightOf(d)).toBeLessThanOrEqual(160);
+    expect(labels(d.svg).find((l) => l.kind === "target1")?.text).toBe("1차 익절 1,234.50");
+  });
+  test("a dropped label (crowding) does not widen the column; the same input gives the same chart", () => {
+    const c1 = at(136.5);
+    expect(at(136.5).svg).toBe(c1.svg);
+    const tiny = { ...PHONE_CARD, mainH: 60 };
+    const k = 136.5 / (last + 2);
+    const c = levelChart({ bars: scaled(k), levels: [{ kind: "stop", price: Math.round((last - 3) * k * 100) / 100 }, { kind: "target3", price: 136.5 }], summary: "x" }, APP_THEME, tiny);
+    // two slots: the current price and 손절 stay, 3차 익절 (the widest) is dropped and does not size the column
+    expect(c.issues).toContainEqual({ code: "label_dropped", kind: "target3", price: 136.5 });
+    expect(labels(c.svg).map((l) => l.kind).sort()).toEqual(["current", "stop"]);
+    expect(rightOf(c)).toBe(100);
+  });
+});
+
+describe("price ticks on the left: never clipped", () => {
+  const scaled = (k: number) => B.map((b) => ({ ...b, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k, v: b.v }));
+  const ticks = (svg: string) => attrs(svg, /<text [^>]*data-role="tick"[^>]*>[^<]*<\/text>/g).map((t) => ({ x: num(t, "x"), text: t.replace(/<[^>]+>/g, "") }));
+  test("two-digit dollars: left 32", () => {
+    const c = levelChart({ bars: B, levels: LV, summary: "x" }, APP_THEME, PHONE_CARD);
+    expect(c.plot.x0).toBe(32);
+    expect(ticks(c.svg).length).toBeGreaterThan(1);
+  });
+  test("won (150,000–250,000): the column widens and every tick number starts inside the chart", () => {
+    for (const layout of [PHONE_CARD, FULL_VIEW]) {
+      const c = levelChart({ bars: scaled(6000), levels: [], summary: "x", digits: 0 }, APP_THEME, layout);
+      const ts = ticks(c.svg);
+      expect(ts.length).toBeGreaterThan(1);
+      expect(c.plot.x0).toBeGreaterThan(32);
+      expect(c.plot.x0).toBeLessThanOrEqual(72);
+      for (const t of ts) expect(t.x - labelEm(t.text) * APP_THEME.tick.size).toBeGreaterThanOrEqual(0);
+    }
+  });
+  test("past leftMax the tick numbers go and the grid lines stay", () => {
+    const c = levelChart({ bars: scaled(1e6), levels: [], summary: "x", digits: 0 }, APP_THEME, PHONE_CARD);
+    expect(c.plot.x0).toBe(72);
+    expect(ticks(c.svg)).toEqual([]);
+    expect(attrs(c.svg, /data-role="grid"/g).length).toBeGreaterThan(1);
+  });
+});
+
+describe("label rules (DD 1949, DD 2145)", () => {
+  const charts = [
+    ["phone", levelChart({ bars: B, levels: LV, summary: "x" }, APP_THEME, PHONE_CARD)],
+    ["full", levelChart({ bars: B, levels: LV, summary: "x" }, APP_THEME, FULL_VIEW)],
+    ["deck", levelChart({ bars: B, levels: LV, summary: "x", unit: "USD", asOf: "11월 26일 종가 기준", source: "Yahoo" }, DECK_THEME, DECK_CHART)],
+  ] as const;
+  test("매수 검토 is the band's word alone, with no number, in every layout", () => {
+    for (const [, c] of charts) expect(labels(c.svg).find((l) => l.kind === "buyZone")?.text).toBe("매수 검토");
+  });
+  test("every label starts at or right of the leader's end (plot.x1 + 8)", () => {
+    for (const [, c] of charts) {
+      const xs = attrs(c.svg, /<text [^>]*data-label="\w+"[^>]*>/g).map((t) => num(t, "x"));
+      expect(xs.length).toBeGreaterThan(3);
+      for (const x of xs) expect(x).toBeGreaterThanOrEqual(c.plot.x1 + 8);
+    }
+  });
+  test("a label moved off its line (> 1.5 px) has one leader from its line; a label on its line has none", () => {
+    const near: ChartLevel[] = [
+      { kind: "stop", price: Math.round((last - 3) * 100) / 100 },
+      { kind: "support", price: Math.round((last - 0.1) * 100) / 100 },
+      { kind: "resistance", price: Math.round((last + 0.1) * 100) / 100 },
+    ];
+    const c = levelChart({ bars: B, levels: near, summary: "x" }, APP_THEME, PHONE_CARD);
+    const size = APP_THEME.label.size;
+    const yOf = (p: number) => c.plot.y0 + (1 - (p - c.range.lo) / (c.range.hi - c.range.lo)) * (c.plot.y1 - c.plot.y0);
+    const priceOf: Record<string, number> = { current: last, ...Object.fromEntries(near.map((l) => [l.kind, l.price])) };
+    const ls = labels(c.svg).map((l) => ({ ...l, py: l.y - size * 0.35, want: yOf(priceOf[l.kind]!) }));
+    const moved = ls.filter((l) => Math.abs(l.py - l.want) > 1.5 + 0.1);
+    const still = ls.filter((l) => Math.abs(l.py - l.want) <= 1.5 - 0.1);
+    expect(moved.length).toBeGreaterThan(0);
+    expect(still.length).toBeGreaterThan(0);
+    const leaders = attrs(c.svg, /<path [^>]*data-role="leader"[^>]*\/>/g).map((p) => p.match(/d="M([-0-9.]+),([-0-9.]+) L[-0-9.]+,[-0-9.]+ L[-0-9.]+,([-0-9.]+)"/)!.slice(1).map(Number));
+    expect(leaders.length).toBe(moved.length);
+    for (const l of moved) expect(leaders.some(([x0, from, to]) => x0 === c.plot.x1 && Math.abs(from! - l.want) < 0.11 && Math.abs(to! - l.py) < 0.11)).toBe(true);
   });
 });
 
@@ -167,6 +271,16 @@ describe("full view and deck", () => {
     expect(d.svg).toContain('data-role="caption">USD · 11월 26일 종가 기준 · Yahoo</text>');
     expect(d.svg).toMatch(/data-role="date">\d{1,2}\/\d{1,2}</);
     expect(labels(d.svg).every((l, i, a) => i === 0 || Math.abs(l.y - a[i - 1]!.y) >= 0)).toBe(true);
+  });
+  test("never NaN in the drawing: a broken bar or current price refuses, a broken level is left out (level_invalid)", () => {
+    const broken = B.map((b, i) => (i === B.length - 3 ? { ...b, c: NaN } : b));
+    expect(() => levelChart({ bars: broken, levels: LV, summary: "x" }, APP_THEME, PHONE_CARD)).toThrow();
+    expect(() => levelChart({ bars: B.map((b, i) => (i === 5 ? { ...b, v: Infinity } : b)), levels: LV, summary: "x" }, APP_THEME, PHONE_CARD)).toThrow();
+    expect(() => levelChart({ bars: B, levels: LV, summary: "x", current: NaN }, APP_THEME, PHONE_CARD)).toThrow();
+    const c = levelChart({ bars: B, levels: [...LV, { kind: "target2", price: NaN }, { kind: "buyZone", price: 30, hi: Infinity }], summary: "x" }, APP_THEME, FULL_VIEW);
+    expect(c.svg).not.toContain("NaN");
+    expect(c.svg).not.toContain("확인 불가");
+    expect(c.issues.filter((i) => i.code === "level_invalid").map((i) => i.kind)).toEqual(["target2", "buyZone"]);
   });
   test("deck refuses to draw without unit, basis and source (FA4 #8)", () => {
     expect(() => levelChart({ bars: B, levels: LV, summary: "x" }, DECK_THEME, DECK_CHART)).toThrow();
