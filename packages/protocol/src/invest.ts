@@ -124,20 +124,93 @@ export interface InvestWatch {
   foot?: string;
 }
 
-export interface InvestStages {
-  line: string;
-  sub: string;
-  escape: { floor: 1 | 2 | 3 | 4; ceiling: 1 | 2 | 3 | 4; label: string };
-  recovery: { stage: 0 | 1 | 2 | 3 | "hold"; label: string };
-  gauges: { id: "worse" | "severe" | "recovery"; label: string; cells: ("met" | "unmet" | "unknown")[]; text: string }[];
-  next: string | null;
+export type InvestTri = "met" | "unmet" | "unknown";
+/** DD 0426 §1: why a stage is not settled — nowhere to get a value yet (quiet) or a source that did not answer today (caution); both → caution */
+export type InvestPendingTone = "quiet" | "caution";
+
+/** one stage line of the board (DD 0059 §1-2, 0428 §2) */
+export interface InvestStageHead {
+  /** escape 1–4, recovery 0–3; with `floor` the stage that surely holds; null only for 회복 판정 보류 and 회복 단계 미확정 */
+  stage: number | null;
+  /** 경계 · 바닥 탐색 …: a settled stage only */
+  name?: string;
+  /** 탈출 2단계 · 탈출 최소 1단계 · 회복 1단계 · 회복 최소 1단계 · 회복 판정 보류 · 회복 단계 미확정 */
+  text: string;
+  floor?: boolean;
+  /** 지표 3개 값이 없어서 2단계 여부는 아직 몰라요. — counts, never indicator numbers */
+  pending?: string;
+  pendingTone?: InvestPendingTone;
+}
+
+export interface InvestStageGauge {
+  key: "worse" | "severe" | "recover";
+  /** 악화 신호 · 심각 신호 · 회복 신호 */
+  label: string;
+  met: number;
+  of: number;
+  unknown: number;
+  cells: { id: string; state: InvestTri }[];
+  /** the bar's accessible label: 악화 신호 8개 중 3개 충족, 확인 불가 1개 */
+  aria: string;
+}
+
+/**
+ * The stage board (B2b-2: A2 → A5 → A6 by @pickle/quant, judged once a KST day from 08:00 and stored; DD 0059 §1-2,
+ * 0426, 0428). An app that does not know `kind` draws it as `none`.
+ */
+export type InvestStages =
+  /** this server reads no public source: 지금은 지표를 받지 않아서 단계를 판정하지 않아요. */
+  | { kind: "off"; off: string }
+  /** before the first judgment: 첫 판정은 오늘 08:00에 나와요. */
+  | { kind: "none"; none: string }
+  | {
+      kind: "judged";
+      escape: InvestStageHead;
+      recovery: InvestStageHead;
+      /** worse, severe, recover */
+      gauges: InvestStageGauge[];
+      /** 탈출 3단계까지: 악화 신호 2개 더 / 회복 2단계까지: 회복 신호 2개 더, 심각 신호 0개 */
+      next: string[];
+      judgedAt: Millis;
+      /** 11월 27일 08:00 판정 · 어제와 같아요 / · 회복 0 → 1단계 */
+      judgedText: string;
+      /** only when today's 08:00 reading is missing: 오늘 08:00 판정을 하지 못했어요. 11월 26일 판정이에요. */
+      stale?: string;
+    };
+
+/** GET /api/invest/stages — `11지표와 단계 조건` (DD 0059 §1-4) */
+export interface InvestStagesDetail {
+  stages: InvestStages;
+  /** empty unless judged */
+  core11: {
+    no: number;
+    name: string;
+    signal: "normal" | "caution" | "risk" | "unknown";
+    /** 4.50% · null → 확인 불가 */
+    value: string | null;
+    /** 11월 26일 · FRED · A / 받을 곳이 아직 없어요 / 오늘 받지 못했어요 */
+    basis: string;
+    reason: string;
+  }[];
+  groups: {
+    key: "worse" | "severe" | "recover";
+    /** 악화 신호 A1–A8 */
+    title: string;
+    /** text: the condition in short; stateText: 충족 · 미충족 · 확인 불가; detail: 22.40 · 11월 26일 · FRED · A */
+    rows: { id: string; text: string; state: InvestTri; stateText: string; detail: string }[];
+    /** the section's foot */
+    next: string;
+  }[];
+  /** 계산 방법 (DD 0426 §4) */
+  method: string[];
+  disclaimer: true;
 }
 
 export interface InvestOverview {
   rev: number;
   mode: InvestMode;
-  /** B1b */
-  stages: InvestStages | null;
+  /** B2b-2 */
+  stages: InvestStages;
   /** newest first */
   watchlist: InvestSymbolRow[];
   rules: InvestRuleRow[];
@@ -146,7 +219,7 @@ export interface InvestOverview {
   /** C */
   decks: { id: ID; headline: string; meta: string; attachmentId: ID; thumbUrl: string }[];
   settings: InvestSettingsView;
-  /** "시세 00:45 기준 · 토스증권. 가격 규칙은 개장 15분 뒤부터 마감까지 5분마다 확인해요." (null with no symbols: the app shows the period sentence alone) */
+  /** "시세 00:45 기준 · 토스증권. 가격 규칙은 개장 15분 뒤부터 마감까지 5분마다 확인해요."; null while `watch` is off (nothing is checked, DD 0454-b) */
   quotesFoot: string | null;
   watch: InvestWatch;
 }

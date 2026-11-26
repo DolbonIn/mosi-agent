@@ -60,7 +60,7 @@ describe("fredgraph CSV", () => {
       { t: "2026-11-25", v: 17.2 },
       { t: "2026-11-26", v: null },
     ]);
-    expect(parseFredCsv(String.fromCharCode(0xfeff) + CSV, "DGS10")?.length).toBe(4);
+    expect(parseFredCsv(String.fromCharCode(0xfeff) + CSV, "DGS10")?.length).toBe(4); // DD 0612 F3: the header cell's trim() takes the BOM
     expect(parseFredCsv("observation_date,SAHMREALTIME\n2026-10-01,-0.03\n", "SAHMREALTIME")).toEqual([{ t: "2026-10-01", v: -0.03 }]);
     expect(parseFredCsv(CSV, "DGS2")).toBeNull(); // another series
     expect(parseFredCsv("<!DOCTYPE html><html><body>Just a moment...</body></html>", "DGS10")).toBeNull();

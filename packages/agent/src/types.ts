@@ -172,6 +172,18 @@ export interface ToolContext {
    * lookup is skipped.
    */
   heard?(): string[];
+  /**
+   * The web pages read (set by the server): what web_read returned this turn and in the thread's recent history, each
+   * as its address (the one web_read gave) and its text. invest_ledger_add holds a figure the model writes to them.
+   * Unset (meetings, tests) = no page was read.
+   */
+  pages?(): readonly ReadPage[];
+}
+
+/** one web page as web_read returned it: its address and the page's own text (title, description, text, items …) */
+export interface ReadPage {
+  url: string;
+  text: string;
 }
 
 /** The subset of server persistence tools may touch. */

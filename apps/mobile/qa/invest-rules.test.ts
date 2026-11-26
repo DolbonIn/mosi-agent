@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import type { InvestStages } from "@pickle/protocol";
 import {
   actionChoices,
+  boardOf,
+  STAGE_EMPTY,
+  stageEmptyLine,
   BUFFER_RANGE,
   CALL_NOTE,
   canOnce,
@@ -271,5 +275,34 @@ describe("the screen's tones and groups", () => {
     expect([gaugeTone("worse"), gaugeTone("severe"), gaugeTone("recovery")]).toEqual(["caution", "danger", "label"]);
     expect(gaugeSaid({ id: "worse", label: "악화 신호", cells: ["met", "met", "met", "unmet", "unknown", "unmet", "unmet", "unmet"], text: "3/8" })).toBe("악화 신호 8개 중 3개 충족, 확인 불가 1개");
     expect(gaugeSaid({ id: "recovery", label: "회복 신호", cells: ["unmet", "met"], text: "1/2" })).toBe("회복 신호 2개 중 1개 충족");
+  });
+  test("B2b-2 stages (team-lead 0554 guard): only a judged board is drawn, in today's shape; off, none, an unknown kind and null draw none", () => {
+    const judged: InvestStages = {
+      kind: "judged",
+      escape: { stage: 2, name: "경계", text: "탈출 2단계" },
+      recovery: { stage: null, text: "회복 판정 보류" },
+      gauges: [
+        { key: "worse", label: "악화 신호", met: 3, of: 8, unknown: 1, cells: [{ id: "A1", state: "met" }, { id: "A2", state: "unknown" }, { id: "A3", state: "unmet" }], aria: "" },
+        { key: "recover", label: "회복 신호", met: 1, of: 6, unknown: 0, cells: [{ id: "R1", state: "met" }], aria: "" },
+      ],
+      next: ["탈출 3단계까지: 악화 신호 2개 더", "회복 1단계까지: 회복 신호 2개 더"],
+      judgedAt: 0,
+      judgedText: "11월 27일 08:00 판정 · 어제와 같아요",
+    };
+    expect(boardOf(judged)).toEqual({
+      line: "탈출 2단계 · 회복 판정 보류",
+      sub: "11월 27일 08:00 판정 · 어제와 같아요",
+      gauges: [
+        { id: "worse", label: "악화 신호", cells: ["met", "unknown", "unmet"], text: "3/8" },
+        { id: "recovery", label: "회복 신호", cells: ["met"], text: "1/6" },
+      ],
+      next: "탈출 3단계까지: 악화 신호 2개 더",
+    });
+    expect(boardOf({ ...judged, next: [] })?.next).toBeNull();
+    const none = [{ kind: "off", off: "지금은 지표를 받지 않아서 단계를 판정하지 않아요." }, { kind: "none", none: "첫 판정은 오늘 08:00에 나와요." }, { kind: "later" }, null, undefined];
+    expect(none.map((s) => boardOf(s as InvestStages | null))).toEqual([null, null, null, null, null]);
+    // the empty line (DD 0600): off and none in the server's words; an unknown kind or nothing keeps today's line
+    expect(none.map((s) => stageEmptyLine(s as InvestStages | null))).toEqual(["지금은 지표를 받지 않아서 단계를 판정하지 않아요.", "첫 판정은 오늘 08:00에 나와요.", STAGE_EMPTY, STAGE_EMPTY, STAGE_EMPTY]);
+    expect(STAGE_EMPTY).toBe("아직 판정이 없어요. 매일 오전 8시에 판정해요.");
   });
 });

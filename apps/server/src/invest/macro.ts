@@ -50,8 +50,7 @@ const isDay = (t: string | undefined): t is string => !!t && /^\d{4}-\d{2}-\d{2}
  * or number, days out of order — is not the series: null.
  */
 export function parseFredCsv(text: string, id: string): Point[] | null {
-  const body = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
-  const lines = body.split(/\r?\n/).filter((l) => l.trim() !== "");
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== ""); // a BOM goes with the header cell's trim()
   const head = lines[0]?.split(",").map((c) => c.trim());
   if (!head || head.length !== 2 || !/^(observation_date|DATE)$/.test(head[0]!) || head[1] !== id) return null;
   const out: Point[] = [];

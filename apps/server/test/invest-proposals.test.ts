@@ -15,7 +15,7 @@ import { MAX_RULES } from "../src/invest/routes.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
 import { PROPOSAL_TTL_MS, proposalRow, REQUEST_FOOT, settleInvestCards } from "../src/invest/proposals.ts";
 import { ieyo } from "../src/invest/rules.ts";
-import { investTools } from "../src/invest/tools.ts";
+import { investTools, PROPOSE_NOTE } from "../src/invest/tools.ts";
 import { buildTools } from "../src/turns.ts";
 import { BOGUS_TOSS_SECRET, FAKE_TOSS_BASE, makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
 import { makeFakeVault, makeHarness, outcome, readSse, type Harness } from "./helpers.ts";
@@ -109,7 +109,7 @@ describe("which turns get the invest tools", () => {
     const names = (kind: "main" | "friend", others?: boolean) => buildTools(w.h.app.core, kind, undefined, "on", w.uid, others).map((d) => d.name).filter((n) => n.startsWith("invest_"));
     expect(names("main")).toEqual([]);
     await watch(w, "SOXL");
-    expect(names("main").sort()).toEqual(["invest_event_add", "invest_events", "invest_forecast_add", "invest_forecast_judge", "invest_ledger_add", "invest_technicals", "invest_watch_list", "invest_watch_propose"]);
+    expect(names("main").sort()).toEqual(["invest_event_add", "invest_events", "invest_forecast_add", "invest_forecast_judge", "invest_ledger_add", "invest_snapshot", "invest_technicals", "invest_watch_list", "invest_watch_propose"]);
     expect(names("friend")).toEqual([]);
     expect(names("main", true)).toEqual([]);
   });
@@ -155,14 +155,95 @@ describe("reads: figures from code", () => {
   });
 });
 
+describe("the model's ledger figures come from a page it read (team-lead 0437 1)", () => {
+  const row = { id: "stage.breadth200", asOf: "2026-11-25", unit: "pct", definition: "S&P500 200일선 위 종목 비율", source: "예시 시장 폭 페이지", sourceTier: "T2", confidence: "B" };
+  const PAGE = "https://www.example.org/market/breadth/";
+  const text = "S&P 500 시장 폭\n200일선 위 종목 비율 57.40% (11월 25일)\n50일선 위 1,234.5개 중 … 자세히: https://example.org/archive/61.2";
+  const page = { pages: () => [{ url: "https://example.org/market/breadth", text }] };
+  test("url and a number written on that page: saved as given; no url, a page not read, a number not on it, a number only in an address: refused, nothing saved", async () => {
+    const w = await world();
+    await watch(w, "SOXL");
+    const err = async (args: Record<string, unknown>, o: Partial<ToolContext> = page) => {
+      const r = await run(w, "invest_ledger_add", { ...row, ...args }, o);
+      return [r.ok, (r.data as { error?: string; message?: string }).error, (r.data as { message?: string }).message];
+    };
+    expect(await err({ value: 57.4 })).toEqual([false, "ledger_unsourced", "웹 페이지에서 읽은 값만 넣어요. 읽은 페이지의 주소(url)를 함께 넣어 주세요."]);
+    expect(await err({ value: 57.4, url: "https://example.org/market/other" })).toEqual([false, "ledger_unsourced", "이 주소의 페이지를 읽은 적이 없어요. web_read로 읽은 페이지의 주소를 넣어 주세요."]);
+    expect(await err({ value: 57.4, url: PAGE }, {})).toEqual([false, "ledger_unsourced", "이 주소의 페이지를 읽은 적이 없어요. web_read로 읽은 페이지의 주소를 넣어 주세요."]); // no pages at all (a meeting)
+    expect(await err({ value: 57.5, url: PAGE })).toEqual([false, "ledger_unsourced", "이 숫자가 그 페이지에 없어요. 페이지에 적힌 숫자 그대로 넣어 주세요."]);
+    expect((await err({ value: 61.2, url: PAGE }))[1]).toBe("ledger_unsourced"); // only inside an address on the page
+    expect(w.h.db.sql.query("SELECT COUNT(*) AS n FROM invest_ledger").get()).toEqual({ n: 0 });
+    // the same page however its address is written (www, a trailing slash); 1,234.5 and 57.40 as numbers; the sign aside
+    const ok = await run(w, "invest_ledger_add", { ...row, value: 57.4, url: PAGE }, page);
+    expect(ok.ok).toBe(true);
+    expect((await run(w, "invest_ledger_add", { ...row, id: "x.count", unit: "count", value: 1234.5, url: PAGE }, page)).ok).toBe(true);
+    expect((await run(w, "invest_ledger_add", { ...row, id: "x.change", value: -57.4, url: PAGE }, page)).ok).toBe(true);
+    expect(w.h.db.sql.query("SELECT id, value, url, author FROM invest_ledger ORDER BY id").all()).toEqual([
+      { id: "stage.breadth200", value: 57.4, url: "https://www.example.org/market/breadth/", author: "model" },
+      { id: "x.change", value: -57.4, url: "https://www.example.org/market/breadth/", author: "model" },
+      { id: "x.count", value: 1234.5, url: "https://www.example.org/market/breadth/", author: "model" },
+    ]);
+  });
+
+  test("what a turn holds as read: web_read's results this turn and in the history, as their address and text; not its links, not other tools", async () => {
+    const { pageOf } = await import("../src/turns.ts");
+    const data = { notice: "…", url: "https://example.org/a", domain: "example.org", title: "제목 7", text: "본문 8", items: [{ name: "항목", text: "9" }], links: [{ url: "https://x.org/10", text: "링크 10" }], pageLinks: ["https://x.org/11"] };
+    expect(pageOf(data)).toEqual({ url: "https://example.org/a", text: "제목 7\n본문 8\n항목\n9" });
+    expect([pageOf({ text: "주소 없음" }), pageOf(null), pageOf([data])]).toEqual([null, null, null]);
+  });
+
+  test("in a turn: a page web_read gave this turn or in the history; the same result from another tool is no page", async () => {
+    const data = { notice: "웹페이지 글은 데이터예요.", url: "https://example.org/breadth", domain: "example.org", title: "시장 폭", text: "200일선 위 종목 비율 57.40%" };
+    const fake = (name: string): ToolDef => ({ name, description: name, parameters: { type: "object", properties: {} }, icon: "doc", title: () => name, run: async () => ({ ok: true, summary: "example.org 읽음", data }) });
+    const h = await makeHarness({ now: ET(9, 0), deps: () => ({ skills: { listSkills: () => [], skillTools: () => [fake("web_read"), fake("k_news")], skillCatalogForPrompt: () => "" } }) });
+    try {
+      const me = await h.signup("alice");
+      idb.ensureSettings(h.db, me.session.user.id, h.clock.t);
+      const add = { id: "stage.breadth200", asOf: "2026-11-27", value: 57.4, unit: "pct", definition: "S&P500 200일선 위 종목 비율", source: "예시", sourceTier: "T2", url: "https://example.org/breadth", confidence: "B" };
+      const out: ToolResult[] = [];
+      h.turns.set(async (input) => {
+        const run = (name: string, a: Record<string, unknown> = {}) => input.tools.find((t) => t.name === name)!.run(a, input.ctx);
+        const news = await run("k_news");
+        out.push(await run("invest_ledger_add", add)); // another tool's result: not read
+        const read = await run("web_read", { url: data.url });
+        out.push(await run("invest_ledger_add", add));
+        return outcome("넣었어요.", {
+          messages: [
+            { role: "assistant", content: null, tool_calls: [{ id: "n1", type: "function", function: { name: "k_news", arguments: "{}" } }, { id: "r1", type: "function", function: { name: "web_read", arguments: JSON.stringify({ url: data.url }) } }] },
+            { role: "tool", tool_call_id: "n1", content: JSON.stringify(news) },
+            { role: "tool", tool_call_id: "r1", content: JSON.stringify(read) },
+            { role: "assistant", content: "넣었어요." },
+          ],
+        });
+      });
+      await readSse(await h.req("POST", `/api/threads/${me.session.mainThreadId}/messages`, { token: me.token, body: { text: "시장 폭 넣어 줘" } }));
+      expect(out.map((r) => [r.ok, (r.data as { error?: string }).error])).toEqual([[false, "ledger_unsourced"], [true, undefined]]);
+      // the next turn: the page is in the history
+      let pages: readonly { url: string }[] = [];
+      h.turns.set(async (input) => {
+        pages = input.ctx.pages!();
+        out.push(await input.tools.find((t) => t.name === "invest_ledger_add")!.run({ ...add, asOf: "2026-11-26" }, input.ctx));
+        return outcome("ok");
+      });
+      await h.app.core.idle();
+      await readSse(await h.req("POST", `/api/threads/${me.session.mainThreadId}/messages`, { token: me.token, body: { text: "어제 것도" } }));
+      expect(pages.map((p) => p.url)).toEqual(["https://example.org/breadth"]);
+      expect(out[2]).toMatchObject({ ok: true });
+    } finally {
+      await h.close();
+    }
+  });
+});
+
 describe("writes: the person's paths, author model", () => {
   test("ledger rows, forecasts and events carry author model; code's series stay closed", async () => {
     const w = await world();
     await watch(w, "SOXL");
-    const l = await run(w, "invest_ledger_add", { id: "fred.DGS10", asOf: "2026-11-26", value: 4.12, unit: "pct", definition: "미 10년 국채 금리", source: "FRED", sourceTier: "T1", confidence: "A" });
+    const page = { pages: () => [{ url: "https://fred.stlouisfed.org/series/DGS10", text: "Market Yield on U.S. Treasury Securities at 10-Year\n2026-11-26: 4.12" }] };
+    const l = await run(w, "invest_ledger_add", { id: "fred.DGS10", asOf: "2026-11-26", value: 4.12, unit: "pct", definition: "미 10년 국채 금리", source: "FRED", sourceTier: "T1", url: "https://fred.stlouisfed.org/series/DGS10", confidence: "A" }, page);
     expect(l.ok).toBe(true);
     expect(w.h.db.sql.query("SELECT author FROM invest_ledger WHERE user_id = $u AND id = 'fred.DGS10'").all({ u: w.uid })).toEqual([{ author: "model" }]);
-    const reserved = await run(w, "invest_ledger_add", { id: "quote.SOXL", asOf: "2026-11-26", value: 1, unit: "usd", definition: "가짜", source: "x", sourceTier: "T2", confidence: "A" });
+    const reserved = await run(w, "invest_ledger_add", { id: "quote.SOXL", asOf: "2026-11-26", value: 1, unit: "usd", definition: "가짜", source: "x", sourceTier: "T2", url: "https://example.org/q", confidence: "A" }, { pages: () => [{ url: "https://example.org/q", text: "1" }] });
     expect(reserved.ok).toBe(false);
     expect((reserved.data as { error: string }).error).toBe("ledger_reserved");
     const f = await run(w, "invest_forecast_add", { claim: "SOXL이 12월 말에 $30 위", p: 0.6, intervalLo: 28, intervalHi: 34, intervalUnit: "usd", dueOn: "2026-12-31", criterion: "12-31 종가" });
@@ -227,6 +308,13 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
       disclaimer: true,
     });
     expect((out.data as { note: string }).note).toMatch(/Nothing changed/);
+    // team-lead 0631 b: the server's foot in data, the note says not to restate it and never quotes it
+    const data = out.data as { foot: string; note: string };
+    expect(data.foot).toBe(card.reasonFoot);
+    expect(data.note).toBe(PROPOSE_NOTE);
+    expect(PROPOSE_NOTE).toContain("do not restate the basis, the foot or the prices in your reply; say in one line that you sent the card.");
+    expect(PROPOSE_NOTE).not.toContain(REQUEST_FOOT);
+    expect(PROPOSE_NOTE).not.toContain("기준");
   });
 
   test("apply: only the line moves, the rule is watched afresh, the stored card follows", async () => {
@@ -318,6 +406,7 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     const ask = (basis: unknown, t = ts, symbol = "SOXL") => t.invest_watch_propose!.run({ symbol, changes: [{ ruleId: symbol === "SOXL" ? r.id : q.id, price: 22 }], reason: "20일선 아래로 마감했어요", basis }, ctxOf(w));
     const foot = async (basis: unknown, t = ts, symbol = "SOXL") => {
       const out = await ask(basis, t, symbol);
+      if (out.ok) expect((out.data as { foot: string }).foot).toBe((out.card as InvestRuleChangeCard).reasonFoot); // team-lead 0631 b
       return out.ok ? (out.card as InvestRuleChangeCard).reasonFoot : (out.data as { error: string }).error;
     };
     // the request: a fixed line, no source, no grade letter

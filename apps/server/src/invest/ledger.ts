@@ -10,6 +10,7 @@
  *
  * The field checks here are shared with the forecast ledger and the event calendar.
  */
+import type { ReadPage } from "@pickle/agent";
 import type { InvestAuthor, InvestGrade, InvestLeadClass, InvestLedgerEntry, InvestLedgerUnit, InvestTier } from "@pickle/protocol";
 import { civilDate, dayNumber, krw, MINUS, num, pp, rate, shares, usd } from "@pickle/quant";
 import type { Db } from "../db/index.ts";
@@ -234,6 +235,42 @@ export function writeLedger(db: Db, userId: string, body: unknown, author: Inves
     db.sql.query(`INSERT OR REPLACE INTO invest_ledger (${cols.join(", ")}) VALUES (${cols.map((c) => `$${c}`).join(", ")})`).run(row as unknown as Record<string, string | number | null>);
     return ledgerView(row);
   });
+}
+
+// ───────────── the model's figures and the pages they come from (team-lead 0437 1) ─────────────
+
+/** an address as a key: the host without www in lower case, the port, the path without a trailing slash, the query */
+export function pageKey(u: string): string | null {
+  try {
+    const x = new URL(u);
+    if (x.protocol !== "https:" && x.protocol !== "http:") return null;
+    return `${x.hostname.toLowerCase().replace(/^www\./, "")}${x.port ? `:${x.port}` : ""}${x.pathname.replace(/\/+$/, "")}${x.search}`;
+  } catch {
+    return null;
+  }
+}
+
+const URL_IN_TEXT = /https?:\/\/[^\s"'<>]+/g;
+
+/** every number written on a page (1,234.5 → 1234.5; 12.30 → 12.3), its addresses left out */
+export function pageNumbers(text: string): Set<number> {
+  const out = new Set<number>();
+  for (const m of text.replace(URL_IN_TEXT, " ").matchAll(/\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g)) out.add(Number(m[0].replace(/,/g, "")));
+  return out;
+}
+
+/**
+ * A figure the model writes comes with the web page it read it on (web_read, this turn or in the recent history:
+ * ToolContext.pages) and is a number written on that page (its sign aside). Page text stays data: this only looks for
+ * the number. Returns the refusal sentence, or null.
+ */
+export function unsourced(pages: readonly ReadPage[] | undefined, url: unknown, value: unknown): string | null {
+  if (typeof url !== "string" || !url) return "웹 페이지에서 읽은 값만 넣어요. 읽은 페이지의 주소(url)를 함께 넣어 주세요.";
+  const key = pageKey(url);
+  const read = key ? (pages ?? []).filter((p) => pageKey(p.url) === key) : [];
+  if (!read.length) return "이 주소의 페이지를 읽은 적이 없어요. web_read로 읽은 페이지의 주소를 넣어 주세요.";
+  if (typeof value !== "number") return null;
+  return read.some((p) => pageNumbers(p.text).has(Math.abs(value))) ? null : "이 숫자가 그 페이지에 없어요. 페이지에 적힌 숫자 그대로 넣어 주세요.";
 }
 
 /** the person's rows and the shared ones: one id's by as_of (newest first), or the latest written */

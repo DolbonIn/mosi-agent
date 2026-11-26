@@ -9,6 +9,7 @@ import type {
   InvestRuleRow,
   InvestSettingsView,
   InvestStages,
+  InvestTri,
   InvestWatch,
 } from "@pickle/protocol";
 
@@ -234,9 +235,46 @@ export const marketOf = (o: Pick<InvestOverview, "watchlist">, symbol: string): 
 
 export const isHeld = (o: Pick<InvestOverview, "watchlist">, symbol: string) => !!o.watchlist.find((w) => w.symbol === symbol)?.holding;
 
+/** ① as this screen draws it today: a title, a line under it, the gauges and the next step */
+export interface StageBoard {
+  line: string;
+  sub: string;
+  gauges: StageGauge[];
+  next: string | null;
+}
+export interface StageGauge {
+  id: "worse" | "severe" | "recovery";
+  label: string;
+  cells: InvestTri[];
+  /** 3/8 */
+  text: string;
+}
+
+/**
+ * B2b-2's stages (team-lead 0554: the minimal guard until screens-more draws the new board): a judged board in
+ * today's shape; off, none and a kind this app does not know draw no board (the section's empty line, as before)
+ */
+export function boardOf(s: InvestStages | null | undefined): StageBoard | null {
+  if (!s || s.kind !== "judged") return null;
+  return {
+    line: `${s.escape.text} · ${s.recovery.text}`, // screens-more 0656: today's title and the judged line under it
+    sub: s.judgedText,
+    gauges: s.gauges.map((g) => ({ id: g.key === "recover" ? "recovery" : g.key, label: g.label, cells: g.cells.map((c) => c.state), text: `${g.met}/${g.of}` })),
+    next: s.next[0] ?? null,
+  };
+}
+
+/** ①'s line while no board is drawn: the server's own words for off and none (DD 0428 §3, DD 0600), else today's line */
+export const STAGE_EMPTY = "아직 판정이 없어요. 매일 오전 8시에 판정해요.";
+export function stageEmptyLine(s: InvestStages | null | undefined): string {
+  if (s?.kind === "off") return s.off;
+  if (s?.kind === "none") return s.none;
+  return STAGE_EMPTY;
+}
+
 /** a gauge's tone and its one-sentence reading (the cells are drawn, the sentence is what is read) */
-export const gaugeTone = (id: InvestStages["gauges"][number]["id"]) => (id === "worse" ? "caution" : id === "severe" ? "danger" : "label");
-export function gaugeSaid(g: InvestStages["gauges"][number]): string {
+export const gaugeTone = (id: StageGauge["id"]) => (id === "worse" ? "caution" : id === "severe" ? "danger" : "label");
+export function gaugeSaid(g: StageGauge): string {
   const met = g.cells.filter((c) => c === "met").length;
   const unknown = g.cells.filter((c) => c === "unknown").length;
   return `${g.label} ${g.cells.length}개 중 ${met}개 충족${unknown ? `, 확인 불가 ${unknown}개` : ""}`;

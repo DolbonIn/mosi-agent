@@ -567,4 +567,15 @@ export const MIGRATIONS: string[] = [
   CREATE INDEX invest_proposals_open ON invest_proposals(status, expires_at);
   CREATE INDEX invest_proposals_user ON invest_proposals(user_id, created_at);
   `,
+  // v12 (B2b-2, A2 · A5 · A6, DD 0059 §1, DD 0426): one stage reading per person and KST day, made at 08:00 (or at the
+  // first beat after it); the board, the agent's invest_snapshot and the daily report all read this one row
+  `
+  CREATE TABLE invest_judgments (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    at INTEGER NOT NULL,
+    json TEXT NOT NULL,
+    PRIMARY KEY (user_id, day)
+  );
+  `,
 ];

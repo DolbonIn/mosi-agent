@@ -1103,6 +1103,7 @@ export const ROUTES = {
   investLedger: "GET /api/invest/ledger?id&limit → {items: InvestLedgerEntry[]} | POST /api/invest/ledger InvestLedgerDraft → InvestLedgerEntry (409 ledger_locked, 400 ledger_reserved)",
   investForecasts: "GET /api/invest/forecasts → InvestForecastList | POST /api/invest/forecasts InvestForecastDraft → InvestForecast | PATCH /api/invest/forecasts/:id InvestForecastJudgement → InvestForecast (409 forecast_changed {forecast})",
   investEvents: "GET /api/invest/events?from&to → {items: InvestEvent[]} | POST /api/invest/events InvestEventDraft → InvestEvent (409 event_exists {event}) | PATCH /api/invest/events/:id {remind} → InvestEvent | DELETE /api/invest/events/:id",
+  investStages: "GET /api/invest/stages → InvestStagesDetail (the board's stages and the 11 indicators, A1–A8, D1–D5, R1–R6 with their figures; DD 0059 §1-4)",
   investProposals: "POST /api/invest/proposals/:id {decision: 'apply' | 'keep'} → {card: InvestRuleChangeCard} (409 proposal_stale {card} / proposal_decided {card}, 410 proposal_expired {card}, 404 proposal_not_found)",
   push: "GET /api/push/key → {publicKey} | POST /api/push/subscriptions PushSubscription.toJSON() → {ok:true} (400 invalid_subscription) | DELETE /api/push/subscriptions {endpoint} → {ok:true, removed} — while the server sends nothing (no PICKLE_PUSH_SUBJECT) the key and POST answer 503 {error:'push_off'}, DELETE works",
 } as const;

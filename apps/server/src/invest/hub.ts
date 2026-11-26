@@ -65,6 +65,7 @@ import {
   step,
   stopBasis,
 } from "./rules.ts";
+import { judgeDay, stagesView } from "./stages.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
 import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 
@@ -117,6 +118,7 @@ export class InvestHub {
   private connectedMemo = new Map<string, { at: number; v: boolean }>();
   private ticking: Promise<{ slots: number; alerts: number }> | null = null;
   private reminding: Promise<number> | null = null;
+  private judging: Promise<number> | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private core: Core) {
@@ -140,7 +142,15 @@ export class InvestHub {
     await Promise.all([
       this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
       this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
+      this.judgeStages(now).catch((err) => this.core.log.error("invest stages failed", { err: errInfo(err) })),
     ]);
+  }
+
+  /** from 08:00 KST, today's stage reading for each invest user who has none (one run at a time) */
+  judgeStages(now = this.core.now()): Promise<number> {
+    if (this.judging) return this.judging;
+    this.judging = judgeDay(this.core, now).finally(() => (this.judging = null));
+    return this.judging;
   }
 
   async stop(): Promise<void> {
@@ -148,6 +158,7 @@ export class InvestHub {
     this.timer = null;
     await this.ticking?.catch(() => undefined);
     await this.reminding?.catch(() => undefined);
+    await this.judging?.catch(() => undefined);
   }
 
   // ───────────────────────────── settings and views ─────────────────────────────
@@ -295,8 +306,10 @@ export class InvestHub {
     const watch = this.watchState(s, now, live, await this.hasSource(userId));
     const blind = watch.state === "blind";
     const shown = wl.map((w) => qs.get(w.symbol)).filter((q): q is idb.QuoteRow => !!q);
-    let quotesFoot: string;
-    if (blind) quotesFoot = watch.foot!;
+    // off: no period sentence (nothing is checked; DD 0454-b), the app shows watch.foot or nothing
+    let quotesFoot: string | null;
+    if (watch.state === "off") quotesFoot = null;
+    else if (blind) quotesFoot = watch.foot!;
     else if (shown.length) {
       const latest = Math.max(...shown.map((q) => q.as_of));
       const names = [...new Set(shown.map((q) => SOURCE_TABLE[q.source as SourceKey]?.name ?? q.source))].join(" · ");
@@ -305,7 +318,7 @@ export class InvestHub {
     return {
       rev: s.rev,
       mode: s.mode,
-      stages: null,
+      stages: stagesView(this.core, userId, now),
       watchlist: wl.map((w) => this.symbolRow(userId, w, qs.get(w.symbol), blind)),
       rules: rs.map((r) => this.ruleRow(r, s.mode)),
       reports: [],

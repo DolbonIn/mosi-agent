@@ -131,7 +131,7 @@ describe("invest routes", () => {
     const ov = await api<InvestOverview>(w, "GET", "/api/invest");
     expect(ov.status).toBe(200);
     expect(ov.body.watch).toEqual({ state: "off", text: "지금은 시세를 받지 않아요" });
-    expect(ov.body.quotesFoot).toBe(PERIOD);
+    expect(ov.body.quotesFoot).toBeNull(); // DD 0454-b: no period sentence while nothing is checked
     expect(ov.body.settings.toss.error?.code).toBe("off");
     expect(ov.body.settings.realBlockers).toEqual(["toss_off"]);
     expect(ov.body.settings.callBlock).toBe("not_configured");
@@ -966,6 +966,8 @@ describe("B1b words (DD 2237)", () => {
     await watch(v, "SOXL");
     await addRule(v, { symbol: "SOXL", kind: "stop", price: 27, action: "notify" });
     expect((await api<InvestOverview>(v, "GET", "/api/invest")).body.watch).toEqual({ state: "off", text: "지금은 시세를 받지 않아요", foot: "그래서 규칙을 확인하지 않아요." });
+    // DD 0454-b: off sends no period sentence, with rules or without
+    expect([(await api<InvestOverview>(w, "GET", "/api/invest")).body.quotesFoot, (await api<InvestOverview>(v, "GET", "/api/invest")).body.quotesFoot]).toEqual([null, null]);
   });
 
   test("invalid_rule asks in the app's words: 넣어 주세요, 다시 골라 주세요, 다시 불러온 뒤 저장해 주세요 (no field names)", async () => {
@@ -1059,7 +1061,8 @@ describe("B1b market calendar (team-lead 2253)", () => {
     await tickAt(w, 15, 0, thanks);
     // the watch line follows the same day view: running for Alice, the market closed for Bob
     expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.watch.state).toBe("ok");
-    expect((await bob.api<InvestOverview>("GET", "/api/invest")).body.watch.state).toBe("closed");
+    const closed = (await bob.api<InvestOverview>("GET", "/api/invest")).body;
+    expect([closed.watch.state, closed.quotesFoot]).toEqual(["closed", PERIOD]); // closed keeps the period sentence (DD 0454-b)
     expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(1);
     expect(tossCalls(w, "/api/v1/market-calendar/")[0]!.path).toBe(`/api/v1/market-calendar/US?date=${thanks}`);
     const said = w.logs.filter((l) => l.includes("market calendar differs"));

@@ -8,7 +8,7 @@ import { copyOf, Foot, InlineError, Placeholder, Stack, useAgentName, useRouteVi
 import { presentPhone } from "../profile/PhoneSheet";
 import { presentAddSymbol } from "./AddSymbolSheet";
 import { presentRule } from "./RuleSheet";
-import { gaugeSaid, gaugeTone, isLiveSale, phoneNotice, pricePhrase, ruleGroups, rulesFoot, watchNotice } from "./rules";
+import { boardOf, gaugeSaid, gaugeTone, isLiveSale, phoneNotice, pricePhrase, ruleGroups, rulesFoot, stageEmptyLine, watchNotice, type StageGauge } from "./rules";
 import type { InvestNum as InvestNumber, InvestOverview, InvestRuleRow, InvestStages, InvestSymbolRow } from "@pickle/protocol";
 import "./invest.css";
 
@@ -73,10 +73,11 @@ function EmptySection({ title, className, children }: { title: string; className
 // ───────────────────────────── ① 시장 단계 ─────────────────────────────
 
 function StageSection({ stages }: { stages: InvestStages | null }) {
-  if (!stages)
+  const board = boardOf(stages);
+  if (!board)
     return (
       <EmptySection title="시장 단계" className="iv-stage">
-        아직 판정이 없어요. 매일 오전 8시에 판정해요.
+        {stageEmptyLine(stages)}
       </EmptySection>
     );
   return (
@@ -84,15 +85,15 @@ function StageSection({ stages }: { stages: InvestStages | null }) {
       <div className="list-row iv-stage-row">
         <span className="list-row-main iv-stage-main">
           <span className="iv-stage-head">
-            <span className="iv-stage-title tnum">{stages.line}</span>
-            <span className="iv-stage-sub tnum">{stages.sub}</span>
+            <span className="iv-stage-title tnum">{board.line}</span>
+            <span className="iv-stage-sub tnum">{board.sub}</span>
           </span>
           <span className="iv-gauges">
-            {stages.gauges.map((g) => (
+            {board.gauges.map((g) => (
               <Gauge key={g.id} g={g} />
             ))}
           </span>
-          {stages.next && <span className="iv-next t-copy">{copyOf(stages.next)}</span>}
+          {board.next && <span className="iv-next t-copy">{copyOf(board.next)}</span>}
         </span>
       </div>
     </ListSection>
@@ -100,7 +101,7 @@ function StageSection({ stages }: { stages: InvestStages | null }) {
 }
 
 /** "악화 신호 ●●●○○○◌○ 3/8": a cell per condition, met in the gauge's tone, unmet as fill, not known dotted */
-function Gauge({ g }: { g: InvestStages["gauges"][number] }) {
+function Gauge({ g }: { g: StageGauge }) {
   return (
     <span className="iv-gauge" role="img" aria-label={gaugeSaid(g)}>
       <span className="iv-gauge-word" aria-hidden="true">

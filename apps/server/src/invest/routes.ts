@@ -10,6 +10,7 @@ import { bad, HttpError, json, notFound, readJson, type Ctx } from "../http.ts";
 import { newId } from "../util.ts";
 import { marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import * as idb from "./db.ts";
+import { stagesDetail } from "./stages.ts";
 import { createEvent, deleteEvent, listEvents, setEventRemind } from "./events.ts";
 import { createForecast, ERROR_CAUSES, ERROR_CAUSE_WORD, forecastRows, forecastScore, judgeForecast, listForecasts, OUTCOMES, OUTCOME_WORD } from "./forecasts.ts";
 import { LEDGER_ID_RE, readLedger, writeLedger } from "./ledger.ts";
@@ -276,6 +277,7 @@ export function investRoutes(core: Core) {
 
   return {
     overview: async (_c: Ctx, userId: string) => json(await hub().overview(userId)),
+    stages: async (_c: Ctx, userId: string) => json(stagesDetail(core, userId, core.now())),
 
     symbol: async (c: Ctx, userId: string) => {
       const symbol = normalizeSymbol(c.params.symbol);

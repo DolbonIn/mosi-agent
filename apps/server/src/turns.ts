@@ -4,7 +4,7 @@
  * Also: background (system-initiated) turns and steer follow-ups.
  */
 import type { AgentEvent, Card, IconName, Message, ThreadKind, ToolActivity, UserSettings } from "@pickle/protocol";
-import type { ApprovalSpec, LlmMessage, LlmToolCall, ToolContext, ToolDef, TurnInput, TurnOutcome } from "@pickle/agent";
+import type { ApprovalSpec, LlmMessage, LlmToolCall, ReadPage, ToolContext, ToolDef, TurnInput, TurnOutcome } from "@pickle/agent";
 import type { LeaseLike } from "./deps.ts";
 import type { MessageRow, ThreadRow, UserRow } from "./db/index.ts";
 import { agentFor, messageView, publishMessage, publishThread, QUOTA_MESSAGE, quotaExceeded, quotaFor, settingsOf, type Core } from "./core.ts";
@@ -282,6 +282,60 @@ export function buildTools(core: Core, kind: ThreadKind, enabledSkills: string[]
  */
 const NOT_HEARD = new Set(["sys_time", "sys_schedule_create", "sys_create_artifact"]);
 const HEARD_CAP = 256 * 1024;
+
+/** the tools whose results are web pages (ToolContext.pages), and the keys of a result that are not the page's text */
+const PAGE_TOOLS = new Set(["web_read"]);
+const NOT_PAGE_TEXT = new Set(["notice", "url", "domain", "asciiDomain", "source", "links", "pageLinks", "sources"]);
+const PAGES_CAP = 256 * 1024;
+
+/** a web_read result's page: its address and every string of its own text; null for anything else */
+export function pageOf(data: unknown): ReadPage | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const d = data as Record<string, unknown>;
+  if (typeof d.url !== "string" || !d.url) return null;
+  const texts: string[] = [];
+  const walk = (v: unknown, depth: number) => {
+    if (typeof v === "string") texts.push(v);
+    else if (depth < 6 && v && typeof v === "object") for (const x of Array.isArray(v) ? v : Object.values(v)) walk(x, depth + 1);
+  };
+  for (const [k, v] of Object.entries(d)) if (!NOT_PAGE_TEXT.has(k)) walk(v, 0);
+  return { url: d.url, text: texts.join("\n").slice(0, PAGES_CAP) };
+}
+
+/** web_read's pages noted in `into` as they come (≤ 256 KB a turn, newest kept) */
+function pagesFrom(def: ToolDef, into: ReadPage[]): ToolDef {
+  if (!PAGE_TOOLS.has(def.name)) return def;
+  return {
+    ...def,
+    async run(args, ctx) {
+      const r = await def.run(args, ctx);
+      const p = r?.ok ? pageOf(r.data) : null;
+      if (p) {
+        into.push(p);
+        let total = into.reduce((n, x) => n + x.text.length, 0);
+        while (total > PAGES_CAP && into.length > 1) total -= into.shift()!.text.length;
+      }
+      return r;
+    },
+  };
+}
+
+/** the pages web_read gave in the history (its stored results; a cut one that no longer parses is no page) */
+function historyPages(history: readonly LlmMessage[]): ReadPage[] {
+  const callName = new Map(history.flatMap((m) => (m.role === "assistant" ? (m.tool_calls ?? []).map((c) => [c.id, c.function.name] as const) : [])));
+  const out: ReadPage[] = [];
+  for (const m of history) {
+    if (m.role !== "tool" || !PAGE_TOOLS.has(callName.get(m.tool_call_id) ?? "")) continue;
+    try {
+      const r = JSON.parse(m.content) as { ok?: boolean; data?: unknown };
+      const p = r.ok ? pageOf(r.data) : null;
+      if (p) out.push(p);
+    } catch {
+      // a result cut at its cap: no page
+    }
+  }
+  return out.slice(-12);
+}
 
 /**
  * The tool with its results noted in `into` (summary and every string in data, ≤ 256 KB a turn, newest kept): a time
@@ -575,6 +629,9 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     const recentTools = history
       .flatMap((m) => (m.role === "tool" && !NOT_HEARD.has(callName.get(m.tool_call_id) ?? "") ? [m.content] : []))
       .slice(-12);
+    // the pages read (invest_ledger_add's figures): web_read's results in history and this turn
+    const pagesRead: ReadPage[] = [];
+    const pastPages = historyPages(history);
     const ctx: ToolContext = {
       userId: o.userId,
       threadId: o.threadId,
@@ -590,6 +647,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       // k-skill logins: only when the owner is the one being answered (see buildTools)
       ...(othersPresent ? {} : { connections: core.connections.forUser(o.userId) }),
       heard: () => [...recentUser, ...(o.userText ? [o.userText] : []), ...steered, ...recentTools, ...toolHeard],
+      pages: () => [...pastPages, ...pagesRead],
     };
 
     let memory: MemoryTools = "on";
@@ -601,7 +659,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
         memory = "on";
       }
     }
-    const toolDefs = buildTools(core, thread.kind, enabled, memory, o.userId, othersPresent).map((d) => heardFrom(d, toolHeard));
+    const toolDefs = buildTools(core, thread.kind, enabled, memory, o.userId, othersPresent).map((d) => pagesFrom(heardFrom(d, toolHeard), pagesRead));
     mark("tools");
     const input: TurnInput = {
       ctx,

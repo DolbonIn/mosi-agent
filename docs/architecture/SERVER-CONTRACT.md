@@ -688,10 +688,10 @@ The same voice, streamed as it is generated: first audio in about 0.25 s instead
 ## Invest (B1) — 나의 모시 > 투자
 Watch prices, keep price rules, alert. No model call anywhere in B1, and no order: the Toss client reads only
 (prices, holdings, sellable quantity). Types: `packages/protocol/src/invest.ts`. Code: `apps/server/src/invest/`.
-- `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages: null, reports: [],
+- `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages (B2b-2), reports: [],
   decks: []}`. Every figure is a server string (`InvestNum {v, text, unit}`; @pickle/quant format.ts) — screens format
   nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"; with live rules `foot` "그래서 규칙을
-  확인하지 않아요.", plus " 토스증권을 연결하면 확인해요." on a server with Toss), `ok`, `closed`, `blind` (live rules
+  확인하지 않아요.", plus " 토스증권을 연결하면 확인해요." on a server with Toss; `quotesFoot` null), `ok`, `closed`, `blind` (live rules
   and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
   `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`).
 - Event `invest {rev, overview}`: the whole overview whenever it changed (a quote, a rule, a watch state, Toss, settings),
@@ -833,7 +833,9 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
   for a real sell stop, else `tap`; `expiresAt` 24 hours on). The foot is code's (DD 0521 §1): `basis` is a ledger id
   (its newest row the person can read: "11-27 기준, 출처 · 등급"; none, another's or grade C → 400 `invalid_proposal`),
   `"technicals"` (only after `invest_technicals` answered for that symbol in the same turn: its last bar's day, source
-  and grade; else 400) or `"request"` (the person named the prices: "요청으로 만든 제안이에요.", no grade). A change names an existing rule of the symbol `{ruleId,
+  and grade; else 400) or `"request"` (the person named the prices: "요청으로 만든 제안이에요.", no grade); the tool's
+  result carries that foot as `data.foot` and a note not to restate the basis, the foot or the prices (team-lead 0631 b).
+  A change names an existing rule of the symbol `{ruleId,
   price | lo, hi | direction (price alerts)}`, takes one away `{ruleId, remove: true}`, or makes a new rule `{kind,
   level?, price | lo, hi, direction?}` that only notifies (`created_by: "proposal"`; resistance and invalidation rules
   come this way). It never sets the action, the buffer, the deadline or "once" (400 `invalid_proposal`). Rows (DD 0405
@@ -864,6 +866,41 @@ default User-Agent, one request at a time per host, a 403/429 or a 200 that is n
 the next US market day (its figures read 확인 불가 meanwhile; a junk body is never cached), one read serves everyone (6 hours
 for FRED, Yahoo's daily rule for KOSPI). A day without a value (empty cell or ".") is a null point; the series' `asOf`
 is its last day with a value.
+
+## Invest (B2b-2) — the market stage board
+
+Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison and stage rule is @pickle/quant's
+`assessStages` (A2 → A5 → A6), never the server's or the model's.
+- **Judged once a day** (migration v12 `invest_judgments`, one row per person and KST day): from 08:00 KST the beat
+  judges each person who uses invest (settings or a watched symbol) without today's row. The macro series (B2e-0) are
+  read once for all; indicators 6, 7 and 11 come from that person's own ledger. Off when the server takes no public
+  sources. The screen, `invest_snapshot` and the reports read the stored row only.
+- **Ledger ids** (team-lead 0437 1a; the person's or the model's figures, code never edits one; grade C never used):
+  `stage.eps.samsung.<FY>` / `stage.eps.hynix.<FY>` — the fiscal year holding the middle of the next 12 months, its
+  newest figure against the same id's figure nearest 3 months before it (within 15 days, the same unit), (a − b) ÷ |b|
+  × 100; `stage.breadth200` (pct); `stage.m7.<AAPL|MSFT|GOOGL|AMZN|META|NVDA|TSLA>` (pct, the recent 3-month change
+  of the 12M forward estimate; below 0 is down, team-lead 0511); `stage.capex.MSFT|GOOGL|META|AMZN.<FY>` — next KST
+  year's against this year's, the same unit. Too old is unknown, the caution form ("{M월 D일} 값이라 오래됐어요"): 6, 8
+  and 11 past 120 days, 7 past 5 US trading days. No figure: "값이 없어요" (quiet). 9 has nowhere yet (invest_flows
+  comes with B2e): "받을 곳이 아직 없어요".
+- **`overview.stages: InvestStages`** — `{kind: "off", off}` ("지금은 지표를 받지 않아서 단계를 판정하지 않아요."), `{kind:
+  "none", none}` ("첫 판정은 오늘 08:00에 나와요." / "첫 판정은 곧 나와요."), or `{kind: "judged", escape, recovery,
+  gauges, next, judgedAt, judgedText, stale?}`. A head is `{stage, name?, floor?, text, pending?, pendingTone?}`: a
+  settled stage has its name ("탈출 3단계", "방어 준비"); a floor has the least stage and no name ("탈출 최소 1단계"); the
+  recovery may be "회복 단계 미확정" (outcomes include hold) or "회복 판정 보류" (stage null for both). `pending` counts,
+  never numbers indicators: "지표 4개 값이 없어서 2단계 여부는 아직 몰라요." (`quiet`), "오늘 지표 2개를 받지 못해서 …"
+  (`caution`), both together (`caution`). `judgedText` "12월 2일 08:00 판정 · 어제와 같아요 | 12월 2일 판정과 같아요 |
+  탈출 최소 1단계 → 탈출 3단계"; `stale` when today's 08:00 row is missing ("오늘 08:00 판정을 하지 못했어요. 12월 2일
+  판정이에요.").
+- `GET /api/invest/stages` → `InvestStagesDetail {stages, core11[11] {no, name, signal, value | null, basis, reason},
+  groups[worse A1–A8, severe D1–D5, recover R1–R6] {rows {id, text, state, stateText, detail}, next}, method[],
+  disclaimer: true}`; off or before the first row: empty core11 and groups.
+- **`invest_snapshot`** (same offer as B2b-1's tools): the stored heads, next lines, judgedText, stale, core11 and the
+  conditions as the screen words them; its description: "단계는 판정본만 말해요. 지금 값은 값으로만 말해요."
+- **The model's ledger figures**: `invest_ledger_add` saves a figure only with the address of a page web_read gave this
+  turn or in the thread's recent history (`ToolContext.pages`, filled by the server from web_read results) and only if
+  the number is written on that page (sign aside; numbers inside addresses do not count). Else 400-style
+  `ledger_unsourced` with the sentence, nothing saved. The person's own paths are unchanged.
 
 ## Web Push (B1c) — the lock-screen line
 
