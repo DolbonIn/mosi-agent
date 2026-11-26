@@ -54,6 +54,15 @@
   line-height: 1.4;
   color: var(--label-2);
 }
+/* the third line (DD 2014): as the second, one line; a long file name ends in an ellipsis (the states are short) */
+.sched-row__file {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .sched-toggle {
   flex: none;
   padding: 0 14px 0 4px;

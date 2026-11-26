@@ -16,12 +16,15 @@ import { Toggle } from "../../../ui/Toggle";
 import { removeSchedule, schedulesRes, setScheduleEnabled, useResource } from "../data";
 import { dayKo, josa, whenKo } from "../format";
 import { InlineError, Note, Placeholder, SectionLabel, Stack, useAgentName, useRouteVisible } from "../parts";
+import { FILE_AGAIN, fileFact, fileLine, fileLocked, toggleLabel } from "./scheduleFile";
 import "./schedules.css";
 
 /**
  * 예약된 일 (MOTION-SPEC §6.11, research §4-11; draft docs/design/drafts/schedules A): recurring work (모닝콜, 출석체크,
  * 브리핑) as two-line rows, the name over "rule · next" ("매일 오전 7:30 · 다음은 오늘", "꺼져 있어요" when off), with a
- * Focus-style toggle beside the row. A row opens its details (label/value facts, what it asks, a way to change it
+ * Focus-style toggle beside the row. A schedule with a text file has a third line (DD 2014): the file's name, or why it
+ * stopped; off because its file was deleted, the switch is disabled and the second line drops "꺼져 있어요" (the third
+ * line says it once, with the reason). A row opens its details (label/value facts, what it asks, a way to change it
  * through the agent, a two-step delete). New schedules are made by asking the agent: the one capsule under the list
  * says so by name and fills the composer with NEW_PROMPT (nothing is sent). No top-bar "+" (two glass shapes: back,
  * tab bar).
@@ -103,16 +106,30 @@ function ScheduleRow({ s }: { s: Schedule }) {
   const toggle = (on: boolean) => {
     setScheduleEnabled(s.id, on).catch((e) => island.errorBanner(toApiError(e).message, on ? "켜지 못했어요" : "끄지 못했어요"));
   };
+  const file = fileLine(s);
+  const locked = fileLocked(s);
   return (
     <div ref={row} className="sched-row" data-schedule={s.id} data-off={!s.enabled || undefined}>
-      <button type="button" className="sched-main" onClick={() => presentSchedule(s.id, row.current)} aria-label={`${s.title}, ${s.human}, ${next}`}>
+      <button
+        type="button"
+        className="sched-main"
+        onClick={() => presentSchedule(s.id, row.current)}
+        aria-label={[s.title, s.human, locked ? null : next, file].filter(Boolean).join(", ")}
+      >
         <span className="sched-row__title">{s.title}</span>
         <span className="sched-row__sub tnum">
-          {s.human} · <ContentSwap swapKey={next}>{next}</ContentSwap>
+          {s.human}
+          {!locked && (
+            <>
+              {" · "}
+              <ContentSwap swapKey={next}>{next}</ContentSwap>
+            </>
+          )}
         </span>
+        {file && <span className="sched-row__file">{file}</span>}
       </button>
       <span className="sched-toggle">
-        <Toggle label={`${s.title} 켜기`} checked={s.enabled} onChange={toggle} />
+        <Toggle label={toggleLabel(s)} checked={s.enabled} onChange={toggle} disabled={locked} />
       </span>
     </div>
   );
@@ -148,7 +165,9 @@ function ScheduleSheet({ id, api }: { id: string; api: SheetApi }) {
         <Fact label="반복" value={s.human} />
         <Fact label="다음 실행" value={!s.enabled ? "꺼져 있어요" : s.nextRunAt ? whenKo(s.nextRunAt) : "없어요"} />
         <Fact label="마지막 실행" value={s.lastRunAt ? whenKo(s.lastRunAt) : "아직 없어요"} />
+        {s.file && <Fact label="지시 파일" value={fileFact(s)!} />}
       </dl>
+      {fileLocked(s) && <Note>{FILE_AGAIN}</Note>}
       <div className="sched-asked">
         <SectionLabel level={3}>{agentName}에게 맡긴 일</SectionLabel>
         <p className="sched-quote">“{s.prompt}”</p>
