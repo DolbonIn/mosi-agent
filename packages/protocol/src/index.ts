@@ -451,6 +451,17 @@ export interface ScheduleCard {
   title: string;
   when: string; // Korean human text "매일 오전 7:00"
   enabled: boolean;
+  /** the text file whose text every run follows (DD 1852: a third line); `deleted` once it left the archive */
+  file?: ScheduleFile;
+}
+
+/**
+ * A schedule's attached text file: its name, and `deleted: true` once the person deleted it. The first run after that
+ * tells the person and switches the schedule off (`enabled: false`, cards too); it cannot be switched on again (DD 2014).
+ */
+export interface ScheduleFile {
+  name: string;
+  deleted?: true;
 }
 
 export interface CardAction {
@@ -946,6 +957,8 @@ export interface Schedule {
   lastRunAt: Millis | null;
   nextRunAt: Millis | null;
   createdAt: Millis;
+  /** the text file attached to every run (sys_schedule_create `file`, or POST attachmentId); absent when none */
+  file?: ScheduleFile;
 }
 
 // ───────────────────────────── skills (k-skill) ─────────────────────────────

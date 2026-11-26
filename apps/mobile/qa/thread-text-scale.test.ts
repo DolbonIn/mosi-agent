@@ -279,6 +279,36 @@ describe("text size changes under an open thread", () => {
     expect(observers.filter((o) => o.on).length).toBe(0);
   });
 
+  test("late layout that leaves the content's height as it was (no ResizeObserver call) is followed by the frames alone", async () => {
+    const t = thread();
+    follow(t, { atEnd: false });
+    t.el.scrollTop = 2100;
+    const row = t.topOne();
+    const i = t.c.children.indexOf(row);
+    const y0 = t.y(row);
+    setDisplayPrefs({ textScale: 1.3 });
+    await micro();
+    nextFrame(); // the first frame after the change: nothing late yet
+    expect(Math.abs(t.y(row) - y0)).toBeLessThanOrEqual(0.5);
+    const height = t.el.scrollHeight;
+    // a frame later a bubble above re-fits taller and one below shorter by as much: the content keeps its size, so a
+    // ResizeObserver is not called (deliver() is not), and only the frames can put the row back
+    t.rows[2]!.extra = 37;
+    t.rows[i + 3]!.extra = -37;
+    expect(t.el.scrollHeight).toBe(height);
+    expect(Math.abs(t.y(row) - y0)).toBeGreaterThan(30);
+    nextFrame();
+    expect(Math.abs(t.y(row) - y0)).toBeLessThanOrEqual(0.5);
+    // once more the frame after, the other way
+    t.rows[5]!.extra = -20;
+    t.rows[i + 4]!.extra = 20;
+    expect(t.el.scrollHeight).toBe(height);
+    nextFrame();
+    expect(Math.abs(t.y(row) - y0)).toBeLessThanOrEqual(0.5);
+    while (frames.size) nextFrame();
+    expect(t.el.listeners()).toBe(0);
+  });
+
   test("the person's touch stops the following: the list is theirs again", async () => {
     const t = thread();
     follow(t, { atEnd: false });

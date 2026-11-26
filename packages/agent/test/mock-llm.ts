@@ -1,5 +1,5 @@
 /** Scriptable local mock of the OpenAI-compatible /chat/completions API (streaming + JSON). */
-import type { LlmMessage, ToolContext, ToolStore } from "../src/index.ts";
+import type { FileReadResult, LlmMessage, ToolContext, ToolStore } from "../src/index.ts";
 
 export interface ScriptedCall {
   id?: string;
@@ -143,8 +143,11 @@ export function startMockLlm(): MockLlm {
 export interface FakeStore extends ToolStore {
   facts: string[];
   artifacts: { id: string; title: string; kind: string; content: string }[];
-  schedules: { id: string; title: string; prompt: string; rule: string }[];
+  schedules: { id: string; title: string; prompt: string; rule: string; file?: string }[];
   friendMessages: { to: string; text: string }[];
+  /** what readFile answers next (default: no text files), and what it was asked */
+  fileResult: FileReadResult;
+  fileReads: { file?: string; from?: number }[];
 }
 
 export function fakeStore(): FakeStore {
@@ -154,6 +157,12 @@ export function fakeStore(): FakeStore {
     artifacts: [],
     schedules: [],
     friendMessages: [],
+    fileResult: { kind: "list", files: [] },
+    fileReads: [],
+    async readFile(q) {
+      s.fileReads.push(q);
+      return s.fileResult;
+    },
     async createArtifact(a, opts) {
       const id = `art_${s.artifacts.length + 1}`;
       s.artifacts.push({ id, ...a, ...(opts ? { opts } : {}) });

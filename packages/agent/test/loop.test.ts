@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, expect, test } from "bun:test";
 import type { AgentEvent } from "@pickle/protocol";
-import { LlmClient, UpstreamError, createRunTurn, partialOutcome, repairHistory, systemTools, type LlmMessage, type ToolDef, type TurnInput, type TurnOutcome } from "../src/index.ts";
+import { FILE_RESULT_MAX_BYTES, LlmClient, UpstreamError, createRunTurn, partialOutcome, repairHistory, systemTools, type LlmMessage, type ToolDef, type TurnInput, type TurnOutcome } from "../src/index.ts";
 import { fakeCtx, fakeStore, startMockLlm } from "./mock-llm.ts";
 
 const KEY = "sk-loop-SECRET-0123456789abcdefXYZ";
@@ -230,6 +230,27 @@ test("a tool's maxResultBytes lets a bigger result through to the model; others 
   expect(JSON.parse(roomy).data.text).toHaveLength(3000);
   expect(Buffer.byteLength(tight)).toBeLessThanOrEqual(6 * 1024);
   expect(tight).toContain("[truncated]");
+});
+
+test("sys_file_read's result (fileResult) reaches the model whole: 30,000 Korean characters (~90 KB); maxResultBytes alone stays clamped at 24 KB", async () => {
+  const mk = (name: string, extra: Partial<ToolDef>): ToolDef => ({
+    name,
+    description: "file",
+    parameters: { type: "object", properties: {} },
+    icon: "doc",
+    title: () => name,
+    ...extra,
+    run: async () => ({ ok: true, summary: "ok", data: { text: "가".repeat(30_000) } }),
+  });
+  mock.script.push({ toolCalls: [{ id: "a", name: "reader", args: "{}" }, { id: "b", name: "greedy", args: "{}" }] }, { text: ["끝"] });
+  await turn({ tools: [mk("reader", { fileResult: true }), mk("greedy", { maxResultBytes: 200 * 1024 })] });
+  const sent = mock.requests[1]!.body.messages as { role: string; tool_call_id?: string; content: string }[];
+  const reader = sent.find((m) => m.tool_call_id === "a")!.content;
+  const greedy = sent.find((m) => m.tool_call_id === "b")!.content;
+  expect(JSON.parse(reader).data.text).toHaveLength(30_000);
+  expect(Buffer.byteLength(reader)).toBeLessThanOrEqual(FILE_RESULT_MAX_BYTES);
+  expect(Buffer.byteLength(greedy)).toBeLessThanOrEqual(24 * 1024);
+  expect(greedy).toContain("[truncated]");
 });
 
 test("a tool call runs, emits running → card → done in order, and its result goes back to the model", async () => {

@@ -17,7 +17,7 @@ import { newId, preview, safeJson } from "./util.ts";
 import { errInfo } from "./log.ts";
 import { SseChannel } from "./events.ts";
 import { kskillConnectedNames, skillsWithoutLogins, trackConnectionCards } from "./kskill.ts";
-import { forgetDeletedInTurn } from "./archive.ts";
+import { forgetDeletedInTurn, withoutFileText } from "./archive.ts";
 import type { Ctx } from "./http.ts";
 
 export const APPROVAL_TTL_MS = 30 * 60 * 1000;
@@ -170,6 +170,11 @@ export interface ResumeSpec {
 }
 
 export interface ExecuteTurnOptions {
+  /**
+   * What the daily log and memory extraction read in place of userText (afterTurn): a schedule's run with its attached
+   * file gives the prompt and the file's name, so the file's text is not taken in again at every run.
+   */
+  memoryText?: string;
   userId: string;
   threadId: string;
   /** text handed to runTurn (null on approval resume) */
@@ -710,7 +715,8 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     if (produced && !(o.dropBareRow && bare)) {
       db.tx(() => {
         // documents this turn made and the person deleted while it ran (archive.ts forgetDeletedInTurn)
-        const kept = forgetDeletedInTurn(core, finalCards, llm, pending ? (pending.messages ?? []) : null);
+        // files read again (sys_file_read): stored with their numbers, not their text (archive.ts withoutFileText)
+        const kept = forgetDeletedInTurn(core, finalCards, withoutFileText(llm), pending ? withoutFileText(pending.messages ?? []) : null);
         db.insertMessage({
           id: messageId,
           threadId: o.threadId,
@@ -774,7 +780,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       error: result.error?.error ?? null,
     });
 
-    if (outcome && finalText.trim()) core.track(afterTurn(core, { user, thread, userText: o.userText, assistantText: finalText, memory: settings.privacy.memoryEnabled }));
+    if (outcome && finalText.trim()) core.track(afterTurn(core, { user, thread, userText: o.memoryText ?? o.userText, assistantText: finalText, memory: settings.privacy.memoryEnabled }));
   } catch (err) {
     log.error("turn persist failed", { user: o.userId, thread: o.threadId, err: errInfo(err) });
     result = { message: result.message, error: { error: "internal", message: "답을 저장하지 못했어요. 다시 시도해 주세요." }, aborted: clientGone };
@@ -1012,6 +1018,8 @@ export async function runSystemTurn(
     userId: string;
     threadId: string;
     prompt: string;
+    /** what the event row keeps for later turns and the daily log / memory read, when not the prompt (a schedule's file) */
+    stored?: string;
     eventText: string;
     lease: LeaseLike;
     notify?: { title: string; icon: IconName; enabled: boolean };
@@ -1026,7 +1034,7 @@ export async function runSystemTurn(
     threadId: o.threadId,
     role: "event",
     text: o.eventText,
-    llm: [{ role: "user", content: o.prompt }],
+    llm: [{ role: "user", content: o.stored ?? o.prompt }],
     createdAt: core.now(),
   });
   let shown = !o.retryable;
@@ -1043,6 +1051,7 @@ export async function runSystemTurn(
       userId: o.userId,
       threadId: o.threadId,
       userText: o.prompt,
+      ...(o.stored !== undefined ? { memoryText: o.stored } : {}),
       userMessage: eventMsg,
       mode: "text",
       lease: o.lease,

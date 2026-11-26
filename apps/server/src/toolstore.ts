@@ -1,8 +1,9 @@
 /** ToolStore adapter: the slice of server persistence that agent tools may touch (user-scoped). */
-import type { ToolStore } from "@pickle/agent";
+import { FileLookupError, type ToolStore } from "@pickle/agent";
 import type { ArtifactRow } from "./db/index.ts";
 import type { Core } from "./core.ts";
 import { createScheduleFor, listHuman } from "./schedules.ts";
+import { fileChars, fileReader, findFile } from "./archive.ts";
 import { listAcceptedFriends, messageFriend } from "./friends.ts";
 import { newId } from "./util.ts";
 import { cleanArtifactHtml, MAX_ARTIFACT_HTML_BYTES, MAX_ARTIFACT_HTML_CARD_BYTES } from "./artifactHtml.ts";
@@ -16,7 +17,13 @@ const MAX_KV_VALUE = 4096;
 
 export function makeToolStore(core: Core, userId: string, threadId: string): ToolStore {
   const { db, deps } = core;
+  // one reader a turn (a store is made per turn): its 60,000-character budget is the turn's
+  const readFile = fileReader(core, userId, threadId);
   return {
+    async readFile(q) {
+      return readFile(q);
+    },
+
     async createArtifact(a, opts) {
       const kind = ARTIFACT_KINDS.has(a.kind) ? a.kind : "document";
       const title = String(a.title ?? "").trim().slice(0, 120) || "제목 없는 문서";
@@ -48,8 +55,18 @@ export function makeToolStore(core: Core, userId: string, threadId: string): Too
     },
 
     async createSchedule(s) {
-      const row = createScheduleFor(core, userId, { title: s.title, prompt: s.prompt, rule: s.rule, threadId: null });
-      return { id: row.id, human: row.human, nextRunAt: row.next_run_at };
+      // a file: the person's own text file, found here as sys_file_read finds it (in a friend thread, one they sent there)
+      let attachmentId: string | null = null;
+      let chars = 0;
+      const name = String(s.file ?? "").trim();
+      if (name) {
+        const found = findFile(core, userId, threadId, name, true);
+        if (!("row" in found)) throw new FileLookupError(found);
+        attachmentId = found.row.id;
+        chars = fileChars(core, found.row);
+      }
+      const row = createScheduleFor(core, userId, { title: s.title, prompt: s.prompt, rule: s.rule, threadId: null, attachmentId });
+      return { id: row.id, human: row.human, nextRunAt: row.next_run_at, ...(row.attachment_name ? { file: { name: row.attachment_name, chars } } : {}) };
     },
 
     async listSchedules() {

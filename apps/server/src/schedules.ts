@@ -5,12 +5,13 @@
  */
 import type { Schedule } from "@pickle/protocol";
 import type { ScheduleRow } from "./db/index.ts";
-import { settingsOf, quotaExceeded, type Core } from "./core.ts";
+import { publishMessage, settingsOf, quotaExceeded, type Core } from "./core.ts";
 import { DAY_MS, koreanTime, kstDate, kstParts, kstToEpoch } from "./kst.ts";
 import { answeredAfter, deleteMessageRow, holdLease, runSystemTurn, type HeldLease, type TurnResult } from "./turns.ts";
 import { bad, json, notFound, readJson, type Ctx, HttpError } from "./http.ts";
 import { eulReul, newId } from "./util.ts";
 import { errInfo } from "./log.ts";
+import { READ_TEXT_MIMES, scheduleFileNote, switchOffGoneSchedule } from "./archive.ts";
 
 export class ScheduleError extends Error {}
 
@@ -112,7 +113,8 @@ export function listHuman(s: Pick<ScheduleRow, "rule" | "human">, now: number): 
   return `${year}${p.month}월 ${p.day}일 (${WEEKDAY[p.weekday]}) ${koreanTime(p.hour, p.minute)}${tag}`;
 }
 
-export function scheduleView(s: ScheduleRow): Schedule {
+/** `fileGone`: the attached file was deleted (the view says so in place of its name, DD 1852) */
+export function scheduleView(s: ScheduleRow, fileGone = false): Schedule {
   return {
     id: s.id,
     title: s.title,
@@ -124,8 +126,15 @@ export function scheduleView(s: ScheduleRow): Schedule {
     lastRunAt: s.last_run_at,
     nextRunAt: s.next_run_at,
     createdAt: s.created_at,
+    ...(s.attachment_id ? { file: { name: s.attachment_name ?? "", ...(fileGone ? { deleted: true as const } : {}) } } : {}),
   };
 }
+
+/** a deleted file's run told the person (DD 2014): an answer stored whole — not after an error or a Stop */
+export const toldGone = (res: TurnResult): boolean => !!res.message && !res.error && !res.aborted;
+
+const fileGone = (core: Core, s: ScheduleRow) => !!s.attachment_id && !core.db.getAttachment(s.user_id, s.attachment_id);
+const viewOf = (core: Core, s: ScheduleRow) => scheduleView(s, fileGone(core, s));
 
 const MAX_SCHEDULES = 50;
 
@@ -133,13 +142,20 @@ const MAX_SCHEDULES = 50;
 export function createScheduleFor(
   core: Core,
   userId: string,
-  s: { title: unknown; prompt: unknown; rule: unknown; enabled?: boolean; threadId: string | null },
+  s: { title: unknown; prompt: unknown; rule: unknown; enabled?: boolean; threadId: string | null; attachmentId?: string | null },
 ): ScheduleRow {
   const title = String(s.title ?? "").trim().slice(0, 60);
   const prompt = String(s.prompt ?? "").trim().slice(0, 2000);
   if (!title) throw new ScheduleError("일정 이름이 필요해요");
   if (!prompt) throw new ScheduleError("무엇을 할지(prompt)가 필요해요");
   if (core.db.listSchedules(userId).length >= MAX_SCHEDULES) throw new ScheduleError(`예약은 최대 ${MAX_SCHEDULES}개까지 만들 수 있어요`);
+  // the attached file: one of this person's own text files, nobody else's (a friend's file id is as unknown as any other)
+  let attachment: { id: string; name: string } | null = null;
+  if (s.attachmentId != null) {
+    const a = typeof s.attachmentId === "string" ? core.db.getAttachment(userId, s.attachmentId) : null;
+    if (!a || !READ_TEXT_MIMES.has(a.mime)) throw new ScheduleError("보관함에서 그 텍스트 파일을 찾지 못했어요");
+    attachment = { id: a.id, name: a.filename };
+  }
   const now = core.now();
   const parsed = parseRule(String(s.rule ?? ""));
   const next = nextRunAt(parsed, now);
@@ -156,6 +172,7 @@ export function createScheduleFor(
     threadId: s.threadId,
     nextRunAt: s.enabled === false ? null : next,
     now,
+    attachment,
   });
   return core.db.getSchedule(userId, id) as ScheduleRow;
 }
@@ -172,7 +189,7 @@ export function scheduleRoutes(core: Core) {
     }
   };
   return {
-    list: (_c: Ctx, userId: string) => json(core.db.listSchedules(userId).map(scheduleView)),
+    list: (_c: Ctx, userId: string) => json(core.db.listSchedules(userId).map((s) => viewOf(core, s))),
     create: async (c: Ctx, userId: string) => {
       const body = await readJson(c.req);
       let threadId: string | null = null;
@@ -183,11 +200,11 @@ export function scheduleRoutes(core: Core) {
         if (t.kind === "friend") throw bad("친구와 함께 쓰는 대화방에는 예약을 걸 수 없어요", "invalid_schedule");
         threadId = body.threadId;
       }
+      if (body.attachmentId !== undefined && body.attachmentId !== null && typeof body.attachmentId !== "string") throw bad("attachmentId는 문자열이어야 해요", "invalid_schedule");
+      const attachmentId = typeof body.attachmentId === "string" ? body.attachmentId : null;
       return wrap(() =>
         json(
-          scheduleView(
-            createScheduleFor(core, userId, { title: body.title, prompt: body.prompt, rule: body.rule, enabled: body.enabled !== false, threadId }),
-          ),
+          viewOf(core, createScheduleFor(core, userId, { title: body.title, prompt: body.prompt, rule: body.rule, enabled: body.enabled !== false, threadId, attachmentId })),
           201,
         ),
       );
@@ -202,12 +219,15 @@ export function scheduleRoutes(core: Core) {
         if (!title || !prompt) throw new ScheduleError("이름과 내용은 비워 둘 수 없어요");
         if (body.enabled !== undefined && typeof body.enabled !== "boolean") throw new ScheduleError("enabled는 true/false여야 해요");
         const enabled = body.enabled !== undefined ? (body.enabled as boolean) : cur.enabled === 1;
+        // its file was deleted: it stays off (DD 2014); a new upload and a new schedule bring it back
+        if (enabled && cur.enabled !== 1 && fileGone(core, cur))
+          throw new HttpError(409, "schedule_file_deleted", "지시 파일을 지워서 이 예약은 다시 켤 수 없어요. 파일을 다시 올리고 예약을 새로 만들어 주세요.");
         const now = core.now();
         const parsed = parseRule(body.rule !== undefined ? String(body.rule) : cur.rule);
         const next = enabled ? nextRunAt(parsed, now) : null;
         if (enabled && parsed.kind === "once" && next === null) throw new ScheduleError("이미 지난 시간이에요");
         core.db.updateSchedule(userId, cur.id, { title, prompt, rule: parsed.canonical, human: humanRule(parsed, now), enabled, nextRunAt: next });
-        return json(scheduleView(core.db.getSchedule(userId, cur.id)!));
+        return json(viewOf(core, core.db.getSchedule(userId, cur.id)!));
       });
     },
     remove: (c: Ctx, userId: string) => {
@@ -389,14 +409,21 @@ export class Scheduler {
       }
       const threadId = this.ensureThread(s);
       lease.bindThread(threadId);
-      await runSystemTurn(core, {
+      // an attached file: its text after the prompt for the model; the event row keeps its name only (archive.ts)
+      const withFile = scheduleFileNote(core, s.user_id, s);
+      const res = await runSystemTurn(core, {
         userId: s.user_id,
         threadId,
-        prompt: s.prompt,
+        prompt: withFile?.prompt ?? s.prompt,
+        ...(withFile ? { stored: withFile.stored } : {}),
         eventText: `${s.title} · ${s.human}`,
         lease,
         notify: { title: s.title, icon: "clock", enabled: settings.notifications.taskDone },
       });
+      // the file is gone and the answer that says so is stored: off now, cards too (a failed or stopped run leaves it on)
+      if (withFile?.gone && toldGone(res)) {
+        for (const id of switchOffGoneSchedule(core, s.user_id, s.id)) publishMessage(core, id);
+      }
       return true;
     } catch (err) {
       core.log.error("schedule run failed", { schedule: s.id, err: errInfo(err) });

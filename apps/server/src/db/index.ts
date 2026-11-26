@@ -163,6 +163,9 @@ export interface ScheduleRow {
   last_run_at: number | null;
   next_run_at: number | null;
   created_at: number;
+  /** v7: the attached text file (its id, and its name kept for after a delete); NULL for none */
+  attachment_id: string | null;
+  attachment_name: string | null;
 }
 
 /** Same shape as @pickle/vault CredentialRow. */
@@ -856,13 +859,48 @@ export class Db {
 
   // ───────────── schedules ─────────────
 
-  insertSchedule(s: { id: string; userId: string; title: string; prompt: string; rule: string; human: string; enabled: boolean; threadId: string | null; nextRunAt: number | null; now: number }): void {
+  insertSchedule(s: {
+    id: string;
+    userId: string;
+    title: string;
+    prompt: string;
+    rule: string;
+    human: string;
+    enabled: boolean;
+    threadId: string | null;
+    nextRunAt: number | null;
+    now: number;
+    attachment?: { id: string; name: string } | null;
+  }): void {
     this.sql
       .query(
-        `INSERT INTO schedules (id, user_id, title, prompt, rule, human, enabled, thread_id, next_run_at, created_at)
-         VALUES ($id, $u, $t, $p, $r, $h, $e, $th, $nr, $n)`,
+        `INSERT INTO schedules (id, user_id, title, prompt, rule, human, enabled, thread_id, next_run_at, created_at, attachment_id, attachment_name)
+         VALUES ($id, $u, $t, $p, $r, $h, $e, $th, $nr, $n, $ai, $an)`,
       )
-      .run({ id: s.id, u: s.userId, t: s.title, p: s.prompt, r: s.rule, h: s.human, e: s.enabled ? 1 : 0, th: s.threadId, nr: s.nextRunAt, n: s.now });
+      .run({
+        id: s.id,
+        u: s.userId,
+        t: s.title,
+        p: s.prompt,
+        r: s.rule,
+        h: s.human,
+        e: s.enabled ? 1 : 0,
+        th: s.threadId,
+        nr: s.nextRunAt,
+        n: s.now,
+        ai: s.attachment?.id ?? null,
+        an: s.attachment?.name ?? null,
+      });
+  }
+
+  /** the person's schedules that attach this file (archive.ts marks their cards when it is deleted) */
+  schedulesWithAttachment(userId: string, attachmentId: string): ScheduleRow[] {
+    return this.sql.query("SELECT * FROM schedules WHERE user_id = $u AND attachment_id = $a").all({ u: userId, a: attachmentId }) as ScheduleRow[];
+  }
+
+  /** off, with no next run (a schedule whose file was deleted, after the run that said so: archive.ts) */
+  switchOffSchedule(userId: string, id: string): void {
+    this.sql.query("UPDATE schedules SET enabled = 0, next_run_at = NULL WHERE id = $id AND user_id = $u").run({ id, u: userId });
   }
 
   listSchedules(userId: string): ScheduleRow[] {

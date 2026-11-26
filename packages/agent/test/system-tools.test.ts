@@ -17,6 +17,7 @@ test("every system tool has a valid OpenAI name, a schema and a Korean title", (
     "sys_schedule_create",
     "sys_schedule_list",
     "sys_schedule_delete",
+    "sys_file_read",
     "sys_friends_list",
     "sys_friend_message",
     "sys_show_briefing",

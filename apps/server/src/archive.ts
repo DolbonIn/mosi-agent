@@ -2,11 +2,12 @@
 import { readFileSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import { join } from "node:path";
-import type { LlmMessage } from "@pickle/agent";
+import { FILE_READ_CALL_CHARS, FILE_READ_TURN_CHARS, FILE_TEXT_MAX_BYTES, type FileInfo, type FileMiss, type FileReadResult, type LlmMessage } from "@pickle/agent";
 import type { Artifact, Attachment, AttachmentRef, Card } from "@pickle/protocol";
 import type { ArtifactRow, AttachmentRow, FriendThreadItem, MessageRow } from "./db/index.ts";
 import { publishMessage, type Core } from "./core.ts";
 import { areFriends } from "./friends.ts";
+import { kstDate } from "./kst.ts";
 import { bad, HttpError, json, notFound, type Ctx } from "./http.ts";
 import { newId, safeJson } from "./util.ts";
 
@@ -135,6 +136,36 @@ function markDeleted(core: Core, ownerId: string, item: FriendThreadItem): strin
       }
     }
     if (hit) changed.push(row.id);
+  }
+  return changed;
+}
+
+/**
+ * A deleted text file that schedules attach: their cards (sys_schedule_create's, in the owner's threads and in a friend
+ * thread where their 모시 made one) get `file: { name, deleted: true }` (DD 1852), inside the delete's transaction. The
+ * schedules keep the id and name: the next run says the file is gone (scheduleFileNote). Returns the messages changed.
+ */
+/** stored rows of the owner's threads whose cards name this schedule */
+function scheduleCardRows(core: Core, ownerId: string, scheduleId: string): MessageRow[] {
+  return core.db.sql
+    .query(`SELECT msg.* FROM messages msg JOIN thread_members m ON m.thread_id = msg.thread_id WHERE m.user_id = $u AND msg.cards_json LIKE $p`)
+    .all({ u: ownerId, p: `%"scheduleId":"${scheduleId}"%` }) as MessageRow[];
+}
+
+function markScheduleFiles(core: Core, ownerId: string, attachmentId: string): string[] {
+  const changed: string[] = [];
+  for (const s of core.db.schedulesWithAttachment(ownerId, attachmentId)) {
+    for (const row of scheduleCardRows(core, ownerId, s.id)) {
+      let hit = false;
+      const cards = safeJson<Card[]>(row.cards_json, []).map((c): Card => {
+        if (c.type !== "schedule" || c.scheduleId !== s.id || !c.file || c.file.deleted) return c;
+        hit = true;
+        return { ...c, file: { name: c.file.name, deleted: true } };
+      });
+      if (!hit) continue;
+      core.db.updateMessageCards(row.id, cards);
+      changed.push(row.id);
+    }
   }
   return changed;
 }
@@ -367,6 +398,206 @@ export function fileText(b: Uint8Array): string {
   return new TextDecoder().decode(b);
 }
 
+// ───────────── reading a file again (sys_file_read) and a schedule's file ─────────────
+
+/** The files a lookup may find, newest first: the person's own; in a friend thread only the files sent there. */
+function filesHere(core: Core, userId: string, threadId: string, ownOnly: boolean): { rows: AttachmentRow[]; deleted: string[] } {
+  const thread = core.db.threadFor(threadId, userId);
+  if (thread?.kind !== "friend") return { rows: core.db.listAttachments(userId), deleted: [] };
+  // a friend thread: the refs of its messages, each still readable by this person (their own, or a friend's while
+  // friends, archive.ts readableAttachment); nothing outside the thread is looked at, so nothing else can be named
+  const refs = (core.db.sql.query("SELECT attachments_json FROM messages WHERE thread_id = $t AND attachments_json != '[]' ORDER BY created_at DESC").all({ t: threadId }) as {
+    attachments_json: string;
+  }[]).flatMap((r) => safeJson<AttachmentRef[]>(r.attachments_json, []));
+  const rows: AttachmentRow[] = [];
+  const deleted: string[] = [];
+  const seen = new Set<string>();
+  for (const ref of refs) {
+    if (seen.has(ref.id)) continue;
+    seen.add(ref.id);
+    if (ref.deleted) {
+      deleted.push(ref.filename);
+      continue;
+    }
+    const row = ownOnly ? core.db.getAttachment(userId, ref.id) : readableAttachment(core, userId, ref.id);
+    if (row) rows.push(row);
+  }
+  return { rows: rows.sort((a, b) => b.created_at - a.created_at), deleted };
+}
+
+const fold = (s: string) => s.normalize("NFC").trim().toLowerCase();
+const bareName = (s: string) => s.replace(/\.[^.\s]{1,10}$/, "");
+/** how a name is matched, strictest first: as written, any case, without the extension, then part of the name */
+const MATCHES: ((name: string, q: string) => boolean)[] = [
+  (name, q) => name.normalize("NFC") === q.normalize("NFC").trim(),
+  (name, q) => fold(name) === fold(q),
+  (name, q) => fold(bareName(name)) === fold(bareName(q)),
+  (name, q) => fold(name).includes(fold(q)),
+];
+/** The rows the first match that finds any gives (newest first), or none. */
+function matching<T>(items: T[], nameOf: (t: T) => string, q: string): T[] {
+  for (const m of MATCHES) {
+    const hits = items.filter((t) => m(nameOf(t), q));
+    if (hits.length) return hits;
+  }
+  return [];
+}
+
+/** a stored file's length in characters (0 when it is gone from disk) */
+export function fileChars(core: Core, a: AttachmentRow): number {
+  try {
+    return readText(attachmentPath(core, a.user_id, a.id), Number.MAX_SAFE_INTEGER).chars;
+  } catch {
+    return 0;
+  }
+}
+const fileInfo = (core: Core, a: AttachmentRow): FileInfo => ({ name: a.filename, date: kstDate(a.created_at), chars: fileChars(core, a) });
+
+/**
+ * A text file by name among the files here (filesHere): the newest of one name; several names → `many` (10 at most);
+ * else a photo or PDF by that name → `not_text`, a file deleted in this friend thread → `deleted`, else `none`.
+ */
+export function findFile(core: Core, userId: string, threadId: string, q: string, ownOnly = false): { row: AttachmentRow } | FileMiss {
+  const here = filesHere(core, userId, threadId, ownOnly);
+  const text = here.rows.filter((r) => READ_TEXT_MIMES.has(r.mime));
+  const hits = matching(text, (r) => r.filename, q);
+  if (hits.length) {
+    const byName = new Map<string, AttachmentRow>();
+    for (const r of hits) if (!byName.has(r.filename)) byName.set(r.filename, r); // newest first: a name's newest file
+    const names = [...byName.values()];
+    return names.length === 1 ? { row: names[0]! } : { kind: "many", name: q, files: names.slice(0, 10).map((r) => fileInfo(core, r)) };
+  }
+  if (matching(here.rows.filter((r) => !READ_TEXT_MIMES.has(r.mime)), (r) => r.filename, q).length) return { kind: "not_text", name: q };
+  if (matching(here.deleted, (n) => n, q).length) return { kind: "deleted", name: q };
+  return { kind: "none", name: q };
+}
+
+/** At most `max` bytes as a JSON string: a text cut again (as cutText) until its escaped form fits. */
+function fitJson(text: string, max: number): string {
+  let t = text;
+  for (let bytes = Buffer.byteLength(JSON.stringify(t)); bytes > max && t; bytes = Buffer.byteLength(JSON.stringify(t)))
+    t = cutText(t, Math.max(1, Math.floor((t.length * max) / bytes) - 16));
+  return t;
+}
+
+/**
+ * sys_file_read for one turn (ToolStore.readFile; makeToolStore makes one reader a turn): a file by name, or the 20
+ * newest text files; FILE_READ_CALL_CHARS a call from `from` (cut at a line break near the cap, as a message's file),
+ * FILE_READ_TURN_CHARS in all.
+ */
+export function fileReader(core: Core, userId: string, threadId: string): (q: { file?: string; from?: number }) => FileReadResult {
+  let left = FILE_READ_TURN_CHARS;
+  return (q) => {
+    const name = String(q.file ?? "").trim();
+    if (!name) {
+      const text = filesHere(core, userId, threadId, false).rows.filter((r) => READ_TEXT_MIMES.has(r.mime));
+      return { kind: "list", files: text.slice(0, 20).map((r) => fileInfo(core, r)) };
+    }
+    const found = findFile(core, userId, threadId, name);
+    if (!("row" in found)) return found;
+    if (left <= 0) return { kind: "spent", max: FILE_READ_TURN_CHARS };
+    const { row } = found;
+    let from = Math.max(0, Math.floor(Number(q.from) || 0));
+    const cap = Math.min(FILE_READ_CALL_CHARS, left);
+    let file: { text: string; chars: number };
+    try {
+      file = readText(attachmentPath(core, row.user_id, row.id), from + cap + 1);
+    } catch {
+      return { kind: "none", name };
+    }
+    const friend = row.user_id !== userId;
+    if (from >= file.chars) return { kind: "text", name: row.filename, chars: file.chars, from: file.chars, to: file.chars, text: "", friend };
+    // never start inside a surrogate pair: take its first half too
+    const at = file.text.charCodeAt(from);
+    if (from > 0 && at >= 0xdc00 && at <= 0xdfff) from -= 1;
+    const rest = file.text.slice(from);
+    const head = fitJson(rest.length <= cap ? rest : cutText(rest, cap), FILE_TEXT_MAX_BYTES);
+    left -= head.length;
+    return { kind: "text", name: row.filename, chars: file.chars, from, to: from + head.length, text: head, friend };
+  };
+}
+
+/** What a stored sys_file_read result says in place of the text (the answer's own turn had it whole). */
+export const FILE_TEXT_NOT_KEPT = "(파일 글은 이 답에만 썼고 남기지 않았어요. 다시 보려면 sys_file_read로 다시 읽어요)";
+
+/**
+ * A turn's model copy as it is stored (turns.ts, the answer row and a paused turn's messages): sys_file_read results
+ * keep their line and numbers, not the file's text, so a later turn's 24 KB window is not filled with it and a
+ * deleted file leaves no text behind. Null stays null; the same array when nothing changes.
+ */
+export function withoutFileText(llm: LlmMessage[] | null): LlmMessage[] | null {
+  if (!llm) return llm;
+  const calls = new Set(llm.flatMap((m) => (m.role === "assistant" ? (m.tool_calls ?? []).filter((c) => c.function?.name === "sys_file_read").map((c) => c.id) : [])));
+  if (!calls.size) return llm;
+  let changed = false;
+  const out = llm.map((m): LlmMessage => {
+    if (m.role !== "tool" || !calls.has(m.tool_call_id)) return m;
+    const r = safeJson<{ data?: { text?: unknown } } | null>(m.content, null);
+    if (r && typeof r === "object" && r.data && typeof r.data === "object") {
+      if (typeof r.data.text !== "string" || !r.data.text) return m;
+      changed = true;
+      return { ...m, content: JSON.stringify({ ...r, data: { ...r.data, text: FILE_TEXT_NOT_KEPT } }) };
+    }
+    // a result cut short (not JSON): nothing of it is kept
+    changed = true;
+    return { ...m, content: JSON.stringify({ ok: true, summary: FILE_TEXT_NOT_KEPT }) };
+  });
+  return changed ? out : llm;
+}
+
+/**
+ * A schedule's run with its attached file (schedules.ts): `prompt` is what the model gets — the schedule's prompt with
+ * the file as a message's file is (withFiles: whole, or cut at 30,000 with its note) — and `stored` what the event row
+ * keeps for later turns (the file's name, not its text). A deleted file (`gone`): no guessing at what it said, and the
+ * answer tells the person three things, briefly: this run did not happen, the schedule is now off, and how to have it
+ * again (described, no line to copy); the scheduler switches it off once that answer is stored (switchOffGoneSchedule).
+ */
+export function scheduleFileNote(
+  core: Core,
+  userId: string,
+  s: { prompt: string; attachment_id: string | null; attachment_name: string | null },
+): { prompt: string; stored: string; gone: boolean } | null {
+  if (!s.attachment_id) return null;
+  const name = s.attachment_name ?? "지시 파일";
+  const row = core.db.getAttachment(userId, s.attachment_id);
+  if (!row) {
+    const gone =
+      `${s.prompt}\n\n[이 예약에 붙인 지시 파일('${name}')은 보관함에서 지워져서 내용이 없어요. 지시 내용을 짐작해서 하지 마세요. ` +
+      "이 예약은 이번 답 뒤에 꺼 둬요. 이번 답에는 세 가지만 짧게 써요: 지시 파일이 지워져서 이번에는 이 예약을 하지 못했다는 것, " +
+      "그래서 예약을 꺼 두었다는 것, 파일을 다시 올리고 예약을 새로 만들면 다시 할 수 있다는 것.]";
+    return { prompt: gone, stored: gone, gone: true };
+  }
+  return {
+    prompt: withFiles(core, userId, s.prompt, [attachmentRef(row)]),
+    stored: `${s.prompt}\n\n[지시 파일: ${row.filename} — 이 회차에 붙여 읽었어요]`,
+    gone: false,
+  };
+}
+
+/**
+ * A schedule whose file was deleted, after the run that told the person so was stored (DD 2014): the schedule goes off
+ * and its stored cards' switch with it, in one transaction. Returns the rows to publish. Turning it on again is refused
+ * (PATCH 409 schedule_file_deleted): a new upload and a new schedule bring it back.
+ */
+export function switchOffGoneSchedule(core: Core, ownerId: string, scheduleId: string): string[] {
+  return core.db.sql.transaction(() => {
+    core.db.switchOffSchedule(ownerId, scheduleId);
+    const changed: string[] = [];
+    for (const row of scheduleCardRows(core, ownerId, scheduleId)) {
+      let hit = false;
+      const cards = safeJson<Card[]>(row.cards_json, []).map((c): Card => {
+        if (c.type !== "schedule" || c.scheduleId !== scheduleId || !c.enabled) return c;
+        hit = true;
+        return { ...c, enabled: false };
+      });
+      if (!hit) continue;
+      core.db.updateMessageCards(row.id, cards);
+      changed.push(row.id);
+    }
+    return changed;
+  })();
+}
+
 /**
  * The model's copy of a message that sent a now deleted file: its user content is rebuilt with the files' notes made
  * again (fileNotes, the deleted one as deleted), keeping the text before them and anything after them (a template
@@ -503,7 +734,9 @@ export function archiveRoutes(core: Core) {
     deleteAttachment: async (c: Ctx, userId: string) => {
       const a = db.getAttachment(userId, c.params.id!);
       if (!a) throw notFound("파일을 찾을 수 없어요");
-      const marked = db.tx(() => (db.deleteAttachment(userId, a.id) ? markDeleted(core, userId, { kind: "attachment", id: a.id }) : null));
+      const marked = db.tx(() =>
+        db.deleteAttachment(userId, a.id) ? [...markDeleted(core, userId, { kind: "attachment", id: a.id }), ...markScheduleFiles(core, userId, a.id)] : null,
+      );
       if (!marked) throw notFound("파일을 찾을 수 없어요"); // another delete got there first
       for (const m of marked) publishMessage(core, m);
       await unlink(attachmentPath(core, userId, a.id)).catch(() => {});

@@ -8,6 +8,7 @@ import { CONNECTION_SERVICE_RE, connectionErrorCode, connectionReason, knownSecr
 import { CARD_STATUS, DEEP_MAX_TOKENS, EXPLORE_RULE, ExploreTracker, TOOL_MARKUP_NOTE, ToolMarkupFilter, VOICE_SEARCH_PREFACE, cardToolOf, exploreIntent, exploreKind, exploreOpen, exploreStatus, type DeepSearchOptions } from "./explore";
 import type { LlmClient, Usage } from "./llm";
 import { scrubSecrets } from "./secrets";
+import { FILE_RESULT_MAX_BYTES } from "./types";
 import type {
   ApprovalSpec,
   ConnectionHandle,
@@ -782,7 +783,7 @@ export function createRunTurn(llm: LlmClient, opts: RunTurnOptions = {}): RunTur
       for (const c of result.moreCards ?? []) addCard(c);
       if (result.ok && result.memory) safeEmit({ type: "memory", text: result.memory });
       setActivity({ id: p.call.id, name: p.def.name, title: p.title, state: result.ok ? "done" : "error", summary: result.summary, startedAt, endedAt: Date.now() });
-      return toolResultContent(result, resultCap(p.def.maxResultBytes));
+      return toolResultContent(result, p.def.fileResult ? FILE_RESULT_MAX_BYTES : resultCap(p.def.maxResultBytes));
     };
 
     /**

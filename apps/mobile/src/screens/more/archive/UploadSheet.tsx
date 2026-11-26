@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { toApiError } from "../../../api/client";
 import { ChromePortal } from "../../../app/ChromePortal";
+import { checkFile, FILE_ACCEPT, withUploadType } from "../../../lib/uploadTypes";
 import { Button, type ButtonState } from "../../../ui/Button";
 import { Glass } from "../../../ui/Glass";
 import { capsule } from "../../../ui/geometry";
@@ -16,17 +17,6 @@ import { InlineError, Note } from "../parts";
  * the server's 201 — then the sheet folds back and the new tile is in the grid.
  */
 
-const MAX = 10 * 1024 * 1024;
-
-function checkFile(f: File): string | null {
-  if (f.size > MAX) return "10MB보다 큰 파일은 올릴 수 없어요. 크기를 줄여서 다시 올려 주세요.";
-  if (f.size === 0) return "빈 파일은 올릴 수 없어요.";
-  const type = f.type || (/\.pdf$/i.test(f.name) ? "application/pdf" : /\.txt$/i.test(f.name) ? "text/plain" : "");
-  if (type === "image/svg+xml") return "SVG 그림은 올릴 수 없어요. PNG나 JPG로 올려 주세요.";
-  if (!(type.startsWith("image/") || type === "application/pdf" || type === "text/plain")) return "사진, PDF, 텍스트 파일만 올릴 수 있어요.";
-  return null;
-}
-
 export function openUploadPicker(source: HTMLElement | null) {
   presentSheet({ source, title: "보관함에 올리기", render: (api) => <UploadPicker api={api} /> });
 }
@@ -34,7 +24,7 @@ export function openUploadPicker(source: HTMLElement | null) {
 const OPTIONS: { id: string; label: string; sub: string; icon: AppIconName; accept: string; capture?: "environment" }[] = [
   { id: "library", label: "사진 보관함에서 고르기", sub: "PNG · JPG · HEIC · GIF", icon: "photo", accept: "image/*" },
   { id: "camera", label: "카메라로 찍기", sub: "찍은 사진을 바로 올려요", icon: "film", accept: "image/*", capture: "environment" },
-  { id: "file", label: "파일 고르기", sub: "PDF · 텍스트 파일", icon: "doc", accept: "application/pdf,text/plain,.pdf,.txt" },
+  { id: "file", label: "파일 고르기", sub: "PDF · 텍스트 파일", icon: "doc", accept: FILE_ACCEPT },
 ];
 
 function UploadPicker({ api }: { api: SheetApi }) {
@@ -60,7 +50,7 @@ function UploadPicker({ api }: { api: SheetApi }) {
     setState("loading");
     api.setBusy(true);
     try {
-      await upload(f);
+      await upload(withUploadType(f));
       if (!mounted.current) return;
       api.setBusy(false);
       setState("success");

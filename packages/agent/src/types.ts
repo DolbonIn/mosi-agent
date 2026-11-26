@@ -197,7 +197,12 @@ export interface ToolStore {
       tuned?: { fontSize: number; textColor: number };
     };
   }>;
-  createSchedule(s: { title: string; prompt: string; rule: string }): Promise<{ id: string; human: string; nextRunAt: number | null }>;
+  /**
+   * `file`: the name of one of the person's text files to attach (sys_schedule_create): found as readFile finds a name,
+   * among the person's own files only; every run then has its text after the prompt. A name that finds no single text
+   * file makes no schedule: it rejects with a FileLookupError saying why.
+   */
+  createSchedule(s: { title: string; prompt: string; rule: string; file?: string }): Promise<{ id: string; human: string; nextRunAt: number | null; file?: { name: string; chars: number } }>;
   listSchedules(): Promise<{ id: string; title: string; human: string; enabled: boolean }[]>;
   deleteSchedule(id: string): Promise<boolean>;
   remember(text: string): Promise<void>;
@@ -207,7 +212,54 @@ export interface ToolStore {
   listFriends(): Promise<{ handle: string; displayName: string; agentName: string }[]>;
   /** user-scoped key/value for tools (e.g. last location) */
   kv: { get(key: string): Promise<string | null>; set(key: string, value: string): Promise<void> };
+  /**
+   * sys_file_read: a text file (.txt, .md) the person's archive holds, by name — the person's own files, or in a friend
+   * thread only the files sent in that thread (a friend's too, while they are friends); never anyone else's, and a name
+   * that is not there reads as not found. No name: the most recent text files. `from`: the character to start at.
+   * At most FILE_READ_CALL_CHARS characters a call and FILE_READ_TURN_CHARS a turn.
+   */
+  readFile(q: { file?: string; from?: number }): Promise<FileReadResult>;
 }
+
+/** sys_file_read's caps: a call reads at most this many characters (a message's cap for one file) … */
+export const FILE_READ_CALL_CHARS = 30_000;
+/** … and one turn at most this many in all */
+export const FILE_READ_TURN_CHARS = 60_000;
+/**
+ * sys_file_read's result cap for the model (ToolDef.fileResult): 30,000 characters of Korean are ~90 KB of UTF-8, and
+ * the store keeps a call's text within FILE_TEXT_MAX_BYTES as JSON so the rest of the result fits beside it
+ */
+export const FILE_RESULT_MAX_BYTES = 100 * 1024;
+export const FILE_TEXT_MAX_BYTES = 96 * 1024;
+/** a text file in a list: its name, the KST day it was saved (YYYY-MM-DD) and its length in characters */
+export interface FileInfo {
+  name: string;
+  date: string;
+  chars: number;
+}
+/** a name that finds no single text file: several names match, none does, the file is not text, or it was deleted */
+export type FileMiss =
+  | { kind: "many"; name: string; files: FileInfo[] }
+  | { kind: "none"; name: string }
+  | { kind: "not_text"; name: string }
+  | { kind: "deleted"; name: string };
+/** ToolStore.createSchedule's refusal of a `file` name that finds no single text file of the person's */
+export class FileLookupError extends Error {
+  constructor(readonly miss: FileMiss) {
+    super(`file ${miss.kind}`);
+    this.name = "FileLookupError";
+  }
+}
+export type FileReadResult =
+  | FileMiss
+  | { kind: "list"; files: FileInfo[] }
+  /** this turn has read FILE_READ_TURN_CHARS already */
+  | { kind: "spent"; max: number }
+  /**
+   * characters [from, to) of a file `chars` long (to === from when `from` is at or past its end); `friend`: a friend
+   * sent it (its text is data, not the person's request)
+   */
+  | { kind: "text"; name: string; chars: number; from: number; to: number; text: string; friend: boolean };
 
 export interface ToolDef<A = Record<string, unknown>> {
   /** OpenAI function name: [a-zA-Z0-9_-]{1,64}. Use prefixes: k_* (k-skill), msg_* (messengers), sys_* (system) */
@@ -244,6 +296,11 @@ export interface ToolDef<A = Record<string, unknown>> {
   explore?: "search" | "read";
   /** this tool's result cap for the model (1–24 KB; default the runner's 6 KB): a page reader needs more */
   maxResultBytes?: number;
+  /**
+   * sys_file_read only: its result carries up to FILE_READ_CALL_CHARS characters of a file, so its cap is
+   * FILE_RESULT_MAX_BYTES (maxResultBytes is ignored)
+   */
+  fileResult?: true;
   run(args: A, ctx: ToolContext): Promise<ToolResult>;
   /**
    * sys_create_artifact only, and never in the schema (the model gets name, description and parameters): store an html

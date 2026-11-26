@@ -82,6 +82,38 @@ files and their notes), trimmed. Before 2026-11-26 the cap was 4,000, which cut 
 with no note; history still treats a stored turn's first 4,000 characters of a longer line as that line (it is not
 replayed again).
 
+**Reading a file again (`sys_file_read {file?, from?}`, agent-runtime 1848-b).** The model can read a text file
+(text/plain, text/markdown) from the person's archive again — one whose text left the conversation (a message's file
+is in the model's copy of that turn and the next one only), or the rest of one cut at 30,000 characters. `file` is a
+name, matched as written, then in any case, then without its extension, then as a part of the name; one name (its
+newest file) is read, several names give the list to ask from (10), a photo or PDF by that name says it cannot be
+read, and nothing found says so. No `file`: the 20 newest text files (name, KST day, characters). A call reads 30,000
+characters at most from `from` (cut at a line break near the cap, as a message's file; the result gives `next`), a
+turn 60,000 in all. Whose files: the person's own; in a friend thread only the files sent in that thread (a friend's
+too, while they are friends, as data whose instructions are not followed) — a name from anywhere else reads as not
+found, and the meeting 모시 has no such tool. The answer row keeps each result's line and numbers, never the file's
+text (later turns see what was read, and a deleted file leaves nothing behind). Chip (DD 1852): title `파일 읽기`
+(`보관함 파일 확인` with no name); the line names the file in quotes (20 characters) and the real numbers:
+`'{이름}' 파일을 다 읽었어요 · {N}자`, `… 앞에서 {M}자 읽었어요 · 전체 {N}자`, `… 파일의 {a}–{b}자를 읽었어요 · 전체 {N}자`,
+`… 파일에 더 읽을 글이 없어요 · 전체 {N}자` (`from` at or past the end), `텍스트 파일 {n}개를 찾았어요` / `보관함에 텍스트 파일이 없어요`, `'{이름}'에 맞는 파일이 {n}개예요`, `… 파일을 찾지 못했어요`,
+`… 파일은 글이 아니라 읽을 수 없어요`, `… 파일은 보관함에서 지웠어요`, `이번 답에서 읽을 수 있는 양(60,000자)을 다 썼어요`.
+The app's status line for the tool is `파일 읽는 중` (no file name: it shows on the lock screen).
+
+**A schedule's file.** `sys_schedule_create` takes `file` (a name, found as above among the person's own files; in a
+friend thread one they sent there), and `POST /api/schedules` takes `attachmentId` (the person's own text file; any
+other id is 400 `invalid_schedule`). One file a schedule. Every run gets the file's text after its prompt as a
+message's file is (whole, or its first 30,000 characters with the cut note); the run's event row keeps the file's
+name, not its text, and the daily log and memory read that too. A file deleted later: the run is told the file is gone
+and not to guess at it, and its answer says only three things, briefly: the schedule could not run because its file was
+deleted, the schedule is now off, and uploading the file again and making a new schedule brings it back (DD 2006, 2014).
+Once that answer is stored (not after a failed or stopped run) the schedule goes off with no next run and its stored
+cards' `enabled` with it, in one transaction, and those rows are published; `PATCH {enabled: true}` on a schedule whose
+file is gone (off by that run or by the person) answers 409 `schedule_file_deleted`, other edits keep it off; cards of that schedule get
+`file: { name, deleted: true }` (`ScheduleCard.file`, `Schedule.file` in `/api/schedules`). Columns
+`schedules.attachment_id` / `attachment_name` came with migration v7 (added only; older schedules have none and run as
+before). Cost (estimate): a 30,000-character Korean file is ~21k–36k tokens on each model call of a run; run twice a
+day (a morning and a pre-market one) it comes to ~12–22% of the day's 400k billable tokens.
+
 **Steered lines left unanswered.** A turn that ends without answering lines steered into it (202) — Stop, a failed turn,
 a follow-up the day's quota kept from running — sends `steers_dropped {threadId, messageIds}` to every device of the
 person (right after a stream-less turn's `turn_error`), and the server stores it on those rows just before: from then on

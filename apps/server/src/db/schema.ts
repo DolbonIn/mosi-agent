@@ -315,4 +315,9 @@ export const MIGRATIONS: string[] = [
      so devices tell a newer answer or event from an older one */ `
   ALTER TABLE users ADD COLUMN settings_rev INTEGER NOT NULL DEFAULT 0;
   `,
+  /* v7 (agent-runtime 1848-b): a schedule's attached text file, read into every run; its name stays for the run and the
+     card after the file is deleted. Columns added only: a schedule from before has neither (NULL) and runs as before */ `
+  ALTER TABLE schedules ADD COLUMN attachment_id TEXT;
+  ALTER TABLE schedules ADD COLUMN attachment_name TEXT;
+  `,
 ];
