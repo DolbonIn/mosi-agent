@@ -103,7 +103,7 @@ export class EventHub {
    * reading first could put a stale rev in `hello` with the change's event already gone. Events published meanwhile go
    * out before `hello` (devices compare revs, not arrival order). A failed read sends `hello` without revs.
    */
-  subscribe(userId: string, signal?: AbortSignal, revs?: () => Promise<{ settingsRev: number; agentRev: number }>): Response {
+  subscribe(userId: string, signal?: AbortSignal, revs?: () => Promise<{ settingsRev: number; agentRev: number; investRev?: number }>): Response {
     const ch = new SseChannel(this.heartbeatMs, signal);
     let set = this.subs.get(userId);
     if (!set) this.subs.set(userId, (set = new Set()));
@@ -118,7 +118,14 @@ export class EventHub {
     if (!revs) ch.send({ type: "hello", at } satisfies ServerEvent);
     else
       void revs().then(
-        (r) => ch.send({ type: "hello", at, settingsRev: r.settingsRev, agentRev: r.agentRev } satisfies ServerEvent),
+        (r) =>
+          ch.send({
+            type: "hello",
+            at,
+            settingsRev: r.settingsRev,
+            agentRev: r.agentRev,
+            ...(r.investRev !== undefined ? { investRev: r.investRev } : {}),
+          } satisfies ServerEvent),
         () => ch.send({ type: "hello", at } satisfies ServerEvent),
       );
     return ch.response();

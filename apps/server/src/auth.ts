@@ -3,6 +3,7 @@
  * 90-day sessions, device key registration (ECDSA P-256 public JWK for approval signatures),
  * per-IP rate limiting on signup/login.
  */
+import { getSettings as getInvestSettings } from "./invest/db.ts";
 import type { AuthResponse, Card, SessionBootstrap } from "@pickle/protocol";
 import type { UserRow } from "./db/index.ts";
 import { agentFor, quotaFor, settingsView, userPublic, type Core } from "./core.ts";
@@ -122,6 +123,7 @@ export async function bootstrap(core: Core, user: UserRow): Promise<SessionBoots
     settings: settingsView(user),
     mainThreadId: user.main_thread_id ?? ensureMainThread(core, user),
     unreadThreads: core.db.unreadCount(user.id),
+    ...(getInvestSettings(core.db, user.id)?.mode === "real" ? { investMode: "real" as const } : {}),
     server: { llm: core.deps.runTurn ? "configured" : "missing", model: core.deps.llm?.model ?? null, version: core.cfg.version },
   };
 }

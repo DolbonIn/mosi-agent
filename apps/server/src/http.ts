@@ -10,6 +10,8 @@ export class HttpError extends Error {
     readonly code: string,
     message: string,
     readonly headers?: Record<string, string>,
+    /** more fields for the body beside error and message (a 409's current row, a count) */
+    readonly extra?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -28,7 +30,7 @@ export function json(body: unknown, status = 200, headers?: Record<string, strin
 }
 
 export function errorResponse(err: HttpError): Response {
-  return json({ error: err.code, message: err.message }, err.status, err.headers);
+  return json({ ...err.extra, error: err.code, message: err.message }, err.status, err.headers);
 }
 
 /** Reads the body with a hard byte cap (works with and without Content-Length). */

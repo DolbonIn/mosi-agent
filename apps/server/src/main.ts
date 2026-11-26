@@ -14,6 +14,7 @@ import type { AppDeps, ConnectionsLike, EnclaveLike, HubLike, LauncherLike, LlmH
 import { createLogger, errInfo } from "./log.ts";
 import { CHAT_MAX_TOKENS, chatToolTimeoutMs, deepSearchOn, thinkingMode, withThinking } from "./llm-policy.ts";
 import { ttsUrlFromEnv } from "./tts.ts";
+import { investConfigFromEnv } from "./invest/config.ts";
 import { startPublicAudio } from "./audio.ts";
 import {
   DEFAULT_MEET_BOT_URL,
@@ -272,6 +273,7 @@ export async function buildDeps(env: Record<string, string | undefined> = proces
           }
         : null,
       stt: sttUrl ? { url: sttUrl } : null,
+      invest: investConfigFromEnv(env),
     },
   };
   return { deps, db, bindApp: (app) => (appRef = app) };

@@ -125,6 +125,8 @@ export interface SessionBootstrap {
   mainThreadId: ID;
   unreadThreads: number;
   server: { llm: "configured" | "missing"; model: string | null; version: string };
+  /** "real" while real invest orders are on (나의 모시 "투자" row: 실제 주문); absent in mock mode */
+  investMode?: "real";
 }
 
 // ───────────────────────────── settings ─────────────────────────────
@@ -281,7 +283,8 @@ export type Card =
   | ResultListCard
   | WeatherCard
   | MessengerCard
-  | ScheduleCard;
+  | ScheduleCard
+  | InvestCard;
 
 export interface BriefingCard {
   type: "briefing";
@@ -987,7 +990,7 @@ export type ServerEvent =
    * the stream closed re-reads GET /api/session when either differs from the one it has seen. Always sent by this
    * server.
    */
-  | { type: "hello"; at: Millis; settingsRev?: number; agentRev?: number }
+  | { type: "hello"; at: Millis; settingsRev?: number; agentRev?: number; investRev?: number }
   | { type: "thread_updated"; thread: Thread }
   /**
    * A row stored in a thread, to every member and every device of theirs: the person's lines (one that starts a turn,
@@ -1038,7 +1041,13 @@ export type ServerEvent =
    * The server deleted a message it had stored (a failed briefing attempt's "오늘의 브리핑" event row: an app that loaded
    * the thread while the attempt ran holds it): drop it. A `thread_updated` with the list row's new preview follows.
    */
-  | { type: "message_deleted"; threadId: ID; messageId: ID };
+  | { type: "message_deleted"; threadId: ID; messageId: ID }
+  /**
+   * The person's invest overview changed (a quote, a rule, a watch state, Toss, settings): the whole overview with its new
+   * `rev`, to every device of theirs alone. Sent only when the overview really changed. Alerts and stop records come as
+   * `message` events like any row. `hello.investRev` tells a device that slept whether to re-read GET /api/invest.
+   */
+  | { type: "invest"; rev: number; overview: InvestOverview };
 
 // ───────────────────────────── route table (documentation + client helper) ─────────────────────────────
 
@@ -1085,6 +1094,12 @@ export const ROUTES = {
   friends: "GET /api/friends | POST /api/friends/:userId/block | DELETE /api/friends/:userId",
   invite: "POST /api/invites → InviteResponse | POST /api/invites/:token/accept → Friend | GET /i/:token (HTML landing)",
   schedules: "GET /api/schedules | POST /api/schedules | PATCH /api/schedules/:id | DELETE /api/schedules/:id",
+  invest: "GET /api/invest → InvestOverview | GET /api/invest/symbols/:symbol → InvestSymbolDetail",
+  investRules:
+    "POST /api/invest/rules/preview InvestRuleDraft & {ruleId?, changes?} → InvestRulePreview | POST /api/invest/rules {draft, previewId?} → InvestRuleRow | PATCH /api/invest/rules/:id {changes, ifRev, previewId?} → InvestRuleRow (409 rule_changed {rule} / preview_stale {preview}) | DELETE /api/invest/rules/:id",
+  investWatchlist: "POST /api/invest/watchlist {symbol} → InvestSymbolRow (404 unknown_symbol) | DELETE /api/invest/watchlist/:symbol?withRules=1 (409 has_rules {count})",
+  investToss: "GET /api/invest/toss → InvestTossStatus | POST /api/invest/toss/check → InvestTossStatus (429 toss_check_too_soon); keys go through POST /api/credentials (service tossinvest)",
+  investSettings: "PATCH /api/invest/settings InvestSettingsPatch → InvestSettingsView",
 } as const;
 
 // ───────────────────────────── shared constants ─────────────────────────────
@@ -1105,5 +1120,10 @@ export { forSpeech, letters, speakable, speechNorm } from "./speech";
 
 /** the visible text of an "html" artifact, and its preview line (the card, the archive list) */
 export { htmlPreview, htmlText } from "./html";
+
+// ───────────────────────────── invest ─────────────────────────────
+
+export type * from "./invest";
+import type { InvestCard, InvestOverview } from "./invest";
 /** the html artifact frame's own inline script (its sha256 is in the server's CSP) */
 export { HTML_FRAME_SCRIPT } from "./htmlFrame";

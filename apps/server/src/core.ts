@@ -15,6 +15,7 @@ import type { AppDeps, ConnectionsLike, ServerConfig } from "./deps.ts";
 import type { Db, MessageRow, ThreadRow, UserRow } from "./db/index.ts";
 import type { EventHub } from "./events.ts";
 import type { VoiceIo } from "./audio.ts";
+import type { InvestHub } from "./invest/hub.ts";
 import type { MeetHub } from "./meet.ts";
 import type { Logger } from "./log.ts";
 import { nextQuotaReset, quotaDay } from "./kst.ts";
@@ -45,6 +46,8 @@ export interface Core {
   voice: VoiceIo;
   /** Google Meet participation through services/meet (see meet.ts) */
   meet: MeetHub;
+  /** invest watch, alerts, overview (invest/hub.ts) */
+  invest: InvestHub;
   /** k-skill logins (kskill.ts, docs/architecture/KSKILL-CONNECTIONS.md) */
   connections: ConnectionsLike;
 }

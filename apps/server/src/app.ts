@@ -32,6 +32,8 @@ import { connectionRoutes, credentialRoutes } from "./credentials.ts";
 import { defaultConnections, stopKskill } from "./kskill.ts";
 import { friendRoutes } from "./friends.ts";
 import { scheduleRoutes, Scheduler } from "./schedules.ts";
+import { InvestHub } from "./invest/hub.ts";
+import { investRoutes } from "./invest/routes.ts";
 import { uiDefinitions } from "./sdui.ts";
 import { createStatic } from "./static.ts";
 import { createTts } from "./tts.ts";
@@ -69,6 +71,7 @@ export function resolveConfig(c: Partial<ServerConfig> = {}): ServerConfig {
     // 쿠팡 파트너스 verifies with a real search (about 10 per key per hour): at most one re-check an hour
     connectionRecheckFloorMs: c.connectionRecheckFloorMs ?? { "coupang-partners": 3_600_000 },
     schedulerIntervalMs: c.schedulerIntervalMs ?? 30_000,
+    invest: c.invest ?? { sources: false, tossBase: null, outboundIp: null },
     sseHeartbeatMs: c.sseHeartbeatMs ?? 15_000,
     eventsHeartbeatMs: c.eventsHeartbeatMs ?? 25_000,
     quiet: c.quiet ?? false,
@@ -114,9 +117,11 @@ export function createApp(deps: AppDeps): App {
     activeTurns: new Map(),
     voice: createVoiceIo(createTts(cfg, { log, now }), now),
     meet: undefined as unknown as MeetHub,
+    invest: undefined as unknown as InvestHub,
     connections: deps.connections ?? defaultConnections(deps, now),
   };
   core.meet = new MeetHub(core);
+  core.invest = new InvestHub(core);
 
   seedTemplates(core);
   const scheduler = new Scheduler(core);
@@ -133,6 +138,7 @@ export function createApp(deps: AppDeps): App {
   const conns = connectionRoutes(core);
   const friends = friendRoutes(core);
   const schedules = scheduleRoutes(core);
+  const invest = investRoutes(core);
   const speech = ttsRoutes(core);
   const meeting = meetRoutes(core);
   const slackLogin = new SlackLoginRelay(core, deps.slackLogin);
@@ -215,7 +221,7 @@ export function createApp(deps: AppDeps): App {
       return events.subscribe(userId, c.req.signal, async () => {
         const user = core.db.userById(userId);
         if (!user) throw new Error("no user");
-        return { settingsRev: user.settings_rev, agentRev: (await agentFor(core, user)).rev };
+        return { settingsRev: user.settings_rev, agentRev: (await agentFor(core, user)).rev, investRev: core.invest.investRev(userId) };
       });
     }, true),
   );
@@ -288,6 +294,18 @@ export function createApp(deps: AppDeps): App {
   r.on("POST", "/api/schedules", authed(schedules.create));
   r.on("PATCH", "/api/schedules/:id", authed(schedules.patch));
   r.on("DELETE", "/api/schedules/:id", authed(schedules.remove));
+  // invest (B1): overview, watchlist, rules, Toss status, call settings — no model call behind any of them
+  r.on("GET", "/api/invest", authed(invest.overview));
+  r.on("GET", "/api/invest/symbols/:symbol", authed(invest.symbol));
+  r.on("POST", "/api/invest/watchlist", authed(invest.addWatch));
+  r.on("DELETE", "/api/invest/watchlist/:symbol", authed(invest.removeWatch));
+  r.on("POST", "/api/invest/rules/preview", authed(invest.preview));
+  r.on("POST", "/api/invest/rules", authed(invest.create));
+  r.on("PATCH", "/api/invest/rules/:id", authed(invest.patch));
+  r.on("DELETE", "/api/invest/rules/:id", authed(invest.removeRule));
+  r.on("GET", "/api/invest/toss", authed(invest.toss));
+  r.on("POST", "/api/invest/toss/check", authed(invest.tossCheck));
+  r.on("PATCH", "/api/invest/settings", authed(invest.settings));
   // voice (call screen): local Drama-3 TTS → audio/mpeg; 503 tts_unavailable → client falls back to Web Speech
   r.on("POST", "/api/tts", authed(speech.speak));
   r.on("POST", "/api/tts/stream", authed(speech.stream));
@@ -351,6 +369,7 @@ export function createApp(deps: AppDeps): App {
       scheduler.start();
       void core.voice.tts?.available(); // non-blocking startup probe for /api/health
       core.meet.start(); // follow meetings that were still running before a restart
+      core.invest.start();
       housekeeping ??= setInterval(() => {
         try {
           const n = core.db.purgeExpiredSessions(now());
@@ -362,6 +381,7 @@ export function createApp(deps: AppDeps): App {
     },
     async close() {
       scheduler.stop();
+      await core.invest.stop();
       if (housekeeping) clearInterval(housekeeping);
       housekeeping = null;
       events.closeAll();

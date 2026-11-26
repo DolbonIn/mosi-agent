@@ -502,11 +502,13 @@ describe("a schedule's file", () => {
     expect((await h.req("POST", "/api/schedules", { token: me.token, body: { title: "점심", prompt: "점심 메뉴 추천해줘", rule: "daily@12:01" } })).status).toBe(201);
     // the same database as schema 6 had it: no file columns, user_version 6
     h.db.sql.exec("ALTER TABLE schedules DROP COLUMN attachment_name; ALTER TABLE schedules DROP COLUMN attachment_id; PRAGMA user_version = 6;");
+    // and without the tables later versions add (v8 invest), which run again after v7
+    for (const { name } of h.db.sql.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'invest_%'").all() as { name: string }[]) h.db.sql.exec(`DROP TABLE ${name}`);
     const cols = () => (h.db.sql.query("PRAGMA table_info(schedules)").all() as { name: string }[]).map((c) => c.name);
     expect(cols()).not.toContain("attachment_id");
     const again = new Db(join(h.dir, "pickle.db"));
     expect(again.schemaVersion).toBe(MIGRATIONS.length);
-    expect(MIGRATIONS.length).toBe(7);
+    expect(MIGRATIONS.length).toBe(8);
     again.close();
     expect(cols()).toEqual(expect.arrayContaining(["attachment_id", "attachment_name"]));
     const [s] = await schedules(me.token);

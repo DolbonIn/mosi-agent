@@ -48,6 +48,7 @@ export function uiDefinitions(agentName: string): UiDefinitions {
           rows: [
             { id: "connections", title: "앱 연결", icon: "link", target: "connections" },
             { id: "schedules", title: "예약된 일", icon: "clock", target: "schedules" },
+            { id: "invest", title: "투자", icon: "chart", target: "invest" },
             { id: "friends", title: "친구", icon: "people", target: "friends" },
             { id: "privacy-scope", title: "정보 공개 범위", icon: "lock", target: "privacy-scope" },
           ],

@@ -320,4 +320,151 @@ export const MIGRATIONS: string[] = [
   ALTER TABLE schedules ADD COLUMN attachment_id TEXT;
   ALTER TABLE schedules ADD COLUMN attachment_name TEXT;
   `,
+  /* v8 (agent-runtime 2006 §2, 2052 §A): invest B1 — settings, watchlist, price rules and their watch state, sent alerts
+     (dedupe_key UNIQUE), stop records (client_order_id UNIQUE), the code-written ledger, the last quotes, the shared
+     source cache and pause state, rule previews and the invest call log. New tables only. */ `
+  CREATE TABLE invest_settings (
+    user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    mode TEXT NOT NULL DEFAULT 'mock',
+    real_since INTEGER,
+    calls_json TEXT NOT NULL DEFAULT '{}',
+    thread_id TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    toss_checked_at INTEGER,
+    toss_ok_at INTEGER,
+    toss_error TEXT,
+    toss_error_at INTEGER,
+    toss_paused_until INTEGER,
+    blind_since INTEGER,
+    blind_banner_day TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE TABLE invest_watchlist (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    symbol TEXT NOT NULL,
+    market TEXT NOT NULL,
+    name TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, symbol)
+  );
+  CREATE TABLE invest_rules (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    symbol TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    level INTEGER,
+    price REAL,
+    lo REAL,
+    hi REAL,
+    direction TEXT NOT NULL,
+    action TEXT NOT NULL,
+    once INTEGER NOT NULL DEFAULT 0,
+    buffer_pct REAL,
+    conditions_json TEXT,
+    until_day TEXT,
+    state TEXT NOT NULL DEFAULT 'armed',
+    hit_at INTEGER,
+    hit_seq INTEGER NOT NULL DEFAULT 0,
+    cleared_at INTEGER,
+    paused_at INTEGER,
+    seen_slot TEXT,
+    real_confirmed_at INTEGER,
+    rev INTEGER NOT NULL DEFAULT 0,
+    created_by TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE INDEX invest_rules_user ON invest_rules(user_id, symbol);
+  CREATE TABLE invest_alerts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rule_id TEXT,
+    symbol TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    dedupe_key TEXT NOT NULL,
+    price REAL,
+    observed_at INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    title TEXT NOT NULL,
+    thread_id TEXT,
+    message_id TEXT,
+    call_state TEXT,
+    called_at INTEGER,
+    created_at INTEGER NOT NULL,
+    UNIQUE (user_id, dedupe_key)
+  );
+  CREATE INDEX invest_alerts_symbol ON invest_alerts(user_id, symbol, created_at);
+  CREATE TABLE invest_orders (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rule_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    client_order_id TEXT NOT NULL UNIQUE,
+    toss_order_id TEXT,
+    state TEXT NOT NULL,
+    qty REAL,
+    filled_qty REAL,
+    avg_price REAL,
+    observed_price REAL NOT NULL,
+    stop_price REAL NOT NULL,
+    reason TEXT,
+    message_id TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE TABLE invest_ledger (
+    user_id TEXT NOT NULL DEFAULT '',
+    id TEXT NOT NULL,
+    as_of TEXT NOT NULL,
+    published_at TEXT,
+    value REAL,
+    value_text TEXT,
+    unit TEXT NOT NULL,
+    definition TEXT NOT NULL,
+    source_tier TEXT NOT NULL,
+    url TEXT,
+    revision TEXT,
+    confidence TEXT NOT NULL,
+    lead_class TEXT,
+    author TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, id, as_of)
+  );
+  CREATE TABLE invest_quotes (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    symbol TEXT NOT NULL,
+    price REAL NOT NULL,
+    prev_close REAL,
+    source TEXT NOT NULL,
+    as_of INTEGER NOT NULL,
+    fetched_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, symbol)
+  );
+  CREATE TABLE invest_cache (key TEXT PRIMARY KEY, body TEXT NOT NULL, fetched_at INTEGER NOT NULL, expires_at INTEGER NOT NULL);
+  CREATE TABLE invest_source_state (
+    source TEXT PRIMARY KEY,
+    paused_until INTEGER,
+    last_status INTEGER,
+    last_error TEXT,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE TABLE invest_previews (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    spec_json TEXT NOT NULL,
+    expires_at INTEGER NOT NULL,
+    used_at INTEGER
+  );
+  CREATE TABLE invest_calls (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    ref TEXT NOT NULL,
+    state TEXT NOT NULL,
+    at INTEGER NOT NULL
+  );
+  CREATE INDEX invest_calls_day ON invest_calls(user_id, at);
+  `,
 ];

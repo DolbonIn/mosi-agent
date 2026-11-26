@@ -4,6 +4,7 @@
  * plaintext: clients send device-sealed envelopes that only the enclave can open. Secrets never appear in
  * responses/logs.
  */
+import { TOSS_SERVICE } from "./invest/toss.ts";
 import type { Card, ConnectRequest, CredentialInfo, KeepFor, SaveCredentialRequest } from "@pickle/protocol";
 import { publishMessage, publishThread, type Core } from "./core.ts";
 import { bad, HttpError, json, notFound, readJson, type Ctx } from "./http.ts";
@@ -133,6 +134,8 @@ export function credentialRoutes(core: Core) {
         throw packageError(err, { status: 500, code: "vault_failed", message: "보안 금고에 저장하지 못했어요. 다시 시도해 주세요." });
       }
       markCredentialCardsSaved(core, userId, req.service);
+      // a Toss key: one holdings read in the background (the invest overview shows the result)
+      if (req.service === TOSS_SERVICE) core.track(core.invest.onTossSaved(userId));
       if (kskill) {
         // a k-skill login saved from the vault screen connects like POST /api/connections/:service
         const r = await afterKskillSave(core, userId, info, { created: true });
@@ -155,7 +158,7 @@ export function credentialRoutes(core: Core) {
 
     remove: async (c: Ctx, userId: string) => {
       let service: string | null = null;
-      if (core.connections.catalog().length) {
+      {
         try {
           service = (await deps.vault.list(userId)).find((r) => r.id === c.params.id)?.service ?? null;
         } catch {
@@ -168,6 +171,7 @@ export function credentialRoutes(core: Core) {
         core.connections.forget(userId, service);
         await publishKskillState(core, userId, service);
       }
+      if (service === TOSS_SERVICE) await core.invest.onTossRemoved(userId);
       return json({ ok: true });
     },
 

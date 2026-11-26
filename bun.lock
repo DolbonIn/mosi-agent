@@ -41,6 +41,7 @@
         "@pickle/launcher": "workspace:*",
         "@pickle/messengers": "workspace:*",
         "@pickle/protocol": "workspace:*",
+        "@pickle/quant": "workspace:*",
         "@pickle/skills": "workspace:*",
         "@pickle/vault": "workspace:*",
       },

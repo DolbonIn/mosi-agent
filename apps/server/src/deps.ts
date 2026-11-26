@@ -167,6 +167,12 @@ export interface ServerConfig {
   /** per k-skill service id: no re-check sooner than this (its verify spends the user's own API quota) */
   connectionRecheckFloorMs: Record<string, number>;
   schedulerIntervalMs: number;
+  /**
+   * invest (agent-runtime 2052): `sources` from PICKLE_INVEST_SOURCES=on — the public quote source (Yahoo) is called
+   * only then (QA and tests never set it); `tossBase` from PICKLE_TOSS_BASE — no Toss call at all without it;
+   * `outboundIp` from PICKLE_OUTBOUND_IP — shown for the Toss allowed-IP setting, never looked up
+   */
+  invest: { sources: boolean; tossBase: string | null; outboundIp: string | null };
   sseHeartbeatMs: number;
   eventsHeartbeatMs: number;
   quiet: boolean;
@@ -198,6 +204,8 @@ export interface AppDeps {
   connections?: ConnectionsLike;
   /** background timers (the k-skill login re-checks); omitted → setTimeout/clearTimeout, unref'd */
   timers?: Timers;
+  /** invest sources and Toss go through this fetch (tests: synthetic responses and the fake Toss); omitted → fetch */
+  investFetch?: typeof fetch;
 }
 
 export interface Timers {

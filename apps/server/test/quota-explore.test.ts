@@ -200,7 +200,7 @@ describe("profile, settings, agent, sdui", () => {
     expect(ui.profile.sections.map((x) => x.rows.map((r) => r.id))).toEqual([
       ["quota"],
       ["account", "phone"],
-      ["connections", "schedules", "friends", "privacy-scope"],
+      ["connections", "schedules", "invest", "friends", "privacy-scope"],
       ["logins", "payments", "access-log", "privacy"],
       ["notifications", "display"],
     ]);

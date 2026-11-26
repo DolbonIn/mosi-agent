@@ -683,6 +683,72 @@ The same voice, streamed as it is generated: first audio in about 0.25 s instead
 - `GET /i/:token` is an HTML page whose "앱 열기" goes to `/?invite=<token>`; the app then calls
   `POST /api/invites/<token>/accept`.
 
+## Invest (B1) — 나의 모시 > 투자
+Watch prices, keep price rules, alert. No model call anywhere in B1, and no order: the Toss client reads only
+(prices, holdings, sellable quantity). Types: `packages/protocol/src/invest.ts`. Code: `apps/server/src/invest/`.
+- `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages: null, reports: [],
+  decks: []}`. Every figure is a server string (`InvestNum {v, text, unit}`; @pickle/quant format.ts) — screens format
+  nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"), `ok`, `closed`, `blind` (live rules
+  and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
+  `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`).
+- Event `invest {rev, overview}`: the whole overview whenever it changed (a quote, a rule, a watch state, Toss, settings),
+  to the person's devices only. `rev` follows the settings rule: max(previous + 1, server clock), never lowered; an
+  unchanged overview sends nothing. `hello.investRev` (absent before the first use) tells a device that slept to re-read.
+  Session: `investMode: "real"` only while real orders are on (never in B1).
+- Watchlist: `POST /api/invest/watchlist {symbol}` → `InvestSymbolRow` (201 new, 200 already there). US `^[A-Z][A-Z0-9.-]{0,9}$`,
+  KR six digits; trimmed and upper-cased. With sources on, Yahoo's own "not found" → 404 `unknown_symbol`; any other
+  failure takes the symbol with its symbol as name. `DELETE /api/invest/watchlist/:symbol` → 409 `has_rules {count}` while
+  it has rules; `?withRules=1` removes both. Newest first. At most 30.
+- Rules: `POST /api/invest/rules/preview` (a draft, or `{ruleId, changes}`) → `InvestRulePreview` (the server's sentence,
+  stop warning, `basis`, `buffer`/`bufferPct`/`bufferDefault`/`bufferFoot` for stops, `sellable` for sell stops, `callNote`
+  for calls, `confirm` tap|hold; valid 10 minutes, used once). `POST /api/invest/rules {draft, previewId?}` → 201
+  `InvestRuleRow`. `PATCH /api/invest/rules/:id {changes, ifRev, previewId?}` reads price · lo · hi · direction (price
+  alerts only; the same direction again is a no-op) · action · until · once · bufferPct and raises `rev`; a stale `ifRev`
+  → 409 `rule_changed {rule}`, a stale preview → 409 `preview_stale {preview}`. `DELETE /api/invest/rules/:id`.
+  Kinds a person makes: stop, target (level 1–3), buy_zone (lo < hi), alert (direction below|above). resistance and
+  invalidate come from strategy proposals (B2): POST → 400 `kind_not_allowed`; PATCH and DELETE work. `sell` only on a
+  stop (400 `sell_not_allowed`). bufferPct 1–20, null = the 5% default (stops only). until: a date from today, within a
+  year. At most 60 rules. Errors are `{error, message}` with the DD 2100 copy.
+- The watch: from 15 minutes after the open every 5 minutes to the close, plus one check 5 minutes after the close (US
+  09:45–16:00 ET + 16:05; early closes 13:00 + 13:05; KRX by its 2026 table; holidays and other years: no check). Each
+  slot runs once per server (a marker in `invest_cache`). Quotes: the person's Toss key first (every watched symbol in one
+  call), then Yahoo for symbols with live rules (4-minute shared cache). Daily bars (ATR for the stop basis): Yahoo once a
+  day per symbol. Stooq is not used (a browser check instead of its CSV).
+- Rule states `armed | hit | paused | expired` (대기 / 닿음 / 멈춤 / 만료; armed with a deadline: `12-01까지`). Inside while
+  armed → one alert and `hit`; inside while hit → nothing; one check outside → armed again, so a later touch is a new alert
+  the same day. `once` → `paused` after its alert; a sell stop always pauses. Any PATCH of a paused or expired rule watches
+  it again. The earlier state is known only when the rule was seen at the check right before (the last close check
+  included); otherwise the alert says why (`noPrior`, title line: first look / after an edit / after resuming / quotes
+  missing in between) and resistance says "위에 있어요", never "넘었어요". One alert per `ruleId:rev:hitSeq` (UNIQUE).
+  The watch never writes a rule's price, direction, action or rev, and a save that lands mid-check wins (no alert for the
+  old rule).
+- Stop basis (D5-2): ATR14 wider than the stop's distance (from the average price, else the last close) → close basis:
+  the close check at or below the stop, or any check at or below the buffer; between the two during the session it waits.
+  ATR14 comes from the day's daily bars; without them the last one computed serves up to 5 market days (kept with the
+  day of its last bar; an alert's ATR goes to the ledger with that as_of). None → intraday only, and the buffer foot
+  starts "지금은 장중 가격만으로 판단해요."; in real mode the stop's alert or record card carries that line too.
+- Alerts go to the person's invest thread (kind `schedule`, title "투자", icon `chart`; made on the first alert) as
+  `invest_alert` / `invest_stop` cards, each with `disclaimer: true`, plus a `notification` banner (amounts in the app
+  banner; B1c's lock-screen push carries the title only). A mock sell stop is a record ("실제 주문이었다면 47주를 팔았을
+  거예요", or without a quantity, or skipped at zero sellable); no card says it sold. Expiry ends a rule at its deadline
+  day's close check with its own card.
+- Calls: a rule with action `call` (and `calls.stopResult` for stop records, `calls.expiry` for expiries; stage calls are
+  B2) dials the verified number after the card is stored, then the card gains `call {ok, text}`. 10 invest calls per KST
+  day, counted apart from `sys_call_me`; blocked → `callBlock` `not_verified` | `not_configured`. Spoken lines say what
+  happened and the price, never advice or the disclaimer.
+- Toss (paths and bodies as the public openapi.json 1.2.28: `POST /oauth2/token` client credentials, `GET /api/v1/prices`,
+  `/api/v1/holdings`, `/api/v1/sellable-quantity` with `X-Tossinvest-Account`, every body `{result}`; prices carry no
+  previous close): keys go through `POST /api/credentials` (service `tossinvest`, envelope fields clientKey, secretKey, accountSeq);
+  saving one runs one holdings read; deleting it turns real off and forgets holdings. `GET /api/invest/toss`,
+  `POST /api/invest/toss/check` (429 `toss_check_too_soon` within a minute) → `InvestTossStatus`. A 403 asked again with a
+  new token is `ip_not_allowed` (never "expired"); the person's Toss calls rest an hour. 401 `auth`, 429 `rate_limited`
+  (5 minutes), else `down`. Keys and tokens never reach logs, cards, events or rows; a failure keeps its code alone.
+- `PATCH /api/invest/settings {calls?: {stopResult?, stage?, expiry?}}` → `InvestSettingsView`.
+- Server env: `PICKLE_INVEST_SOURCES=on` lets the server call public sources (off by default: no Yahoo call at all);
+  `PICKLE_TOSS_BASE` (https origin) lets it call Toss (off by default, so tests and QA cannot); `PICKLE_OUTBOUND_IP` is shown
+  to the person for Toss's allowed-IP list (never looked up). A 403 or 429 from a public source rests it until the next
+  day; a 200 that is not its data (a block page) too. Default User-Agent, one request at a time per host, 10 s limit.
+
 ## Other
 - `PATCH /api/settings` → the whole settings with `rev` (deep merge; unknown keys, `rev` included, 400).
   `PATCH /api/agent` → AgentProfile with `rev`: only the fields sent change, merged in the launcher's per-user queue —
