@@ -59,6 +59,8 @@ export function makeInvestUpstream() {
     tossRevoked: new Set<string>(),
     yahoo: new Map<string, YahooQuote | "not_found" | number>(),
     yahooDaily: new Map<string, Bar[]>(),
+    /** FRED fredgraph CSV per series id: the body to send, or a status (403, 429, 500); an id not set answers 404 */
+    fred: new Map<string, string | number>(),
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -184,6 +186,13 @@ export function makeInvestUpstream() {
           error: null,
         },
       });
+    }
+
+    if (url.host === "fred.stlouisfed.org" && url.pathname === "/graph/fredgraph.csv") {
+      const v = state.fred.get(url.searchParams.get("id") ?? "");
+      if (typeof v === "number") return new Response("blocked", { status: v });
+      if (v === undefined) return new Response("Not Found", { status: 404 });
+      return new Response(v, { status: 200, headers: { "content-type": "text/csv" } });
     }
 
     throw new Error(`fake upstream: unexpected ${url.host}`);

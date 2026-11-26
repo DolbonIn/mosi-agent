@@ -823,7 +823,9 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
   errorCause?}` (due and not judged only: 409 `forecast_not_due` / `forecast_judged`; it sets `InvestForecast.proposal`
   — "{agent name} 제안: 빗나감 · 시기" — never the outcome or the rev), `invest_watch_propose`. The descriptions (DD
   0521): with quotes off or blind the model passes on the server's watch words and never offers to turn quotes on; a
-  date said without a year is the next one from today, and a refused date is corrected and tried once more.
+  date said without a year is the next one from today, and a refused date is corrected and tried once more; `"request"`
+  only when the person said those prices in the turn, a reason with no source, grade or day, and the watch list never
+  redrawn as an html card (DD 0524, 0600).
 - **Proposals**: `invest_watch_propose {symbol, changes[≤ 6], reason (one line ≤ 120, not the rows' prices), basis}`
   stores a proposal and puts an `invest_rule_change` card in the turn's message (DD 1935 §2-3: the question title,
   `changes` rows 낱말 · 지금 → 바꿀 값, `reason` and `reasonFoot`, the result sentence of
@@ -851,6 +853,17 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
   The messages showing the card get its new state (`message` events), and the 30-second beat turns waiting cards past
   their time to `expired`. A turn stores each rule-change card as its proposal stands at the insert, and the A17 line
   only on the message's last invest card.
+
+## Invest (B2e-0) — the macro series
+
+No route and no model behind it; B2b-2's snapshot reads it. Code: `apps/server/src/invest/macro.ts`. FRED's fredgraph
+CSV (no key; `FRED · A`) for DGS10 DGS2 DFEDTARU BAMLH0A0HYM2 UNRATE CPILFESL SAHMREALTIME IC4WSA NFCI VIXCLS SP500
+DEXKOUS DEXJPUS, from the 1st of January three years back; Yahoo's chart JSON (`Yahoo(지연 시세) · B+`) only for what FRED does not
+carry (`^KS11`). The public-source rules hold for both hosts: nothing called unless `PICKLE_INVEST_SOURCES=on`, the
+default User-Agent, one request at a time per host, a 403/429 or a 200 that is not the series rests that source until
+the next US market day (its figures read 확인 불가 meanwhile; a junk body is never cached), one read serves everyone (6 hours
+for FRED, Yahoo's daily rule for KOSPI). A day without a value (empty cell or ".") is a null point; the series' `asOf`
+is its last day with a value.
 
 ## Web Push (B1c) — the lock-screen line
 

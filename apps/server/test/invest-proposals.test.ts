@@ -377,12 +377,13 @@ describe("invest_watch_propose (A12: the model proposes, the person decides)", (
     await watch(w, "SOXL");
     const d = (name: string) => tools(w)[name]!.description;
     expect(d("invest_watch_list")).toContain("When watch.state is off or blind, pass on watch.text and watch.foot as the server wrote them: quotes are the server's setting, so never offer to turn them on.");
+    expect(d("invest_watch_list")).toContain("The invest screen and the server's cards already show the symbols, rules and quotes: never redraw them with sys_create_artifact, and say them briefly in the reply."); // DD 0600 A
     for (const name of ["invest_event_add", "invest_forecast_add"]) {
       expect(d(name)).toContain("A date said without a year is the next such date from today");
       expect(d(name)).toMatch(/If a date is refused, correct it and (add|record) it once more; ask the person only when the date really reads two ways\./);
     }
     const p = d("invest_watch_propose");
-    for (const s of ["reason: one line on why, without the prices the card's rows already show.", '"technicals" (only after invest_technicals answered for this symbol in this turn)', '"request" (the person named the prices)', "After the card, say in one line that you sent it; do not repeat its rows or its result."]) expect(p).toContain(s);
+    for (const s of ["reason: one line on why, without the prices the card's rows already show and without a source, grade or as-of day (the foot says those).", '"technicals" (only after invest_technicals answered for this symbol in this turn)', '"request" (only when the person said those prices or that change in this turn)', "After the card, say in one line that you sent it; do not repeat its rows or its result."]) expect(p).toContain(s);
     expect(p).not.toContain(REQUEST_FOOT); // the foot's words stay code's
     const schema = tools(w).invest_watch_propose!.parameters as { properties: Record<string, unknown>; required: string[] };
     expect([Object.keys(schema.properties), schema.required]).toEqual([["symbol", "changes", "reason", "basis"], ["symbol", "changes", "reason", "basis"]]);
