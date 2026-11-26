@@ -4,8 +4,10 @@
  * RFC 8292 (VAPID) on WebCrypto; test/push.test.ts checks the encryption against RFC 8291's own example.
  *
  * - Nothing is sent unless PICKLE_PUSH_SUBJECT is set (cfg.push; team-lead 2210: the contact goes to Apple, Google and
- *   Mozilla, so the person decides it first, and no personal address is a default). Until then the key and subscriptions
- *   are kept as usual and the app shows no reason: push is quietly off. QA servers and tests never reach a push service.
+ *   Mozilla, so the person decides it first, and no personal address is a default). Until then the key and a new
+ *   subscription answer 503 push_off (team-lead 2331b, DD 2330: the app then offers no lock-screen line it cannot
+ *   deliver, and says no reason); removing one still works, and rows from before are kept, never sent to. QA servers
+ *   and tests never reach a push service.
  * - The VAPID key pair lives in the data dir (`vapid.json`, 0600), made on first use. Its private half never leaves that
  *   file: never logged, never sent. A new key pair makes every subscription stale (the browser's applicationServerKey).
  * - A subscription belongs to the session that sent it: signing out (or a password reset) deletes the session and its
@@ -242,11 +244,15 @@ export class PushHub {
   }
 }
 
-/** the key and subscriptions work with push off too (team-lead 2210): only sending waits for PICKLE_PUSH_SUBJECT */
+/** push off (no PICKLE_PUSH_SUBJECT): the app takes this as off and offers nothing; no reason line (team-lead 2331b) */
+const pushOff = () => json({ error: "push_off" }, 503);
+
+/** with push off the key and a new subscription answer 503 push_off; DELETE works either way */
 export function pushRoutes(core: Core) {
   return {
-    key: async (_c: Ctx, _userId: string) => json({ publicKey: await core.push.publicKey() }),
+    key: async (_c: Ctx, _userId: string) => (core.push.enabled() ? json({ publicKey: await core.push.publicKey() }) : pushOff()),
     save: async (c: Ctx, a: AuthedUser) => {
+      if (!core.push.enabled()) return pushOff();
       core.push.save(a, await readJson(c.req));
       return json({ ok: true });
     },

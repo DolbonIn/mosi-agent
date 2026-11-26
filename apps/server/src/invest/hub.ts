@@ -9,7 +9,21 @@ import { errInfo } from "../log.ts";
 import { dial, myPhoneView, PHONE_TOOL_TIMEOUT_MS, readMyPhone } from "../phone.ts";
 import { kstDate, kstParts, kstToEpoch } from "../kst.ts";
 import { newId } from "../util.ts";
-import { currentSlot, marketDate, marketDaysAfter, nextMarketDayStart, prevSlot, type Market, type Slot } from "./calendar.ts";
+import {
+  currentSlot,
+  dailyUntil,
+  dayFromToss,
+  finishedBars,
+  marketClock,
+  marketDate,
+  marketDay,
+  marketDaysAfter,
+  prevSlot,
+  type DayInfo,
+  type DayOverride,
+  type Market,
+  type Slot,
+} from "./calendar.ts";
 import {
   alertBanner,
   alertCallLine,
@@ -32,6 +46,7 @@ import {
   bufferFoot,
   bufferPct,
   bufferPrice,
+  callNote,
   dedupeKey,
   DEFAULT_BUFFER_PCT,
   expiresAt,
@@ -52,6 +67,20 @@ import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 export const DEFAULT_CALLS = { stopResult: true, stage: false, expiry: false } as const;
 /** quotes missing this long during the session = blind (2006 §3) */
 export const BLIND_AFTER_MS = 15 * 60_000;
+/** a person's Toss calendar or daily read that failed is asked again after this long (one a market day when it works) */
+export const TOSS_DAILY_RETRY_MS = 60 * 60_000;
+/** how long "is Toss connected" is remembered between 30-second ticks (a vault read otherwise) */
+const CONNECTED_MEMO_MS = 5 * 60_000;
+/** a person's Toss calendar answer is kept this long (prevSlot looks back up to 15 days; the gap check needs 10) */
+const CALENDAR_KEEP_MS = 10 * 86_400_000;
+
+/** the person's own Toss reads (team-lead 2253): the key carries the person, so nobody else's watch reads them */
+const calKey = (userId: string, market: Market, day: string) => `cal:toss:${userId}:${market}:${day}`;
+const tossBarsKey = (userId: string, market: Market, symbol: string) => `bars:toss:${userId}:${market}:${symbol}`;
+const tossAtrKey = (userId: string, market: Market, symbol: string) => `atr:toss:${userId}:${market}:${symbol}`;
+/** what the log says of a day: "09:30-16:00" (market clock), "closed" or "unknown" */
+const daySays = (market: Market, d: DayInfo) => (d.kind === "open" ? `${marketClock(market, d.session.open)}-${marketClock(market, d.session.close)}` : d.kind);
+
 /** the last computed ATR14 serves this many market days after its bars (team-lead 2052 answer) */
 export const ATR_KEEP_DAYS = 5;
 export const QUOTE_CACHE_MS = 4 * 60_000;
@@ -63,7 +92,7 @@ export const TOSS_ERROR_TEXT: Readonly<Record<Exclude<TossErrorCode, "not_connec
   ip_not_allowed: "토스증권이 접속을 막았어요(허용 IP)",
   rate_limited: "토스증권이 잠시 요청을 막았어요",
   down: "토스증권에 연결하지 못했어요",
-  off: "이 서버는 토스증권에 연결하지 않아요",
+  off: "지금은 토스증권에 연결할 수 없어요",
 };
 
 export function marketOf(symbol: string): Market {
@@ -83,6 +112,9 @@ export class InvestHub {
   private sent = new Map<string, string>();
   private holdingsByUser = new Map<string, { at: number; list: TossHolding[] }>();
   private ranSlots = new Set<string>();
+  /** per person and key: when a Toss calendar or daily read was last asked and failed */
+  private tossTried = new Map<string, number>();
+  private connectedMemo = new Map<string, { at: number; v: boolean }>();
   private ticking: Promise<{ slots: number; alerts: number }> | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
 
@@ -142,12 +174,15 @@ export class InvestHub {
       if (!toss.okAt) blockers.push("toss_never_ok");
       if (toss.error?.code === "ip_not_allowed") blockers.push("toss_ip_blocked");
     }
+    const callBlock = this.callBlock(userId);
     return {
       mode: s.mode,
       ...(s.mode === "real" && s.real_since ? { realSince: s.real_since } : {}),
       toss,
       calls: this.calls(s),
-      callBlock: this.callBlock(userId),
+      callBlock,
+      callNote: callNote(callBlock),
+      bufferPctDefault: { v: DEFAULT_BUFFER_PCT, text: `${num(DEFAULT_BUFFER_PCT)}%`, unit: "pct" },
       phone: myPhoneView(readMyPhone(this.core, userId)),
       openOrders: idb.openOrders(this.core.db, userId),
       realBlockers: blockers,
@@ -213,7 +248,11 @@ export class InvestHub {
   }
 
   watchState(s: idb.InvestSettingsRow, now: number, liveRules: idb.RuleRow[], anySource: boolean): InvestWatch {
-    if (!anySource) return { state: "off", text: "지금은 시세를 받지 않아요" };
+    if (!anySource) {
+      // DD 2237 §4: a person with live rules believes they run; say they do not, and how they would on a Toss server
+      const foot = liveRules.length ? `그래서 규칙을 확인하지 않아요.${this.toss.base() ? " 토스증권을 연결하면 확인해요." : ""}` : null;
+      return { state: "off", text: "지금은 시세를 받지 않아요", ...(foot ? { foot } : {}) };
+    }
     if (s.blind_since && now - s.blind_since >= BLIND_AFTER_MS) {
       const realSell = s.mode === "real" && liveRules.some((r) => r.kind === "stop" && r.action === "sell");
       const clock = atText(s.blind_since, now);
@@ -225,7 +264,8 @@ export class InvestHub {
         foot: `시세 ${clock} 기준 · 마지막으로 받은 값이에요. 시세가 돌아오면 다시 확인해요. 그동안 손절선 확인도 멈춰 있어요.`,
       };
     }
-    const open = currentSlot("US", now) || currentSlot("KR", now);
+    const ov = this.dayOverride(s.user_id);
+    const open = currentSlot("US", now, ov) || currentSlot("KR", now, ov);
     return open ? { state: "ok", text: "" } : { state: "closed", text: "" };
   }
 
@@ -286,7 +326,7 @@ export class InvestHub {
     const q = idb.quotes(core.db, userId).find((x) => x.symbol === symbol);
     const rs = idb.rules(core.db, userId, symbol);
     const blind = this.watchState(s, core.now(), rs, await this.hasSource(userId)).state === "blind";
-    const bars = await this.dailyBars(symbol, w.market);
+    const bars = await this.dailyBars(symbol, w.market, userId);
     const levels = rs.flatMap((r) =>
       r.kind === "buy_zone"
         ? [
@@ -308,17 +348,88 @@ export class InvestHub {
   // ───────────────────────────── market data ─────────────────────────────
 
   /**
-   * daily bars (ATR for the stop basis, the symbol chart): Yahoo, tried once a day per symbol and shared by everyone; a
-   * 429 or 403 rests Yahoo for the day. Toss's daily candles come in when its openapi.json is checked (agent-runtime
-   * 2050-b). None → null: the stop is judged on intraday prices only (team-lead 2045 correction).
+   * daily bars (ATR for the stop basis, the symbol chart), team-lead 2045 order: the person's own Toss candles (their
+   * token and cache, team-lead 2253), else Yahoo, shared by everyone; a 429 or 403 rests Yahoo for the day. A read lasts
+   * to today's close check when made before it (so the day's bar is read again once final), else to the next market
+   * day. None → null: the stop is judged on intraday prices only (team-lead 2045 correction).
    */
-  async dailyBars(symbol: string, market: Market): Promise<{ bars: Bar[]; source: SourceKey } | null> {
-    const until = (now: number) => nextMarketDayStart(market, now);
+  async dailyBars(symbol: string, market: Market, userId?: string): Promise<{ bars: Bar[]; source: SourceKey } | null> {
+    if (userId) {
+      const t = await this.tossDaily(userId, symbol, market);
+      if (t) return { bars: t, source: "toss" };
+    }
+    const until = (now: number) => dailyUntil(market, now);
     const y = await cachedGet(this.gate, this.core, "yahoo", yahooUrl(symbol, market, "1y"), until);
     if (!y.ok) return null;
     const bars = parseYahooDaily(y.text, (ms) => marketDate(market, ms));
     if (bars === null) this.gate.pauseForJunk("yahoo");
     return bars && bars.length ? { bars, source: "yahoo" } : null;
+  }
+
+  /** this person's Toss daily candles: read with their token for their own watch, kept under their key */
+  private async tossDaily(userId: string, symbol: string, market: Market): Promise<Bar[] | null> {
+    const { db } = this.core;
+    const now = this.core.now();
+    const key = tossBarsKey(userId, market, symbol);
+    const hit = idb.cacheGet(db, key, now);
+    if (hit) return JSON.parse(hit) as Bar[];
+    const s = idb.getSettings(db, userId);
+    if (!s || !this.tossUsable(s, now) || !(await this.tossConnected(userId, now))) return null;
+    const tried = this.tossTried.get(key);
+    if (tried != null && now - tried < TOSS_DAILY_RETRY_MS) return null;
+    const r = await this.toss.candles(userId, symbol);
+    if (!r.ok || !r.value.length) {
+      this.tossTried.set(key, now);
+      return null;
+    }
+    this.tossTried.delete(key);
+    idb.cachePut(db, key, JSON.stringify(r.value), now, dailyUntil(market, now, this.dayOverride(userId)));
+    return r.value;
+  }
+
+  /** "is Toss connected" for the 30-second ticks, remembered a few minutes */
+  private async tossConnected(userId: string, now: number): Promise<boolean> {
+    const m = this.connectedMemo.get(userId);
+    if (m && now - m.at < CONNECTED_MEMO_MS && now >= m.at) return m.v;
+    const v = await this.toss.connected(userId);
+    this.connectedMemo.set(userId, { at: now, v });
+    return v;
+  }
+
+  /** the days this person's Toss calendar has answered (their cache), as their watch sees them; other days: null */
+  dayOverride(userId: string): DayOverride {
+    const { db } = this.core;
+    const now = this.core.now();
+    return (market, day) => {
+      const v = idb.cacheGet(db, calKey(userId, market, day), now);
+      return v == null ? null : dayFromToss(market, day, JSON.parse(v) as { open: number; close: number } | null);
+    };
+  }
+
+  /**
+   * Once a market day per market for a person with Toss: their market calendar for today, with their token, for their
+   * own watch (team-lead 2253). Weekends are not asked. A reply that differs from the rules and the table is logged
+   * with the market, the day and the two answers only.
+   */
+  private async checkCalendar(userId: string, market: Market, day: string, now: number): Promise<void> {
+    const { db } = this.core;
+    const key = calKey(userId, market, day);
+    const table = marketDay(market, day);
+    if (table.kind === "closed" && table.reason === "weekend") return;
+    if (idb.cacheGet(db, key, now) != null) return;
+    const s = idb.getSettings(db, userId);
+    if (!s || !this.tossUsable(s, now) || !(await this.tossConnected(userId, now))) return;
+    const tried = this.tossTried.get(key);
+    if (tried != null && now - tried < TOSS_DAILY_RETRY_MS) return;
+    this.tossTried.set(key, now);
+    const r = await this.toss.marketDay(userId, market, day);
+    if (!r.ok || !r.value || r.value.date !== day) return;
+    const ss = r.value.session;
+    if (ss && !(ss.open < ss.close && ss.close - ss.open <= 12 * 3_600_000 && marketDate(market, ss.open) === day)) return;
+    this.tossTried.delete(key);
+    idb.cachePut(db, key, JSON.stringify(ss), now, now + CALENDAR_KEEP_MS);
+    const said = daySays(market, dayFromToss(market, day, ss));
+    if (daySays(market, table) !== said) this.core.log.warn("market calendar differs from the table", { market, day, table: daySays(market, table), toss: said });
   }
 
   /** a Yahoo intraday quote (best effort; 4-minute shared cache) */
@@ -339,33 +450,42 @@ export class InvestHub {
     const { db } = this.core;
     const now = this.core.now();
     const market = marketOf(symbol);
-    const key = `atr:${market}:${symbol}`;
-    const bars = await this.dailyBars(symbol, market);
+    const ov = this.dayOverride(userId);
+    const got = await this.dailyBars(symbol, market, userId);
+    // finished bars only (team-lead 2253): a bar read during today's session is still moving
+    const bars = got ? finishedBars(got.bars, market, now, ov) : [];
+    const keyOf = (src: SourceKey) => (src === "toss" ? tossAtrKey(userId, market, symbol) : `atr:${market}:${symbol}`);
     let atr14: number | null = null;
     let close: number | null = null;
     let atrAsOf: string | null = null;
-    if (bars) {
-      const last = bars.bars[bars.bars.length - 1]!;
-      const a = atr(bars.bars);
+    let atrSource: SourceKey = got?.source ?? "yahoo";
+    if (got && bars.length) {
+      const last = bars[bars.length - 1]!;
+      const a = atr(bars);
       close = last.c;
       atr14 = a.length ? (a[a.length - 1] ?? null) : null;
       if (atr14 != null) {
         atrAsOf = last.t;
-        idb.cachePut(db, key, JSON.stringify({ atr: atr14, close, asOf: last.t }), now, now + 30 * 86_400_000);
+        idb.cachePut(db, keyOf(got.source), JSON.stringify({ atr: atr14, close, asOf: last.t }), now, now + 30 * 86_400_000);
       }
     } else {
-      const kept = idb.cacheGet(db, key, now);
-      const k = kept ? (JSON.parse(kept) as { atr: number; close: number; asOf: string }) : null;
-      if (k && marketDaysAfter(market, k.asOf, marketDate(market, now)) <= ATR_KEEP_DAYS) {
-        atr14 = k.atr;
-        close = k.close;
-        atrAsOf = k.asOf;
+      // the person's own Toss figure first, then the shared Yahoo one
+      for (const src of ["toss", "yahoo"] as const) {
+        const kept = idb.cacheGet(db, keyOf(src), now);
+        const k = kept ? (JSON.parse(kept) as { atr: number; close: number; asOf: string }) : null;
+        if (k && marketDaysAfter(market, k.asOf, marketDate(market, now), ov) <= ATR_KEEP_DAYS) {
+          atr14 = k.atr;
+          close = k.close;
+          atrAsOf = k.asOf;
+          atrSource = src;
+          break;
+        }
       }
     }
     const h = this.holding(userId, symbol);
     const ref = h?.avgPrice ?? close;
     const basis = stopBasis(atr14, stop, ref);
-    return { basis, buffer: bufferPrice(market, stop, bufPct), atr14, atrAsOf };
+    return { basis, buffer: bufferPrice(market, stop, bufPct), atr14, atrAsOf, atrSource };
   }
 
   // ───────────────────────────── Toss ─────────────────────────────
@@ -429,27 +549,39 @@ export class InvestHub {
   private async runDue(now: number): Promise<{ slots: number; alerts: number }> {
     let slots = 0;
     let alerts = 0;
+    const { db } = this.core;
     for (const market of ["US", "KR"] as const) {
-      const slot = currentSlot(market, now);
-      if (!slot || this.ranSlots.has(slot.key)) continue;
-      const marker = `watch:slot:${market}`;
-      if (idb.cacheGet(this.core.db, marker, now) === slot.key) {
-        this.ranSlots.add(slot.key);
-        continue;
+      const day = marketDate(market, now);
+      // the slot each person is due: the table's, or their own Toss calendar's (team-lead 2253)
+      const due = new Map<string, { slot: Slot; users: string[] }>();
+      for (const userId of idb.investUsers(db)) {
+        if (!idb.watchlist(db, userId).some((w) => w.market === market)) continue;
+        await this.checkCalendar(userId, market, day, now);
+        const slot = currentSlot(market, now, this.dayOverride(userId));
+        if (!slot) continue;
+        const k = `${slot.key}${slot.close ? ":close" : ""}`;
+        const g = due.get(k);
+        if (g) g.users.push(userId);
+        else due.set(k, { slot, users: [userId] });
       }
-      this.ranSlots.add(slot.key);
-      idb.cachePut(this.core.db, marker, slot.key, now, now + 7 * 86_400_000);
-      slots++;
-      alerts += await this.runSlot(slot, now);
+      for (const [k, g] of due) {
+        if (this.ranSlots.has(k)) continue;
+        this.ranSlots.add(k);
+        const marker = `watch:ran:${k}`;
+        if (idb.cacheGet(db, marker, now) != null) continue;
+        idb.cachePut(db, marker, "1", now, now + 2 * 86_400_000);
+        slots++;
+        alerts += await this.runSlot(g.slot, now, g.users);
+      }
     }
     if (this.ranSlots.size > 500) this.ranSlots = new Set([...this.ranSlots].slice(-50));
     return { slots, alerts };
   }
 
-  private async runSlot(slot: Slot, now: number): Promise<number> {
+  private async runSlot(slot: Slot, now: number, users: string[]): Promise<number> {
     let n = 0;
     const shared = new Map<string, Promise<Quote | "not_found" | null>>();
-    for (const userId of idb.investUsers(this.core.db)) {
+    for (const userId of users) {
       try {
         n += await this.watchUser(userId, slot, now, shared);
       } catch (err) {
@@ -504,7 +636,7 @@ export class InvestHub {
       core.track(core.push.send(userId, { title: BLIND_PUSH_TITLE, tag: "invest:blind" }));
     }
 
-    const prev = prevSlot(slot);
+    const prev = prevSlot(slot, this.dayOverride(userId));
     let alerts = 0;
     for (const r0 of live) {
       const r = idb.rule(db, userId, r0.id);
@@ -513,12 +645,12 @@ export class InvestHub {
       if (o) {
         let basis: "close_and_intraday" | "intraday" = "intraday";
         let buffer: number | null = null;
-        let atrSeen: { value: number; asOf: string } | null = null;
+        let atrSeen: { value: number; asOf: string; source: SourceKey } | null = null;
         if (r.kind === "stop") {
           const c = await this.stopContext(userId, r.symbol, r.price!, bufferPct(r));
           basis = c.basis;
           buffer = c.buffer;
-          atrSeen = c.atr14 != null && c.atrAsOf ? { value: c.atr14, asOf: c.atrAsOf } : null;
+          atrSeen = c.atr14 != null && c.atrAsOf ? { value: c.atr14, asOf: c.atrAsOf, source: c.atrSource } : null;
         }
         const j = judge(r, o.price, slot.close, basis, buffer);
         const st = step(r, r, j, slot.key, prev?.key ?? null, now);
@@ -595,7 +727,7 @@ export class InvestHub {
     );
   }
 
-  private async fire(userId: string, r: idb.RuleRow, st: ReturnType<typeof step>, o: Observation, slot: Slot, now: number, stopAtr?: { kind: string; atr: { value: number; asOf: string } | null }): Promise<boolean> {
+  private async fire(userId: string, r: idb.RuleRow, st: ReturnType<typeof step>, o: Observation, slot: Slot, now: number, stopAtr?: { kind: string; atr: { value: number; asOf: string; source: SourceKey } | null }): Promise<boolean> {
     const { core } = this;
     const { db } = core;
     const s = idb.ensureSettings(db, userId, now);
@@ -654,9 +786,9 @@ export class InvestHub {
         value: stopAtr.atr.value,
         unit: market === "US" ? "usd" : "krw",
         definition: "ATR14 (일봉 14일 평균 실제 범위)",
-        source: SOURCE_TABLE.yahoo.name,
+        source: SOURCE_TABLE[stopAtr.atr.source].name,
         url: null,
-        confidence: SOURCE_TABLE.yahoo.grade,
+        confidence: SOURCE_TABLE[stopAtr.atr.source].grade,
         now,
       });
     if (sellStop) {

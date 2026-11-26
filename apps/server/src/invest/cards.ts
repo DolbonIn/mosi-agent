@@ -86,12 +86,18 @@ function changeText(o: Observation): string | null {
   return `전일 대비 ${pct((o.price / o.prevClose - 1) * 100)}`;
 }
 
-/** "손절선보다 $0.18 아래" / "매수 검토 구간 안" */
+/** 과 after a final consonant, 와 after a vowel (a label's last syllable) */
+function gwaWa(word: string): string {
+  const c = word.charCodeAt(word.length - 1) - 0xac00;
+  return `${word}${c >= 0 && c <= 11171 && c % 28 === 0 ? "와" : "과"}`;
+}
+
+/** "손절선보다 $0.18 아래" / "손절선과 같은 가격" / "1차 익절가와 같은 가격" / "매수 검토 구간 안" (DD 2237 §1) */
 function distanceText(market: Market, r: RuleSpec, price: number): string {
   if (r.kind === "buy_zone") return "매수 검토 구간 안";
   const level = r.price!;
   const diff = Math.round((price - level) * (market === "US" ? 100 : 1)) / (market === "US" ? 100 : 1);
-  if (diff === 0) return `${levelLabel(r)} 가격`;
+  if (diff === 0) return `${gwaWa(levelLabel(r))} 같은 가격`;
   return `${levelLabel(r)}보다 ${money(market, Math.abs(diff))} ${diff < 0 ? "아래" : "위"}`;
 }
 
@@ -314,8 +320,10 @@ function kstClock(ms: number): string {
 
 // ───────────────── calls (G7: what, at what price, so what, the market — 30 seconds; never advice or the disclaimer) ─────────────────
 
+/** a price said aloud: dollars without trailing zeros (30달러, 30.5달러: DD 2237 §2), won as they are; screens keep
+ * two decimals */
 function spoken(market: Market, x: number): string {
-  return market === "US" ? `${num(x, 2)}달러` : `${num(x)}원`;
+  return market === "US" ? `${num(x, 2).replace(/\.(\d*?)0+$/, (_m, keep: string) => (keep ? `.${keep}` : ""))}달러` : `${num(x)}원`;
 }
 
 /** G7 ③: where the price stands against the stop, and the holding against its average price (spoken: no signs) */
@@ -323,7 +331,7 @@ function spokenPosition(market: Market, price: number, stop: number | null, hold
   const out: string[] = [];
   if (stop != null) {
     const d = Math.round((price - stop) * 100) / 100;
-    out.push(d === 0 ? `손절선 ${spoken(market, stop)}과 같은 가격이에요.` : `손절선 ${spoken(market, stop)}보다 ${spoken(market, Math.abs(d))} ${d > 0 ? "위" : "아래"}예요.`);
+    out.push(d === 0 ? `손절선 ${gwaWa(spoken(market, stop))} 같은 가격이에요.` : `손절선 ${spoken(market, stop)}보다 ${spoken(market, Math.abs(d))} ${d > 0 ? "위" : "아래"}예요.`);
   }
   if (holding && holding.avgPrice != null && holding.avgPrice > 0) {
     const v = (price / holding.avgPrice - 1) * 100;

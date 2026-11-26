@@ -58,7 +58,7 @@ export function normalizeSymbol(v: unknown): string | null {
 }
 
 function priceOf(v: unknown, label: string): number {
-  if (typeof v !== "number" || !Number.isFinite(v)) throw invalid(`${label}을 숫자로 적어 주세요.`);
+  if (typeof v !== "number" || !Number.isFinite(v)) throw invalid(`${label}을 숫자로 넣어 주세요.`);
   if (!(v > 0)) throw invalid(`${label}은 0보다 커야 해요.`);
   if (v > MAX_PRICE) throw invalid(`${label}이 너무 커요.`);
   return v;
@@ -91,7 +91,7 @@ export function specFromDraft(d: Partial<InvestRuleDraft>, now: number): RuleSpe
   if (d.kind !== "stop" && d.kind !== "target" && d.kind !== "buy_zone" && d.kind !== "alert") throw invalid("규칙 종류가 올바르지 않아요.");
   if (typeof d.action !== "string" || !ACTIONS.has(d.action)) throw invalid("행동이 올바르지 않아요.");
   if (d.action === "sell" && d.kind !== "stop") throw bad(INVEST_ERRORS.sell_not_allowed, "sell_not_allowed");
-  if (d.once !== undefined && typeof d.once !== "boolean") throw invalid("한 번만 알릴지는 켜기와 끄기로 정해 주세요.");
+  if (d.once !== undefined && typeof d.once !== "boolean") throw invalid("한 번만 알릴지 다시 골라 주세요.");
   if (d.bufferPct !== undefined && d.bufferPct !== null && d.kind !== "stop") throw invalid("장중 버퍼는 손절에만 정할 수 있어요.");
   let level: number | null = null;
   if (d.kind === "target") {
@@ -157,7 +157,7 @@ export function specWithChanges(r: RuleSpec, ch: Partial<InvestRuleChanges>, now
   }
   if (ch.until !== undefined) next.until_day = untilOf(ch.until, market, now);
   if (ch.once !== undefined) {
-    if (typeof ch.once !== "boolean") throw invalid("한 번만 알릴지는 켜기와 끄기로 정해 주세요.");
+    if (typeof ch.once !== "boolean") throw invalid("한 번만 알릴지 다시 골라 주세요.");
     next.once = ch.once ? 1 : 0;
   }
   if (ch.bufferPct !== undefined) {
@@ -370,7 +370,7 @@ export function investRoutes(core: Core) {
       const body = await readJson<{ changes?: Partial<InvestRuleChanges>; ifRev?: unknown; previewId?: unknown }>(c.req);
       const now = core.now();
       const r = mineRule(userId, c.params.id);
-      if (typeof body.ifRev !== "number" || !Number.isInteger(body.ifRev)) throw invalid("ifRev를 보내 주세요.");
+      if (typeof body.ifRev !== "number" || !Number.isInteger(body.ifRev)) throw invalid("규칙을 다시 불러온 뒤 저장해 주세요.");
       if (body.ifRev !== r.rev) throw new HttpError(409, "rule_changed", INVEST_ERRORS.rule_changed, undefined, { rule: view(userId, r) });
       const spec = specWithChanges(r, body.changes ?? {}, now);
       const s = idb.ensureSettings(core.db, userId, now);

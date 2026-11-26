@@ -343,10 +343,10 @@ export function stopWarning(market: Market, r: RuleSpec, price: number | null, e
   return `지금 가격 ${money(market, price)}보다 높아서, ${editing ? "바꾸면" : "저장하면"} 바로 손절 조건이 돼요.`;
 }
 
-/** the footnote under the action row when it is a call (DD 2010 §4) */
+/** the footnote under the action row when it is a call (DD 2010 §4); footnote sentences end in a period (DD 2341) */
 export function callNote(block: "not_verified" | "not_configured" | null): string {
-  if (block === "not_verified") return "번호를 인증하지 않아 전화를 걸 수 없어요";
-  if (block === "not_configured") return "지금은 전화를 걸 수 없어요";
+  if (block === "not_verified") return "번호를 인증하지 않아 전화를 걸 수 없어요.";
+  if (block === "not_configured") return "지금은 전화를 걸 수 없어요.";
   return `앱에서 인증한 번호로 걸어요. 하루 ${INVEST_CALLS_PER_DAY}통까지예요.`;
 }
 

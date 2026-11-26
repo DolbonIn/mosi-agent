@@ -11,10 +11,13 @@
  *   check), 5xx and timeouts = down.
  * - Bodies, error texts, keys and tokens never reach logs, cards, events or the model: a failure keeps its code alone.
  *
- * The response shapes follow the openapi.json document once its check is approved (agent-runtime 2050-b); until then
- * the readers below accept the field names Toss's public examples use and test/fake-toss.ts serves those.
+ * The response shapes follow the public openapi.json (1.2.28, read 2026-11-26; test/fake-toss.ts serves the same shapes
+ * with synthetic values). The token, and so every read here, is the person's own: it serves their watch only
+ * (team-lead 2253).
  */
+import type { Bar } from "@pickle/quant";
 import type { Core } from "../core.ts";
+import type { Market } from "./calendar.ts";
 
 export const TOSS_SERVICE = "tossinvest";
 export const TOSS_TIMEOUT_MS = 10_000;
@@ -82,6 +85,58 @@ export function readHoldings(j: unknown): TossHolding[] {
     out.push({ symbol: symbol.toUpperCase(), qty, avgPrice: num(pick(it, ["averagePurchasePrice", "averagePrice", "avgPrice"])) });
   }
   return out;
+}
+
+const rec = (x: unknown): Record<string, unknown> | null => (x && typeof x === "object" && !Array.isArray(x) ? (x as Record<string, unknown>) : null);
+const instant = (x: unknown): number | null => {
+  const t = typeof x === "string" ? Date.parse(x) : NaN;
+  return Number.isFinite(t) ? t : null;
+};
+
+/** GET /api/v1/candles?interval=1d → {result: {candles (newest first), nextBefore}}; here oldest first, one bar a day,
+ * `t` the trading day (the timestamp's own date: local midnight) */
+export function readCandles(j: unknown): Bar[] {
+  const list = rec(rec(j)?.result)?.candles;
+  const out: Bar[] = [];
+  for (const it of Array.isArray(list) ? list : []) {
+    const c = rec(it);
+    const ts = str(c?.timestamp);
+    const close = num(c?.closePrice);
+    if (!c || !ts || !/^\d{4}-\d{2}-\d{2}T/.test(ts) || close == null || close <= 0) continue;
+    out.push({ t: ts.slice(0, 10), o: num(c.openPrice) ?? close, h: num(c.highPrice) ?? close, l: num(c.lowPrice) ?? close, c: close, v: num(c.volume) ?? 0 });
+  }
+  out.sort((a, b) => (a.t < b.t ? -1 : a.t > b.t ? 1 : 0));
+  return out.filter((b, i) => i === 0 || b.t !== out[i - 1]!.t);
+}
+
+export interface TossMarketDay {
+  date: string;
+  /** the regular session (null: closed that day) */
+  session: { open: number; close: number } | null;
+}
+
+/**
+ * GET /api/v1/market-calendar/{US|KR}?date= → {result: {today, previousBusinessDay, nextBusinessDay}}. US: `today.
+ * regularMarket` (null when closed). KR: `today.integrated.regularMarket` (the KRX+NXT union); KRX is closed when it is
+ * null or its closing auction (`singlePriceAuctionStartTime`, KRX only) is null. A shape it cannot read → null.
+ */
+export function readMarketDay(market: Market, j: unknown): TossMarketDay | null {
+  const t = rec(rec(rec(j)?.result)?.today);
+  const date = str(t?.date);
+  if (!t || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  let reg: unknown;
+  if (market === "US") reg = t.regularMarket;
+  else {
+    if (t.integrated === null) return { date, session: null };
+    const ig = rec(t.integrated);
+    if (!ig || !("regularMarket" in ig)) return null;
+    reg = ig.regularMarket;
+    if (rec(reg) && rec(reg)!.singlePriceAuctionStartTime === null) return { date, session: null };
+  }
+  if (reg === null) return { date, session: null };
+  const open = instant(rec(reg)?.startTime);
+  const close = instant(rec(reg)?.endTime);
+  return open != null && close != null ? { date, session: { open, close } } : null;
 }
 
 export function readSellable(j: unknown): number | null {
@@ -205,6 +260,18 @@ export class TossClient {
   async holdings(userId: string): Promise<TossResult<TossHolding[]>> {
     const r = await this.get(userId, "/api/v1/holdings");
     return r.ok ? { ok: true, value: readHoldings(r.value) } : r;
+  }
+
+  /** this person's daily candles (200 trading days) */
+  async candles(userId: string, symbol: string): Promise<TossResult<Bar[]>> {
+    const r = await this.get(userId, `/api/v1/candles?symbol=${encodeURIComponent(symbol)}&interval=1d&count=200`);
+    return r.ok ? { ok: true, value: readCandles(r.value) } : r;
+  }
+
+  /** the market calendar for `date` (YYYY-MM-DD, the market's own date), asked with this person's token */
+  async marketDay(userId: string, market: Market, date: string): Promise<TossResult<TossMarketDay | null>> {
+    const r = await this.get(userId, `/api/v1/market-calendar/${market}?date=${encodeURIComponent(date)}`);
+    return r.ok ? { ok: true, value: readMarketDay(market, r.value) } : r;
   }
 
   async sellable(userId: string, symbol: string): Promise<TossResult<number | null>> {

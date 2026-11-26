@@ -102,6 +102,10 @@ export interface InvestSettingsView {
   calls: { stopResult: boolean; stage: boolean; expiry: boolean };
   /** why calls cannot go out now; null: they can */
   callBlock: "not_verified" | "not_configured" | null;
+  /** the footnote under a call action, the words of a preview's callNote (DD 2341: the app keeps no copy) */
+  callNote: string;
+  /** the operating default intraday buffer (5%): the add sheet's placeholder before the first preview (DD 2341) */
+  bufferPctDefault: InvestNum;
   phone: { masked: string; verified: boolean } | null;
   openOrders: number;
   realBlockers: InvestRealBlocker[];

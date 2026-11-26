@@ -7,7 +7,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test
 import type { InvestAlertCard, InvestOverview, InvestRuleRow, InvestStopCard, ServerEvent } from "@pickle/protocol";
 import type { CredentialAccess } from "@pickle/agent";
 import { etToEpoch } from "../src/invest/calendar.ts";
+import { alertCallLine, alertCard, type AlertInput } from "../src/invest/cards.ts";
 import * as idb from "../src/invest/db.ts";
+import type { RuleSpec } from "../src/invest/rules.ts";
 import { writeMyPhone } from "../src/phone.ts";
 import type { Logger, LogFields } from "../src/log.ts";
 import { BOGUS_TOSS_SECRET, FAKE_TOSS_BASE, makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
@@ -112,8 +114,10 @@ function investCards(w: World): (InvestAlertCard | InvestStopCard)[] {
 const alerts = (w: World) => investCards(w).filter((c): c is InvestAlertCard => c.type === "invest_alert");
 
 /** what a person reads (cards, overview) never shows a broken number or an emoji (DD 2045, team-lead 888c34b) */
+/** id fields left out: a random id holds "NaN" now and then (DD 2329); the words people read are all still checked */
+const withoutIds = (x: unknown) => JSON.stringify(x, (k, v: unknown) => (/^id$|Id$/.test(k) ? undefined : v));
 async function expectClean(w: World) {
-  const text = JSON.stringify(investCards(w)) + JSON.stringify((await api(w, "GET", "/api/invest")).body);
+  const text = withoutIds(investCards(w)) + withoutIds((await api(w, "GET", "/api/invest")).body);
   expect(text).not.toMatch(/NaN|Infinity|undefined|\$null|null원/);
   expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
 }
@@ -131,6 +135,9 @@ describe("invest routes", () => {
     expect(ov.body.settings.toss.error?.code).toBe("off");
     expect(ov.body.settings.realBlockers).toEqual(["toss_off"]);
     expect(ov.body.settings.callBlock).toBe("not_configured");
+    // DD 2341: the call footnote and the default buffer come from the server; footnote sentences end in a period
+    expect(ov.body.settings.callNote).toBe("지금은 전화를 걸 수 없어요.");
+    expect(ov.body.settings.bufferPctDefault).toEqual({ v: 5, text: "5%", unit: "pct" });
     expect(ov.body.settings.calls).toEqual({ stopResult: true, stage: false, expiry: false });
 
     const add = await api<{ symbol: string; name: string; price: unknown }>(w, "POST", "/api/invest/watchlist", { symbol: " soxl " });
@@ -197,7 +204,7 @@ describe("invest routes", () => {
       bufferDefault: true,
       bufferFoot: "지금은 장중 가격만으로 판단해요. 종가로 판단할 때, 장중 가격이 손절선보다 이만큼 더 내려가면 마감을 기다리지 않아요. 원문에 숫자가 없어서 정한 운영 기본값(5%)이에요.",
       confirm: "tap",
-      callNote: "지금은 전화를 걸 수 없어요",
+      callNote: "지금은 전화를 걸 수 없어요.",
       price: { v: 26.5, text: "$26.50" },
     });
     // the draft changed after the preview: stale
@@ -405,9 +412,10 @@ describe("invest watch", () => {
     expect(alerts(w)).toHaveLength(0);
     await tickAt(w, 16, 5);
     expect(alerts(w)).toHaveLength(1);
-    // the daily bars were read once for the day, with the default User-Agent (no header set)
+    // the daily bars were read once during the session and once more at the close check (the day's bar is final
+    // there: team-lead 2253), with the default User-Agent (no header set)
     const daily = w.up.calls.filter((c) => c.host === "query1.finance.yahoo.com" && c.path.includes("range=1y"));
-    expect(daily).toHaveLength(1);
+    expect(daily).toHaveLength(2);
     expect(daily.every((c) => c.userAgent === null)).toBe(true);
 
     // next day: below the buffer during the session alerts at once
@@ -643,7 +651,7 @@ describe("invest Toss status", () => {
     await addRule(w, { symbol: "SOXL", kind: "stop", price: 27, action: "notify" });
     await tickAt(w, 9, 45);
     expect(w.up.calls).toEqual([]);
-    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.settings.toss).toMatchObject({ connected: false, error: { code: "off", text: "이 서버는 토스증권에 연결하지 않아요" } });
+    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.settings.toss).toMatchObject({ connected: false, error: { code: "off", text: "지금은 토스증권에 연결할 수 없어요" } });
   });
 
   test("Toss on but no key saved and public sources off: the watch is off, never blind", async () => {
@@ -707,6 +715,7 @@ describe("invest calls", () => {
   test("a call rule dials the verified number and the card says so; 10 a day, then the card says why not", async () => {
     const w = await world({ twilio: true });
     verified(w);
+    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.settings).toMatchObject({ callBlock: null, callNote: "앱에서 인증한 번호로 걸어요. 하루 10통까지예요." });
     await connectToss(w);
     await watch(w, "SOXL");
     w.up.state.tossHoldings = [{ symbol: "SOXL", quantity: 10, averagePrice: 30 }];
@@ -720,7 +729,9 @@ describe("invest calls", () => {
     expect(twilio).toHaveLength(1);
     const twiml = twilio[0]!.get("Twiml") ?? "";
     // G7: what, at what price, so what (the stop line, the holding), the market — and nothing else
-    expect(twiml).toContain("깽이예요. 투자 알림이에요. SOXL이 알림 가격 30.00달러에 닿았어요. 지금 가격은 30.50달러예요. 손절선 27.00달러보다 3.50달러 위예요. 보유한 10주는 평단보다 1.67% 높아요. 시장 상태는 이번에는 확인하지 못했어요.");
+    // dollars are said without trailing zeros (DD 2237 §2); the percentage keeps its two places
+    expect(twiml).toContain("깽이예요. 투자 알림이에요. SOXL이 알림 가격 30달러에 닿았어요. 지금 가격은 30.5달러예요. 손절선 27달러보다 3.5달러 위예요. 보유한 10주는 평단보다 1.67% 높아요. 시장 상태는 이번에는 확인하지 못했어요.");
+    expect(twiml).not.toMatch(/\.\d0달러/);
     expect(twiml).not.toMatch(/면책|투자 판단|권유|사세요|파세요|채팅에서/);
     expect(alerts(w).at(-1)!.call).toMatchObject({ ok: true });
     expect(alerts(w).at(-1)!.call!.text).toMatch(/^전화로 알렸어요 · \d\d:\d\d$/);
@@ -745,7 +756,7 @@ describe("invest calls", () => {
     await tickAt(w, 9, 45);
     expect(twilio).toHaveLength(0);
     expect(alerts(w).at(-1)!.call).toMatchObject({ ok: false, reason: "not_verified", text: "전화를 걸지 못했어요 · 번호를 인증하지 않았어요" });
-    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.settings.callBlock).toBe("not_verified");
+    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.settings).toMatchObject({ callBlock: "not_verified", callNote: "번호를 인증하지 않아 전화를 걸 수 없어요." });
   });
 });
 
@@ -812,7 +823,7 @@ describe("invest G8 boundaries", () => {
   test("G8-1: the Toss client has no order method (B1 reads only)", async () => {
     const { TossClient } = await import("../src/invest/toss.ts");
     const names = Object.getOwnPropertyNames(TossClient.prototype).sort();
-    expect(names).toEqual(["base", "connected", "constructor", "forget", "get", "holdings", "prices", "sellable", "token"]);
+    expect(names).toEqual(["base", "candles", "connected", "constructor", "forget", "get", "holdings", "marketDay", "prices", "sellable", "token"]);
     expect(names.some((n) => /order|sell$|buy|cancel/i.test(n))).toBe(false);
   });
 
@@ -868,5 +879,234 @@ describe("invest G8 boundaries", () => {
     expect(saved).toBe(true);
     expect(alerts(w)).toHaveLength(0);
     expect(idb.rule(w.h.db, w.uid, r.id)).toMatchObject({ price: 25, rev: 2, state: "armed", seen_slot: "@edited" });
+  });
+});
+
+
+// ───────────────────────────── B1b (team-lead 2253, DD 2237) ─────────────────────────────
+
+/** a second person in the same server */
+async function person(w: World, name: string) {
+  const b = await w.h.signup(name);
+  const call = async <T = unknown>(method: string, path: string, body?: unknown) => {
+    const res = await w.h.req(method, path, { token: b.token, body });
+    return { status: res.status, body: (await res.json()) as T };
+  };
+  return { uid: b.session.user.id, api: call };
+}
+
+const cacheKeys = (w: World, like: string) => (w.h.db.sql.query("SELECT key FROM invest_cache WHERE key LIKE $k ORDER BY key").all({ k: like }) as { key: string }[]).map((r) => r.key);
+const tossCalls = (w: World, path: string) => w.up.calls.filter((c) => c.host === "toss.fake.test" && c.path.startsWith(path));
+const quoteAt = (w: World, uid: string, symbol: string) => idb.quotes(w.h.db, uid).find((q) => q.symbol === symbol)?.fetched_at ?? null;
+
+describe("expectClean", () => {
+  test("leaves out id fields only: a NaN in an id passes, a NaN in any other field is caught", () => {
+    const card = { type: "invest_alert", ruleId: "ir_Lc205hjY0fkPKNaNfe9kYQ", alertId: "ia_x", id: "ir_NaN", title: "손절 관찰가 도달", lines: [{ text: "$NaN" }] };
+    expect(withoutIds(card)).toBe('{"type":"invest_alert","title":"손절 관찰가 도달","lines":[{"text":"$NaN"}]}');
+    expect(withoutIds({ ...card, lines: [] })).not.toMatch(/NaN/);
+  });
+});
+
+describe("B1b words (DD 2237)", () => {
+  const spec = (o: Partial<RuleSpec>): RuleSpec => ({ symbol: "SOXL", kind: "alert", level: null, price: 27, lo: null, hi: null, direction: "below", action: "notify", once: 0, buffer_pct: null, until_day: null, ...o });
+  const input = (rule: RuleSpec, price: number, market: "US" | "KR" = "US"): AlertInput => ({
+    alertId: "ia_1",
+    ruleId: "ir_1",
+    rule,
+    market,
+    mode: "mock",
+    obs: { price, prevClose: null, at: ET(10, 0), source: "toss" },
+    now: ET(10, 0),
+    holding: null,
+    noPrior: null,
+    paused: false,
+    nextTarget: null,
+    stopPrice: rule.kind === "stop" ? rule.price : null,
+  });
+
+  test("at the level's own price the distance reads '…과/와 같은 가격' for every kind; never '가격 가격'", () => {
+    const cases: [Partial<RuleSpec>, string][] = [
+      [{ kind: "stop" }, "손절선과 같은 가격"],
+      [{ kind: "target", level: 1, direction: "above" }, "1차 익절가와 같은 가격"],
+      [{ kind: "resistance", direction: "above" }, "저항과 같은 가격"],
+      [{ kind: "invalidate" }, "무효화 가격과 같은 가격"],
+      [{ kind: "alert" }, "알림 가격과 같은 가격"],
+    ];
+    for (const [o, words] of cases) {
+      const text = JSON.stringify(alertCard(input(spec(o), 27)));
+      expect(text).toContain(words);
+      expect(text).not.toMatch(/가격 가격|가 가격/);
+    }
+    const kr = JSON.stringify(alertCard(input(spec({ symbol: "005930", kind: "stop", price: 70000 }), 70000, "KR")));
+    expect(kr).toContain("손절선과 같은 가격");
+    // not the same price: unchanged
+    expect(JSON.stringify(alertCard(input(spec({ kind: "stop" }), 26.82)))).toContain("손절선보다 $0.18 아래");
+  });
+
+  test("a call says dollars without trailing zeros; won and percentages as they were", () => {
+    const at = alertCallLine("모시", { ...input(spec({ kind: "alert", price: 30, direction: "above" }), 30), stopPrice: 30 });
+    expect(at).toContain("알림 가격 30달러에 닿았어요.");
+    expect(at).toContain("손절선 30달러와 같은 가격이에요.");
+    const near = alertCallLine("모시", { ...input(spec({ kind: "alert", price: 3.5, direction: "above" }), 30.5), stopPrice: 27.1 });
+    expect(near).toContain("3.5달러");
+    expect(near).toContain("손절선 27.1달러보다 3.4달러 위예요.");
+    for (const line of [at, near]) expect(line).not.toMatch(/\.\d0달러|\.00달러/);
+    const won = alertCallLine("모시", { ...input(spec({ symbol: "005930", kind: "alert", price: 70000, direction: "above" }), 70000, "KR"), stopPrice: 70000 });
+    expect(won).toContain("손절선 70,000원과 같은 가격이에요.");
+  });
+
+  test("watch off: with live rules the foot says they are not checked, and how they would be on a Toss server", async () => {
+    const w = await world({ sources: false });
+    await watch(w, "SOXL");
+    const watchOf = async () => (await api<InvestOverview>(w, "GET", "/api/invest")).body.watch;
+    expect(await watchOf()).toEqual({ state: "off", text: "지금은 시세를 받지 않아요" });
+    await addRule(w, { symbol: "SOXL", kind: "stop", price: 27, action: "notify" });
+    expect(await watchOf()).toEqual({ state: "off", text: "지금은 시세를 받지 않아요", foot: "그래서 규칙을 확인하지 않아요. 토스증권을 연결하면 확인해요." });
+    const v = await world({ sources: false, toss: false });
+    await watch(v, "SOXL");
+    await addRule(v, { symbol: "SOXL", kind: "stop", price: 27, action: "notify" });
+    expect((await api<InvestOverview>(v, "GET", "/api/invest")).body.watch).toEqual({ state: "off", text: "지금은 시세를 받지 않아요", foot: "그래서 규칙을 확인하지 않아요." });
+  });
+
+  test("invalid_rule asks in the app's words: 넣어 주세요, 다시 골라 주세요, 다시 불러온 뒤 저장해 주세요 (no field names)", async () => {
+    const w = await world();
+    await watch(w, "SOXL");
+    const post = (draft: Record<string, unknown>) => api<{ error: string; message: string }>(w, "POST", "/api/invest/rules", { draft });
+    const notNum = await post({ symbol: "SOXL", kind: "stop", price: "27", action: "notify" });
+    expect(notNum.status).toBe(400);
+    expect(notNum.body.error).toBe("invalid_rule");
+    expect(notNum.body.message).toMatch(/을 숫자로 넣어 주세요\.$/);
+    expect(await post({ symbol: "SOXL", kind: "stop", price: 27, action: "notify", once: "yes" })).toEqual({ status: 400, body: { error: "invalid_rule", message: "한 번만 알릴지 다시 골라 주세요." } });
+    const r = await addRule(w, { symbol: "SOXL", kind: "stop", price: 27, action: "notify" });
+    expect(await api(w, "PATCH", `/api/invest/rules/${r.id}`, { changes: { once: 1 }, ifRev: r.rev })).toEqual({ status: 400, body: { error: "invalid_rule", message: "한 번만 알릴지 다시 골라 주세요." } });
+    expect(await api(w, "PATCH", `/api/invest/rules/${r.id}`, { changes: { price: 26 } })).toEqual({ status: 400, body: { error: "invalid_rule", message: "규칙을 다시 불러온 뒤 저장해 주세요." } });
+  });
+});
+
+describe("B1b daily bars (team-lead 2253)", () => {
+  const draft = { symbol: "SOXL", kind: "stop", price: 27, action: "notify" };
+
+  test("a bar read during the session is left out of the ATR and the last close; from the close check it counts", async () => {
+    const w = await world({ toss: false });
+    await watch(w, "SOXL");
+    // up to 11-27: close 28, ATR 3 (> 28 − 27: close basis); today's moving bar: close 21, a $20 range (ATR ≈ 4.2 < 6)
+    w.up.state.yahooDaily.set("SOXL", [...syntheticBars(DAY, 30, 28, 3), { t: DAY, o: 28, h: 40, l: 20, c: 21, v: 1 }]);
+    const basisAt = async (h: number, m: number) => {
+      w.h.clock.t = ET(h, m);
+      return (await api<{ basis: string }>(w, "POST", "/api/invest/rules/preview", draft)).body.basis;
+    };
+    const dailyReads = () => w.up.calls.filter((c) => c.host === "query1.finance.yahoo.com" && c.path.includes("range=1y")).length;
+    expect(await basisAt(9, 40)).toBe("close_and_intraday");
+    expect(await basisAt(16, 4)).toBe("close_and_intraday");
+    expect(dailyReads()).toBe(1);
+    // 16:05 is the close check: the day's bar is read again and is final now
+    expect(await basisAt(16, 5)).toBe("intraday");
+    expect(dailyReads()).toBe(2);
+    expect(await basisAt(18, 0)).toBe("intraday");
+    expect(dailyReads()).toBe(2);
+  });
+
+  test("Toss candles first for the person with Toss, with their token and under their key; the other person reads Yahoo", async () => {
+    const w = await world();
+    await connectToss(w);
+    await watch(w, "SOXL");
+    const bob = await person(w, "bob");
+    expect((await bob.api("POST", "/api/invest/watchlist", { symbol: "SOXL" })).status).toBeLessThan(300);
+    w.up.state.yahooDaily.set("SOXL", syntheticBars(DAY, 30, 28, 3)); // ATR 3: close basis
+    w.up.state.tossCandles.set("SOXL", syntheticBars(DAY, 30, 28, 0.5)); // ATR 0.5: intraday
+    w.up.state.tossPrices.set("SOXL", { price: 28 });
+    w.h.clock.t = ET(9, 40);
+    const mine = await api<{ basis: string }>(w, "POST", "/api/invest/rules/preview", draft);
+    const his = await bob.api<{ basis: string }>("POST", "/api/invest/rules/preview", draft);
+    expect(mine.body.basis).toBe("intraday");
+    expect(his.body.basis).toBe("close_and_intraday");
+    await api(w, "POST", "/api/invest/rules/preview", draft);
+    const candles = tossCalls(w, "/api/v1/candles");
+    expect(candles.map((c) => c.path)).toEqual(["/api/v1/candles?symbol=SOXL&interval=1d&count=200"]);
+    expect(candles[0]!.auth).toMatch(/^Bearer tok-\d+$/);
+    expect(cacheKeys(w, "bars:toss:%")).toEqual([`bars:toss:${w.uid}:US:SOXL`]);
+    // an alert from that ATR keeps the source it came from
+    await addRule(w, draft);
+    await tickAt(w, 9, 45);
+    w.up.state.tossPrices.set("SOXL", { price: 26.9 });
+    await tickAt(w, 9, 50);
+    expect(alerts(w)).toHaveLength(1);
+    const led = w.h.db.sql.query("SELECT as_of, source_tier, confidence FROM invest_ledger WHERE user_id = $u AND id = 'atr14.SOXL'").get({ u: w.uid });
+    expect(led).toEqual({ as_of: "2026-11-27", source_tier: "토스증권", confidence: "A" });
+    // Alice's Toss figure under her key; Bob's Yahoo one (public data) is the shared key
+    expect(cacheKeys(w, "atr:%")).toEqual(["atr:US:SOXL", `atr:toss:${w.uid}:US:SOXL`]);
+  });
+});
+
+describe("B1b market calendar (team-lead 2253)", () => {
+  test("a person's Toss calendar moves their own watch only; once a market day; weekends not asked; a mismatch logged without the person", async () => {
+    const w = await world();
+    await connectToss(w);
+    await watch(w, "SOXL");
+    await addRule(w, { symbol: "SOXL", kind: "stop", price: 20, action: "notify" });
+    w.up.state.tossPrices.set("SOXL", { price: 28 });
+    const bob = await person(w, "bob");
+    await bob.api("POST", "/api/invest/watchlist", { symbol: "SOXL" });
+    expect((await bob.api("POST", "/api/invest/rules", { draft: { symbol: "SOXL", kind: "stop", price: 20, action: "notify" } })).status).toBe(201);
+    const thanks = "2026-11-26";
+    w.up.state.yahoo.set("SOXL", { price: 28, time: Math.floor(ET(9, 44, thanks) / 1000) });
+    // Thanksgiving: closed by the rules, open by Alice's Toss calendar
+    w.up.state.tossCalendar.set(`US:${thanks}`, { open: `${thanks}T09:30:00-05:00`, close: `${thanks}T16:00:00-05:00` });
+    expect(await tickAt(w, 9, 45, thanks)).toEqual({ slots: 1, alerts: 0 });
+    expect(quoteAt(w, w.uid, "SOXL")).toBe(ET(9, 45, thanks));
+    expect(quoteAt(w, bob.uid, "SOXL")).toBeNull();
+    await tickAt(w, 9, 50, thanks);
+    await tickAt(w, 15, 0, thanks);
+    // the watch line follows the same day view: running for Alice, the market closed for Bob
+    expect((await api<InvestOverview>(w, "GET", "/api/invest")).body.watch.state).toBe("ok");
+    expect((await bob.api<InvestOverview>("GET", "/api/invest")).body.watch.state).toBe("closed");
+    expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(1);
+    expect(tossCalls(w, "/api/v1/market-calendar/")[0]!.path).toBe(`/api/v1/market-calendar/US?date=${thanks}`);
+    const said = w.logs.filter((l) => l.includes("market calendar differs"));
+    expect(said).toEqual([`warn market calendar differs from the table {"market":"US","day":"${thanks}","table":"closed","toss":"09:30-16:00"}`]);
+    expect(said.join("")).not.toContain(w.uid);
+    // Friday (no answer from Toss: the rules' early close): the check before Alice's first one is her Thursday close
+    // check, so a stop crossed overnight is an ordinary alert, not "시세를 받지 못한 사이에"
+    await tickAt(w, 16, 5, thanks);
+    w.up.state.tossPrices.set("SOXL", { price: 19 });
+    w.up.state.yahoo.set("SOXL", { price: 28, time: Math.floor(ET(9, 44, "2026-11-27") / 1000) });
+    await tickAt(w, 9, 45, "2026-11-27");
+    expect(alerts(w)).toHaveLength(1);
+    expect(alerts(w)[0]!.noPrior).toBeUndefined();
+    expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(2);
+    // Saturday: not asked
+    await tickAt(w, 10, 0, "2026-11-28");
+    expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(2);
+    // Monday: open by the rules, closed by Alice's calendar: Bob is watched, Alice is not
+    w.up.state.tossCalendar.set(`US:${DAY}`, null);
+    w.up.state.yahoo.set("SOXL", { price: 28, time: Math.floor(ET(9, 44) / 1000) });
+    expect(await tickAt(w, 9, 45)).toEqual({ slots: 1, alerts: 0 });
+    expect(quoteAt(w, bob.uid, "SOXL")).toBe(ET(9, 45));
+    expect(quoteAt(w, w.uid, "SOXL")).toBe(ET(9, 45, "2026-11-27"));
+    // an early close by Alice's calendar: her close check at 13:05 is Bob's ordinary 13:05 check (two slots)
+    const tue = "2026-12-01";
+    w.up.state.tossCalendar.set(`US:${tue}`, { open: `${tue}T09:30:00-05:00`, close: `${tue}T13:00:00-05:00` });
+    w.up.state.yahoo.set("SOXL", { price: 28, time: Math.floor(ET(13, 4, tue) / 1000) });
+    expect((await tickAt(w, 13, 5, tue)).slots).toBe(2);
+    expect((await tickAt(w, 13, 10, tue)).slots).toBe(1);
+    expect(quoteAt(w, w.uid, "SOXL")).toBe(ET(13, 5, tue));
+    expect(quoteAt(w, bob.uid, "SOXL")).toBe(ET(13, 10, tue));
+    // the answers are Alice's, kept under her key; Bob has none
+    expect(cacheKeys(w, "cal:toss:%")).toEqual([`cal:toss:${w.uid}:US:${thanks}`, `cal:toss:${w.uid}:US:${DAY}`, `cal:toss:${w.uid}:US:${tue}`].sort());
+    expect(cacheKeys(w, `%${bob.uid}%`)).toEqual([]);
+    await expectClean(w);
+  });
+
+  test("no answer from Toss: the table decides, and the call is not repeated within the hour", async () => {
+    const w = await world();
+    await connectToss(w);
+    await watch(w, "SOXL");
+    w.up.state.tossPrices.set("SOXL", { price: 28 });
+    expect((await tickAt(w, 9, 45)).slots).toBe(1); // no calendar answer set: 404
+    expect((await tickAt(w, 9, 50)).slots).toBe(1);
+    expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(1);
+    expect((await tickAt(w, 10, 50)).slots).toBe(1);
+    expect(tossCalls(w, "/api/v1/market-calendar/")).toHaveLength(2);
+    expect(cacheKeys(w, "cal:toss:%")).toEqual([]);
   });
 });

@@ -688,7 +688,8 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
 (prices, holdings, sellable quantity). Types: `packages/protocol/src/invest.ts`. Code: `apps/server/src/invest/`.
 - `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages: null, reports: [],
   decks: []}`. Every figure is a server string (`InvestNum {v, text, unit}`; @pickle/quant format.ts) — screens format
-  nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"), `ok`, `closed`, `blind` (live rules
+  nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"; with live rules `foot` "그래서 규칙을
+  확인하지 않아요.", plus " 토스증권을 연결하면 확인해요." on a server with Toss), `ok`, `closed`, `blind` (live rules
   and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
   `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`).
 - Event `invest {rev, overview}`: the whole overview whenever it changed (a quote, a rule, a watch state, Toss, settings),
@@ -711,9 +712,14 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   year. At most 60 rules. Errors are `{error, message}` with the DD 2100 copy.
 - The watch: from 15 minutes after the open every 5 minutes to the close, plus one check 5 minutes after the close (US
   09:45–16:00 ET + 16:05; early closes 13:00 + 13:05; KRX by its 2026 table; holidays and other years: no check). Each
-  slot runs once per server (a marker in `invest_cache`). Quotes: the person's Toss key first (every watched symbol in one
-  call), then Yahoo for symbols with live rules (4-minute shared cache). Daily bars (ATR for the stop basis): Yahoo once a
-  day per symbol. Stooq is not used (a browser check instead of its CSV).
+  slot runs once per server (a marker in `invest_cache`). A person with Toss follows their own Toss market calendar
+  (asked with their token once a market day per market, weekends not asked; kept under their key): Toss's answer decides
+  that day for them only (US: open or closed and the regular hours, early closes included; KR: whether KRX trades — no
+  closing auction = closed — with KRX's hours). Everyone else follows the rules and the table. A Toss answer that
+  differs from the table is logged with the market, the day and the two answers only. Quotes: the person's Toss key
+  first (every watched symbol in one call), then Yahoo for symbols with live rules (4-minute shared cache). Daily bars:
+  the person's Toss candles (their token, kept under their key), else Yahoo (shared); a read made before the day's close
+  check lasts to it, so the day's bar is read again once final, else to the next market day. Stooq is not used.
 - Rule states `armed | hit | paused | expired` (대기 / 닿음 / 멈춤 / 만료; armed with a deadline: `12-01까지`). Inside while
   armed → one alert and `hit`; inside while hit → nothing; one check outside → armed again, so a later touch is a new alert
   the same day. `once` → `paused` after its alert; a sell stop always pauses. Any PATCH of a paused or expired rule watches
@@ -724,8 +730,9 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   old rule).
 - Stop basis (D5-2): ATR14 wider than the stop's distance (from the average price, else the last close) → close basis:
   the close check at or below the stop, or any check at or below the buffer; between the two during the session it waits.
-  ATR14 comes from the day's daily bars; without them the last one computed serves up to 5 market days (kept with the
-  day of its last bar; an alert's ATR goes to the ledger with that as_of). None → intraday only, and the buffer foot
+  ATR14 and the last close come from finished daily bars only (today's bar from its close check on); without them the
+  last one computed serves up to 5 market days (kept with the day of its last bar, a Toss figure under the person's key;
+  an alert's ATR goes to the ledger with that as_of and the source it came from). None → intraday only, and the buffer foot
   starts "지금은 장중 가격만으로 판단해요."; in real mode the stop's alert or record card carries that line too.
 - Alerts go to the person's invest thread (kind `schedule`, title "투자", icon `chart`; made on the first alert) as
   `invest_alert` / `invest_stop` cards, each with `disclaimer: true`, plus a `notification` banner (amounts in the app
@@ -735,10 +742,13 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
 - Calls: a rule with action `call` (and `calls.stopResult` for stop records, `calls.expiry` for expiries; stage calls are
   B2) dials the verified number after the card is stored, then the card gains `call {ok, text}`. 10 invest calls per KST
   day, counted apart from `sys_call_me`; blocked → `callBlock` `not_verified` | `not_configured`. Spoken lines say what
-  happened and the price, never advice or the disclaimer.
+  happened and the price, never advice or the disclaimer. `settings.callNote` is the call footnote in the preview's words
+  ("앱에서 인증한 번호로 걸어요. 하루 10통까지예요." or why not) and `settings.bufferPctDefault` the operating default
+  buffer (`5%`), so screens hold no copy of either (DD 2341).
 - Toss (paths and bodies as the public openapi.json 1.2.28: `POST /oauth2/token` client credentials, `GET /api/v1/prices`,
-  `/api/v1/holdings`, `/api/v1/sellable-quantity` with `X-Tossinvest-Account`, every body `{result}`; prices carry no
-  previous close): keys go through `POST /api/credentials` (service `tossinvest`, envelope fields clientKey, secretKey, accountSeq);
+  `/api/v1/holdings`, `/api/v1/sellable-quantity`, `/api/v1/candles?interval=1d&count=200`,
+  `/api/v1/market-calendar/{US|KR}?date=` with `X-Tossinvest-Account`, every body `{result}`; prices carry no previous
+  close; a person's key serves that person's watch only): keys go through `POST /api/credentials` (service `tossinvest`, envelope fields clientKey, secretKey, accountSeq);
   saving one runs one holdings read; deleting it turns real off and forgets holdings. `GET /api/invest/toss`,
   `POST /api/invest/toss/check` (429 `toss_check_too_soon` within a minute) → `InvestTossStatus`. A 403 asked again with a
   new token is `ip_not_allowed` (never "expired"); the person's Toss calls rest an hour. 401 `auth`, 429 `rate_limited`
@@ -752,8 +762,10 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
 ## Web Push (B1c) — the lock-screen line
 
 - Nothing is sent unless the server env has `PICKLE_PUSH_SUBJECT` (`mailto:` or `https:`, the VAPID contact; team-lead
-  2210: the person decides it, no personal address as a default). Until then the routes below work as usual (the key,
-  subscriptions kept) and the app shows no reason: push is quietly off. QA never sets it.
+  2210: the person decides it, no personal address as a default). Until then `GET /api/push/key` and
+  `POST /api/push/subscriptions` answer 503 `{error: "push_off"}` (team-lead 2331b, DD 2330: the app takes it as off,
+  asks for no permission and shows no reason); `DELETE` works as usual, and rows from before are kept but not sent to.
+  Once it is set, the app's next start subscribes. QA never sets it.
 - `GET /api/push/key` → `{publicKey}`: the VAPID public key (base64url, 65-byte P-256 point) for
   `PushManager.subscribe({userVisibleOnly: true, applicationServerKey})`. The key pair is made once in the data dir
   (`vapid.json`, 0600); its private half never leaves that file.

@@ -5,7 +5,7 @@
  * off server. The push service is a fake fetch: nothing real is called.
  */
 import { afterEach, describe, expect, test } from "bun:test";
-import { statSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { ServerEvent, WebPushPayload } from "@pickle/protocol";
 import type { CredentialAccess } from "@pickle/agent";
@@ -14,6 +14,7 @@ import * as idb from "../src/invest/db.ts";
 import type { Logger, LogFields } from "../src/log.ts";
 import { PUSH_HOSTS, PushHub, b64url, encryptPayload, pushConfigFromEnv, unb64url } from "../src/push.ts";
 import { BOGUS_TOSS_SECRET, FAKE_TOSS_BASE, makeInvestUpstream } from "./fake-toss.ts";
+import { sha256Hex } from "../src/util.ts";
 import { makeDevice, makeFakeVault, makeHarness, type Harness } from "./helpers.ts";
 
 const DAY = "2026-11-30"; // a Monday, a full session
@@ -207,16 +208,19 @@ describe("push encryption", () => {
 });
 
 describe("push subscriptions", () => {
-  test("no PICKLE_PUSH_SUBJECT: the key and subscriptions work as usual, an alert sends nothing (quietly off)", async () => {
+  test("no PICKLE_PUSH_SUBJECT: the key and a new subscription answer 503 push_off, removal works; a row from before is kept and sent nothing", async () => {
     const w = await world({ push: false });
-    const key = await api<{ publicKey: string }>(w, "GET", "/api/push/key");
-    expect(key.status).toBe(200);
-    expect(unb64url(key.body.publicKey).length).toBe(65);
+    const off = { status: 503, body: { error: "push_off" } };
+    // team-lead 2331b (DD 2330): the app takes this as off and offers no lock-screen line; no reason words
+    expect(await api(w, "GET", "/api/push/key")).toEqual(off);
     const d = await device(FCM(1));
-    expect(await api(w, "POST", "/api/push/subscriptions", d.sub)).toEqual({ status: 200, body: { ok: true } });
+    expect(await api(w, "POST", "/api/push/subscriptions", d.sub)).toEqual(off);
+    expect(await api(w, "POST", "/api/push/subscriptions", { endpoint: "http://example.com/x" })).toEqual(off); // off comes first
+    expect(subs(w)).toHaveLength(0);
+    expect(existsSync(join(w.h.dir, "vapid.json"))).toBe(false); // no key pair made while off
+    // a row from before (the subject taken out, the server restarted): kept, never sent to
+    w.h.app.core.push.save({ userId: w.uid, tokenHash: sha256Hex(w.token), deviceId: null }, d.sub);
     expect(subs(w)).toHaveLength(1);
-    expect(await api(w, "DELETE", "/api/push/subscriptions", { endpoint: FCM(1) })).toEqual({ status: 200, body: { ok: true, removed: true } });
-    expect((await api(w, "POST", "/api/push/subscriptions", d.sub)).status).toBe(200);
     await connectToss(w);
     await stopRule(w, "SOXL", 27);
     w.up.state.tossPrices.set("SOXL", { price: 27.5 });
@@ -225,9 +229,11 @@ describe("push subscriptions", () => {
     await tickAt(w, 9, 50);
     expect(banners(w).map((b) => b.title)).toContain("SOXL 손절 관찰가 도달");
     expect(w.ps.calls).toHaveLength(0);
-    // not even tried: the row is as it was, nothing logged but the key's making
     expect(subs(w)).toMatchObject([{ last_status: null, last_ok_at: null }]);
-    expect(w.logs.filter((l) => l.includes("push"))).toEqual([`info push keys made {}`]);
+    expect(w.logs.filter((l) => l.includes("push"))).toEqual([]);
+    // removing it works while off
+    expect(await api(w, "DELETE", "/api/push/subscriptions", { endpoint: FCM(1) })).toEqual({ status: 200, body: { ok: true, removed: true } });
+    expect(subs(w)).toHaveLength(0);
   });
 
   test("the key: a P-256 point, made once in the data dir (0600), the same after a restart; its private half never shown", async () => {

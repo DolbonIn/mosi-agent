@@ -44,6 +44,13 @@ export function makeInvestUpstream() {
     /** a status every Toss API call answers with (403 = the allowed IP, 401, 429, 500) */
     tossStatus: null as number | null,
     tokenStatus: null as number | null,
+    /** Toss daily candles per symbol, oldest first here (served newest first) */
+    tossCandles: new Map<string, Bar[]>(),
+    /**
+     * Toss market calendar per "US:2026-11-26" / "KR:2026-07-17": the regular session's ISO start and end, or null for
+     * a closed day; `krxClosed` = NXT trades, KRX does not (no closing auction). A day not set answers 404.
+     */
+    tossCalendar: new Map<string, { open: string; close: string; krxClosed?: boolean } | null>(),
     yahoo: new Map<string, YahooQuote | "not_found" | number>(),
     yahooDaily: new Map<string, Bar[]>(),
   };
@@ -97,6 +104,33 @@ export function makeInvestUpstream() {
       if (url.pathname === "/api/v1/sellable-quantity") {
         const s = url.searchParams.get("symbol") ?? "";
         return json({ result: { sellableQuantity: String(state.tossSellable.get(s) ?? 0) } });
+      }
+      if (url.pathname === "/api/v1/candles") {
+        const s = url.searchParams.get("symbol") ?? "";
+        const kr = /^\d{6}$/.test(s);
+        const bars = [...(state.tossCandles.get(s) ?? [])].reverse().slice(0, Number(url.searchParams.get("count") ?? 100));
+        const candles = bars.map((b) => ({
+          timestamp: `${b.t}T00:00:00${kr ? "+09:00" : "-05:00"}`,
+          openPrice: String(b.o),
+          highPrice: String(b.h),
+          lowPrice: String(b.l),
+          closePrice: String(b.c),
+          volume: String(b.v),
+          currency: kr ? "KRW" : "USD",
+        }));
+        return json({ result: { candles, nextBefore: null } });
+      }
+      const cal = /^\/api\/v1\/market-calendar\/(US|KR)$/.exec(url.pathname);
+      if (cal) {
+        const market = cal[1]!;
+        const date = url.searchParams.get("date") ?? "";
+        const k = `${market}:${date}`;
+        if (!state.tossCalendar.has(k)) return json({ error: { code: "not_found" } }, 404);
+        const v = state.tossCalendar.get(k)!;
+        const near = { date };
+        if (market === "US") return json({ result: { today: { date, dayMarket: null, preMarket: null, regularMarket: v ? { startTime: v.open, endTime: v.close } : null, afterMarket: null }, previousBusinessDay: near, nextBusinessDay: near } });
+        const integrated = v ? { preMarket: null, regularMarket: { startTime: v.open, singlePriceAuctionStartTime: v.krxClosed ? null : v.close, endTime: v.close }, afterMarket: null } : null;
+        return json({ result: { today: { date, integrated }, previousBusinessDay: near, nextBusinessDay: near } });
       }
       return json({ error: "no route" }, 404);
     }

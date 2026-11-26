@@ -11,6 +11,9 @@
  * KR (KRX 09:00–15:30 KST): a table per year. A day in a year the table does not cover is "unknown": nothing is judged
  * or traded on it (2006 §1 "표가 덮지 않는 날은 확인 불가").
  *
+ * A person with Toss sees the days Toss's market calendar has answered for them (`DayOverride`, team-lead 2253: their
+ * key serves their own watch only); everyone else, and every other day, follows the rules and the table.
+ *
  * The watch's slots follow the source's G2 run window: from 15 minutes after the open, every 5 minutes up to the close,
  * then one close check 5 minutes after it (the official close is read there).
  */
@@ -31,6 +34,9 @@ export type DayInfo =
   | { kind: "open"; session: Session }
   | { kind: "closed"; reason: "weekend" | "holiday"; name?: string }
   | { kind: "unknown" };
+
+/** A person's own answer for a day (their Toss market calendar), or null: the rules and the table decide. */
+export type DayOverride = (market: Market, day: string) => DayInfo | null;
 
 const MIN = 60_000;
 const HOUR = 3_600_000;
@@ -189,14 +195,37 @@ export function krDay(day: string): DayInfo {
   if (!table) return { kind: "unknown" };
   const name = table.closed[day];
   if (name) return { kind: "closed", reason: "holiday", name };
-  const h = table.hours?.[day] ?? { open: "09:00", close: "15:30" };
-  const [oh, om] = h.open.split(":").map(Number) as [number, number];
-  const [ch, cm] = h.close.split(":").map(Number) as [number, number];
-  return { kind: "open", session: { market: "KR", day, open: kstToEpochDay(day, oh, om), close: kstToEpochDay(day, ch, cm), early: false } };
+  return { kind: "open", session: krSession(day) };
 }
 
-export function marketDay(market: Market, day: string): DayInfo {
-  return market === "US" ? usDay(day) : krDay(day);
+/** a KRX session on `day`: the table's changed hours, else 09:00–15:30 */
+function krSession(day: string): Session {
+  const h = KR_TABLE[Number(day.slice(0, 4))]?.hours?.[day] ?? { open: "09:00", close: "15:30" };
+  const [oh, om] = h.open.split(":").map(Number) as [number, number];
+  const [ch, cm] = h.close.split(":").map(Number) as [number, number];
+  return { market: "KR", day, open: kstToEpochDay(day, oh, om), close: kstToEpochDay(day, ch, cm), early: false };
+}
+
+export function marketDay(market: Market, day: string, ov?: DayOverride): DayInfo {
+  return ov?.(market, day) ?? (market === "US" ? usDay(day) : krDay(day));
+}
+
+/**
+ * A day as Toss's market calendar told it (toss.ts readMarketDay; null session = closed). US takes the regular
+ * session's own hours, early closes included. KR takes only whether KRX trades: Toss's KR hours are the KRX+NXT union,
+ * so the hours stay the table's (or 09:00–15:30).
+ */
+export function dayFromToss(market: Market, day: string, session: { open: number; close: number } | null): DayInfo {
+  if (!session) return { kind: "closed", reason: "holiday", name: "토스증권 장 운영 정보" };
+  if (market === "KR") return { kind: "open", session: krSession(day) };
+  return { kind: "open", session: { market: "US", day, open: session.open, close: session.close, early: session.close < etToEpoch(day, 16, 0) } };
+}
+
+/** HH:MM in the market's own clock */
+export function marketClock(market: Market, ms: number): string {
+  const local = ms + (market === "US" ? easternOffset(ms) : 9) * HOUR;
+  const min = Math.floor((((local % 86_400_000) + 86_400_000) % 86_400_000) / MIN);
+  return `${pad(Math.floor(min / 60))}:${pad(min % 60)}`;
 }
 
 /** One watch check: `close` is the check after the close that reads the official close. */
@@ -227,8 +256,8 @@ export function sessionSlots(s: Session): Slot[] {
 
 /** The check due at `now`: the latest slot at or before now, if now is still inside its 5 minutes. Null outside the
  * run window, on closed days and on unknown days. */
-export function currentSlot(market: Market, now: number): Slot | null {
-  const info = marketDay(market, marketDate(market, now));
+export function currentSlot(market: Market, now: number, ov?: DayOverride): Slot | null {
+  const info = marketDay(market, marketDate(market, now), ov);
   if (info.kind !== "open") return null;
   let due: Slot | null = null;
   for (const s of sessionSlots(info.session)) if (s.at <= now) due = s;
@@ -237,8 +266,8 @@ export function currentSlot(market: Market, now: number): Slot | null {
 
 /** The check that comes before `slot`: the one 5 minutes earlier, or the close check of the last trading day before.
  * Null when an unknown day lies in between or nothing is found within 15 days. */
-export function prevSlot(slot: Slot): Slot | null {
-  const info = marketDay(slot.market, slot.day);
+export function prevSlot(slot: Slot, ov?: DayOverride): Slot | null {
+  const info = marketDay(slot.market, slot.day, ov);
   if (info.kind === "open") {
     const all = sessionSlots(info.session);
     const i = all.findIndex((s) => s.at === slot.at);
@@ -247,7 +276,7 @@ export function prevSlot(slot: Slot): Slot | null {
   let z = dayNumber(slot.day);
   for (let n = 0; n < 15; n++) {
     z -= 1;
-    const d = marketDay(slot.market, civilDate(z));
+    const d = marketDay(slot.market, civilDate(z), ov);
     if (d.kind === "unknown") return null;
     if (d.kind === "open") return sessionSlots(d.session).at(-1)!;
   }
@@ -255,10 +284,10 @@ export function prevSlot(slot: Slot): Slot | null {
 }
 
 /** The next session's open after `ms` (for "다음 거래일 개장 15분 뒤", B4). Null when an unknown day comes first. */
-export function nextSession(market: Market, ms: number): Session | null {
+export function nextSession(market: Market, ms: number, ov?: DayOverride): Session | null {
   let z = dayNumber(marketDate(market, ms));
   for (let n = 0; n < 15; n++) {
-    const d = marketDay(market, civilDate(z));
+    const d = marketDay(market, civilDate(z), ov);
     if (d.kind === "unknown") return null;
     if (d.kind === "open" && d.session.open > ms) return d.session;
     z += 1;
@@ -270,11 +299,35 @@ export function nextSession(market: Market, ms: number): Session | null {
  * Market days after `from` up to and including `to` (YYYY-MM-DD): how old a daily figure is in sessions. An unknown day
  * (no KRX table for that year) counts as a market day, so an old figure ages out rather than lasting.
  */
-export function marketDaysAfter(market: Market, from: string, to: string): number {
+export function marketDaysAfter(market: Market, from: string, to: string, ov?: DayOverride): number {
   let n = 0;
   const end = dayNumber(to);
-  for (let z = dayNumber(from) + 1; z <= end && n < 400; z++) if (marketDay(market, civilDate(z)).kind !== "closed") n++;
+  for (let z = dayNumber(from) + 1; z <= end && n < 400; z++) if (marketDay(market, civilDate(z), ov).kind !== "closed") n++;
   return n;
+}
+
+/** when a day's bar is final: that session's close check (close + 5 minutes); null when the day has no session */
+export function closeCheckAt(market: Market, day: string, ov?: DayOverride): number | null {
+  const d = marketDay(market, day, ov);
+  return d.kind === "open" ? d.session.close + SLOT_MS : null;
+}
+
+/**
+ * The daily bars that are over at `now` (team-lead 2253): nothing after today, and today's bar only from its close
+ * check on. A bar read during the session is still moving: its close is the price of that moment.
+ */
+export function finishedBars<T extends { t: string }>(bars: T[], market: Market, now: number, ov?: DayOverride): T[] {
+  const today = marketDate(market, now);
+  const at = closeCheckAt(market, today, ov);
+  const todayDone = at != null && now >= at;
+  return bars.filter((b) => b.t < today || (b.t === today && todayDone));
+}
+
+/** how long a daily read stays good: up to today's close check when read before it (then today's bar is final), else
+ * to the next market day */
+export function dailyUntil(market: Market, t: number, ov?: DayOverride): number {
+  const at = closeCheckAt(market, marketDate(market, t), ov);
+  return at != null && t < at ? at : nextMarketDayStart(market, t);
 }
 
 /** The start of the next market day (00:00 local) after `ms`: a paused source tries again from there. */
