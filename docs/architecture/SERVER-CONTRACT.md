@@ -60,11 +60,27 @@ Both come with `GET /api/threads` and every `thread_updated` upsert, computed on
 | sent right after Stop, while the stopped turn is still winding down | the request waits for it (≤ settle time + 2 s), then 200 SSE with a **fresh** turn — never steered into the stopped one. If it is somehow still stopping: 409 `busy` "하던 일을 멈추는 중이에요. 잠시 후 다시 보내 주세요." |
 | friend thread, not addressed to the agent | 201 `{delivered:true, userMessage}` |
 | friend thread, starts with "@" or contains my agent's name | 200 SSE (my agent answers in the shared thread) |
-| > 4000 chars / empty | 413 `message_too_long` / 400 `empty_message` |
+| > 4000 chars / no text and no files | 413 `message_too_long` / 400 `empty_message` |
 | quota | 429 `quota_exceeded` (long Korean message mentioning 04:00 reset + tickets) |
 | no LLM key | 503 `llm_not_configured` |
 
 `attachmentIds` ≤ 10.
+
+**Files with no text.** `text` may be empty (or spaces) when `attachmentIds` holds at least one file (a photo alone, a
+long message the app turned into a .txt), in every case above: a turn, a steer, the queue, a friend thread. The row
+keeps `text: ""`. The model's copy is a blank line and the files' notes, as with text; when a text file was read
+(whole or cut), it begins with a described note that the file's text is what the person sent and is to be answered
+(no sample line; a line of photos or PDFs alone gets none). Where a line is shown and the row has no text, the server
+writes a stand-in (DD 1811): `사진` or `사진 N장` when every file is an image, else the first other file's name, plus
+` 외 N개` for the rest. It is used in a friend thread's list row (`{이름}: {줄}`) and the friend's banner body. A new
+thread of the person's own (`task`, automatic title) whose first line is files with no text is named after the first
+file that is not an image, without its extension, at once (`thread_updated`), and the model's title is not asked for;
+with images only, the title comes as before.
+
+**A steered line is taken in whole up to 64,000 characters** (the launcher's cap: 4,000 of text plus 50,000 of text
+files and their notes), trimmed. Before 2026-11-26 the cap was 4,000, which cut a file sent while the agent was working,
+with no note; history still treats a stored turn's first 4,000 characters of a longer line as that line (it is not
+replayed again).
 
 **Steered lines left unanswered.** A turn that ends without answering lines steered into it (202) — Stop, a failed turn,
 a follow-up the day's quota kept from running — sends `steers_dropped {threadId, messageIds}` to every device of the

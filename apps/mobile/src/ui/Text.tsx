@@ -104,24 +104,84 @@ const EM: [RegExp, number][] = [
   // and five brackets and marks (1.02: "ㆼ", "〚")
   [/[\u1100-\u11ff\u301a\u301b\u3031\u3032\u3037\u3190-\u33ff\ua960-\ua97f\ud7b0-\ud7ff\uf900-\ufaff]/u, 1.03],
   [/[\u3000-\u302d\u3030-\u318f\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7a3\uff00-\uffef]/u, 1],
-  [/[ \t\n\r\u00a0.,:;·!|'ijlI\/\\‘’‚‛]/u, 0.32], // (0.31: "!")
-  [/[tfr()[\]{}]/u, 0.39], // (0.39)
-  [/[1*"\-°²³“”„‟•‣․‧‖‗‐‑]/u, 0.48], // (0.48)
-  [/[asxzkvyJ?`†‡¨¯´¸¿]/u, 0.56], // (0.56)
-  [/[bcdeghnopquEFL2357_–§¶]/u, 0.63], // (0.63: "3")
-  [/[mM…—¼½]/u, 0.88], // (0.88)
-  [/[W@%æÆ©¾←↑→↓₩]/u, 0.97], // (0.97: "W")
-  [/[ACDGHNOQUVXw&®\xc0-\xff]/u, 0.78], // other capitals, Latin-1 letters (0.78: "w")
-  [/[\x00-\xff]/u, 0.67], // the other digits, B K P R S T Y Z # $ + < = > ^ ~ and Latin-1 symbols (0.67)
+  // ASCII and Latin-1 are in LATIN (below); the punctuation past them that copy uses, on steps (the widest of each)
+  [/[\t\n\r‘’‚‛]/u, 0.32], // (0.30)
+  [/[“”„‟•‣․‧‖‗‐‑]/u, 0.48], // (0.48)
+  [/[†‡]/u, 0.56], // (0.52)
+  [/–/u, 0.63], // (0.59)
+  [/[…—]/u, 0.88], // (0.88)
+  [/[←↑→↓₩]/u, 0.97], // (0.92)
+  [/[\x00-\xff]/u, 0.67], // control characters
   // emoji, other Latin, Greek and Cyrillic letters, the widest other symbols (1.47: "😀", "ᾯ")
   [/[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}]/u, 1.5],
   [/[\p{sc=Latin}\p{sc=Greek}\p{sc=Cyrillic}‰‱⩶⬷\u{1f747}⛟\u{1f76b}⬤⬲⮐⮑⒛]/u, 1.5],
   // other symbols and spaces ("℃" 1.19, "★" 1.03, "①" 0.94)
   [/(?![⸺⸻⬳⨌\u{10198}])[\p{sc=Common}\p{sc=Inherited}]/u, 1.2],
 ];
+// ASCII (U+0020–U+007E) and Latin-1 (U+00A0–U+00FF), each character's own width in thousandths of an em: the widest
+// drawn over the app's sizes and both engines (as EM), rounded up; the soft hyphen 0. A table, not steps: by steps a
+// Latin word counted 6.6 % over its drawn width (the median of 5,662 strings), so a domain that fits its line came
+// apart ("w-clinic-w-eygpq.hatenablog.com ·" 16.47 em drawn, 17.96 by steps, at a 17.04 em line)
+const LATIN = (
+  "284 314 480 632 632 929 715 300 385 385 475 632 300 475 300 308 632 467 607 630 647 621 640 572 642 640 300 300 " +
+  "632 632 632 516 921 676 660 719 730 599 575 750 746 270 541 662 571 877 746 775 638 775 656 640 636 740 676 970 " +
+  "682 658 664 385 308 385 632 587 514 555 617 563 617 575 365 612 591 250 249 545 256 873 587 593 613 612 384 527 " +
+  "366 587 545 778 527 545 541 385 262 385 632 284 314 632 632 632 632 262 600 514 897 393 664 632 0 696 514 475 " +
+  "632 344 357 514 617 600 300 514 265 421 664 783 816 881 516 676 676 676 676 676 676 963 719 599 599 599 599 270 " +
+  "270 270 270 759 746 775 775 775 775 775 632 771 740 740 740 740 658 628 625 555 555 555 555 555 555 906 563 575 " +
+  "575 575 575 250 250 250 250 585 587 593 593 593 593 593 632 593 587 587 587 587 545 613 545"
+)
+  .split(" ")
+  .map((n) => Number(n) / 1000);
+// the pairs whose kerning widens them, of those characters and the punctuation on steps below (348 of 46,656; most
+// narrow or keep them), by how much in thousandths of an em, the most over the app's sizes and both engines: added to
+// the first of the two, so a string is never counted under its drawn width ("_j" 79, "r’" 64, "Tì" 59; "rt" drawn
+// 0.759, 0.750 by its characters)
+const KERN = new Map<string, number>(
+  ([
+    [79, "_j"],
+    [64, "r’ r”"],
+    [59, "Tì Tî Tï íT îT ïT"],
+    [54, "Vì Vî Vï íV îV ïV"],
+    [45, "r² r³ r¹ µ² µ³ µ¹"],
+    [40, ",/ ./ Wì Wî Wï \\, \\. \\… íW îW ïW …/"],
+    [35, "*Ð Fì Fî Fï T² T³ T¹ ^Ð °Ð ²T ²t ³T ³t ¹T ¹t ’² ’³ ’¹ ”² ”³ ”¹"],
+    [31, "r“"],
+    [
+      30,
+      "(j 0\\ 9\\ BÐ P‘ P“ V² V³ V¹ W² W³ W¹ X² X³ X¹ Y² Y³ Y¹ [j \\j f² f³ f¹ g_ q_ rf r‘ {j ²B ²D ²E ²F ²H ²I " +
+      "²K ²L ²M ²N ²P ²R ²V ²W ²X ²Y ²È ²É ²Ê ²Ë ²Ì ²Í ²Î ²Ï ²Ñ ²Ý ²Þ ³B ³D ³E ³F ³H ³I ³K ³L ³M ³N ³P ³R ³V ³W " +
+      "³X ³Y ³È ³É ³Ê ³Ë ³Ì ³Í ³Î ³Ï ³Ñ ³Ý ³Þ µ’ µ” ¹B ¹D ¹E ¹F ¹H ¹I ¹K ¹L ¹M ¹N ¹P ¹R ¹V ¹W ¹X ¹Y ¹È ¹É ¹Ê ¹Ë " +
+      "¹Ì ¹Í ¹Î ¹Ï ¹Ñ ¹Ý ¹Þ Ý² Ý³ Ý¹",
+    ],
+    [26, "——"],
+    [
+      25,
+      "&B &D &E &F &H &I &K &L &M &N &P &R &È &É &Ê &Ë &Ì &Í &Î &Ï &Ñ &Þ E² E³ E¹ F² F³ F¹ Pf Pt Rt rt È² È³ È¹ " +
+      "É² É³ É¹ Ê² Ê³ Ê¹ Ë² Ë³ Ë¹",
+    ],
+    [21, "77 7\\ Pv Py Pý Pÿ T\\ W\\ dì f’ t’ xf"],
+    [
+      20,
+      "&A &À &Á &Â &Ã &Ä &Å E\\ H\\ I\\ J\\ M\\ N\\ U\\ V\\ _v _y _ý cf f” lì r? t” ·Ð È\\ É\\ Ê\\ Ë\\ Ì\\ Í\\ " +
+      "Î\\ Ï\\ Ñ\\ Ù\\ Ú\\ Û\\ Ü\\ çf",
+    ],
+    [16, "3\\ 5\\ 6\\ 8\\ C\\ Y\\ fY fÝ uf Ç\\ Ý\\ ùf úf ûf üf"],
+    [15, "&J /T P\\ rv ry rý"],
+    [11, ",5 ,9 .5 .9 F\\ Rf X\\ _p ct rm rn rp rr rñ çt …5 …9"],
+    [
+      6,
+      ":2 ;2 ’B ’D ’E ’F ’H ’I ’K ’L ’M ’N ’P ’R ’È ’É ’Ê ’Ë ’Ì ’Í ’Î ’Ï ’Ñ ’Þ ”B ”D ”E ”F ”H ”I ”K ”L ”M ”N ”P " +
+      "”R ”È ”É ”Ê ”Ë ”Ì ”Í ”Î ”Ï ”Ñ ”Þ",
+    ],
+  ] as [number, string][]).flatMap(([n, ps]) => ps.split(" ").map((p): [string, number] => [p, n / 1000])),
+);
 const PICT = /\p{Extended_Pictographic}/u;
 const emSeen = new Map<string, number>(); // a character's group, found once
-const emOf = (c: string) => emSeen.get(c) ?? emSeen.set(c, EM.find(([r]) => r.test(c))?.[1] ?? 4.7).get(c)!;
+const latinEm = (cp: number) =>
+  cp >= 0x20 && cp < 0x7f ? LATIN[cp - 0x20] : cp >= 0xa0 && cp <= 0xff ? LATIN[cp - 0xa0 + 95] : undefined;
+const emOf = (c: string) =>
+  emSeen.get(c) ?? emSeen.set(c, latinEm(c.codePointAt(0) ?? 0) ?? EM.find(([r]) => r.test(c))?.[1] ?? 4.7).get(c)!;
 /**
  * a text's width in em, never under the system font's (`EM` above; anything else, other scripts and the five widest
  * symbols, 4.7: "𒐫" 4.64): a skin tone after an emoji and an emoji joined to the one before it (ZWJ) are drawn inside
@@ -133,7 +193,7 @@ export const emWidth = (s: string): number =>
       n +
       ((/\p{Emoji_Modifier}/u.test(c) && PICT.test(a[i - 1] ?? "")) || (a[i - 1] === "\u200d" && PICT.test(c))
         ? 0
-        : emOf(c)),
+        : emOf(c) + (KERN.get(c + (a[i + 1] ?? "")) ?? 0)),
     0,
   );
 

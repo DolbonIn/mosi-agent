@@ -35,7 +35,7 @@ describe("subLine", () => {
     const text = "어사이드 채팅창에 “AI 주요 뉴스 3개를 정리해 개인 메일로 보내줘”라고 입력했다.";
     const when = "mk.co.kr · 11/14 13:01";
     const m = (list: number) => renderToStaticMarkup(createElement(Fragment, null, copy(text, { line: subLine(when, true, 1.2, list) })));
-    // 430: (340 − 12 − 180.5) / 18 = 8.19 em
+    // 430: (340 − 12 − 170.3) / 18 = 8.76 em
     expect(subLine(when, true, 1.2, 366)).toBeGreaterThan(emWidth("보내줘”라고"));
     expect(m(366)).toContain('<span class="t-tie">보내줘”라고</span>');
     // 320: 'when' takes 60 % (138 px), (230 − 12 − 138) / 18 = 4.44 em
@@ -51,7 +51,7 @@ describe("ResultsCard", () => {
       type: "results",
       title: "공연",
       items: [
-        // "고성군문화복지센터 ·" 9.64 em: beside "뮤지컬 · 11.27~11.28" the line is 7.05 em, alone 17.07
+        // "고성군문화복지센터 ·" 9.58 em: beside "뮤지컬 · 11.27~11.28" the line is 7.47 em, alone 17.07
         { title: "가", subtitle: "고성군문화복지센터 · 강원", meta: "뮤지컬 · 11.27~11.28" },
         { title: "나", subtitle: "고성군문화복지센터 · 강원" },
         { title: "다", subtitle: "고성군문화복지센터 · 강원", url: "https://example.org/a" },

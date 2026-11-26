@@ -20,7 +20,7 @@ import type {
   SkillInfo,
 } from "@pickle/protocol";
 import type { CredentialAccess, RunTurn, ToolDef, TurnInput, TurnOutcome } from "@pickle/agent";
-import { applyAgentPatch, nextRev, sameAgentFields } from "@pickle/launcher";
+import { MAX_STEER_CHARS, applyAgentPatch, nextRev, sameAgentFields } from "@pickle/launcher";
 import { createApp, type App } from "../src/app.ts";
 import { openDatabase, type Db, type CredentialRow } from "../src/db/index.ts";
 import type { AppDeps, HubLike, LauncherLike, LeaseLike, ServerConfig, VaultLike } from "../src/deps.ts";
@@ -37,8 +37,10 @@ export class FakeLease implements LeaseLike {
     this.released = true;
     this.onRelease();
   }
+  /** as the launcher's lease takes a steered line: trimmed, capped (lease.ts), an empty one dropped */
   steer(t: string) {
-    if (!this.released) this.queue.push(t);
+    const s = t.trim().slice(0, MAX_STEER_CHARS);
+    if (!this.released && s) this.queue.push(s);
   }
   drain() {
     const q = this.queue;

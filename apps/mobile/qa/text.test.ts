@@ -4,7 +4,7 @@ import { createElement, Fragment, isValidElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { copy, emWidth, glued, Sentences, sentencesOf } from "../src/ui/Text";
-import { EM_WIDTHS } from "./fixtures/em-widths.mjs";
+import { EM_STRINGS, EM_WIDTHS } from "./fixtures/em-widths.mjs";
 
 const html = (text: string, sentences = true) => renderToStaticMarkup(createElement(Sentences, { text, sentences }));
 
@@ -156,8 +156,8 @@ describe("Sentences", () => {
   test("clamp: no sentence blocks, and no tie or nbsp run wider than the slot's narrowest line", () => {
     const t = (x: string) => `<span class="t-tie">${x}</span>`;
     const clamped = (text: string, clamp = 5) => renderToStaticMarkup(createElement("p", null, copy(text, { clamp })));
-    // emWidth: "microsoft.com/devicelogin에" 14.5 em, "example.com에서" 8.7: plain in a clamp, tied elsewhere; "x.com에"
-    // 4.0 still tied
+    // emWidth: "microsoft.com/devicelogin에" 13.6 em, "example.com에서" 8.3: plain in a clamp, tied elsewhere; "x.com에"
+    // 3.9 still tied
     expect(clamped("microsoft.com/devicelogin에 입력해요.")).toBe("<p>microsoft.com/devicelogin에 입력해요.</p>");
     expect(clamped("example.com에서 봐요.")).toBe("<p>example.com에서 봐요.</p>");
     expect(clamped("example.com에서 봐요.", 10)).toBe(`<p>${t("example.com에서")} 봐요.</p>`);
@@ -173,7 +173,7 @@ describe("Sentences", () => {
     expect(clamped("그 미술관에서")).toBe("<p>그 미술관에서</p>");
     expect(clamped("총 23 곳을 찾았어요")).toBe(`<p>${t("총\u00a023\u00a0곳을")} 찾았어요</p>`);
     // a "·" rides only while the word and the dot fit, so the amount stays one box either way: at 5.4 em "32,400원 ·"
-    // 5.23 em (a space and "·" count 0.32) rides, "132,400원" 5.07 em keeps its tie and "132,400원 ·" 5.71 em is not
+    // 5.03 em (a nbsp counts 0.284, "·" 0.3) rides, "132,400원" 4.92 em keeps its tie and "132,400원 ·" 5.50 em is not
     // made (a line may start with the dot); a word over the clamp gets no nbsp run either
     expect(clamped("쿠팡 · 32,400원 · 눌러서 확인하기", 5.4)).toBe(
       `<p>${t("쿠팡\u00a0·")} ${t("32,400원\u00a0·")} 눌러서 확인하기</p>`,
@@ -186,16 +186,19 @@ describe("Sentences", () => {
     // sentences={false} alone keeps every tie
     expect(html("microsoft.com/devicelogin에 입력해요. 끝.", false)).toBe(`${t("microsoft.com/devicelogin에")} 입력해요. 끝.`);
   });
-  test("emWidth: never under the font's measured width (fixtures/em-widths.mjs), ASCII on the narrowest step", () => {
+  test("emWidth: never under the font's measured width (fixtures/em-widths.mjs), ASCII and Latin-1 each at its own", () => {
     const all = Object.entries(EM_WIDTHS);
     expect(all.filter(([s, w]) => emWidth(s) < w)).toEqual([]);
-    // each ASCII character on the narrowest step that holds its width, Hangul 1
-    const steps = [0.32, 0.39, 0.48, 0.56, 0.63, 0.67, 0.78, 0.88, 0.97];
-    expect(all.filter(([s, w]) => /^[!-~]$/.test(s) && emWidth(s) !== steps.find((x) => x >= w))).toEqual([]);
+    // each ASCII and Latin-1 character at its own measured width, rounded up to 0.001 (no step over it; a space and a
+    // nbsp 0.284, "·" 0.3), Hangul 1
+    const latin = all.filter(([s]) => /^[\x20-\x7e\u00a0-\u00ff]$/u.test(s));
+    expect(latin.length).toBeGreaterThan(180);
+    expect(latin.filter(([s, w]) => emWidth(s) > w + 0.001 + 1e-9)).toEqual([]);
+    expect([emWidth(" "), emWidth("\u00a0"), emWidth("·")]).toEqual([0.284, 0.284, 0.3]);
     expect(all.filter(([s]) => /^[\uac00-\ud7af]$/u.test(s) && emWidth(s) !== 1)).toEqual([]);
-    // the marks Korean copy uses past ASCII, on their steps too
+    // the marks Korean copy uses past Latin-1, on steps
     const marks: [string, number][] = [
-      ["·", 0.32], ["’", 0.32], ["“", 0.48], ["•", 0.48], ["–", 0.63],
+      ["’", 0.32], ["“", 0.48], ["•", 0.48], ["–", 0.63],
       ["…", 0.88], ["—", 0.88], ["→", 0.97], ["₩", 0.97],
     ];
     expect(marks.filter(([c, x]) => emWidth(c) !== x)).toEqual([]);
@@ -204,15 +207,23 @@ describe("Sentences", () => {
     expect(emWidth("👍🏻")).toBe(1.5);
     expect(emWidth("👩‍💻")).toBe(1.5);
     expect(emWidth("❤️")).toBe(1.5);
-    expect(emWidth("1️⃣")).toBeCloseTo(1.48, 9);
+    expect(emWidth("1️⃣")).toBeCloseTo(1.467, 9);
     expect(emWidth("🏻")).toBe(1.5);
-    expect(emWidth("가\u200d·")).toBeCloseTo(1.32, 9);
+    expect(emWidth("가\u200d·")).toBeCloseTo(1.3, 9);
     expect(emWidth("")).toBe(0);
     // other scripts count wide ("﷽" 3.21, "𒐫" 4.64), and so does a sign spanning the digits after it; a combining mark
     // counts nothing
     expect(emWidth("﷽")).toBe(4.7);
     expect(emWidth("\u0600")).toBe(4.7);
-    expect(emWidth("e\u0301")).toBe(0.63);
+    expect(emWidth("e\u0301")).toBe(0.575);
+  });
+  test("emWidth: never under a string's drawn width where kerning widens a pair (fixtures/em-widths.mjs EM_STRINGS)", () => {
+    expect(Object.entries(EM_STRINGS).filter(([s, w]) => emWidth(s) < w)).toEqual([]);
+    // a pair counts its kerning once, on its first character: "_j" 0.587 + 0.249 + 0.079, "j_" none; "r’s" 0.384 +
+    // 0.32 + 0.527 + 0.064
+    expect(emWidth("_j")).toBeCloseTo(0.915, 9);
+    expect(emWidth("j_")).toBeCloseTo(0.836, 9);
+    expect(emWidth("r’s")).toBeCloseTo(1.295, 9);
   });
   test("clamp: a box wider than the slot's line by the font is not made, one that fits is", () => {
     const t = (x: string) => `<span class="t-tie">${x}</span>`;
@@ -224,11 +235,11 @@ describe("Sentences", () => {
     expect(clamped("WWWWWW·끝")).toBe("<p>WWWWWW·끝</p>");
     expect(clamped("GWANGJU·끝")).toBe("<p>GWANGJU·끝</p>");
     expect(clamped("(★★★★★)를")).toBe("<p>(★★★★★)를</p>");
-    // emoji sequences count once ("👍🏻👍🏻👍🏻·" 4.68 em drawn, 4.82 by emWidth): tied
+    // emoji sequences count once ("👍🏻👍🏻👍🏻·" 4.68 em drawn, 4.80 by emWidth): tied
     expect(clamped("👍🏻👍🏻👍🏻·끝")).toBe(`<p>${t("👍🏻👍🏻👍🏻·")}<wbr/>끝</p>`);
     expect(clamped("👨‍👩‍👧👨‍👩‍👧·끝")).toBe(`<p>${t("👨‍👩‍👧👨‍👩‍👧·")}<wbr/>끝</p>`);
     expect(clamped("1️⃣2️⃣·끝")).toBe(`<p>${t("1️⃣2️⃣·")}<wbr/>끝</p>`);
-    // narrow letters and "1" count narrow: "fontanaclinic ·" 6.62 em drawn (7.28), "010-1111-1111" 6.40 (6.62; the
+    // narrow letters and "1" count narrow: "fontanaclinic ·" 6.62 em drawn (6.66), "010-1111-1111" 6.40 (6.42; the
     // old measure: 8.4 and 7.8, over 7.5)
     expect(clamped("문의는 fontanaclinic · 전화", 7.5)).toBe(`<p>문의는 ${t("fontanaclinic\u00a0·")} 전화</p>`);
     expect(clamped("010-1111-1111 전화", 7.5)).toBe(`<p>${t("010-1111-1111")} 전화</p>`);
@@ -236,19 +247,20 @@ describe("Sentences", () => {
   test("line: no tie or nbsp run wider than a narrow slot's narrowest line, the sentence blocks kept", () => {
     const t = (x: string) => `<span class="t-tie">${x}</span>`;
     const lined = (text: string, line?: number) => renderToStaticMarkup(createElement("p", null, copy(text, { line })));
-    // "고성군문화복지센터 ·" 9.64 em: beside "뮤지컬 · 11.27~11.28" at 320 (7.05 em, InfoCards subLine) the dot stays
-    // apart; with room it rides
-    expect(lined("고성군문화복지센터 · 강원", 7.05)).toBe(`<p>고성군문화복지센터 ${t("·")} 강원</p>`);
-    expect(lined("고성군문화복지센터 · 강원", 9.64)).toBe(`<p>${t("고성군문화복지센터\u00a0·")} 강원</p>`);
+    // "고성군문화복지센터 ·" 9.584 em: beside "뮤지컬 · 11.27~11.28" at 320 (7.47 em, InfoCards subLine) the dot
+    // stays apart; with room it rides
+    expect(lined("고성군문화복지센터 · 강원", 7.47)).toBe(`<p>고성군문화복지센터 ${t("·")} 강원</p>`);
+    expect(lined("고성군문화복지센터 · 강원", 9.58)).toBe(`<p>고성군문화복지센터 ${t("·")} 강원</p>`);
+    expect(lined("고성군문화복지센터 · 강원", 9.59)).toBe(`<p>${t("고성군문화복지센터\u00a0·")} 강원</p>`);
     expect(lined("고성군문화복지센터 · 강원")).toBe(`<p>${t("고성군문화복지센터\u00a0·")} 강원</p>`);
-    // past the line the word keeps its own tie when that fits ("132,400원" 5.07 em, "132,400원 ·" 5.71), and a word's
-    // own tie over it is not made either ("example.com에서" 8.7 em)
+    // past the line the word keeps its own tie when that fits ("132,400원" 4.92 em, "132,400원 ·" 5.50), and a word's
+    // own tie over it is not made either ("example.com에서" 8.3 em)
     expect(lined("쿠팡 · 132,400원 · 확인", 5.4)).toBe(`<p>${t("쿠팡\u00a0·")} ${t("132,400원")} ${t("·")} 확인</p>`);
     expect(lined("example.com에서 봐요.", 8)).toBe("<p>example.com에서 봐요.</p>");
     expect(lined("총 23 곳을 찾았어요", 2.5)).toBe("<p>총 23 곳을 찾았어요</p>");
     expect(lined("총 23 곳을 찾았어요", 3)).toBe(`<p>${t("총\u00a023")} 곳을 찾았어요</p>`);
     // the sentence blocks stay (a clamp turns them off), the cap holds inside each
-    expect(lined("가요. 고성군문화복지센터 · 강원.", 7.05)).toBe(
+    expect(lined("가요. 고성군문화복지센터 · 강원.", 7.47)).toBe(
       `<p><span class="t-s">가요.</span> <span class="t-s">고성군문화복지센터 ${t("·")} 강원.</span></p>`,
     );
     expect(lined("가요. 고성군문화복지센터 · 강원.")).toBe(

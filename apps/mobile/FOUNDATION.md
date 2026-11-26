@@ -512,10 +512,14 @@ the class `.t-copy` (text-wrap: pretty: no one-word last line), and its text goe
   lines). A line-clamped slot gives it as `clamp` (below). lines.mjs reports a tie laid on two lines (`wide-tie`).
   Measured on results subtitles (320 from saved replies, 876 made up; each with and without a link) at 320–430 × text
   size 0.9–1.3 in Chrome and WebKit, 95,680 rows: rows with a tie wrapped inside its box 16,153 → 0, indented lines
-  1,136 → 0, lines 171,739 → 158,789, no row a line longer. Of the 97,287 ties held on one line before, 516 now break
-  inside (443 a Latin word and its "·", which `emWidth` overestimates; the rest within the upper bounds of `emWidth`
-  and of 'when'). With 320's line at every width the same rows broke 1,754 (1,707 at 360–430). Lines opening on "·"
-  2,425 → 2,774: a word that fills its line leaves its dot to the next one.
+  1,136 → 0, lines 171,739 → 158,789, no row a line longer. Of the 97,287 ties held on one line before, 516 broke
+  inside with ASCII on `emWidth`'s steps, 173 with its per-character widths (snap-fnd-em-latin; 134 of them a word
+  and its "·"; the rest within the margins of `emWidth`, each character's widest over every size and Hangul's 1, and of
+  'when'). With 320's line at every width the same rows broke 1,754 (1,707 at 360–430). Lines opening on "·" 2,425 →
+  2,774: a word that fills its line leaves its dot to the next one; 2,677 with the per-character widths, lines
+  158,789 → 158,803: 14 rows a line longer, each for a tie that fits now, a word kept whole that broke inside
+  ("엠스테이지 (구. / 인사아트홀) · 서울" → "엠스테이지 / (구.인사아트홀) · / 서울", 10) or a word and its "·" whose dot
+  opened the last line ("지 라이브홀 / · 서울" → "지 / 라이브홀 · / 서울", 4).
 - **Line-clamped slots** take `copy(text, { clamp })`, `clamp` the slot's narrowest line in em: no sentence blocks (a
   sentence box would be one tall line to the clamp) and no tie or nbsp run wider than that line by `emWidth(text)`, an
   upper bound of the system font's width: the app's `--font-text` at every size the app draws text at (the type tokens
@@ -527,10 +531,12 @@ the class `.t-copy` (text-wrap: pretty: no one-word last line), and its text goe
   - Hangul, kana, Han, CJK punctuation, jamo ("ㅋ"), enclosed and compatibility forms ("㈜", "㎏") and full-width forms 1
     (0.99; Hangul is 0.87 here and near 1 in other fonts, so it stays wide); old jamo, compatibility ideographs and five
     brackets and marks 1.03 (1.02: "ㆼ", "〚");
-  - a space and . , : ; · ! | ' i j l I / ‘ ’ 0.32; t f r ( ) [ ] { } 0.39; "1" * " - ° “ ” • 0.48; a s x z k v y J ? `
-    † ‡ 0.56; the other small letters, E F L "2" "3" "5" "7" _ – 0.63; the other digits, B K P R S T Y Z # $ + < = > ^ ~
-    and Latin-1's other symbols 0.67; the other capitals, w, & and Latin-1's letters 0.78; m M … — 0.88; W @ % æ Æ © ←
-    ↑ → ↓ ₩ 0.97: each ASCII character on the narrowest of the steps that holds it;
+  - ASCII and Latin-1 each at its own width, rounded up to 0.001 (a table: a space and a nbsp 0.284, "·" 0.3, "i" 0.25,
+    "1" 0.467, "a" 0.555, "m" 0.873, "W" 0.97), and a pair of them whose kerning widens it adds that on its first
+    character (348 pairs of 46,656 with the marks below: "_j" 0.079, "r’" 0.064, "Tì" 0.059);
+    qa/fixtures/em-widths.mjs `EM_STRINGS` keeps every such pair and 173 strings (Latin words, domains, numbers, runs),
+    each the widest drawn over the same sizes and engines, and text.test.ts checks `emWidth` is never under them;
+  - the marks Korean copy uses past Latin-1 on steps: ‘ ’ 0.32, “ ” • 0.48, † ‡ 0.56, – 0.63, … — 0.88, ← ↑ → ↓ ₩ 0.97;
   - emoji, the other Latin, Greek and Cyrillic letters and "‰" "‱" 1.5 (1.47; a skin tone after an emoji and an emoji
     joined to the one before add nothing, a keycap's frame 1); the other symbols 1.2 ("℃" 1.19, "★" 1.03); other
     scripts and the five widest symbols 4.7 ("﷽" 3.21, cuneiform up to 4.64).
@@ -539,7 +545,12 @@ the class `.t-copy` (text-wrap: pretty: no one-word last line), and its text goe
   and 0.59), and WebKit draws emoji on whole pixels (1.47 em at 13.65 px, 1.08 at 100). A first cut measured at 100 px
   still let "“😂😂😂😂😂”처럼" (9.96 em drawn, 8.4 by that cut) wrap inside its box in the owner's bubble of the room card
   (WebKit, 320, text size 100 %). Measured with the fonts macOS (and iOS) draws; other platforms' fonts are not
-  measured, and Hangul's 1 keeps a margin there. Until snap-fnd-em it was a rough measure (Hangul, kana and CJK 1, the
+  measured, and Hangul's 1 keeps a margin there. Until snap-fnd-em-latin ASCII sat on nine steps (0.32 to 0.97) and
+  Latin-1 on two: a Latin string counted ×1.067 its drawn width (the median of 5,729 ASCII and Latin-1 strings, ×1.190
+  at p90), ×1.008 by the table (×1.022), none under in 10,656 strings (words, domains, mails, numbers, runs, curly
+  quotes) at the app's 69 sizes in both engines; the steps' margins hid most kerning but not all: 13 pairs drew wider
+  than they counted ("r’" 0.71, drawn 0.745; ",/" 0.64, drawn 0.645).
+  Until snap-fnd-em it was a rough measure (Hangul, kana and CJK 1, the
   narrow marks 0.3, anything else 0.6) that counted jamo outside the syllables, emoji, most capitals and some digits
   under their width. Through 17 clamps (the banner's 10 and 5, the room card's 15), by the widths drawn at the app's
   sizes, it let 76 boxes over their line in the saved replies (1576 lines, 238,574 boxes), 1044 in 268 chat-style lines
@@ -547,17 +558,19 @@ the class `.t-copy` (text-wrap: pretty: no one-word last line), and its text goe
   capitals, numbers and emoji; 0 by `emWidth`, and 0 in the room fixture either way. On the replies it ties 13,545
   character boundaries more and 7,223 fewer: boxes that fit the font but not the bound's margins (the steps, Hangul's
   1, the smallest size), "06-6786-8880," 7.50 em drawn and 7.94 by `emWidth`, "OSAKA(오사카" 6.40 and 7.07 against the
-  room's 6.7. On the room card (its two highlights, one the owner's, a 4-line clamp; four long ties at 320 and 390,
+  room's 6.7 (7.57 and 6.81 by the per-character widths).
+  On the room card (its two highlights, one the owner's, a 4-line clamp; four long ties at 320 and 390,
   text size 100, 120 and 130 %, both engines: 96 highlights) the rough measure showed 5 or 6 lines in 15, each a tie
   wider than its line wrapping inside at 320 ("“😂😂😂😂😂”처럼" 121.6–152.3 px, "(ㅋㅋㅋㅋㅋㅋㅋㅋ)", "ㅋㅋㅋㅋㅋㅋㅋㅋ·");
   `emWidth` 0. The banner (16 bodies at 320 and 390, 100 and 130 %): ties wrapped inside 2 → 0, bodies cut by the
   height stop 4 and 4.
   That holds for the "·" rider too: past the clamp the dot stays apart and may open a line, and the word keeps its own
-  tie. At 5.4 em (the room card's rows at text size 130 %) "32,400원&nbsp;·" is 5.23 em and rides; "132,400원&nbsp;·"
-  is 5.71 em, so "132,400원" (5.07) is tied alone and the dot may open the next line (WebKit's pretty takes that break
+  tie. At 5.4 em (the room card's rows at text size 130 %) "32,400원&nbsp;·" is 5.03 em and rides; "132,400원&nbsp;·"
+  is 5.50 em, so "132,400원" (4.92) is tied alone and the dot may open the next line (WebKit's pretty takes that break
   even where the pair fits). Before, the run was left untied and WebKit split "132, / 400원": a split amount
-  reads worse than a dot at a line's start. Beside 실행 취소 (5 em) "132,400원" is over the bound and left untied (4.73
-  em drawn at 11.7 px). Pretty stays on in these slots: greedy lines (`text-wrap-style: auto`)
+  reads worse than a dot at a line's start. Beside 실행 취소 (5 em) "132,400원" is tied too (4.73
+  em drawn at 11.7 px; with ASCII on steps, 5.07, it was left untied).
+  Pretty stays on in these slots: greedy lines (`text-wrap-style: auto`)
   took 4 of the 6 dot starts in the banner probe away, but gave 40 of the 168 bodies shown whole on two lines a
   one-word second line (pretty: 0 of 164) and split one more number. -webkit-line-clamp counts a box that wraps inside
   as one line, so a 2-line clamp showed three, up to five with a long 「…」 quote, at 320 with text size 130 %. The

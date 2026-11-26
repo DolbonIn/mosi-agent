@@ -146,6 +146,17 @@ describe("the model reads a text file to the end, up to the caps", () => {
     expect(sent).toContain(`전체 ${n(45_009)}자 중 앞 ${n(head.length)}자만 읽었어요`);
   });
 
+  test("a Windows (CRLF) file cut at a line break: the line's \\r goes with it, and the count is of what is left", async () => {
+    const me = (await h.signup("alice")) as Me;
+    const text = prose(40_000, "윈").replaceAll("\n", "\r\n");
+    const nl = text.lastIndexOf("\n", 29_999);
+    expect(text[nl - 1]).toBe("\r");
+    const head = text.slice(0, nl - 1);
+    expect(head.endsWith("\r")).toBe(false);
+    const f = await file(me.token, "윈도우.txt", text);
+    expect(await send(me, "봐줘", [f])).toBe(`봐줘\n\n${cutNote("윈도우.txt", text, head)}`);
+  });
+
   test("no line break near the cap: cut at 30,000 characters, or 29,999 when the 30,000th is the first half of a surrogate pair", async () => {
     const me = (await h.signup("alice")) as Me;
     const flat = "가".repeat(31_000);
@@ -210,6 +221,19 @@ describe("a deleted text file: rows made before (text/plain of up to 8 KB inline
     expect(llmOf(id)).toEqual([
       { role: "user", content: `봐줘\n\n[첨부: 메모.txt — 보관함에서 지운 파일이라 내용이 없어요]\n${bigNote}\n[첨부: 사진.png (image/png, 1KB) — 내용은 볼 수 없어요]\n\n(둘러보기 안내)` },
     ]);
+  });
+
+  test("an old row with a file of exactly 8,192 bytes (inline then) and a 12 KB one: deleting the 12 KB file finds the row by the old rule", async () => {
+    const me = (await h.signup("alice")) as Me;
+    const edge = "가".repeat(2_730) + "AB"; // 8,190 + 2 bytes
+    expect(new TextEncoder().encode(edge).length).toBe(8 * 1024);
+    const small = await file(me.token, "경계.txt", edge);
+    const big = await file(me.token, "긴글.txt", prose(5_000, "옛"));
+    const before = await notesBefore(me.session.user.id, [small, big]);
+    expect(before.startsWith(`[첨부: 경계.txt]\n${edge}\n`)).toBe(true);
+    const id = oldRow(me, "봐줘", [small, big], `봐줘\n\n${before}`);
+    expect((await del(me, big.id)).status).toBe(200);
+    expect(llmOf(id)).toEqual([{ role: "user", content: `봐줘\n\n[첨부: 경계.txt]\n${edge}\n[첨부: 긴글.txt — 보관함에서 지운 파일이라 내용이 없어요]` }]);
   });
 
   test("an old row whose 12 KB text file is deleted: its short note becomes the deleted-file note; the small file's text stays", async () => {

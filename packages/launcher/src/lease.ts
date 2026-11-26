@@ -9,7 +9,12 @@ export interface Lease {
 }
 
 const MAX_QUEUED = 20;
-const MAX_STEER_CHARS = 4000;
+/**
+ * A steered line is the model's copy of the person's line, files included: up to 4,000 characters of text and 50,000
+ * of text files (the server's caps), with room for their notes. (4,000 before 11-26, which cut a file sent while the
+ * agent was working, with no note.)
+ */
+export const MAX_STEER_CHARS = 64_000;
 
 class ActiveLease implements Lease {
   #queue: string[];

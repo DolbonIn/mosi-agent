@@ -231,12 +231,48 @@ const count = (n: number) => n.toLocaleString("ko-KR");
 const TELL_ONCE = "이 파일을 두고 처음 답할 때 한 번, ";
 
 /**
- * What the model gets for a message's files, after the text (threads.ts llmUserContent): each file's note (fileNotes),
- * one per line.
+ * What the model gets for a person's line that came with files (threads.ts llmUserContent): the text, a blank line, then
+ * each file's note (fileNotes), one per line. A line with no text whose files the model reads (a text file, whole or
+ * cut) begins with FILES_ONLY_NOTE in place of the text, so the file's text reads as what the person sent (a long
+ * message the app turned into a file arrives so); one with only images or PDFs begins with nothing. `rule` "v1" makes
+ * the notes as before 11-26 (no line was sent without text then).
  */
-export function attachmentNotes(core: Core, userId: string, atts: AttachmentRef[], rule: NoteRule = "now"): string {
-  return fileNotes(core, userId, atts, rule).join("\n");
+export function withFiles(core: Core, userId: string, text: string, atts: AttachmentRef[], rule: NoteRule = "now"): string {
+  return linesOf(text, fileNotes(core, userId, atts, rule), rule);
 }
+
+/**
+ * What stands for a line sent with files and no text where a line is shown (a friend thread's list row, a friend's
+ * banner; DD 1811): "사진" / "사진 N장" when every file is an image, else the first other file's name, with " 외 N개" for
+ * the rest. The stored row keeps its empty text.
+ */
+export function filesLine(atts: Pick<AttachmentRef, "filename" | "mime">[]): string {
+  const other = atts.find((a) => !a.mime.startsWith("image/"));
+  if (!other) return atts.length > 1 ? `사진 ${atts.length}장` : "사진";
+  return atts.length > 1 ? `${other.filename} 외 ${atts.length - 1}개` : other.filename;
+}
+
+/**
+ * The title of the person's new thread whose first line is files with no text (DD 1811): the first file that is not
+ * an image, its name without the extension (40 characters at most, as an automatic title). Null when every file is an
+ * image (the automatic title then comes as before).
+ */
+export function filesTitle(atts: Pick<AttachmentRef, "filename" | "mime">[]): string | null {
+  const name = atts.find((a) => !a.mime.startsWith("image/"))?.filename;
+  if (!name) return null;
+  const bare = name.replace(/\.[^.\s]{1,10}$/, "").trim() || name;
+  return Array.from(bare).slice(0, 40).join("");
+}
+
+/** Described, with no sample answer (DD 1736 §5). */
+export const FILES_ONLY_NOTE =
+  "[이 사람이 글 없이 파일만 보냈어요. 아래 파일의 글을 이 사람이 보낸 메시지로 읽고 답해 주세요. 글에 부탁이 있으면 그대로 해 주세요. 파일을 받았다는 말로만 끝내지 마세요]";
+
+const linesOf = (text: string, notes: FileNote[], rule: NoteRule) =>
+  `${text || (rule === "now" && notes.some((n) => n.read) ? FILES_ONLY_NOTE : "")}\n\n${notes.map((n) => n.note).join("\n")}`;
+
+/** A file's note in the model's copy, and whether it holds any of the file's text. */
+type FileNote = { note: string; read: boolean };
 
 /**
  * Each file's note, in order. A deleted file: only that it was deleted. A text file (plain or Markdown): its text,
@@ -246,18 +282,19 @@ export function attachmentNotes(core: Core, userId: string, atts: AttachmentRef[
  * (text/plain of up to 8 KB inline whole, a short note for the rest). Synchronous (≤ 10 files, each read once) so a
  * delete can make them again inside its transaction.
  */
-function fileNotes(core: Core, userId: string, atts: AttachmentRef[], rule: NoteRule): string[] {
-  const out: string[] = [];
+function fileNotes(core: Core, userId: string, atts: AttachmentRef[], rule: NoteRule): FileNote[] {
+  const out: FileNote[] = [];
+  const push = (note: string, read = false) => out.push({ note, read });
   let left = TEXT_MESSAGE_MAX_CHARS;
   for (const a of atts) {
     if (a.deleted) {
-      out.push(deletedFileNote(a));
+      push(deletedFileNote(a));
       continue;
     }
     const other = `[첨부: ${a.filename} (${a.mime}, ${Math.ceil(a.size / 1024)}KB) — 내용은 볼 수 없어요]`;
     const v1 = rule === "v1";
     if (v1 ? a.mime !== "text/plain" || a.size > V1_INLINE_BYTES : !READ_TEXT_MIMES.has(a.mime)) {
-      out.push(other);
+      push(other);
       continue;
     }
     const cap = v1 ? Infinity : Math.min(TEXT_FILE_MAX_CHARS, left);
@@ -265,24 +302,25 @@ function fileNotes(core: Core, userId: string, atts: AttachmentRef[], rule: Note
     try {
       file = readText(attachmentPath(core, userId, a.id), cap + 1);
     } catch {
-      out.push(other);
+      push(other);
       continue;
     }
     if (file.chars <= cap) {
-      out.push(`[첨부: ${a.filename}]\n${file.text}`);
+      push(`[첨부: ${a.filename}]\n${file.text}`, true);
       left -= file.chars;
       continue;
     }
     const head = cutText(file.text, cap);
     if (!head) {
-      out.push(`[첨부: ${a.filename} (${count(file.chars)}자) — 이 메시지에 실을 수 있는 글자 수를 넘어서 읽지 못했어요. ${TELL_ONCE}읽지 못했다는 것을 사람에게 알려 주세요]`);
+      push(`[첨부: ${a.filename} (${count(file.chars)}자) — 이 메시지에 실을 수 있는 글자 수를 넘어서 읽지 못했어요. ${TELL_ONCE}읽지 못했다는 것을 사람에게 알려 주세요]`);
       continue;
     }
     left -= head.length;
-    out.push(
+    push(
       `[첨부: ${a.filename} — 전체 ${count(file.chars)}자 중 앞 ${count(head.length)}자만 읽었어요. 뒤 ${count(file.chars - head.length)}자는 이 대화에 없어요. ` +
         `${TELL_ONCE}앞부분만 읽었다는 것과 읽은 양을 사람에게 알려 주세요]\n` +
         `${head}\n[첨부: ${a.filename} — 여기서 잘렸어요]`,
+      true,
     );
   }
   return out;
@@ -345,14 +383,14 @@ function forgetAttachmentText(core: Core, ownerId: string, row: MessageRow, was:
     let f = made.get(rule);
     if (!f) {
       const notes = fileNotes(core, ownerId, was, rule);
-      made.set(rule, (f = { notes, head: `${row.text}\n\n${notes.join("\n")}` }));
+      made.set(rule, (f = { notes: notes.map((n) => n.note), head: linesOf(row.text, notes, rule) }));
     }
     return f;
   };
   // the file's text as each rule put it in: in the message (the message cap may have cut it) or alone
   let texts: string[] | undefined;
   const textsOf = () =>
-    (texts ??= [...new Set([form("now").notes[was.indexOf(target)], fileNotes(core, ownerId, [target], "now")[0], form("v1").notes[was.indexOf(target)]])].filter(
+    (texts ??= [...new Set([form("now").notes[was.indexOf(target)], fileNotes(core, ownerId, [target], "now")[0]?.note, form("v1").notes[was.indexOf(target)]])].filter(
       (x): x is string => !!x && (x.startsWith(`[첨부: ${target.filename}]\n`) || x.startsWith(`[첨부: ${target.filename} — 전체 `)),
     ));
   let changed = false;
@@ -360,7 +398,7 @@ function forgetAttachmentText(core: Core, ownerId: string, row: MessageRow, was:
     if (m.role !== "user" || typeof m.content !== "string") return m;
     let c = m.content;
     const rule = (["now", "v1"] as const).find((r) => c.startsWith(form(r).head));
-    if (rule) c = `${row.text}\n\n${attachmentNotes(core, ownerId, now, rule)}` + c.slice(form(rule).head.length);
+    if (rule) c = withFiles(core, ownerId, row.text, now, rule) + c.slice(form(rule).head.length);
     else for (const t of textsOf()) if (c.includes(t)) c = c.split(t).join(deletedFileNote(target));
     if (c === m.content) return m;
     changed = true;

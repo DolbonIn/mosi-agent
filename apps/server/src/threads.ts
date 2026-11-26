@@ -19,7 +19,7 @@ import {
 import { bad, forbidden, HttpError, json, notFound, readJson, type Ctx } from "./http.ts";
 import { activeThreadOf, holdLease, MAX_QUEUED_TURNS, noteSteered, parseCall, queuedTurns, streamQueuedTurn, streamTurn, waitForStoppedTurn, type HeldLease } from "./turns.ts";
 import { areFriends } from "./friends.ts";
-import { attachmentNotes, attachmentRef } from "./archive.ts";
+import { attachmentRef, filesLine, filesTitle, withFiles } from "./archive.ts";
 import { clampInt, iGa, newId, preview, safeJson } from "./util.ts";
 import { cutToHeard, withVoiceNote } from "./history.ts";
 import { errInfo } from "./log.ts";
@@ -35,9 +35,9 @@ function requireThread(core: Core, threadId: string, userId: string): ThreadRow 
   return t;
 }
 
-/** LLM-side user content: the text plus a note per attachment (text files inline up to their caps; archive.ts attachmentNotes). */
+/** LLM-side user content: the text plus a note per attachment (text files inline up to their caps; archive.ts withFiles). */
 function llmUserContent(core: Core, userId: string, text: string, atts: AttachmentRef[]): string {
-  return atts.length ? `${text}\n\n${attachmentNotes(core, userId, atts)}` : text;
+  return atts.length ? withFiles(core, userId, text, atts) : text;
 }
 
 function mentionsAgent(text: string, agentName: string): boolean {
@@ -103,7 +103,9 @@ export function threadRoutes(core: Core) {
       const body = await readJson(c.req);
       if (typeof body.text !== "string") throw bad("메시지를 입력해 주세요", "empty_message");
       const text = body.text.trim();
-      if (!text) throw bad("메시지를 입력해 주세요", "empty_message");
+      // files may come without text (a photo alone, a long message the app turned into a file)
+      const withAttachments = Array.isArray(body.attachmentIds) && body.attachmentIds.length > 0;
+      if (!text && !withAttachments) throw bad("메시지를 입력해 주세요", "empty_message");
       if (text.length > MAX_MESSAGE_CHARS) throw new HttpError(413, "message_too_long", `메시지는 ${MAX_MESSAGE_CHARS.toLocaleString("ko-KR")}자까지 보낼 수 있어요`);
       const mode = body.mode === "voice" ? "voice" : "text";
       let attachments: AttachmentRef[] = [];
@@ -130,12 +132,19 @@ export function threadRoutes(core: Core) {
       // 둘러보기's 부탁하기 sends the template's short line; the how-to rides along in the model copy only
       const hint = thread.kind === "task" && isNewOwnThread(thread, userId) ? templateHint(user, text) : null;
       const content = llmUserContent(core, userId, text, attachments) + (hint ? `\n\n${hint}` : "");
+      // a new thread whose first line is files with no text is named after the file (the model's title would read the
+      // file's text, or only notes)
+      const title = !text && thread.kind === "task" && thread.auto_title === 1 && isNewOwnThread(thread, userId) ? filesTitle(attachments) : null;
       // everything below is synchronous until streamTurn, so the busy/steer decision can't race
       const now = core.now();
       const userMsgId = newId("m");
       const insertUserRow = (steered: boolean) => {
         db.insertMessage({ id: userMsgId, threadId: thread.id, role: "user", text, attachments, llm: [{ role: "user", content }], steered, createdAt: now });
         for (const a of attachments) db.setAttachmentThread(userId, a.id, thread.id);
+        if (title) {
+          db.setThreadTitle(thread.id, title);
+          publishThread(core, thread.id);
+        }
       };
 
       const raw = deps.launcher.tryAcquire(userId);
@@ -372,7 +381,7 @@ export function threadRoutes(core: Core) {
       const id = newId("m");
       db.tx(() => {
         db.insertMessage({ id, threadId: thread.id, role: "user", text, attachments, authorUserId: userId, authorKind: "human", createdAt: now });
-        db.touchThread(thread.id, now, preview(`${me.display_name}: ${text}`));
+        db.touchThread(thread.id, now, preview(`${me.display_name}: ${text || filesLine(attachments)}`));
         db.setUnread(thread.id, peerId, true);
       });
       // the friend and the sender's own other devices (the sending one merges it by id with the 201 / start); a line that
@@ -381,7 +390,7 @@ export function threadRoutes(core: Core) {
       publishThread(core, thread.id);
       const peer = db.userById(peerId);
       if (peer && settingsOf(peer).notifications.friendMessages) {
-        core.events.publish(peerId, { type: "notification", title: `${me.display_name} 님`, body: preview(text, 80), threadId: thread.id, messageId: id, icon: "people" });
+        core.events.publish(peerId, { type: "notification", title: `${me.display_name} 님`, body: preview(text || filesLine(attachments), 80), threadId: thread.id, messageId: id, icon: "people" });
       }
       const userMessage = messageView(core, db.getMessage(id)!, userId);
       if (!lease) return json({ delivered: true, userMessage }, 201);

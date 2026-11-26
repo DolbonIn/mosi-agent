@@ -13,6 +13,6 @@ export {
   type SystemPromptContext,
   type WorkspaceConfig,
 } from "./launcher";
-export type { Lease } from "./lease";
+export { MAX_STEER_CHARS, type Lease } from "./lease";
 export { bm25Search, tokenize, type Bm25Doc } from "./bm25";
 export { SAFETY_NOTICES, SAFETY_VERSION, agentsMd, defaultPersona } from "./templates";

@@ -274,9 +274,20 @@ export function withVoiceNote(llm: LlmMessage[], cut: boolean): LlmMessage[] {
   return out.length < llm.length || cut ? [...out, VOICE_NOTE_MESSAGE] : llm;
 }
 
-/** The launcher trims steered text and caps it at 4000 chars; compare on that form. */
-const STEER_CAP = 4000;
+/** The launcher trims steered text and caps it (lease.ts MAX_STEER_CHARS); compare on that form. */
+const STEER_CAP = 64_000;
+/** the cap before 11-26: what a turn of then took in of a longer line */
+const OLD_STEER_CAP = 4_000;
 export const steerKey = (s: string) => s.trim().slice(0, STEER_CAP);
+
+/**
+ * Whether `injected` (what the launcher put into a turn: trimmed and capped) is the steered line `line`: in the form of
+ * now, or in that of before 11-26, which a stored turn of then holds for a line over 4,000 characters.
+ */
+export function sameSteer(line: string, injected: string): boolean {
+  const key = steerKey(injected);
+  return key === steerKey(line) || (key.length === OLD_STEER_CAP && key === line.trim().slice(0, OLD_STEER_CAP));
+}
 
 /** What a user row sent to the model (attachments inlined), falling back to its visible text. */
 export function userContentOf(row: MessageRow): string {
@@ -315,9 +326,9 @@ function unanswered(list: MessageRow[], idx: number, answeredTail: boolean): boo
 export function historyFromRows(rows: MessageRow[], opts: { excludeTrailingUserTexts?: Set<string>; answeredTail?: boolean } = {}): LlmMessage[] {
   let list = rows;
   if (opts.excludeTrailingUserTexts?.size) {
-    const ex = new Set([...opts.excludeTrailingUserTexts].map(steerKey));
+    const ex = [...opts.excludeTrailingUserTexts];
     let end = list.length;
-    while (end > 0 && list[end - 1]!.role === "user" && ex.has(steerKey(userContentOf(list[end - 1]!)))) end--;
+    while (end > 0 && list[end - 1]!.role === "user" && ex.some((t) => sameSteer(userContentOf(list[end - 1]!), t))) end--;
     list = list.slice(0, end);
   }
   const out: LlmMessage[] = [];
@@ -327,8 +338,8 @@ export function historyFromRows(rows: MessageRow[], opts: { excludeTrailingUserT
     if (row.steered && row.role === "user") {
       const next = list.slice(idx + 1).find((r) => r.role === "assistant");
       const nextLlm = next ? llmOf(next) : null;
-      const key = steerKey(userContentOf(row));
-      if (nextLlm?.some((m) => m.role === "user" && typeof m.content === "string" && steerKey(m.content) === key)) continue;
+      const line = userContentOf(row);
+      if (nextLlm?.some((m) => m.role === "user" && typeof m.content === "string" && sameSteer(line, m.content))) continue;
     }
     if (isSystemRequest(row) && unanswered(list, idx, !!opts.answeredTail)) continue;
     if (llm) {
