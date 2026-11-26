@@ -191,6 +191,19 @@ describe("a deleted file in the model's copy", () => {
     expect(user.content).toBe(`이거 정리해줘\n\n[첨부: 메모.txt — 보관함에서 지운 파일이라 내용이 없어요]\n[첨부: 목록.txt]\n우산\n충전기\n[첨부: 사진.png (image/png, 1KB) — 내용은 볼 수 없어요]`);
   });
 
+  test("a deleted image or PDF (never inlined): its note becomes the deleted-file note in the next turn's history; the text file's note stays (DD 0130 F3)", async () => {
+    const me = (await h.signup("alice")) as Me;
+    const img = await upload(me.token, "사진.png", new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2]), "image/png");
+    const pdf = await upload(me.token, "표.pdf", new TextEncoder().encode("%PDF-1.4\n%%EOF\n"), "application/pdf");
+    const txt = await upload(me.token, "목록.txt", "우산");
+    await readSse(await h.req("POST", `/api/threads/${me.session.mainThreadId}/messages`, { token: me.token, body: { text: "이거 봐줘", attachmentIds: [img.id, pdf.id, txt.id] } }));
+    expect((await del(me.token, "attachments", img.id)).status).toBe(200);
+    expect((await del(me.token, "attachments", pdf.id)).status).toBe(200);
+    const history = await turn(me);
+    const user = history.find((m) => m.role === "user" && typeof m.content === "string" && m.content.startsWith("이거 봐줘"))!;
+    expect(user.content).toBe("이거 봐줘\n\n[첨부: 사진.png — 보관함에서 지운 파일이라 내용이 없어요]\n[첨부: 표.pdf — 보관함에서 지운 파일이라 내용이 없어요]\n[첨부: 목록.txt]\n우산");
+  });
+
   test("two files with the same name and the same text: only the deleted one's note changes; anything after the notes (a template hint) is kept", async () => {
     const me = (await h.signup("alice")) as Me;
     const one = await upload(me.token, "메모.txt", "같은 내용");

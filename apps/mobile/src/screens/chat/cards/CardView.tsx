@@ -35,6 +35,7 @@ export const CardView = memo(function CardView({
   tools,
   onSend,
   interactive = true,
+  deletedNote,
 }: {
   card: Card;
   /** position in the message (keys only) */
@@ -44,6 +45,8 @@ export const CardView = memo(function CardView({
   tools: ToolActivity[];
   onSend: (text: string) => void;
   interactive?: boolean;
+  /** what a card deleted from the archive says (cards/deleted.ts: who deleted it, by the row's author) */
+  deletedNote?: string;
 }) {
   switch (card.type) {
     case "briefing":
@@ -55,8 +58,9 @@ export const CardView = memo(function CardView({
     case "connection_request":
       return <ConnectionRequestView card={card} threadId={threadId} onSend={onSend} interactive={interactive} />;
     case "artifact":
-      // html: the model's own page, drawn inline in a sandboxed frame (never folded: it is the answer)
-      return card.kind === "html" ? <HtmlArtifactCard card={card} /> : <ArtifactCard card={card} />;
+      // html: the model's own page, drawn inline in a sandboxed frame (never folded: it is the answer); once deleted from
+      // the archive, the one-row card like any other document (no frame: the page is gone)
+      return card.kind === "html" && !card.deleted ? <HtmlArtifactCard card={card} /> : <ArtifactCard card={card} note={deletedNote} />;
     case "results":
       return <ResultsCard card={card} />;
     case "weather":

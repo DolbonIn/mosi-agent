@@ -76,6 +76,16 @@ export interface ThreadMessages {
   error?: string;
   /** optimistic user messages whose send failed (keep them; offer "다시 보내기") */
   failed: ID[];
+  /**
+   * a reconnect may have missed changes here: the first page is read again when the thread is next on screen (catchUp).
+   * Which reconnect (a count): a read answers only the one it was sent for, not one that came while it was out
+   */
+  stale?: number;
+  /**
+   * when a re-read last dropped the pages held (more than a page missed; ms, new on every such re-read): the thread
+   * view starts over at the end, and rows dated before it don't enter (as on opening)
+   */
+  epoch?: number;
 }
 
 export interface ConnectionsState extends ConnectionsResponse {
@@ -229,7 +239,7 @@ function touchThread(threadId: ID, at: number) {
 
 // ───────────────────────────── mutators (used by events.ts too) ─────────────────────────────
 
-/** local only: the server clears `unread` on GET messages but publishes no thread_updated for it */
+/** this device's copy: the server clears `unread` on GET messages and tells the person's other devices (thread_updated) */
 export function markThreadRead(threadId: ID) {
   const s = threadsStore.get();
   const i = s.items.findIndex((t) => t.id === threadId);
@@ -246,8 +256,12 @@ export function upsertThread(thread: Thread) {
   threadsStore.set({ ...s, items: items.sort((a, b) => b.updatedAt - a.updatedAt) });
 }
 
-/** A message pushed by the server (or another device). Replaces an optimistic copy of the same user text. */
+/**
+ * A message pushed by the server (or another device). Replaces an optimistic copy of the same user text. A row the
+ * server deleted (message_deleted, or gone from a re-read page) stays out, should its push come late.
+ */
 export function appendMessage(threadId: ID, m: Message) {
+  if (deletedIds.has(m.id)) return;
   patchThread(threadId, (t) => {
     let items = t.items;
     if (!items.some((x) => x.id === m.id) && m.role === "user") {
@@ -405,6 +419,7 @@ export function resetSession(error?: string) {
   heldError = null;
   sentHere.clear();
   deletedIds.clear();
+  hellos = 0;
   island.idle();
   sessionStore.set({ status: "anon", session: null, error });
 }
@@ -440,11 +455,124 @@ export async function loadMessages(threadId: ID, { older = false }: { older?: bo
     const oldest = cur.items.find((m) => !isTempId(m.id));
     const page = await ep.messages(threadId, { before: older ? oldest?.createdAt : undefined });
     const messages = page.messages.filter((m) => !deletedIds.has(m.id));
+    // a re-read dropped the pages held meanwhile (refreshRecent): this page no longer joins on to them
+    if ((messagesStore.get()[threadId]?.epoch ?? 0) !== (cur.epoch ?? 0)) return patchThread(threadId, (t) => ({ ...t, loading: false }));
     patchThread(threadId, (t) => ({ ...t, items: mergeById(t.items, messages), loading: false, loaded: true, hasMore: page.hasMore }));
   } catch (e) {
     patchThread(threadId, (t) => ({ ...t, loading: false, error: toApiError(e).message }));
   }
 }
+
+// ── catching up after a reconnect (screens/chat/catchUp.ts): the server does not replay events sent while this device
+// was away, so the thread list and the first page of a thread on screen are read again and merged in (DD 2259 §6, 0327)
+
+/** `hello` counted since sign-in: the first one comes with the reads the app starts with, later ones are reconnects */
+let hellos = 0;
+/** whether this `hello` is a reconnect (not the first since sign-in; resetSession counts again) */
+export function noteHello(): boolean {
+  return ++hellos > 1;
+}
+
+/**
+ * Read the thread list again and merge it in. The answer wins, except for a thread changed here while the request was
+ * out (a thread_updated, a local read or touch: its object is no longer the one held when the request went), which keeps
+ * its change; archiving, renaming and reading don't move updatedAt, so it can't decide. A thread the answer leaves out
+ * goes (deleted, unfriended) unless it came in meanwhile. Threads in `shown` stay read: their view reads the first page.
+ */
+export async function refreshThreads(shown: ReadonlySet<ID> = new Set()): Promise<void> {
+  const before = new Map(threadsStore.get().items.map((t) => [t.id, t] as const));
+  let fetched: Thread[];
+  try {
+    fetched = await ep.threads();
+  } catch {
+    return; // keep what we have; the next reconnect or opening the drawer reads again
+  }
+  const cur = threadsStore.get();
+  const now = new Map(cur.items.map((t) => [t.id, t] as const));
+  const touched = (id: ID) => now.has(id) && now.get(id) !== before.get(id);
+  const items: Thread[] = [];
+  for (const t of fetched) {
+    const kept = touched(t.id) ? now.get(t.id)! : t;
+    items.push(shown.has(t.id) && kept.unread ? { ...kept, unread: false } : kept);
+  }
+  const listed = new Set(fetched.map((t) => t.id));
+  for (const t of cur.items) if (!listed.has(t.id) && (!before.has(t.id) || touched(t.id))) items.push(t);
+  threadsStore.set({ ...cur, items: items.sort((a, b) => b.updatedAt - a.updatedAt), loading: false, loaded: true, error: undefined });
+}
+
+let staleCount = 0;
+/** every thread whose pages are held reads its first page again when it is next on screen (ThreadView) */
+export function markThreadsStale() {
+  const all = messagesStore.get();
+  if (!Object.values(all).some((t) => t.loaded)) return;
+  const stale = ++staleCount;
+  messagesStore.set(Object.fromEntries(Object.entries(all).map(([id, t]) => [id, t.loaded ? { ...t, stale } : t])));
+}
+
+/**
+ * Read a thread's first page again and swap it in for the server rows it covers (DD 2259 §6): after the page's oldest
+ * row (the whole thread when there is no more), rows the page leaves out were deleted and go the way of
+ * message_deleted; rows changed or added here while the request was out (a push, this device's own turn) keep the
+ * change; optimistic and failed lines, older pages and receipts (composerStore) are not touched; a row the same as before
+ * keeps its object. A page that shares no row with the ones held, with more behind it (over a page missed), replaces
+ * them: `epoch` is set and the view starts over at the end. Two reads that overlap merge safely: each keeps what
+ * changed since it was sent, so the later answer landing first loses nothing.
+ */
+export async function refreshRecent(threadId: ID): Promise<void> {
+  const held = messagesStore.get()[threadId];
+  if (!held?.loaded) return;
+  const before = new Map(held.items.map((m) => [m.id, m] as const));
+  const answers = held.stale;
+  try {
+    const page = await ep.messages(threadId);
+    // a reconnect that came while this was out wants its own read (the rows it may have missed came after this one)
+    patchThread(threadId, (t) => ({ ...t, ...recentSwap(t, before, page.messages, page.hasMore), stale: t.stale === answers ? undefined : t.stale }));
+  } catch {
+    /* stays stale: read again when next on screen or at the next reconnect */
+  }
+}
+
+/** the swap itself (refreshRecent): `before` is the thread's rows when the request went, `rows` the page */
+export function recentSwap(t: ThreadMessages, before: ReadonlyMap<ID, Message>, rows: readonly Message[], hasMore: boolean): Partial<ThreadMessages> {
+  const page = rows.filter((m) => !deletedIds.has(m.id));
+  const now = new Map(t.items.map((m) => [m.id, m] as const));
+  const touched = (id: ID) => now.has(id) && now.get(id) !== before.get(id);
+  const oldest = page.length ? Math.min(...page.map((m) => m.createdAt)) : Infinity;
+  const held = [...before.values()].filter((m) => !isTempId(m.id));
+  const rebuild = hasMore && held.length > 0 && !page.some((m) => before.has(m.id));
+  const gone = new Set<ID>();
+  const listed = new Set(page.map((m) => m.id));
+  // deleted: a row held from before, inside what the page covers, that the page leaves out (and not changed meanwhile).
+  // With more behind, a row of the same ms as the page's oldest may have been cut by the limit (the server orders by
+  // created_at, then rowid): it stays (DD 0703; one really deleted then stays until the next full read)
+  for (const m of held) if (!listed.has(m.id) && !touched(m.id) && now.has(m.id) && (!hasMore || m.createdAt > oldest)) gone.add(m.id);
+  for (const id of gone) deletedIds.add(id);
+  // a line of ours still on its way whose stored row the page brings (a reconnect while sending): the row takes the
+  // optimistic copy's place, as its push would (appendMessage). Never a failed one: the server never stored it
+  const taken = new Set<ID>();
+  for (const p of page) {
+    if (p.role !== "user" || now.has(p.id)) continue;
+    const copy = t.items.find((m) => isTempId(m.id) && !t.failed.includes(m.id) && m.role === "user" && m.text === p.text && !taken.has(m.id));
+    if (!copy) continue;
+    taken.add(copy.id);
+    sentHere.add(p.id);
+  }
+  const items: Message[] = [];
+  for (const m of t.items) {
+    if (gone.has(m.id) || listed.has(m.id) || taken.has(m.id)) continue;
+    if (rebuild && before.has(m.id) && !isTempId(m.id)) continue; // the older pages go with a rebuild (not deleted: they read again)
+    items.push(m);
+  }
+  for (const p of page) {
+    const cur = now.get(p.id);
+    items.push(cur && (touched(p.id) || sameMessage(cur, p)) ? cur : p);
+  }
+  const draft = t.draft && listed.has(t.draft.messageId) ? null : t.draft;
+  // hasMore: false when the page is the whole thread; a rebuild starts over from the page; else the older pages' own
+  return { items: sortMessages(items), draft, ...(rebuild ? { hasMore, epoch: Math.max(Date.now(), (t.epoch ?? 0) + 1) } : hasMore ? {} : { hasMore: false }) };
+}
+
+const sameMessage = (a: Message, b: Message) => a === b || JSON.stringify(a) === JSON.stringify(b);
 
 export async function loadConnections(): Promise<void> {
   const s = connectionsStore.get();

@@ -115,6 +115,25 @@ onServerEvent((e) => {
 /** a `steers_dropped` named this line: its turn stopped or failed and nothing will answer it (the call asks for its notes) */
 export const steerDropped = (id: ID) => droppedSteers.has(id);
 /**
+ * After the notice the server keeps it on the row: every later view of such a line carries `steerDropped` (page reads,
+ * pushes; SERVER-CONTRACT "Steered lines left unanswered"). A device that missed the notice (asleep, offline) drops the
+ * receipt when the row comes in again: the catch-up after a reconnect (catchUp), a reload, a later push.
+ */
+let rowsSeen: Record<ID, readonly unknown[]> = {};
+messagesStore.subscribe(() => {
+  const all = messagesStore.get();
+  const ids: ID[] = [];
+  for (const [threadId, t] of Object.entries(all)) {
+    if (rowsSeen[threadId] === t.items) continue; // a running answer's text changes the draft, not the rows
+    for (const m of t.items) if (m.steerDropped && !droppedSteers.has(m.id)) ids.push(m.id);
+  }
+  rowsSeen = Object.fromEntries(Object.entries(all).map(([id, t]) => [id, t.items]));
+  if (!ids.length) return;
+  for (const id of ids) droppedSteers.add(id);
+  const s = receipts.get();
+  forget(ids.filter((id) => s[id] === "steered"));
+});
+/**
  * A live `message` push of the person's line with the receipt its sending device got from the request's answer: the
  * line gets it on this device too, so every open device of the person draws the same rows.
  *  - `steered: true`, a line the server steered into a running turn (the 202): "하던 일에 이어서 전했어요" (the error row

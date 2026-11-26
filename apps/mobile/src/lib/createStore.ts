@@ -50,11 +50,17 @@ export const shallowEqual = (a: unknown, b: unknown): boolean => {
   return true;
 };
 
-/** Subscribe to a store, optionally through a selector (re-renders only when the selection changes). */
+/**
+ * Subscribe to a store, optionally through a selector (re-renders only when the selection changes). The selection is
+ * kept for the state and the selector it came from: a selector that closes over props ("the thread with this id")
+ * reads the store again when it changes, even while the state stays the same (kept for the state alone, it returned
+ * the selection for the props before; composerStore's useAwaitingFollowUp reads the whole store around that). A new
+ * selection equal to the last by `isEqual` keeps the last one.
+ */
 export function useStore<T>(store: Store<T>): T;
 export function useStore<T, S>(store: Store<T>, selector: (s: T) => S, isEqual?: (a: S, b: S) => boolean): S;
 export function useStore<T, S>(store: Store<T>, selector?: (s: T) => S, isEqual: (a: S, b: S) => boolean = shallowEqual): S | T {
-  const memo = useRef<{ state: T; sel: S } | null>(null);
+  const memo = useRef<{ state: T; fn: (s: T) => S; sel: S } | null>(null);
   const selRef = useRef(selector);
   selRef.current = selector;
   const getSnapshot = useCallback(() => {
@@ -62,13 +68,13 @@ export function useStore<T, S>(store: Store<T>, selector?: (s: T) => S, isEqual:
     const sel = selRef.current;
     if (!sel) return state as unknown as S;
     const prev = memo.current;
-    if (prev && Object.is(prev.state, state)) return prev.sel;
+    if (prev && Object.is(prev.state, state) && prev.fn === sel) return prev.sel;
     const next = sel(state);
     if (prev && isEqual(prev.sel, next)) {
-      memo.current = { state, sel: prev.sel };
+      memo.current = { state, fn: sel, sel: prev.sel };
       return prev.sel;
     }
-    memo.current = { state, sel: next };
+    memo.current = { state, fn: sel, sel: next };
     return next;
   }, [store, isEqual]);
   return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);

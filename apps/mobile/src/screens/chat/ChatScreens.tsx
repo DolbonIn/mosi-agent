@@ -1,7 +1,7 @@
 import type { ID } from "@pickle/protocol";
 import { useEffect, useRef, useState } from "react";
 import * as ep from "../../api/endpoints";
-import { loadThreads, useAgent, useQuota, useSession, useThread } from "../../api/store";
+import { loadThreads, useAgent, useQuota, useSession } from "../../api/store";
 import { island } from "../../app/island";
 import { lazyScreen, nav, useNav, type ScreenProps } from "../../app/nav";
 import { setCompactTitle, useTopBarCenter, useTopBarRight } from "../../app/topBarStore";
@@ -10,6 +10,7 @@ import { DEFAULT_AVATAR } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { presentSheet } from "../../ui/Sheet";
 import { useCall } from "./call/callState";
+import { useKeptThread } from "./catchUp";
 import { setArchived } from "./DrawerContent";
 import { isMeetThread, MeetLive } from "./MeetLive";
 import { clearInvite, pendingInvite } from "./onboarding/state";
@@ -42,7 +43,7 @@ export function ChatTab({ route }: ScreenProps) {
 /** a pushed conversation: task / call / schedule / friend */
 export function ThreadScreen({ route }: ScreenProps) {
   const threadId = (route.params?.threadId as ID | undefined) ?? null;
-  const thread = useThread(threadId);
+  const thread = useKeptThread(threadId);
   const agent = useAgent();
   const active = useNav((s) => {
     const st = s.stacks[s.tab];

@@ -9,8 +9,10 @@ import { ContentSwap } from "../../motion/ContentSwap";
 import { t } from "../../motion/springs";
 import { Avatar } from "../../ui/Avatar";
 import { Icon } from "../../ui/Icon";
+import { copy } from "../../ui/Text";
 import { fitBubble, heldPieces, HOLD } from "./bubbleFit";
 import { CardView, foldable } from "./cards/CardView";
+import { deletedNote } from "./cards/deleted";
 import { markScheduleUndone } from "./cards/InfoCards";
 import { turnStarted, useAwaitingFollowUp, useReceipt } from "./composerStore";
 import { Markdown } from "./markdown";
@@ -98,7 +100,7 @@ export const MessageRow = memo(function MessageRow({
     return (
       <motion.div className="msg-row msg-me" data-failed={failed || undefined} {...enter}>
         <div className="bubble bubble-me">
-          {m.attachments.length > 0 && <Attachments items={m.attachments} />}
+          {m.attachments.length > 0 && <Attachments items={m.attachments} note={deletedNote(m.author, ctx.thread)} />}
           {m.text && <BubbleText text={m.text} fit={!m.attachments.length} />}
         </div>
         {failed ? (
@@ -127,7 +129,7 @@ export const MessageRow = memo(function MessageRow({
         <div className="msg-col">
           <span className="msg-author">{m.author?.name ?? `${ctx.thread?.peer?.displayName ?? "친구"} 님`}</span>
           <div className="bubble bubble-peer">
-            {m.attachments.length > 0 && <Attachments items={m.attachments} />}
+            {m.attachments.length > 0 && <Attachments items={m.attachments} note={deletedNote(m.author, ctx.thread)} />}
             {m.text && <BubbleText text={m.text} fit={!m.attachments.length} />}
           </div>
         </div>
@@ -137,7 +139,9 @@ export const MessageRow = memo(function MessageRow({
 
   const peerAgent = friend && author === "peer-agent";
   // friend threads already put each author's face beside the row; the main/task thread's turn head carries it
-  const body = <AssistantBody id={m.id} text={m.text} tools={m.tools} cards={m.cards} live={false} ctx={ctx} interactive={!peerAgent} face={friend ? null : ctx.agentSpec} />;
+  const body = (
+    <AssistantBody id={m.id} text={m.text} tools={m.tools} cards={m.cards} live={false} ctx={ctx} interactive={!peerAgent} face={friend ? null : ctx.agentSpec} deletedNote={deletedNote(m.author, ctx.thread)} />
+  );
   if (friend) {
     const spec: AvatarSpec = peerAgent ? { hue: hueOf(`${ctx.thread?.peer?.userId ?? "p"}:agent`), shape: "drop", eyes: "oval" } : ctx.agentSpec;
     return (
@@ -211,6 +215,7 @@ export function AssistantBody({
   ctx,
   interactive = true,
   face = null,
+  deletedNote,
 }: {
   id: ID;
   text: string;
@@ -221,6 +226,8 @@ export function AssistantBody({
   interactive?: boolean;
   /** the turn head's face; null in friend threads, whose rows carry the author's avatar and name already */
   face?: AvatarSpec | null;
+  /** what its cards deleted from the archive say (cards/deleted.ts) */
+  deletedNote?: string;
 }) {
   const shown = live ? commitPoint(text) : text;
   // the turn's line (tool status → the folded records and steps) comes first and the answer right after it; only
@@ -238,7 +245,7 @@ export function AssistantBody({
         </div>
       )}
       {cards.map((c, i) =>
-        foldable(c) ? null : <CardView key={cardKey(c, i)} card={c} index={i} messageId={id} threadId={ctx.threadId} tools={tools} onSend={ctx.onSend} interactive={interactive} />,
+        foldable(c) ? null : <CardView key={cardKey(c, i)} card={c} index={i} messageId={id} threadId={ctx.threadId} tools={tools} onSend={ctx.onSend} interactive={interactive} deletedNote={deletedNote} />,
       )}
     </div>
   );
@@ -252,11 +259,25 @@ function cardKey(c: ProtoCard, i: number) {
   return `${c.type}:${i}`;
 }
 
-function Attachments({ items }: { items: AttachmentRef[] }) {
+/**
+ * A message's files: a picture as itself, another file as a chip with its name, both opening the file. A file deleted
+ * from the archive (`deleted`, url "") is a one-row card in its place, like a deleted document card: a photo or
+ * document glyph by its mime, the filename, who deleted it (`note`, cards/deleted.ts), secondary colour, not a link
+ * (DD 2103, 2259 §7).
+ */
+export function Attachments({ items, note = "보관함에서 지웠어요" }: { items: AttachmentRef[]; note?: string }) {
   return (
     <div className="bubble-files">
       {items.map((a) =>
-        a.mime.startsWith("image/") ? (
+        a.deleted ? (
+          <div key={a.id} className="bubble-file is-deleted">
+            <Icon name={a.mime.startsWith("image/") ? "photo" : "doc"} size={18} />
+            <span className="bf-body">
+              <span className="bf-name">{a.filename}</span>
+              <span className="bf-note t-copy">{copy(note)}</span>
+            </span>
+          </div>
+        ) : a.mime.startsWith("image/") ? (
           <a key={a.id} href={tokenUrl(a.url)} target="_blank" rel="noopener noreferrer" className="bubble-img-link">
             <img className="bubble-img" src={tokenUrl(a.url)} alt={a.filename} loading="lazy" />
           </a>

@@ -735,6 +735,21 @@ a.res-link:active {
   flex: none;
   color: var(--label-3);
 }
+/* deleted from the archive (DD 2103, 2259 §7): nothing to open (no pointer, no press tint), the title in secondary
+   colour over who deleted it */
+.ccard-artifact.is-deleted {
+  cursor: default;
+}
+.ccard-artifact.is-deleted:active {
+  background: var(--surface);
+}
+.ccard-artifact.is-deleted .art-title {
+  color: var(--label-2);
+}
+.art-note {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
 .art-sheet {
   display: flex;
   flex-direction: column;

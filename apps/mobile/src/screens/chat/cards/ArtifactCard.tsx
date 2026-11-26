@@ -4,6 +4,7 @@ import * as ep from "../../../api/endpoints";
 import { BarChart } from "../../../ui/BarChart";
 import { Icon, type AppIconName } from "../../../ui/Icon";
 import { presentSheet } from "../../../ui/Sheet";
+import { copy } from "../../../ui/Text";
 import { Markdown } from "../markdown";
 import { dayClockKo } from "../util";
 
@@ -11,7 +12,9 @@ import { dayClockKo } from "../util";
  * Artifact card → sheet. The card is paper: a text-size kind glyph (no plate, meeting B / IT-9), the title, and the
  * kind as a word in the two-line preview ("문서 · 참석 4명 · 42분"); tapping it morphs a sheet out of
  * the card (presentSheet source) that loads the artifact: documents and checklists render as markdown, dashboards as
- * widgets (stat tiles, BarChart with the chart rule, lists).
+ * widgets (stat tiles, BarChart with the chart rule, lists). Deleted from the archive (`deleted`): the same glyph and
+ * title in secondary colour over who deleted it (`note`, cards/deleted.ts), no chevron, and nothing to tap (not a
+ * button, no focus: the document is gone, DD 2103 / 2259 §7); an html card comes here too, its page frame gone.
  */
 const KIND: Record<ArtifactRef["kind"], { icon: AppIconName; label: string }> = {
   document: { icon: "doc", label: "문서" },
@@ -21,8 +24,18 @@ const KIND: Record<ArtifactRef["kind"], { icon: AppIconName; label: string }> = 
   html: { icon: "doc", label: "페이지" },
 };
 
-export function ArtifactCard({ card }: { card: ArtifactRef }) {
+export function ArtifactCard({ card, note = "보관함에서 지웠어요" }: { card: ArtifactRef; note?: string }) {
   const k = KIND[card.kind] ?? KIND.document;
+  if (card.deleted)
+    return (
+      <div className="ccard ccard-artifact is-deleted">
+        <Icon name={k.icon} size={17} weight="medium" className="art-glyph" />
+        <span className="art-body">
+          <span className="art-title">{card.title}</span>
+          <span className="art-note t-copy">{copy(note)}</span>
+        </span>
+      </div>
+    );
   const open = (el: HTMLElement) => presentSheet({ source: el, title: card.title, render: () => <ArtifactBody id={card.artifactId} kind={card.kind} /> });
   return (
     <button type="button" className="ccard ccard-artifact" onClick={(e) => open(e.currentTarget)} aria-label={`${k.label} 열기: ${card.title}`}>

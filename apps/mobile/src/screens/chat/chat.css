@@ -290,10 +290,39 @@
   font-size: var(--t-subhead);
   max-width: 100%;
 }
-.bubble-file span {
+.bubble-file > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* in a friend's bubble (--surface) a chip of the same paper loses its edge: one step down, the page's --bg, as the bubble
+   is on the page (DD 0943; --fill would put a deleted chip's --label-2 at 4.40:1); more contrast adds the hairline the
+   bubbles and cards carry */
+.bubble-peer .bubble-file {
+  background: var(--bg);
+}
+:root[data-contrast="more"] .bubble-peer .bubble-file {
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+/* a file deleted from the archive: a one-row card in its place, like a deleted document card (DD 2259 §7): glyph,
+   filename, who deleted it, secondary colour, not a link */
+.bubble-file.is-deleted {
+  padding: 8px 12px;
+  color: var(--label-2);
+}
+.bubble-file.is-deleted > .bf-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  white-space: normal;
+}
+.bf-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bf-note {
+  font-size: var(--t-footnote);
 }
 
 /* ── assistant ── */

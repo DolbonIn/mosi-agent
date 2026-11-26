@@ -1,7 +1,7 @@
 import type { ID, Message } from "@pickle/protocol";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { cancelTurn, loadMessages, markThreadRead, messagesStore, retryMessage, sendMessage, useAgent, useMessages, useThread, useUi, type SendResult } from "../../api/store";
+import { cancelTurn, loadMessages, markThreadRead, messagesStore, refreshRecent, retryMessage, sendMessage, useAgent, useMessages, useUi, type SendResult } from "../../api/store";
 import { ChromePortal } from "../../app/ChromePortal";
 import { island } from "../../app/island";
 import { Screen, useScroller } from "../../app/Screen";
@@ -11,6 +11,7 @@ import { DEFAULT_AVATAR } from "../../ui/Avatar";
 import { Icon } from "../../ui/Icon";
 import { fitAhead } from "./bubbleFit";
 import { prewarmAudio } from "./call/audioUnlock";
+import { useKeptThread, useShownThread } from "./catchUp";
 import { launchCall } from "./call/launch";
 import { Composer } from "./Composer";
 import { dropStoppedSteers, errorAnchorOf, errorRowAfter, markReceipt, turnStarted, useReceipts } from "./composerStore";
@@ -59,7 +60,7 @@ function ThreadSkeleton() {
 function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active: boolean; header?: ReactNode; footer?: ReactNode }) {
   const scroller = useScroller();
   const data = useMessages(threadId);
-  const thread = useThread(threadId);
+  const thread = useKeptThread(threadId);
   const agent = useAgent();
   const ui = useUi();
   const content = useRef<HTMLDivElement>(null);
@@ -100,6 +101,11 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   useEffect(() => {
     if (active && data.loaded && thread?.unread) markThreadRead(threadId);
   }, [active, data.loaded, thread?.unread, threadId]);
+  // a reconnect may have missed changes (catchUp): on screen, the first page is read again and swapped in
+  useShownThread(threadId, active);
+  useEffect(() => {
+    if (active && data.loaded && data.stale) void refreshRecent(threadId);
+  }, [active, data.loaded, data.stale, threadId]);
 
   // ── scrolling ──
   // a smooth scroll to the end is in flight: its intermediate scroll events must not un-pin the list, and content that
@@ -231,10 +237,18 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
 
   // first page → start at the end (a newest answer taller than the screen: at its head); older page prepended → keep
   // what was on screen where it was
+  const epoch = useRef(data.epoch);
   useLayoutEffect(() => {
     const el = scroller?.current;
     if (!el || !data.loaded) return;
     const first = data.items[0]?.id ?? null;
+    if (epoch.current !== data.epoch) {
+      // a re-read replaced the pages held (over a page missed): start over at the end, as on opening (its rows don't
+      // enter: `since` below)
+      epoch.current = data.epoch;
+      positioned.current = false;
+      firstId.current = null;
+    }
     if (!positioned.current) {
       positioned.current = true;
       // a newest answer taller than the screen opens at its head (its first line under the top bar), not at its end;
@@ -366,6 +380,8 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   const items = data.items;
   if (data.draft) drafted.current.add(data.draft.messageId); // idempotent, so a repeated render is harmless
   const rows = (keys.current ??= rowKeys())(items);
+  // rows newer than the view enter; after a re-read that replaced the pages held, only rows newer than it
+  const since = Math.max(mountedAt.current, data.epoch ?? 0);
   // the running answer is the list's last row, keyed by the id its final message keeps: when the reply finishes the
   // final message takes over that row in place (MessageRow live)
   const draft = data.draft;
@@ -418,7 +434,7 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
         {[
           errorAt === -1 && errorRow,
           ...items.flatMap((m, i) => {
-            const fresh = rows.freshOf(m, () => m.createdAt > mountedAt.current && !drafted.current.has(m.id));
+            const fresh = rows.freshOf(m, () => m.createdAt > since && !drafted.current.has(m.id));
             const row = <Row key={rows.keyOf(m)} m={m} prev={items[i - 1]} ctx={ctx} failed={failed.has(m.id)} error={m.id === lastFailed ? data.error : undefined} fresh={fresh} />;
             return i === errorAt ? [row, errorRow] : [row];
           }),

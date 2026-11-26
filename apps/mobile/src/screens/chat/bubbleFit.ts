@@ -20,11 +20,14 @@
  * of the paragraph in a box of its own, so trying widths lays out the ruler and never the thread; each bubble gets
  * one width at the end, checked against its own line boxes. (A single character's box costs WebKit ~60 µs: reading
  * per character put 17–22 ms on each page of 50.) Scrolling over fitted bubbles costs nothing. A thread width or text
- * size change drops every cap and places the bubbles again like an open: in view now (ResizeObserver runs before
- * paint), the rest as they come near. The observer hears of a jump only after the paint that shows it, so the app's
- * own jumps to the end ("새 메시지", sending from far up) fit where they land and glide first (fitAhead); another jump
- * of more than two screens (no reader scrolls so) can show bubbles not yet fitted for a frame.
+ * size change drops every cap and places the bubbles again like an open: in view now, before paint (a text size as
+ * tierStore tells it, a width from a ResizeObserver), the rest as they come near. The observer hears of a jump only
+ * after the paint that shows it, so the app's own jumps to the end ("새 메시지", sending from far up) fit where they
+ * land and glide first (fitAhead); another jump of more than two screens (no reader scrolls so) can show bubbles not
+ * yet fitted for a frame.
  */
+
+import { tierStore } from "../../motion/tier";
 
 /** a last line with fewer visible characters than this is an orphan (qa/lib/lines.mjs "orphan": two or fewer) */
 const MIN_LAST = 3;
@@ -539,17 +542,21 @@ function refit(content: HTMLElement, t: Thread): void {
   place(content, t, all, true);
 }
 
+/** the thread's width or text size is not what it was placed at: place it again */
+function rekey(content: HTMLElement, t: Thread): void {
+  const key = keyOf(content);
+  if (key === t.key) return;
+  const had = t.key;
+  t.key = key;
+  if (had) refit(content, t);
+}
+
 let ro: ResizeObserver | null = null;
 function onResize(entries: ResizeObserverEntry[]): void {
   for (const e of entries) {
     const content = e.target as HTMLElement;
     const t = threads.get(content);
-    if (!t) continue;
-    const key = keyOf(content);
-    if (key === t.key) continue;
-    const had = t.key;
-    t.key = key;
-    if (had) refit(content, t);
+    if (t) rekey(content, t);
   }
 }
 
@@ -583,6 +590,29 @@ function flush(): void {
     if (t) place(content, t, els.sort(order), false);
   }
 }
+
+/**
+ * A text size change is placed before any observer hears of it. tierStore tells its listeners before tier.ts writes
+ * --text-scale (recompute: set, then apply), so a microtask from here runs once the new size is on <html>, still in the
+ * same task: the caps are in before layout is read for the next frame, and the key they were placed at is the one the
+ * observer then brings (nothing to do). Placed from the observer instead, the caps changed the thread's height after
+ * the observers had read it, and ThreadView's (same box, same depth) was left undelivered: WebKit reported
+ * "ResizeObserver loop completed with undelivered notifications" on 1.3 → 1. Heard from module load, so before any
+ * screen's own tierStore listener: one that reads the rows in a microtask of its own reads them with these caps in.
+ */
+let scale = tierStore.get().textScale;
+let scaleQueued = false;
+tierStore.subscribe(() => {
+  const next = tierStore.get().textScale;
+  if (next === scale) return;
+  scale = next;
+  if (scaleQueued) return;
+  scaleQueued = true;
+  queueMicrotask(() => {
+    scaleQueued = false;
+    for (const [content, t] of threads) rekey(content, t);
+  });
+});
 
 /**
  * Fit a bubble's text (`.bubble-text` inside `.thread-content`) now and whenever its thread's width changes. Call
