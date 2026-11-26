@@ -35,7 +35,7 @@ function requireThread(core: Core, threadId: string, userId: string): ThreadRow 
   return t;
 }
 
-/** LLM-side user content: the text plus short notes for attachments (small text files inlined; archive.ts attachmentNotes). */
+/** LLM-side user content: the text plus a note per attachment (text files inline up to their caps; archive.ts attachmentNotes). */
 function llmUserContent(core: Core, userId: string, text: string, atts: AttachmentRef[]): string {
   return atts.length ? `${text}\n\n${attachmentNotes(core, userId, atts)}` : text;
 }

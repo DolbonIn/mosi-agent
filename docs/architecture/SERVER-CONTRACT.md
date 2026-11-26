@@ -513,8 +513,25 @@ password, token, QR link/fingerprint or database key (tests grep the captured lo
 
 ## Attachments
 - `POST /api/attachments` multipart, field `file` (+ optional `threadId`) → 201
-  `{id, filename, mime, size, threadId, url:"/api/attachments/<id>/raw", createdAt}`. Raster images, PDF, text/plain
-  (no SVG). 413 `file_too_large` (10 MB) · 415 `unsupported_type` · 400 `invalid_upload`.
+  `{id, filename, mime, size, threadId, url:"/api/attachments/<id>/raw", createdAt}`. Raster images, PDF, plain text
+  and Markdown (no SVG, HTML or other text). Markdown is stored as `text/markdown` (`text/x-markdown` too); a file that
+  comes with no type or as `application/octet-stream` is told by its name (`.txt` text/plain, `.md`/`.markdown`
+  text/markdown). Bun's multipart parser types a file part by its name's extension alone, so a name without a known
+  extension is 415 whatever type the part says. Raw: text files (Markdown too) come as `text/plain; charset=utf-8`.
+  413 `file_too_large` (10 MB) · 415 `unsupported_type` · 400 `invalid_upload`.
+- What the model reads of a message's files (personal threads): a text file's text goes into the model's copy of the
+  message, up to 30,000 characters per file and 50,000 for all its files together, in order. A file cut there gets,
+  above its text, a note with its whole length, how much the model has and how much is missing
+  (`[첨부: 이름 — 전체 N자 중 앞 M자만 읽었어요. 뒤 N−M자는 이 대화에 없어요. …]`) and, where it stops,
+  `[첨부: 이름 — 여기서 잘렸어요]`; the cut falls on the last line break within 2,000 characters of the cap (else at
+  the cap, never inside a surrogate pair). A text file with nothing of the 50,000 left gets only a note that it was not
+  read. The person sees just the file's name, so both notes ask the model to tell them, once, in its first answer about
+  the file (described, with no sample line). Images and PDFs: a short note (`내용은 볼 수 없어요`). Cost: a full
+  Korean file is ~21k–36k tokens (estimate) on each model call of its turn and of the next turn, whose history still
+  holds the request (history keeps the last request whole; after that its 24 KB window drops the file and what came
+  before it). From the turn after next the model no longer has the file's text: a file meant to be followed for a whole
+  conversation has to be sent again. Rows made before 2026-11-26 had text/plain of up to 8 KB inline and a short note
+  for anything else.
 - Who reads: `GET /api/attachments/:id/raw` (and `GET /api/artifacts/:id`, `GET /api/blobs/:id`) serve the caller's
   own, or a friend's that the friend's side put in their friend thread (a photo or file they sent, their 모시's card),
   while both are still members of that thread and still friends. Anything else — another user, a friend outside that
@@ -531,7 +548,8 @@ password, token, QR link/fingerprint or database key (tests grep the captured lo
   `sys_create_artifact` call and result as a pair (found by the result's `data.artifactId`), the call's arguments
   without `content`, the result's `summary` saying it was deleted with `deleted: true` (replay does not take such an
   HTML card's call for a design-guide call); the message that sent the file
-  gets its files' notes made again (small text files inline, the deleted one as deleted), the text before and anything
+  gets its files' notes made again (text files inline as above, the deleted one as deleted; a row made before 2026-11-26
+  is found by that day's rule and made again by it, so it gets no text it never had), the text before and anything
   after kept. The visible answer text and memories are not changed. A document deleted while the turn that made it
   still runs is caught when the turn's answer row is written (same transaction): its card goes in marked, the row's
   model copy and a paused turn's approval messages without its content. An approval already waiting is not changed.

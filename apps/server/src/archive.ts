@@ -32,9 +32,26 @@ export function attachmentView(a: AttachmentRow): Attachment {
 
 export function allowedMime(mime: string): boolean {
   const m = mime.toLowerCase().split(";")[0]!.trim();
-  if (m === "application/pdf" || m === "text/plain") return true;
+  // text: plain and Markdown only (no HTML or any other text/*)
+  if (m === "application/pdf" || m === "text/plain" || m === "text/markdown" || m === "text/x-markdown") return true;
   // raster images only — SVG can carry script
   return /^image\/(png|jpe?g|gif|webp|heic|heif|avif|bmp)$/.test(m);
+}
+
+/**
+ * The type an upload is stored as, or null when it is not taken. A file that came without a type, or as
+ * application/octet-stream (iOS can send either), is told by its name: .txt is text/plain, .md and .markdown are
+ * text/markdown. Markdown is always stored as text/markdown. (Bun's multipart parser types a file part by its name's
+ * extension and leaves out the part's own Content-Type: a name without a known extension comes as "".)
+ */
+export function storedMime(type: string, filename: string): string | null {
+  let m = type.toLowerCase().split(";")[0]!.trim();
+  if (!m || m === "application/octet-stream") {
+    const ext = /\.([a-z0-9]+)$/i.exec(filename)?.[1]?.toLowerCase();
+    m = ext === "txt" ? "text/plain" : ext === "md" || ext === "markdown" ? "text/markdown" : "";
+  }
+  if (m === "text/x-markdown") m = "text/markdown";
+  return m && allowedMime(m) ? m : null;
 }
 
 export function sanitizeFilename(name: string): string {
@@ -184,35 +201,117 @@ function withoutContent(args: string): string {
   return JSON.stringify(rest);
 }
 
-/** Small text files go to the model inline, up to this size (threads.ts llmUserContent). */
-export const TEXT_ATTACHMENT_INLINE = 8 * 1024;
+/** Text files the model reads (threads.ts llmUserContent): plain text and Markdown. */
+export const READ_TEXT_MIMES: ReadonlySet<string> = new Set(["text/plain", "text/markdown"]);
+/**
+ * The most of one text file the model gets in a message, and of all the message's text files together, in characters
+ * (UTF-16 code units; tokens follow characters, not bytes). A Korean character is ~0.7–1.2 tokens and an English one
+ * ~0.25 (estimates), so a full Korean file is ~21k–36k tokens on each model call of its turn and of the next turn,
+ * whose history still holds the request (trimHistory keeps the last one; after that its 24 KB window drops the file):
+ * a file and one follow-up turn come to ~12–22% of the day's 400k billable tokens (agent-runtime 1755).
+ */
+export const TEXT_FILE_MAX_CHARS = 30_000;
+export const TEXT_MESSAGE_MAX_CHARS = 50_000;
+/** a file cut at its cap ends at its last line break when there is one this close to the cap */
+const CUT_AT_LINE_WITHIN = 2_000;
+/** before 11-26, only text/plain files of up to this size went inline, whole */
+const V1_INLINE_BYTES = 8 * 1024;
+
+/** How a message's file notes are made: as now, or as before 11-26 ("v1"; an old row is made again by its own rule). */
+type NoteRule = "now" | "v1";
 
 /** A deleted file in the model's copy of the message that sent it. */
 export const deletedFileNote = (a: Pick<AttachmentRef, "filename">) => `[첨부: ${a.filename} — 보관함에서 지운 파일이라 내용이 없어요]`;
 
+const count = (n: number) => n.toLocaleString("ko-KR");
 /**
- * What the model gets for a message's files, after the text (threads.ts llmUserContent): small text files inline, a
- * short note for the rest, and for a deleted file only that it was deleted. Synchronous (≤ 10 files of ≤ 8 KB) so a
- * delete can rebuild it inside its transaction.
+ * The person sees only the file's name, so a file the model did not read to the end is told to them in the answer, once
+ * (DD 1743; described, never a sample line the model would copy).
  */
-export function attachmentNotes(core: Core, userId: string, atts: AttachmentRef[]): string {
-  const notes: string[] = [];
+const TELL_ONCE = "이 파일을 두고 처음 답할 때 한 번, ";
+
+/**
+ * What the model gets for a message's files, after the text (threads.ts llmUserContent): each file's note (fileNotes),
+ * one per line.
+ */
+export function attachmentNotes(core: Core, userId: string, atts: AttachmentRef[], rule: NoteRule = "now"): string {
+  return fileNotes(core, userId, atts, rule).join("\n");
+}
+
+/**
+ * Each file's note, in order. A deleted file: only that it was deleted. A text file (plain or Markdown): its text,
+ * up to TEXT_FILE_MAX_CHARS, and TEXT_MESSAGE_MAX_CHARS for all of them together in order. A file cut there says how
+ * much of it the model has, above the text and again where it stops, so the model never answers as if it had read the
+ * rest; one that finds nothing left says it was not read. Both ask the model to tell the person so, once. Anything else: a short note. `rule` "v1": as before 11-26
+ * (text/plain of up to 8 KB inline whole, a short note for the rest). Synchronous (≤ 10 files, each read once) so a
+ * delete can make them again inside its transaction.
+ */
+function fileNotes(core: Core, userId: string, atts: AttachmentRef[], rule: NoteRule): string[] {
+  const out: string[] = [];
+  let left = TEXT_MESSAGE_MAX_CHARS;
   for (const a of atts) {
     if (a.deleted) {
-      notes.push(deletedFileNote(a));
+      out.push(deletedFileNote(a));
       continue;
     }
-    if (a.mime === "text/plain" && a.size <= TEXT_ATTACHMENT_INLINE) {
-      try {
-        notes.push(`[첨부: ${a.filename}]\n${fileText(readFileSync(attachmentPath(core, userId, a.id)))}`);
-        continue;
-      } catch {
-        /* fall through */
-      }
+    const other = `[첨부: ${a.filename} (${a.mime}, ${Math.ceil(a.size / 1024)}KB) — 내용은 볼 수 없어요]`;
+    const v1 = rule === "v1";
+    if (v1 ? a.mime !== "text/plain" || a.size > V1_INLINE_BYTES : !READ_TEXT_MIMES.has(a.mime)) {
+      out.push(other);
+      continue;
     }
-    notes.push(`[첨부: ${a.filename} (${a.mime}, ${Math.ceil(a.size / 1024)}KB) — 내용은 볼 수 없어요]`);
+    const cap = v1 ? Infinity : Math.min(TEXT_FILE_MAX_CHARS, left);
+    let file: { text: string; chars: number };
+    try {
+      file = readText(attachmentPath(core, userId, a.id), cap + 1);
+    } catch {
+      out.push(other);
+      continue;
+    }
+    if (file.chars <= cap) {
+      out.push(`[첨부: ${a.filename}]\n${file.text}`);
+      left -= file.chars;
+      continue;
+    }
+    const head = cutText(file.text, cap);
+    if (!head) {
+      out.push(`[첨부: ${a.filename} (${count(file.chars)}자) — 이 메시지에 실을 수 있는 글자 수를 넘어서 읽지 못했어요. ${TELL_ONCE}읽지 못했다는 것을 사람에게 알려 주세요]`);
+      continue;
+    }
+    left -= head.length;
+    out.push(
+      `[첨부: ${a.filename} — 전체 ${count(file.chars)}자 중 앞 ${count(head.length)}자만 읽었어요. 뒤 ${count(file.chars - head.length)}자는 이 대화에 없어요. ` +
+        `${TELL_ONCE}앞부분만 읽었다는 것과 읽은 양을 사람에게 알려 주세요]\n` +
+        `${head}\n[첨부: ${a.filename} — 여기서 잘렸어요]`,
+    );
   }
-  return notes.join("\n");
+  return out;
+}
+
+/**
+ * A text file's text (fileText) and its length in characters. A UTF-16 file longer than `need` characters is made
+ * text only that far (its length comes from its size); a UTF-8 one is decoded whole (≤ 10 MB).
+ */
+function readText(path: string, need: number): { text: string; chars: number } {
+  const b = readFileSync(path);
+  if (b.length > 2 && b[0] === 0xff && b[1] === 0xfe) {
+    const chars = Math.floor((b.length - 2) / 2);
+    return { text: fileText(chars > need ? b.subarray(0, 2 + need * 2) : b), chars };
+  }
+  const text = fileText(b);
+  return { text, chars: text.length };
+}
+
+/**
+ * The first `cap` characters of a text: up to its last line break when one is within CUT_AT_LINE_WITHIN of the cap
+ * (a line's "\r" too), else at the cap, never between the two halves of a surrogate pair.
+ */
+function cutText(text: string, cap: number): string {
+  const s = text.slice(0, cap);
+  const nl = s.lastIndexOf("\n");
+  if (nl > 0 && nl >= cap - CUT_AT_LINE_WITHIN) return s.slice(0, s[nl - 1] === "\r" ? nl - 1 : nl);
+  const last = s.charCodeAt(s.length - 1);
+  return last >= 0xd800 && last <= 0xdbff ? s.slice(0, -1) : s;
 }
 
 /**
@@ -232,31 +331,43 @@ export function fileText(b: Uint8Array): string {
 
 /**
  * The model's copy of a message that sent a now deleted file: its user content is rebuilt with the files' notes made
- * again (attachmentNotes, the deleted one as deleted), keeping the text before them and anything after them (a template
- * hint) as it was. If that copy was not made the usual way, only the deleted file's inlined text is replaced, wherever
- * it appears. Null when nothing changes (an image or PDF was never inlined, but its note still becomes the deleted one).
+ * again (fileNotes, the deleted one as deleted), keeping the text before them and anything after them (a template
+ * hint) as it was. The notes are looked for as made now, then as made before 11-26, and made again by the rule that
+ * matched, so an old row gets no text it never had (a text file over 8 KB keeps its short note). If that copy was not
+ * made the usual way, only the deleted file's text (as either rule put it in) is replaced, wherever it appears. Null
+ * when nothing changes (an image or PDF was never inlined, but its note still becomes the deleted one).
  */
 function forgetAttachmentText(core: Core, ownerId: string, row: MessageRow, was: AttachmentRef[], now: AttachmentRef[], target: AttachmentRef): LlmMessage[] | null {
   const llm = llmOf(row);
   if (!llm) return null;
-  const head = `${row.text}\n\n${attachmentNotes(core, ownerId, was)}`;
-  const made = `${row.text}\n\n${attachmentNotes(core, ownerId, now)}`;
-  let inlined: string | null | undefined;
+  const made = new Map<NoteRule, { head: string; notes: string[] }>();
+  const form = (rule: NoteRule) => {
+    let f = made.get(rule);
+    if (!f) {
+      const notes = fileNotes(core, ownerId, was, rule);
+      made.set(rule, (f = { notes, head: `${row.text}\n\n${notes.join("\n")}` }));
+    }
+    return f;
+  };
+  // the file's text as each rule put it in: in the message (the message cap may have cut it) or alone
+  let texts: string[] | undefined;
+  const textsOf = () =>
+    (texts ??= [...new Set([form("now").notes[was.indexOf(target)], fileNotes(core, ownerId, [target], "now")[0], form("v1").notes[was.indexOf(target)]])].filter(
+      (x): x is string => !!x && (x.startsWith(`[첨부: ${target.filename}]\n`) || x.startsWith(`[첨부: ${target.filename} — 전체 `)),
+    ));
   let changed = false;
   const next = llm.map((m): LlmMessage => {
     if (m.role !== "user" || typeof m.content !== "string") return m;
     let c = m.content;
-    if (c.startsWith(head)) c = made + c.slice(head.length);
-    else {
-      inlined ??= attachmentNotes(core, ownerId, [target]);
-      if (inlined.startsWith(`[첨부: ${target.filename}]\n`) && c.includes(inlined)) c = c.split(inlined).join(deletedFileNote(target));
-    }
+    const rule = (["now", "v1"] as const).find((r) => c.startsWith(form(r).head));
+    if (rule) c = `${row.text}\n\n${attachmentNotes(core, ownerId, now, rule)}` + c.slice(form(rule).head.length);
+    else for (const t of textsOf()) if (c.includes(t)) c = c.split(t).join(deletedFileNote(target));
     if (c === m.content) return m;
     changed = true;
     return { ...m, content: c };
   });
-  // a small text file whose text was in neither form: left as it was, said once (no names in logs)
-  if (!changed && target.mime === "text/plain" && target.size <= TEXT_ATTACHMENT_INLINE && llm.some((m) => m.role === "user"))
+  // a text file whose text was in neither form: left as it was, said once (no names in logs)
+  if (!changed && READ_TEXT_MIMES.has(target.mime) && llm.some((m) => m.role === "user"))
     core.log.info("deleted file: its text not found in the model copy", { message: row.id });
   return changed ? next : null;
 }
@@ -312,8 +423,9 @@ export function archiveRoutes(core: Core) {
       if (!file || typeof file === "string") throw bad("file 필드에 파일을 넣어 주세요", "invalid_upload");
       if (file.size > MAX_ATTACHMENT_BYTES) throw new HttpError(413, "file_too_large", "파일은 10MB까지 올릴 수 있어요");
       if (file.size === 0) throw bad("빈 파일이에요", "invalid_upload");
-      const mime = (file.type || "application/octet-stream").toLowerCase().split(";")[0]!.trim();
-      if (!allowedMime(mime)) throw new HttpError(415, "unsupported_type", "이미지, PDF, 텍스트 파일만 올릴 수 있어요");
+      const filename = sanitizeFilename(file.name);
+      const mime = storedMime(file.type, filename);
+      if (!mime) throw new HttpError(415, "unsupported_type", "이미지, PDF, 텍스트 파일만 올릴 수 있어요");
       let threadId: string | null = null;
       const t = form.get("threadId");
       if (typeof t === "string" && t) {
@@ -323,7 +435,7 @@ export function archiveRoutes(core: Core) {
       const id = newId("f");
       await mkdir(join(core.cfg.dataDir, "attachments", userId), { recursive: true });
       await Bun.write(attachmentPath(core, userId, id), file);
-      db.insertAttachment({ id, userId, threadId, filename: sanitizeFilename(file.name), mime, size: file.size, now: core.now() });
+      db.insertAttachment({ id, userId, threadId, filename, mime, size: file.size, now: core.now() });
       return json(attachmentView(db.getAttachment(userId, id)!), 201);
     },
     listAttachments: (_c: Ctx, userId: string) => json(db.listAttachments(userId).map(attachmentView)),
@@ -333,7 +445,8 @@ export function archiveRoutes(core: Core) {
       // the file lives under its owner (a friend's photo is in their folder)
       const f = Bun.file(attachmentPath(core, a.user_id, a.id));
       if (!(await f.exists())) throw notFound("파일을 찾을 수 없어요");
-      const type = a.mime === "text/plain" ? "text/plain; charset=utf-8" : a.mime;
+      // Markdown too goes out as plain text (shown as it is, never rendered)
+      const type = READ_TEXT_MIMES.has(a.mime) ? "text/plain; charset=utf-8" : a.mime;
       return new Response(f, {
         headers: {
           "Content-Type": type,
