@@ -1,6 +1,6 @@
 import type { ID, Thread } from "@pickle/protocol";
 import { useEffect, useRef } from "react";
-import { onServerEvent } from "../../api/events";
+import { onServerEvent, setShownThreads } from "../../api/events";
 import { markThreadsStale, messagesStore, noteHello, refreshThreads, threadsStore, useThread } from "../../api/store";
 
 /**
@@ -13,8 +13,10 @@ import { markThreadsStale, messagesStore, noteHello, refreshThreads, threadsStor
  * nothing waits on an earlier one. events.ts is left as it is.
  */
 
-/** threads whose view is on screen now (ThreadView `active`): they stay read in the merged list */
+/** threads whose view is on screen now (ThreadView `active`): they stay read in the merged list, and a line's
+ *  notification for one raises no banner (events.ts) */
 const shown = new Set<ID>();
+setShownThreads((threadId) => shown.has(threadId));
 /** a reconnect came while hidden: catch up once the page is visible (however many came meanwhile) */
 let waiting = false;
 
@@ -44,15 +46,17 @@ onServerEvent((e) => {
   }
 });
 
+/** this thread is on screen until the function returned is called (ThreadView through useShownThread) */
+export function showThread(threadId: ID): () => void {
+  shown.add(threadId);
+  return () => {
+    shown.delete(threadId);
+  };
+}
+
 /** ThreadView: this thread is on screen while `active` */
 export function useShownThread(threadId: ID, active: boolean): void {
-  useEffect(() => {
-    if (!active) return;
-    shown.add(threadId);
-    return () => {
-      shown.delete(threadId);
-    };
-  }, [threadId, active]);
+  useEffect(() => (active ? showThread(threadId) : undefined), [threadId, active]);
 }
 
 /**

@@ -10,7 +10,8 @@ import { appendMessage, applyAgent, catchUp, failRemoteTurn, noteRemoteActivity,
  * in a hidden tab and wakes on visible/online. Events fold into the stores:
  *   message (other tabs, friend side, steer follow-ups, schedule turns, card status flips) · message_deleted (a row the
  *   server deleted: a failed briefing attempt's event row) · thread_updated ·
- *   agent_status (→ island when no local turn runs) · quota · notification (→ island banner) · connection ·
+ *   agent_status (→ island when no local turn runs) · quota · notification (→ island banner, but not a line's for a
+ *   thread on screen: when it comes, and again when its turn in the banner queue comes) · connection ·
  *   turn_error (a turn the person's steered line went into failed → thread error; island 다시 시도 on the device that
  *   sent the line). steers_dropped goes to screens/chat/composerStore through onServerEvent (lines steered into an app turn
  *   that stopped or failed, which nothing will answer, lose "하던 일에 이어서 전했어요").
@@ -31,6 +32,16 @@ export function setOpenThreadHandler(fn: ((threadId: ID) => void) | null): void 
   openThread = fn;
   island.setHandlers({ open: (threadId) => (threadId ? openThread?.(threadId) : undefined) });
 }
+
+let shown: (threadId: ID) => boolean = () => false;
+/** Chat tells which threads are on screen now (ThreadView `active`; screens/chat/catchUp.ts). */
+export function setShownThreads(fn: (threadId: ID) => boolean): void {
+  shown = fn;
+}
+/** a line's notification (its `messageId`: the stored line it announces, DD 0825) for a thread on screen: the line is
+ *  right there, and the banner covered the thread's head saying it again (DD 1957 §3). One that is not a line
+ *  ("기억했어요" after a turn, a skipped schedule: no messageId) still comes, and so does any from an older server */
+const seenHere = (e: Extract<ServerEvent, { type: "notification" }>) => !!e.messageId && !!e.threadId && shown(e.threadId);
 
 let es: EventSource | null = null;
 let wanted = false;
@@ -68,12 +79,15 @@ function dispatch(e: ServerEvent) {
       removeMessage(e.threadId, e.messageId);
       break;
     case "notification": {
+      if (seenHere(e)) break;
       const threadId = e.threadId;
       island.banner({
         icon: e.icon,
         title: e.title,
         body: e.body,
         onPress: threadId && openThread ? () => openThread?.(threadId) : undefined,
+        // asked again when its turn in the queue comes: the thread may be on screen by then (DD 2210)
+        skip: () => seenHere(e),
       });
       break;
     }

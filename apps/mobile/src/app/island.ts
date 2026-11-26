@@ -70,6 +70,8 @@ export interface IslandBanner {
   hold?: number;
   /** called when the banner leaves without its action being pressed */
   onExpire?: () => void;
+  /** asked when its turn in the queue comes: true drops it unseen (a line whose thread is on screen by then: events.ts) */
+  skip?: () => boolean;
 }
 
 export interface IslandState {
@@ -279,8 +281,11 @@ function armBanner(id: number, ms: number) {
 }
 
 function showNextBanner() {
-  if (islandStore.get().banner || !queue.length) return;
-  const next = queue.shift()!;
+  if (islandStore.get().banner) return;
+  let next = queue.shift();
+  // banners wait their turn one at a time: one whose moment passed meanwhile goes unseen, and the next is asked
+  while (next?.skip?.()) next = queue.shift();
+  if (!next) return;
   islandStore.patch({ banner: next });
   armBanner(next.id, next.hold ?? bannerHold(next));
   clearTimeout(bannerCap);

@@ -303,6 +303,15 @@ describe("turn_error: a failed turn the person's line went into", () => {
     expect(messagesStore.get().t_quota!.error).toBe(QUOTA);
     expect(islandStore.get().banner?.title).toBe(QUOTA_TITLE);
     expect(islandStore.get().banner?.body).toBe(QUOTA_RESET);
+    // pressing it opens that thread (DD 1930 D5: the banner is the only way there from this device)
+    const { setOpenThreadHandler } = await import("../src/api/events");
+    const opened: string[] = [];
+    setOpenThreadHandler((id) => opened.push(id));
+    island.clearBanners();
+    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA });
+    islandStore.get().banner?.onPress?.();
+    expect(opened).toEqual(["t_quota"]);
+    setOpenThreadHandler(null);
     // no message text: the same banner; the row says koreanMessage's whole quota message
     island.clearBanners();
     push({ type: "turn_error", threadId: "t_quota2", error: "quota_exceeded", message: "" });
