@@ -299,6 +299,9 @@ export function stopBanner(r: RuleSpec, market: Market, card: InvestStopCard): {
   return { title: `${r.symbol} 모의 손절 기록`, body: `${p} · 손절선 ${money(market, r.price!)} · 주문은 내지 않았어요` };
 }
 
+/** the lock-screen title of the blind banner (DD 2042-b §4); the other push titles are their banners' titles */
+export const BLIND_PUSH_TITLE = "시세 확인 멈춤";
+
 export const BLIND_BANNER = (since: number) => ({
   title: "시세를 받지 못하고 있어요",
   body: `${kstClock(since)}부터 가격 확인이 멈췄어요. 손절선 확인도 멈춰 있어요.`,

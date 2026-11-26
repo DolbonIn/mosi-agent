@@ -15,6 +15,7 @@ import {
   alertCallLine,
   alertCard,
   BLIND_BANNER,
+  BLIND_PUSH_TITLE,
   callText,
   expiredBanner,
   expiredCallLine,
@@ -500,6 +501,7 @@ export class InvestHub {
     if (s.blind_since && now - s.blind_since >= BLIND_AFTER_MS && s.blind_banner_day !== kstDayKey(now)) {
       idb.updateSettings(db, userId, { blind_banner_day: kstDayKey(now) }, now);
       core.events.publish(userId, { type: "notification", ...BLIND_BANNER(s.blind_since), icon: "chart" });
+      core.track(core.push.send(userId, { title: BLIND_PUSH_TITLE, tag: "invest:blind" }));
     }
 
     const prev = prevSlot(slot);
@@ -548,7 +550,7 @@ export class InvestHub {
   }
 
   /** store the card row in the invest thread, push it and its banner; returns the row id */
-  private post(userId: string, card: Parameters<Core["db"]["insertMessage"]>[0]["cards"] extends (infer C)[] | undefined ? C : never, record: string, banner: { title: string; body: string }): { threadId: string; messageId: string } {
+  private post(userId: string, card: Parameters<Core["db"]["insertMessage"]>[0]["cards"] extends (infer C)[] | undefined ? C : never, record: string, banner: { title: string; body: string }, ruleId: string): { threadId: string; messageId: string } {
     const { core } = this;
     const threadId = this.ensureThread(userId);
     const messageId = newId("m");
@@ -559,6 +561,8 @@ export class InvestHub {
     publishMessage(core, messageId);
     publishThread(core, threadId);
     core.events.publish(userId, { type: "notification", title: banner.title, body: banner.body, threadId, messageId, icon: "chart" });
+    // the lock screen gets the banner's title alone (DD 2042-b §4: symbol and event, no amount); one tag per rule
+    core.track(core.push.send(userId, { title: banner.title, tag: `invest:${ruleId}`, threadId, messageId }));
     return { threadId, messageId };
   }
 
@@ -686,7 +690,7 @@ export class InvestHub {
       });
       const banner = stopBanner(r, market, card);
       const record = `[투자 기록] ${r.symbol} 모의 손절 · ${card.title} · 관측 ${money(market, o.price)} · 손절선 ${money(market, r.price!)} · ${card.foot}`;
-      const { threadId, messageId } = this.post(userId, card, record, banner);
+      const { threadId, messageId } = this.post(userId, card, record, banner, r.id);
       idb.setAlertMessage(db, alertId, threadId, messageId);
       db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id: alertId, t: banner.title });
       idb.setOrderMessage(db, orderId, messageId, now);
@@ -712,7 +716,7 @@ export class InvestHub {
     const card = alertCard(input);
     const banner = alertBanner(input);
     const record = `[투자 알림] ${card.title}${card.titleLines?.length ? ` (${card.titleLines.join(" ")})` : ""} · ${card.price?.text ?? ""} · ${card.sub ?? ""} · ${card.foot}`;
-    const { threadId, messageId } = this.post(userId, card, record, banner);
+    const { threadId, messageId } = this.post(userId, card, record, banner, r.id);
     idb.setAlertMessage(db, alertId, threadId, messageId);
     db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id: alertId, t: card.title });
     if (r.action === "call") this.callLater(userId, messageId, alertId, alertCallLine(agentName, input), (c) => idb.setAlertCall(db, alertId, c.ok ? "ok" : c.reason, c.at));
@@ -751,7 +755,7 @@ export class InvestHub {
     if (!fresh) return false;
     const card = expiredCard({ alertId, ruleId: r.id, rule: r, market, mode: s.mode, createdAt: r.created_at, at: now, now });
     const banner = expiredBanner(r, market);
-    const { threadId, messageId } = this.post(userId, card, `[투자 알림] ${card.title} · ${card.titleLines![0]}`, banner);
+    const { threadId, messageId } = this.post(userId, card, `[투자 알림] ${card.title} · ${card.titleLines![0]}`, banner, r.id);
     idb.setAlertMessage(db, alertId, threadId, messageId);
     db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id: alertId, t: card.title });
     if (this.calls(s).expiry) this.callLater(userId, messageId, alertId, expiredCallLine(core.db.userById(userId)?.agent_name ?? "모시", r), (c) => idb.setAlertCall(db, alertId, c.ok ? "ok" : c.reason, c.at));

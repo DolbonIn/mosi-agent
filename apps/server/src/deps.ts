@@ -173,6 +173,8 @@ export interface ServerConfig {
    * `outboundIp` from PICKLE_OUTBOUND_IP — shown for the Toss allowed-IP setting, never looked up
    */
   invest: { sources: boolean; tossBase: string | null; outboundIp: string | null };
+  /** Web Push (push.ts, B1c): the VAPID contact from PICKLE_PUSH_SUBJECT (mailto: or https:); null = off, no push request */
+  push: { subject: string } | null;
   sseHeartbeatMs: number;
   eventsHeartbeatMs: number;
   quiet: boolean;
@@ -206,6 +208,8 @@ export interface AppDeps {
   timers?: Timers;
   /** invest sources and Toss go through this fetch (tests: synthetic responses and the fake Toss); omitted → fetch */
   investFetch?: typeof fetch;
+  /** Web Push requests go through this fetch (tests: a fake push service); omitted → fetch */
+  pushFetch?: typeof fetch;
 }
 
 export interface Timers {

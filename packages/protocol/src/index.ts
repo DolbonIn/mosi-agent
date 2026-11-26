@@ -1100,7 +1100,22 @@ export const ROUTES = {
   investWatchlist: "POST /api/invest/watchlist {symbol} → InvestSymbolRow (404 unknown_symbol) | DELETE /api/invest/watchlist/:symbol?withRules=1 (409 has_rules {count})",
   investToss: "GET /api/invest/toss → InvestTossStatus | POST /api/invest/toss/check → InvestTossStatus (429 toss_check_too_soon); keys go through POST /api/credentials (service tossinvest)",
   investSettings: "PATCH /api/invest/settings InvestSettingsPatch → InvestSettingsView",
+  push: "GET /api/push/key → {publicKey} | POST /api/push/subscriptions PushSubscription.toJSON() → {ok:true} (400 invalid_subscription) | DELETE /api/push/subscriptions {endpoint} → {ok:true, removed} — all three work while the server sends nothing (no PICKLE_PUSH_SUBJECT)",
 } as const;
+
+/**
+ * What the service worker gets in a push event (B1c, push.ts): `title` alone is shown (DD 2042-b §4: symbol and event, no
+ * amount — the body stays empty), `tag` replaces an earlier line of the same rule (`invest:<ruleId>`, `invest:blind`),
+ * `threadId`/`messageId` are the row a tap opens (absent for the blind line).
+ */
+export interface WebPushPayload {
+  v: 1;
+  title: string;
+  body: "";
+  tag: string;
+  threadId?: ID;
+  messageId?: ID;
+}
 
 // ───────────────────────────── shared constants ─────────────────────────────
 

@@ -467,4 +467,20 @@ export const MIGRATIONS: string[] = [
   );
   CREATE INDEX invest_calls_day ON invest_calls(user_id, at);
   `,
+  // v9 (B1c): Web Push subscriptions, one per device endpoint; the session that sent it owns it (signing out drops it)
+  `
+  CREATE TABLE push_subscriptions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_hash TEXT NOT NULL REFERENCES sessions(token_hash) ON DELETE CASCADE,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    last_ok_at INTEGER,
+    last_status INTEGER
+  );
+  CREATE INDEX push_subscriptions_user ON push_subscriptions(user_id, created_at);
+  CREATE INDEX push_subscriptions_session ON push_subscriptions(session_hash);
+  `,
 ];

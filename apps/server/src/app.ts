@@ -34,6 +34,7 @@ import { friendRoutes } from "./friends.ts";
 import { scheduleRoutes, Scheduler } from "./schedules.ts";
 import { InvestHub } from "./invest/hub.ts";
 import { investRoutes } from "./invest/routes.ts";
+import { PushHub, pushRoutes } from "./push.ts";
 import { uiDefinitions } from "./sdui.ts";
 import { createStatic } from "./static.ts";
 import { createTts } from "./tts.ts";
@@ -72,6 +73,7 @@ export function resolveConfig(c: Partial<ServerConfig> = {}): ServerConfig {
     connectionRecheckFloorMs: c.connectionRecheckFloorMs ?? { "coupang-partners": 3_600_000 },
     schedulerIntervalMs: c.schedulerIntervalMs ?? 30_000,
     invest: c.invest ?? { sources: false, tossBase: null, outboundIp: null },
+    push: c.push ?? null,
     sseHeartbeatMs: c.sseHeartbeatMs ?? 15_000,
     eventsHeartbeatMs: c.eventsHeartbeatMs ?? 25_000,
     quiet: c.quiet ?? false,
@@ -118,9 +120,11 @@ export function createApp(deps: AppDeps): App {
     voice: createVoiceIo(createTts(cfg, { log, now }), now),
     meet: undefined as unknown as MeetHub,
     invest: undefined as unknown as InvestHub,
+    push: undefined as unknown as PushHub,
     connections: deps.connections ?? defaultConnections(deps, now),
   };
   core.meet = new MeetHub(core);
+  core.push = new PushHub(core);
   core.invest = new InvestHub(core);
 
   seedTemplates(core);
@@ -139,6 +143,7 @@ export function createApp(deps: AppDeps): App {
   const friends = friendRoutes(core);
   const schedules = scheduleRoutes(core);
   const invest = investRoutes(core);
+  const push = pushRoutes(core);
   const speech = ttsRoutes(core);
   const meeting = meetRoutes(core);
   const slackLogin = new SlackLoginRelay(core, deps.slackLogin);
@@ -306,6 +311,10 @@ export function createApp(deps: AppDeps): App {
   r.on("GET", "/api/invest/toss", authed(invest.toss));
   r.on("POST", "/api/invest/toss/check", authed(invest.tossCheck));
   r.on("PATCH", "/api/invest/settings", authed(invest.settings));
+  // Web Push (B1c): the VAPID public key and this session's subscription; the service worker is the app's
+  r.on("GET", "/api/push/key", authed(push.key));
+  r.on("POST", "/api/push/subscriptions", authedFull(push.save));
+  r.on("DELETE", "/api/push/subscriptions", authed(push.remove));
   // voice (call screen): local Drama-3 TTS → audio/mpeg; 503 tts_unavailable → client falls back to Web Speech
   r.on("POST", "/api/tts", authed(speech.speak));
   r.on("POST", "/api/tts/stream", authed(speech.stream));

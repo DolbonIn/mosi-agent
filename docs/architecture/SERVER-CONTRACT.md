@@ -749,6 +749,29 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   to the person for Toss's allowed-IP list (never looked up). A 403 or 429 from a public source rests it until the next
   day; a 200 that is not its data (a block page) too. Default User-Agent, one request at a time per host, 10 s limit.
 
+## Web Push (B1c) — the lock-screen line
+
+- Nothing is sent unless the server env has `PICKLE_PUSH_SUBJECT` (`mailto:` or `https:`, the VAPID contact; team-lead
+  2210: the person decides it, no personal address as a default). Until then the routes below work as usual (the key,
+  subscriptions kept) and the app shows no reason: push is quietly off. QA never sets it.
+- `GET /api/push/key` → `{publicKey}`: the VAPID public key (base64url, 65-byte P-256 point) for
+  `PushManager.subscribe({userVisibleOnly: true, applicationServerKey})`. The key pair is made once in the data dir
+  (`vapid.json`, 0600); its private half never leaves that file.
+- `POST /api/push/subscriptions` with `PushSubscription.toJSON()` → `{ok: true}`. The endpoint must be https on a push
+  service browsers use (FCM, Mozilla, Apple, WNS), else 400 `invalid_subscription` (also for keys that are not a P-256
+  point and a 16-byte auth secret). The same endpoint again moves it (to this session, or another person signing in on
+  that device). Ten per person: the oldest go. Post it again on each app start while permission is granted.
+- The session that posted it owns it: `POST /api/auth/logout` (and a password reset) deletes the subscription with the
+  session, so a signed-out device gets no line. `DELETE /api/push/subscriptions {endpoint}` → `{ok: true, removed}` (only
+  the person's own).
+- What is sent (`WebPushPayload`, RFC 8291 aes128gcm + RFC 8292 VAPID, TTL 4 h, urgency high): `{v: 1, title, body: "",
+  tag, threadId?, messageId?}`. The title is the invest banner's title (DD 2042-b §4: symbol and event, e.g. "SOXL 손절 관찰가
+  도달", "SOXL 모의 손절 기록", "SOXL 감시 기간 끝"; blind is "시세 확인 멈춤" with no row); no amount, quantity or average price.
+  `tag` is `invest:<ruleId>` (a later line of the same rule replaces it) or `invest:blind`; a tap opens the row.
+- A push service's 404/410 drops the subscription; anything else (429, 5xx, no answer) keeps it with its status, no retry.
+  Pushes go out after the card is stored, in the background: a slow push service never holds the watch. Endpoints are
+  never logged.
+
 ## Other
 - `PATCH /api/settings` → the whole settings with `rev` (deep merge; unknown keys, `rev` included, 400).
   `PATCH /api/agent` → AgentProfile with `rev`: only the fields sent change, merged in the launcher's per-user queue —

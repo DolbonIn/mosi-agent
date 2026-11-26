@@ -16,6 +16,7 @@ import type { Db, MessageRow, ThreadRow, UserRow } from "./db/index.ts";
 import type { EventHub } from "./events.ts";
 import type { VoiceIo } from "./audio.ts";
 import type { InvestHub } from "./invest/hub.ts";
+import type { PushHub } from "./push.ts";
 import type { MeetHub } from "./meet.ts";
 import type { Logger } from "./log.ts";
 import { nextQuotaReset, quotaDay } from "./kst.ts";
@@ -48,6 +49,8 @@ export interface Core {
   meet: MeetHub;
   /** invest watch, alerts, overview (invest/hub.ts) */
   invest: InvestHub;
+  /** Web Push to the person's subscribed devices (push.ts): the lock-screen line of an invest alert */
+  push: PushHub;
   /** k-skill logins (kskill.ts, docs/architecture/KSKILL-CONNECTIONS.md) */
   connections: ConnectionsLike;
 }
