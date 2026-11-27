@@ -115,7 +115,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     expect(messagesStore.get().t_main!.items.map((m) => m.id)).toEqual(["m_ev", "m_line"]);
     expect(islandStore.get().kind).toBe("thinking");
 
-    push({ type: "turn_error", threadId: "t_main", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_main", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_main!.error).toBe(MSG);
     expect(islandStore.get().kind).toBe("error");
     expect(islandStore.get().banner).toBeNull();
@@ -135,7 +135,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     const { island, islandStore } = await import("../src/app/island");
     island.idle();
     appendMessage("t_dev", row("t_dev", "m_dev", "user", "다른 폰에서 보낸 말"));
-    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_dev!.error).toBe(MSG);
     expect(islandStore.get().kind).toBe("idle");
     expect(islandStore.get().banner).toBeNull();
@@ -146,7 +146,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     // the device that sent it: a newer line of theirs from here gets 다시 시도 (their newest line decides)
     answers.push({ steer: "m_dev2" });
     await import("../src/api/store").then((s) => s.sendMessage("t_dev", "여기서 보낸 말"));
-    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(islandStore.get().kind).toBe("error");
     island.press();
     await tick();
@@ -160,7 +160,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     // and back: the other device's newer line decides again, a line of ours before it does not make it ours
     island.idle();
     append("t_dev", row("t_dev", "m_dev3", "user", "다시 다른 폰에서"));
-    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_dev", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(islandStore.get().kind).toBe("idle");
     expect(islandStore.get().banner).toBeNull();
   });
@@ -177,7 +177,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     await signIn();
     await loadMessages("t_reload");
     expect(messagesStore.get().t_reload!.items.map((m) => m.id)).toEqual(["m_rl"]);
-    push({ type: "turn_error", threadId: "t_reload", error: "timeout", message: "답이 너무 오래 걸렸어요." });
+    push({ type: "turn_error", threadId: "t_reload", error: "timeout", message: "답이 너무 오래 걸렸어요.", steersDropped: [] });
     expect(messagesStore.get().t_reload!.error).toBe("답이 너무 오래 걸렸어요.");
     expect(islandStore.get().kind).toBe("idle");
     expect(islandStore.get().banner).toBeNull();
@@ -194,7 +194,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     answers.push({ stream: "m_st" });
     expect((await sendMessage("t_stream", "처음 물어보는 말")).status).toBe("done");
     expect(messagesStore.get().t_stream!.items.map((m) => m.id)).toEqual(["m_st", "m_st_a"]);
-    push({ type: "turn_error", threadId: "t_stream", error: "upstream_rate_limited", message: MSG }); // its follow-up failed
+    push({ type: "turn_error", threadId: "t_stream", error: "upstream_rate_limited", message: MSG, steersDropped: [] }); // its follow-up failed
     expect(islandStore.get().kind).toBe("error");
     let before = sends.length;
     island.press();
@@ -209,7 +209,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     expect(messagesStore.get().t_push!.items.map((m) => m.id)).toEqual(["m_push"]);
     stopTurn("t_push");
     await tick();
-    push({ type: "turn_error", threadId: "t_push", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_push", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(islandStore.get().kind).toBe("error");
     before = sends.length;
     island.press();
@@ -222,7 +222,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
   test("a thread that isn't open keeps the row: a later load leaves it, the next send clears it", async () => {
     const { appendMessage, loadMessages, messagesStore, sendMessage, stopTurn } = await import("../src/api/store");
     appendMessage("t_other", row("t_other", "m_o1", "user", "내일 일정 알려줘"));
-    push({ type: "turn_error", threadId: "t_other", error: "timeout", message: "답이 너무 오래 걸렸어요." });
+    push({ type: "turn_error", threadId: "t_other", error: "timeout", message: "답이 너무 오래 걸렸어요.", steersDropped: [] });
     pages.set("t_other", [...messagesStore.get().t_other!.items, row("t_other", "m_o0", "assistant", "어제 답", { createdAt: 1 })]);
     await loadMessages("t_other"); // opening the thread later
     expect(messagesStore.get().t_other!.loaded).toBe(true);
@@ -240,7 +240,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     answers.push({ steer: "m_mine" });
     await sendMessage("t_shared", "내 질문");
     appendMessage("t_shared", row("t_shared", "m_peer", "user", "친구 질문", { author: { kind: "peer", name: "바다" } }));
-    push({ type: "turn_error", threadId: "t_shared", error: "upstream_rate_limited", message: "" });
+    push({ type: "turn_error", threadId: "t_shared", error: "upstream_rate_limited", message: "", steersDropped: [] });
     expect(messagesStore.get().t_shared!.error).toBeTruthy();
     expect(islandStore.get().kind).toBe("error");
     const before = sends.length;
@@ -258,7 +258,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     island.idle();
     appendMessage("t_shared2", row("t_shared2", "m_mine2", "user", "다른 폰의 내 질문", { author: { kind: "me", name: "하늘" } }));
     appendMessage("t_shared2", row("t_shared2", "m_peer2", "user", "친구 질문", { author: { kind: "peer", name: "바다" } }));
-    push({ type: "turn_error", threadId: "t_shared2", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_shared2", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_shared2!.error).toBe(MSG);
     expect(islandStore.get().kind).toBe("idle");
     expect(islandStore.get().banner).toBeNull();
@@ -272,7 +272,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     const { messagesStore } = await import("../src/api/store");
     const { island, islandStore } = await import("../src/app/island");
     island.idle();
-    push({ type: "turn_error", threadId: "t_cold", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_cold", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_cold!.error).toBe(MSG);
     expect(islandStore.get().kind).toBe("idle");
     expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "답하지 못했어요", body: MSG });
@@ -283,7 +283,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     // no message text: the banner says the server's kind in Korean, as the row does
     const { koreanMessage } = await import("../src/api/client");
     island.clearBanners();
-    push({ type: "turn_error", threadId: "t_cold2", error: "timeout", message: "" });
+    push({ type: "turn_error", threadId: "t_cold2", error: "timeout", message: "", steersDropped: [] });
     expect(koreanMessage(0, "timeout")).toBeTruthy();
     expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "답하지 못했어요", body: koreanMessage(0, "timeout") });
     expect(messagesStore.get().t_cold2!.error).toBe(koreanMessage(0, "timeout"));
@@ -298,7 +298,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     island.clearBanners();
     // the server's QUOTA_MESSAGE (76 characters): the banner's two lines cut its ticket hint
     const QUOTA = "오늘 사용량 한도를 다 썼어요. 매일 새벽 4시에 초기화되고, 지금 바로 이어서 쓰려면 나의 모시에서 한도 초기화 티켓을 사용해 주세요.";
-    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA });
+    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA, steersDropped: [] });
     expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "오늘 사용량을 다 썼어요", body: "새벽 4시에 다시 채워져요." });
     expect(messagesStore.get().t_quota!.error).toBe(QUOTA);
     expect(islandStore.get().banner?.title).toBe(QUOTA_TITLE);
@@ -308,13 +308,13 @@ describe("turn_error: a failed turn the person's line went into", () => {
     const opened: string[] = [];
     setOpenThreadHandler((id) => opened.push(id));
     island.clearBanners();
-    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA });
+    push({ type: "turn_error", threadId: "t_quota", error: "quota_exceeded", message: QUOTA, steersDropped: [] });
     islandStore.get().banner?.onPress?.();
     expect(opened).toEqual(["t_quota"]);
     setOpenThreadHandler(null);
     // no message text: the same banner; the row says koreanMessage's whole quota message
     island.clearBanners();
-    push({ type: "turn_error", threadId: "t_quota2", error: "quota_exceeded", message: "" });
+    push({ type: "turn_error", threadId: "t_quota2", error: "quota_exceeded", message: "", steersDropped: [] });
     expect(islandStore.get().banner).toMatchObject({ tone: "error", title: "오늘 사용량을 다 썼어요", body: "새벽 4시에 다시 채워져요." });
     expect(messagesStore.get().t_quota2!.error).toBe(koreanMessage(0, "quota_exceeded"));
     island.clearBanners();
@@ -359,7 +359,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     island.idle();
     island.clearBanners();
     appendMessage("t_quota3", row("t_quota3", "m_q3", "user", "다른 폰에서 보낸 말"));
-    push({ type: "turn_error", threadId: "t_quota3", error: "quota_exceeded", message: MSG });
+    push({ type: "turn_error", threadId: "t_quota3", error: "quota_exceeded", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_quota3!.error).toBe(MSG);
     expect(islandStore.get().banner).toBeNull();
   });
@@ -372,7 +372,7 @@ describe("turn_error: a failed turn the person's line went into", () => {
     await sendMessage("t_main", "한 번 더");
     void sendMessage("t_main", "지금 보내는 말"); // its optimistic copy is the thread's newest user row
     expect(islandStore.get().kind).toBe("thinking");
-    push({ type: "turn_error", threadId: "t_main", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_main", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(islandStore.get().kind).toBe("thinking");
     stopTurn("t_main");
     await tick();

@@ -39,14 +39,15 @@ async function device(token: string) {
   const errors: { error: string; message: string }[] = [];
   return {
     errors,
-    /** the steers_dropped and turn_error events since the last call, and the agent_status idle ones between them, in order */
+    /** the steers_dropped and turn_error events since the last call (turn_error with its steersDropped), and the agent_status idle ones between them, in order */
     async got(waitMs = 60): Promise<string[]> {
       const out: string[] = [];
       for (;;) {
         const e = await ev.next<ServerEvent>((x) => x.type === "steers_dropped" || x.type === "turn_error" || (x.type === "agent_status" && x.status === "idle"), waitMs);
         if (!e) return out;
         if (e.type === "turn_error") errors.push({ error: e.error, message: e.message });
-        out.push(e.type === "steers_dropped" ? `steers_dropped ${e.threadId} ${e.messageIds.join(",")}` : e.type === "turn_error" ? `turn_error ${e.threadId}` : "idle");
+        // turn_error with its steersDropped, always there (without it nothing follows the thread id; an empty list leaves a trailing space)
+        out.push(e.type === "steers_dropped" ? `steers_dropped ${e.threadId} ${e.messageIds.join(",")}` : e.type === "turn_error" ? `turn_error ${e.threadId}${e.steersDropped === undefined ? "" : ` ${e.steersDropped.join(",")}`}` : "idle");
       }
     },
     async raw(waitMs = 60) {
@@ -397,7 +398,7 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     await h.app.scheduler.tick();
     await h.app.core.idle();
     expect(h.turns.inputs.map((i) => (i.userText?.includes("[자동 아침 브리핑]") ? "briefing" : i.userText))).toEqual(["briefing", "미세먼지도"]);
-    const want = [`turn_error ${tid}`, `steers_dropped ${tid} ${a}`, "idle", `turn_error ${tid}`, `steers_dropped ${tid} ${b}`, "idle"];
+    const want = [`turn_error ${tid} ${a}`, `steers_dropped ${tid} ${a}`, "idle", `turn_error ${tid} ${b}`, `steers_dropped ${tid} ${b}`, "idle"];
     expect(await phone.got()).toEqual(want);
     expect(await laptop.got()).toEqual(want);
     await phone.cancel();
@@ -422,7 +423,7 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     await h.app.scheduler.tick();
     await h.app.core.idle();
     expect(h.turns.inputs.map((i) => i.userText)).toEqual(["점심 메뉴 추천해줘"]);
-    expect(await d.got()).toEqual([`turn_error ${tid}`, `steers_dropped ${tid} ${a},${b}`, "idle"]);
+    expect(await d.got()).toEqual([`turn_error ${tid} ${a},${b}`, `steers_dropped ${tid} ${a},${b}`, "idle"]);
     await d.cancel();
   });
 
@@ -465,7 +466,7 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     fail();
     await h.app.core.idle();
     expect(h.turns.inputs.map((i) => i.userText)).toEqual(["첫 질문", "추가", "하나 더"]);
-    const want = ["idle", `turn_error ${tid}`, `steers_dropped ${tid} ${a},${b}`, "idle", `turn_error ${tid}`, `steers_dropped ${tid} ${c}`, "idle"];
+    const want = ["idle", `turn_error ${tid} ${a},${b}`, `steers_dropped ${tid} ${a},${b}`, "idle", `turn_error ${tid} ${c}`, `steers_dropped ${tid} ${c}`, "idle"];
     expect(await phone.got()).toEqual(want);
     expect(await laptop.got()).toEqual(want);
     await phone.cancel();
@@ -493,7 +494,7 @@ describe("steers_dropped after a turn with no stream of its own fails (a briefin
     await h.app.core.idle();
     expect(h.turns.inputs.map((i) => i.userText)).toEqual(["첫 질문"]); // no follow-up turn ran
     for (const d of [phone, laptop]) {
-      expect(await d.got()).toEqual(["idle", `turn_error ${tid}`, `steers_dropped ${tid} ${a},${b}`]);
+      expect(await d.got()).toEqual(["idle", `turn_error ${tid} ${a},${b}`, `steers_dropped ${tid} ${a},${b}`]);
       expect(d.errors).toEqual([{ error: "quota_exceeded", message: QUOTA_MESSAGE }]);
     }
     // the agent is free again
@@ -583,7 +584,7 @@ describe("a turn that fails while a tool still runs: no line keeps its receipt b
     expect(names.indexOf("·")).toBeGreaterThan(i + 1); // no await between the two
     expect(rec.at("hub steers_dropped") - rec.at("hub turn_error")).toBeLessThan(50);
     expect(names.filter((n) => n === "hub turn_error")).toHaveLength(1);
-    expect(await phone.got()).toEqual([`turn_error ${tid}`, `steers_dropped ${tid} ${a}`, "idle"]);
+    expect(await phone.got()).toEqual([`turn_error ${tid} ${a}`, `steers_dropped ${tid} ${a}`, "idle"]);
     tool.done();
     await phone.cancel();
   });

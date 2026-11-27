@@ -1029,9 +1029,11 @@ export type ServerEvent =
    * A turn with no stream of its own (a briefing or schedule, a steer follow-up) failed after the person's lines went
    * into it, or a follow-up for the person's queued lines could not run (the day's quota is used up: `quota_exceeded`
    * with the quota message): show `message` as the thread's error, as a stream's `error` event does for a turn the app
-   * started. A `steers_dropped` naming the lines it leaves unanswered comes right after it.
+   * started. `steersDropped` (always there): the rows of the lines it leaves unanswered, oldest first — the same rows
+   * as the `steers_dropped` that comes right after it with no wait between, so the app can drop their receipts as it
+   * draws the error row (as with a stream's `error`). An empty list: no line dropped, and no `steers_dropped` follows.
    */
-  | { type: "turn_error"; threadId: ID; error: string; message: string }
+  | { type: "turn_error"; threadId: ID; error: string; message: string; steersDropped: ID[] }
   /**
    * A turn ended without answering lines the server steered into it (202; `messageIds` = their rows, oldest first).
    * A turn the app started: it stopped after the server took it (멈추기 on any device, the island's, the call talking

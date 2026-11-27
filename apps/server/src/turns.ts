@@ -928,11 +928,12 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       leftovers = [];
     }
     // A failed turn with no stream: its turn_error goes out once the turn has wound down (a tool may still have been
-    // running above), right before its steers_dropped with no await between, so no line keeps its receipt beside the
-    // error row. (A turn the app started sent its steers_dropped and its error, naming the same rows, at once above.)
+    // running above), naming the rows it leaves unanswered (team-lead 0758), right before its steers_dropped with the
+    // same rows and no await between, so no line keeps its receipt beside the error row. (A turn the app started sent
+    // its steers_dropped and its error, naming the same rows, at once above.)
     if (turnError) {
       try {
-        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message });
+        core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message, steersDropped: dropped });
       } catch {
         /* ignore */
       }
@@ -1070,7 +1071,7 @@ async function steerFollowUp(core: Core, userId: string, threadId: string, texts
     lease.release();
     core.log.info("follow-up turn skipped: daily quota", { user: userId, thread: threadId, lines: texts.length });
     try {
-      core.events.publish(userId, { type: "turn_error", threadId, error: "quota_exceeded", message: QUOTA_MESSAGE });
+      core.events.publish(userId, { type: "turn_error", threadId, error: "quota_exceeded", message: QUOTA_MESSAGE, steersDropped: rows });
     } catch {
       /* ignore */
     }

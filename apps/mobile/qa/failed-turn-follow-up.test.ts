@@ -231,7 +231,7 @@ describe("a failed turn's follow-up: the island shows its work, then 다시 시�
     status("running"); // the briefing
     answers.push({ steer: "f_b1" });
     expect((await sendMessage("t_f", "오늘 우산 필요해?")).status).toBe("steered");
-    push({ type: "turn_error", threadId: "t_f", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_f", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     // never loaded here (rows from the stream and the send): the row still follows the last of them
     expect(messagesStore.get().t_f!.loaded).toBe(false);
     expect(errorAnchorOf("t_f")).toBe("f_b1");
@@ -258,7 +258,7 @@ describe("the error row's place (errorAnchorOf)", () => {
   test("a thread not loaded when its turn_error came: no place until its rows load, then their last row; later rows go below; the next send ends it", async () => {
     const { loadMessages, messagesStore, sendMessage, stopTurn } = await store();
     const { errorAnchorOf } = await chat();
-    push({ type: "turn_error", threadId: "t_far", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_far", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(messagesStore.get().t_far?.error).toBe(MSG);
     expect(errorAnchorOf("t_far")).toBeUndefined();
     pages.set("t_far", [row("t_far", "g_ev", "event", "오늘의 브리핑"), row("t_far", "g_b1", "user", "오늘 우산 필요해?")]);
@@ -278,11 +278,11 @@ describe("the error row's place (errorAnchorOf)", () => {
     const { errorAnchorOf } = await chat();
     pages.set("t_two", [row("t_two", "k_a1", "user", "오늘 날씨 알려줘")]);
     await loadMessages("t_two");
-    push({ type: "turn_error", threadId: "t_two", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_two", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(errorAnchorOf("t_two")).toBe("k_a1");
     push({ type: "message", threadId: "t_two", message: row("t_two", "k_b1", "user", "오늘 우산 필요해?") });
     expect(errorAnchorOf("t_two")).toBe("k_a1");
-    push({ type: "turn_error", threadId: "t_two", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_two", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(errorAnchorOf("t_two")).toBe("k_b1");
   });
 
@@ -295,7 +295,7 @@ describe("the error row's place (errorAnchorOf)", () => {
     const s = sendMessage("t_tmp", "오늘 우산 필요해?"); // its optimistic row is the newest
     const temp = messagesStore.get().t_tmp!.items.at(-1)!.id;
     expect(temp).toMatch(/^tmp/);
-    push({ type: "turn_error", threadId: "t_tmp", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_tmp", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(errorAnchorOf("t_tmp")).toBe(temp);
     land!();
     expect((await s).status).toBe("steered");
@@ -311,7 +311,7 @@ describe("the error row's place (errorAnchorOf)", () => {
     pages.set("t_gone", [row("t_gone", "j_a1", "user", "오늘 날씨 알려줘")]);
     await loadMessages("t_gone");
     const s = sendMessage("t_gone", "보내는 중"); // hangs: no answer queued
-    push({ type: "turn_error", threadId: "t_gone", error: "upstream_rate_limited", message: MSG });
+    push({ type: "turn_error", threadId: "t_gone", error: "upstream_rate_limited", message: MSG, steersDropped: [] });
     expect(errorAnchorOf("t_gone")).toMatch(/^tmp/);
     stopTurn("t_gone");
     await s;
