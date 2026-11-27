@@ -125,7 +125,7 @@ async function world(fred = calm(), o: { sources?: boolean } = {}) {
 const FOMC = { market: "US", day: "2026-12-02", kind: "macro", title: "FOMC 의사록 공개", source: "Federal Reserve", sourceTier: "T1", confidence: "A" };
 
 const GOOD = JSON.stringify({
-  summary: ["하이일드 스프레드가 3.60%로 올라 경계가 필요해요.", "S&P500이 200일선 위에 있어요.", "지수는 오르지만 신용 쪽은 조심스러운 시장이에요."],
+  summary: ["하이일드 스프레드가 3.60%p로 올라 경계가 필요해요.", "S&P500이 200일선 위에 있어요.", "지수는 오르지만 신용 쪽은 조심스러운 시장이에요."],
   conclusion: ["지수는 오르지만 신용 스프레드가 넓어지며 시장이 조심스러워졌어요.", "하이일드 스프레드가 넓어진 것이 가장 큰 위험이에요.", "S&P500이 200일선 위에 머문 것은 회복 쪽 근거예요."],
   scenarios: {
     next: { up: "신용 스프레드가 다시 좁아지면", flat: "지표 발표가 없으면", down: "스프레드가 더 넓어지면" },
@@ -233,7 +233,7 @@ describe("the 08:00 report", () => {
         { name: "VIX", value: "20.00", sub: "변화 0.00% · 11월 30일 · FRED · A" },
         { name: "미국 10년물 금리", value: "4.50%", sub: "변화 0.00%p · 11월 30일 · FRED · A" },
         { name: "미국 2년물 금리", value: "3.96%", sub: "변화 −0.04%p · 11월 30일 · FRED · A" },
-        { name: "하이일드 스프레드", value: "3.60%", sub: "변화 +0.60%p · 11월 30일 · FRED · A" },
+        { name: "하이일드 스프레드", value: "3.60%p", sub: "변화 +0.60%p · 11월 30일 · FRED · A" }, // a spread's level in %p (DD 0907 2)
         { name: "엔/달러 환율", value: "150.00", sub: "변화 0.00% · 11월 30일 · FRED · A" },
         { name: "원/달러 환율", value: "1,350.00", sub: "변화 0.00% · 11월 30일 · FRED · A" },
       ],
@@ -473,12 +473,19 @@ describe("the model's words (team-lead 0747: two calls at most per person and da
     expect(checkSentence("하락 가능성을 살펴봐요.", 60, allowed)).toBe("하락 가능성을 살펴봐요.");
     expect(checkSentence("  줄이\n 바뀌어도  하나예요. ", 60, allowed)).toBe("줄이 바뀌어도 하나예요.");
     // DD 0828 1b · 1c: the stages, missing data and trust are code's; a summary or §1 sentence on them goes
-    for (const s of ["탈출 단계는 그대로예요.", "판정 신뢰도는 보통이에요.", "확인 불가 지표가 많아요.", "데이터 누락이 있어요.", "오늘 일부 지표를 받지 못했어요."]) {
+    for (const s of ["탈출 단계는 그대로예요.", "판정 신뢰도는 보통이에요.", "확인 불가 지표가 많아요.", "데이터 누락이 있어요.", "오늘 일부 지표를 받지 못했어요.", "금리 인상 단계예요."]) {
       expect(checkWords(JSON.stringify({ summary: [s, "둘이에요.", "셋이에요."], conclusion: [s, "남아요."] }), allowed)).toMatchObject({ summary: null, paragraph: ["남아요."] });
     }
+    // DD 0846: consumer confidence is a real indicator of the market picture (신뢰 alone is not a code topic)
+    const mood = "미시간대 소비자신뢰지수가 내려갔어요.";
+    expect(checkWords(JSON.stringify({ summary: [mood, "둘이에요.", "셋이에요."], conclusion: [mood] }), allowed)).toMatchObject({ summary: [mood, "둘이에요.", "셋이에요."], paragraph: [mood] });
     expect(checkWords(JSON.stringify({ summary: [], scenarios: { ...sc, month: { up: "d", flat: "e" } } }), allowed).scenarios).toBeNull();
     // the note quotes none of the code's own sentences (no-sample-lines)
     for (const s of [NO_SUMMARY, NO_SCENARIOS, "오늘 지표", "보유 중일 때만", "만료·무효화", "확인 대기"]) expect(REPORT_NOTE).not.toContain(s);
+    // DD 0846 Q10, DD 0907 3: what the model must leave to code, the word it never uses, the picture told by changes
+    expect(REPORT_NOTE).toContain("The report already shows the stages, their change from the previous reading, which data is missing and how far the reading can be trusted: never write about any of these.");
+    expect(REPORT_NOTE).toContain("Never use the word 단계 in anything you write.");
+    expect(REPORT_NOTE).toContain("The market picture says rising, falling or mixed only as the changes in the data show it, and gives the changes rather than the levels.");
   });
 });
 

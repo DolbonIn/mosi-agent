@@ -316,7 +316,8 @@ export type InvestAlertKind =
 export interface InvestAlertCard {
   type: "invest_alert";
   alertId: ID;
-  ruleId: ID;
+  /** absent on a symbol's own card (gap, split: B2c-2) */
+  ruleId?: ID;
   symbol: string;
   kind: InvestAlertKind;
   level?: 1 | 2 | 3;

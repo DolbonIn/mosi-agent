@@ -39,13 +39,20 @@ import {
   expiredBanner,
   expiredCallLine,
   expiredCard,
+  gapBanner,
+  gapCard,
   mockStopCard,
+  runBanner,
+  runCard,
+  splitBanner,
+  splitCard,
   stopBanner,
   stopCallLine,
   type Holding,
   type Observation,
 } from "./cards.ts";
 import * as idb from "./db.ts";
+import { gapOf, runAbove, splitOf, type Gap, type Run, type Split } from "./intraday.ts";
 import {
   actionText,
   bufferFoot,
@@ -60,7 +67,9 @@ import {
   money,
   moneyNum,
   pctNum,
+  priorReason,
   ruleLeft,
+  SEEN_SPLIT,
   stateFoot,
   stateText,
   step,
@@ -88,7 +97,7 @@ import {
   type MarketRead,
   type Stored,
 } from "./report.ts";
-import { judgeDay, stagesView, type JudgmentRow } from "./stages.ts";
+import { judgeDay, stageCallText, stageRowText, stagesView, type JudgmentRow } from "./stages.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
 import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 
@@ -570,6 +579,16 @@ export class InvestHub {
    * (team-lead 2052 answer, 21:2x correction).
    */
   async stopContext(userId: string, symbol: string, stop: number, bufPct: number) {
+    const market = marketOf(symbol);
+    const { atr14, close, atrAsOf, atrSource } = await this.atrOf(userId, symbol);
+    const h = this.holding(userId, symbol);
+    const ref = h?.avgPrice ?? close;
+    const basis = stopBasis(atr14, stop, ref);
+    return { basis, buffer: bufferPrice(market, stop, bufPct), atr14, atrAsOf, atrSource };
+  }
+
+  /** ATR14 and the last close from finished daily bars, else the kept figure (D5-2; B2c-2's gap and run read the same) */
+  async atrOf(userId: string, symbol: string): Promise<{ atr14: number | null; close: number | null; atrAsOf: string | null; atrSource: SourceKey }> {
     const { db } = this.core;
     const now = this.core.now();
     const market = marketOf(symbol);
@@ -605,10 +624,7 @@ export class InvestHub {
         }
       }
     }
-    const h = this.holding(userId, symbol);
-    const ref = h?.avgPrice ?? close;
-    const basis = stopBasis(atr14, stop, ref);
-    return { basis, buffer: bufferPrice(market, stop, bufPct), atr14, atrAsOf, atrSource };
+    return { atr14, close, atrAsOf, atrSource };
   }
 
   // ───────────────────────────── Toss ─────────────────────────────
@@ -745,6 +761,23 @@ export class InvestHub {
       const q = await pending;
       if (q && q !== "not_found") got.set(sym, { price: q.price, prevClose: q.prevClose, at: q.at, source: "yahoo" });
     }
+    // B2c-2: the session's first check reads the open (gap, from Yahoo's day chart for everyone: a public delayed
+    // quote, no one's token) and yesterday's last price (split); every check reads the price the check before stored
+    const prev = prevSlot(slot, this.dayOverride(userId));
+    const first = !slot.close && (!prev || prev.day !== slot.day);
+    const before = new Map(idb.quotes(db, userId).map((q) => [q.symbol, q] as const));
+    // Yahoo's day chart per symbol with live rules, first check only: the open, and the previous close (Toss's prices
+    // carry none)
+    const yq = new Map<string, Quote>();
+    if (first) {
+      for (const sym of new Set(live.map((r) => r.symbol))) {
+        let pending = shared.get(sym);
+        if (!pending) shared.set(sym, (pending = this.yahooQuote(sym, slot.market)));
+        const q = await pending;
+        if (q && q !== "not_found") yq.set(sym, q);
+      }
+    }
+    const opens = new Map([...yq].filter(([, q]) => q.open && q.prevClose != null && marketDate(slot.market, q.open.at) === slot.day));
     for (const [symbol, o] of got) idb.putQuote(db, { user_id: userId, symbol, price: o.price, prev_close: o.prevClose, source: o.source, as_of: o.at, fetched_at: now });
 
     // blind: live rules and no quote for any of their symbols, for 15 minutes of the session (2006 §3, DD 2010 §7)
@@ -761,12 +794,37 @@ export class InvestHub {
       core.track(core.push.send(userId, { title: BLIND_PUSH_TITLE, tag: "invest:blind" }));
     }
 
-    const prev = prevSlot(slot, this.dayOverride(userId));
     let alerts = 0;
+    // a split or a merge (first check, yesterday's price known): that symbol's rules stop before anything is judged
+    const held = new Set<string>();
+    if (first && prev) {
+      for (const sym of new Set(live.map((r) => r.symbol))) {
+        const b = before.get(sym);
+        if (!b || marketDate(slot.market, b.as_of) !== prev.day) continue;
+        // the previous close as the source of today's price gives it, else Yahoo's
+        const o = got.get(sym);
+        const y = yq.get(sym);
+        const pc = o?.prevClose != null ? { prevClose: o.prevClose, at: o.at, source: o.source } : y?.prevClose != null ? { prevClose: y.prevClose, at: y.at, source: "yahoo" as const } : null;
+        const sp = pc ? splitOf(b.price, pc.prevClose) : null;
+        if (!pc || !sp) continue;
+        held.add(sym);
+        if (await this.holdForSplit(userId, sym, sp, { price: b.price, day: prev.day }, pc, now)) alerts++;
+      }
+    }
+    const ran = new Set<string>();
     for (const r0 of live) {
       const r = idb.rule(db, userId, r0.id);
       if (!r || (r.state !== "armed" && r.state !== "hit")) continue;
       const o = got.get(r.symbol);
+      // A14 추격 금지: in or under the buy zone at the check before (seen there), far above it now
+      const was = before.get(r.symbol)?.price ?? null;
+      if (o && r.kind === "buy_zone" && prev && priorReason(r.seen_slot, prev.key) === null && was != null && was <= r.hi! && o.price > r.hi!) {
+        const run = runAbove(was, o.price, r.hi!, (await this.atrOf(userId, r.symbol)).atr14);
+        if (run) {
+          ran.add(r.symbol);
+          if (await this.runAlert(userId, r, run, o, now)) alerts++;
+        }
+      }
       if (o) {
         let basis: "close_and_intraday" | "intraday" = "intraday";
         let buffer: number | null = null;
@@ -788,8 +846,107 @@ export class InvestHub {
         if (await this.expire(userId, after, slot, now)) alerts++;
       }
     }
+    // a big gap at the open: one card per symbol and day, none where a split stopped the rules or the run card went
+    if (prev) {
+      for (const [sym, q] of opens) {
+        if (held.has(sym) || ran.has(sym)) continue;
+        const atr = await this.atrOf(userId, sym);
+        const g = gapOf(q.open!.price, q.prevClose!, atr.atr14);
+        if (g && (await this.gapAlert(userId, sym, g, q, prev.day, slot.day, atr, now))) alerts++;
+      }
+    }
     await this.publish(userId);
     return alerts;
+  }
+
+  // ───────────────────────────── B2c-2: gap, a run above the buy zone, split (team-lead 0856, DD 0847) ─────────────────────────────
+
+  /** a code row in the person's ledger (T2, the quote source's grade); a refused one is logged, never in the card's way */
+  private codeLedger(userId: string, market: Market, row: { id: string; asOf: string; value: number; definition: string; source: SourceKey }): void {
+    try {
+      writeLedger(this.core.db, userId, { id: row.id, asOf: row.asOf, value: row.value, unit: market === "US" ? "usd" : "krw", definition: row.definition, source: SOURCE_TABLE[row.source].name, sourceTier: "T2", confidence: SOURCE_TABLE[row.source].grade }, "code", this.core.now());
+    } catch (err) {
+      this.core.log.error("invest ledger write failed", { user: userId, id: row.id, err: errInfo(err) });
+    }
+  }
+
+  /** one symbol-level alert row (no rule): false when its key was used */
+  private claimAlert(userId: string, row: { id: string; ruleId: string | null; symbol: string; kind: string; key: string; price: number | null; at: number; source: string }, alsoInTx?: () => void): boolean {
+    const { db } = this.core;
+    return db.tx(() => {
+      const ok = idb.insertAlert(db, {
+        id: row.id,
+        user_id: userId,
+        rule_id: row.ruleId,
+        symbol: row.symbol,
+        kind: row.kind,
+        dedupe_key: row.key,
+        price: row.price,
+        observed_at: row.at,
+        source: row.source,
+        title: "",
+        thread_id: null,
+        message_id: null,
+        call_state: null,
+        called_at: null,
+        created_at: this.core.now(),
+      });
+      if (ok) alsoInTx?.();
+      return ok;
+    });
+  }
+
+  private sendAlert(userId: string, alertId: string, card: ReturnType<typeof gapCard>, banner: { title: string; body: string }, tag: string): void {
+    const { db } = this.core;
+    const record = `[투자 알림] ${card.title}${card.titleLines?.length ? ` (${card.titleLines.join(" ")})` : ""} · ${card.rows.map((r) => `${r.label} ${r.value}`).join(" · ")} · ${card.foot}`;
+    const { threadId, messageId } = this.post(userId, card, record, banner, tag);
+    idb.setAlertMessage(db, alertId, threadId, messageId);
+    db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id: alertId, t: card.title });
+  }
+
+  /** A14 분할·병합: the symbol's live rules stop (paused, marked) in the alert's transaction; prices are never changed */
+  private async holdForSplit(userId: string, symbol: string, split: Split, seen: { price: number; day: string }, o: { prevClose: number; at: number; source: SourceKey }, now: number): Promise<boolean> {
+    const { db } = this.core;
+    const market = marketOf(symbol);
+    const alertId = newId("ia");
+    let n = 0;
+    const ok = this.claimAlert(userId, { id: alertId, ruleId: null, symbol, kind: "split", key: `split:${symbol}:${marketDate(market, o.at)}`, price: o.prevClose, at: o.at, source: o.source }, () => {
+      for (const r of idb.rules(db, userId, symbol)) {
+        if (r.state !== "armed" && r.state !== "hit") continue;
+        idb.updateRuleWatch(db, r.id, r.rev, { state: "paused", hit_at: r.hit_at, hit_seq: r.hit_seq, cleared_at: r.cleared_at, paused_at: now, seen_slot: SEEN_SPLIT }, now);
+        n++;
+      }
+    });
+    if (!ok) return false;
+    const input = { alertId, symbol, market, split, seen, prevClose: o.prevClose, obs: o, held: n, now };
+    this.sendAlert(userId, alertId, splitCard(input), splitBanner(input), `split:${symbol}`);
+    return true;
+  }
+
+  /** the run card, once per buy-zone entry (the rule's hit_seq moves only when the price comes back into the zone) */
+  private async runAlert(userId: string, r: idb.RuleRow, run: Run, o: Observation, now: number): Promise<boolean> {
+    const market = marketOf(r.symbol);
+    const alertId = newId("ia");
+    if (!this.claimAlert(userId, { id: alertId, ruleId: r.id, symbol: r.symbol, kind: "chase", key: `chase:${r.id}:${r.rev}:${r.hit_seq}`, price: o.price, at: o.at, source: o.source })) return false;
+    const atr = await this.atrOf(userId, r.symbol);
+    this.codeLedger(userId, market, { id: `quote.${r.symbol}`, asOf: new Date(o.at).toISOString(), value: o.price, definition: "5분 감시 가격", source: o.source });
+    if (atr.atr14 != null && atr.atrAsOf) this.codeLedger(userId, market, { id: `atr14.${r.symbol}`, asOf: atr.atrAsOf, value: atr.atr14, definition: "ATR14 (일봉 14일 평균 실제 범위)", source: atr.atrSource });
+    const input = { alertId, ruleId: r.id, rule: r, market, mode: idb.ensureSettings(this.core.db, userId, now).mode, run, obs: o, now, stageRow: stageRowText(this.core, userId, now) };
+    this.sendAlert(userId, alertId, runCard(input), runBanner(input), `chase:${r.id}`);
+    return true;
+  }
+
+  /** the gap card, once per symbol and market day */
+  private async gapAlert(userId: string, symbol: string, gap: Gap, q: Quote, prevDay: string, day: string, atr: { atr14: number | null; atrAsOf: string | null; atrSource: SourceKey }, now: number): Promise<boolean> {
+    const market = marketOf(symbol);
+    const alertId = newId("ia");
+    const open = q.open!;
+    if (!this.claimAlert(userId, { id: alertId, ruleId: null, symbol, kind: "gap", key: `gap:${symbol}:${day}`, price: open.price, at: open.at, source: "yahoo" })) return false;
+    this.codeLedger(userId, market, { id: `quote.${symbol}`, asOf: new Date(open.at).toISOString(), value: open.price, definition: "그날 첫 5분 봉 시가", source: "yahoo" });
+    if (atr.atr14 != null && atr.atrAsOf) this.codeLedger(userId, market, { id: `atr14.${symbol}`, asOf: atr.atrAsOf, value: atr.atr14, definition: "ATR14 (일봉 14일 평균 실제 범위)", source: atr.atrSource });
+    const input = { alertId, symbol, market, gap, open: open.price, prevClose: q.prevClose!, prevDay, obs: { at: q.at, source: "yahoo" as const }, now, stageRow: stageRowText(this.core, userId, now) };
+    this.sendAlert(userId, alertId, gapCard(input), gapBanner(input), `gap:${symbol}`);
+    return true;
   }
 
   // ───────────────────────────── D-1 (team-lead 0056, DD 0109 §1) ─────────────────────────────
@@ -975,7 +1132,7 @@ export class InvestHub {
       idb.setAlertMessage(db, alertId, threadId, messageId);
       db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id: alertId, t: banner.title });
       idb.setOrderMessage(db, orderId, messageId, now);
-      if (this.calls(s).stopResult) this.callLater(userId, messageId, orderId, stopCallLine(agentName, r, market, card, o.price, h), (c) => idb.setAlertCall(db, alertId, c.ok ? "ok" : c.reason, c.at));
+      if (this.calls(s).stopResult) this.callLater(userId, messageId, orderId, stopCallLine(agentName, r, market, card, o.price, h, stageCallText(core, userId, now) ?? undefined), (c) => idb.setAlertCall(db, alertId, c.ok ? "ok" : c.reason, c.at));
       return true;
     }
     const next = r.kind === "target" && r.level ? idb.rules(db, userId, r.symbol).find((x) => x.kind === "target" && x.level === r.level! + 1 && x.price != null) : undefined;
@@ -991,8 +1148,13 @@ export class InvestHub {
       noPrior: st.noPrior,
       paused: st.next.state === "paused",
       nextTarget: next ? { level: next.level!, price: next.price! } : null,
-      stopPrice: idb.rules(db, userId, r.symbol).find((x) => x.kind === "stop" && x.price != null)?.price ?? null,
+      // the person's stop that is still watched (DD 1441 1: an expired one is in neither the card nor the call)
+      stopPrice: idb.rules(db, userId, r.symbol).find((x) => x.kind === "stop" && x.price != null && x.state !== "expired")?.price ?? null,
       intradayOnly,
+      stageRow: stageRowText(core, userId, now),
+      stageCall: stageCallText(core, userId, now) ?? undefined,
+      // the buy zone's 다음 row (DD 0847 1): the person's rules on this symbol that are not over
+      firstTarget: r.kind === "buy_zone" ? (idb.rules(db, userId, r.symbol).find((x) => x.kind === "target" && x.level === 1 && x.price != null && x.state !== "expired")?.price ?? null) : null,
     };
     const card = alertCard(input);
     const banner = alertBanner(input);
@@ -1034,7 +1196,7 @@ export class InvestHub {
       return ok;
     });
     if (!fresh) return false;
-    const card = expiredCard({ alertId, ruleId: r.id, rule: r, market, mode: s.mode, createdAt: r.created_at, at: now, now });
+    const card = expiredCard({ alertId, ruleId: r.id, rule: r, market, mode: s.mode, createdAt: r.created_at, at: now, now, stageRow: stageRowText(core, userId, now) });
     const banner = expiredBanner(r, market);
     const { threadId, messageId } = this.post(userId, card, `[투자 알림] ${card.title} · ${card.titleLines![0]}`, banner, r.id);
     idb.setAlertMessage(db, alertId, threadId, messageId);

@@ -31,6 +31,8 @@ export interface YahooQuote {
   /** seconds */
   time: number;
   name?: string;
+  /** B2c-2: the day chart's first 5-minute bar (its open, and when it began in seconds); absent = a close-only body */
+  open?: { price: number; time: number };
 }
 
 export function makeInvestUpstream() {
@@ -182,7 +184,14 @@ export function makeInvestUpstream() {
       if (q === "not_found") return json({ chart: { result: null, error: { code: "Not Found", description: "No data found, symbol may be delisted" } } }, 404);
       return json({
         chart: {
-          result: [{ meta: { symbol: sym, regularMarketPrice: q.price, regularMarketTime: q.time, chartPreviousClose: q.prevClose ?? null, longName: q.name ?? null }, timestamp: [q.time], indicators: { quote: [{ close: [q.price] }] } }],
+          result: [
+            {
+              meta: { symbol: sym, regularMarketPrice: q.price, regularMarketTime: q.time, chartPreviousClose: q.prevClose ?? null, longName: q.name ?? null },
+              ...(q.open
+                ? { timestamp: [q.open.time, q.time], indicators: { quote: [{ open: [q.open.price, q.price], close: [q.price, q.price] }] } }
+                : { timestamp: [q.time], indicators: { quote: [{ close: [q.price] }] } }),
+            },
+          ],
           error: null,
         },
       });

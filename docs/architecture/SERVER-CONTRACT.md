@@ -724,8 +724,8 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   check lasts to it, so the day's bar is read again once final, else to the next market day. Stooq is not used.
 - Rule states `armed | hit | paused | expired` (대기 / 닿음 / 멈춤 / 만료; armed with a deadline: `12-01까지`). Inside while
   armed → one alert and `hit`; inside while hit → nothing; one check outside → armed again, so a later touch is a new alert
-  the same day. `once` → `paused` after its alert; a sell stop always pauses. Any PATCH of a paused or expired rule watches
-  it again. The earlier state is known only when the rule was seen at the check right before (the last close check
+  the same day. `once` → `paused` after its alert; a sell stop always pauses; a split or a merge pauses the symbol's
+  rules (B2c-2). Any PATCH of a paused or expired rule watches it again. The earlier state is known only when the rule was seen at the check right before (the last close check
   included); otherwise the alert says why (`noPrior`, title line: first look / after an edit / after resuming / quotes
   missing in between) and resistance says "위에 있어요", never "넘었어요". One alert per `ruleId:rev:hitSeq` (UNIQUE).
   The watch never writes a rule's price, direction, action or rev, and a save that lands mid-check wins (no alert for the
@@ -950,7 +950,8 @@ Code: `apps/server/src/invest/report.ts` (A13 · A15, DD 1935 §2-4, DD 0059 §2
   (another KST year named when read); someone else's or an unknown id: 404 `report_not_found` "볼 수 없는 보고서예요.".
   Sections in A15's order: `conclusion` (the heads, the change, the paragraph or `note`, 판정 신뢰도 높음 with none of
   the 11 unknown, 보통 with 1–3, 낮음 with 4 or more), `market` (S&P500 · 나스닥100 · 필라델피아 반도체 지수 · 코스피 · VIX
-  · 10년물 · 2년물 · 하이일드 스프레드 · 엔/달러 · 원/달러: the last value, `변화 … · as-of · source · grade`; missing
+  · 10년물 · 2년물 · 하이일드 스프레드 · 엔/달러 · 원/달러: the last value (rates in %, the high-yield spread in %p like its
+  change), `변화 … · as-of · source · grade`; missing
   "오늘 받지 못했어요"), `core11` (the board's rows), `worse` · `recovery` (the gauges, only the met conditions, the
   board's next lines), `etf` (per watched symbol with rules: the last daily close, buy zone, targets and stop with
   "보유 중일 때만 해당" unless Toss says it is held, 예상 수익률 · 예상 손실률 "(추정)", 손익비 "2.09" or "2.09 / 3.73" with
@@ -959,6 +960,52 @@ Code: `apps/server/src/invest/report.ts` (A13 · A15, DD 1935 §2-4, DD 0059 §2
   the reason when a rule expired or its invalidation was met, else "만료·무효화 없음"), `scenarios` (다음 거래일 · 5거래일 · 20거래일 × 상승 ·
   횡보 · 하락, words only), `events` (the next 8, KST first).
 - 컨센서스: 받을 곳 없음 (A15 §8's column is left out until there is somewhere to get it; DD 0733 6).
+
+## Invest (B2c-2) — what the watch reads besides the rules
+
+Code: `apps/server/src/invest/intraday.ts` (pure), `hub.ts`, `cards.ts` (A14 매 실행 13단계, team-lead 0747 8 · 0856, DD
+0847). No model call, no order, no new table.
+- **Cadence**: B1's 5-minute checks, closer than A14's hourly run. The session's first check (the market day's first slot,
+  never the close check) also reads Yahoo's day chart for each symbol with live rules, for everyone, Toss users too (a
+  public delayed quote, no one's token; one read per symbol and check, shared): the open (its first 5-minute bar with an
+  open) and the previous close.
+- **Gap** (`kind: "gap"`, caution, no `ruleId`; A14 급격한 갭): the open against the previous close, both 3% or more and
+  ATR14 × 1 or more (ATR14 as the stop basis reads it). The first check only, the open's market day today, once per symbol
+  and day (`gap:<symbol>:<day>`); none where a split stopped the rules or a run card went at that check. Title "SOXL이 전일
+  종가보다 5.0% 높게|낮게 시작했어요"; rows 시가 · 전일 종가 `$30.00 · 11월 30일` · 갭 `5.0% · ATR 1.5배` · 시장; banner "SOXL 갭
+  상승|하락 출발" / "시가 $31.50 · 전일 종가 대비 5.0%".
+- **A run above the buy zone** (`kind: "chase"`, caution, the buy zone's `ruleId`; A14 추격 금지, never a buy signal): a live
+  buy_zone rule seen at the check right before, its price then at or under the zone's top, now above the top by ATR14 × 1
+  and 3% of the top both. Once per entry: one per `ruleId:rev:hitSeq` (hitSeq moves only when the price comes back into
+  the zone). Title "SOXL이 매수 검토 구간 위로 크게 벗어났어요", lines "$28.50까지 올라왔어요." "전략을 다시 봐야 해요."; rows 규칙
+  · 벗어난 폭 `구간 위 $1.50 · 5.6% · ATR 1.5배` · 시장; banner "SOXL 매수 검토 구간 크게 벗어남" / "$28.50 · 매수 검토
+  $25.00–27.00".
+- **Split or merge** (`kind: "split"`, danger, no `ruleId`; A14 분할·병합): at the first check, the price stored at the check
+  before (the last close check, of that market day) against today's previous close (today's source's, else Yahoo's): r =
+  previous close ÷ that price within ±1% of k (merge, k shares into 1) or of 1/k (split, 1 into k), k ∈ {2, 3, 4, 5, 8,
+  10, 15, 20, 25, 50}. That price unknown → nothing judged; a crash leaves the previous close where it was, so it is never
+  read as a split. In the alert's transaction every armed or hit rule of the symbol turns `paused` (marked `@split`);
+  price, direction, action and rev are not touched. They alert nothing until the person saves one (PATCH, unchanged too,
+  or a proposal applied): that rule is watched again with its earlier state unknown (`noPrior`). Once per symbol and day
+  (`split:<symbol>:<day>`). Title "SOXL 가격 규칙을 멈췄어요", lines "10주가 1주로 합쳐진 것으로 보여요." | "1주가 2주로 나뉜
+  것으로 보여요." and "규칙을 열어 저장하면 다시 봐요."; rows 지난 거래일에 본 가격 `$32.57 · 11월 30일` · 전일 종가 `$325.70 · Yahoo(지연
+  시세) · B+` · 멈춘 규칙 `3개`; notes "규칙 가격은 바꾸지 않았어요."; banner "SOXL 가격 규칙 멈춤" / "분할이나 병합으로 보여요 ·
+  규칙 3개". The rule's `stateFoot`: "11월 27일 23:45에 분할이나 병합으로 보여서 멈췄어요. 가격을 확인하고 저장하면 다시 봐요."
+- Gap, run and split cards go to the invest thread with A17, a banner and a push (tag `invest:gap:<symbol>`,
+  `invest:chase:<ruleId>`, `invest:split:<symbol>`), and never call. Gap and run cards write `quote.<symbol>` (the open, the
+  price) and `atr14.<symbol>` to the person's ledger (code, T2, the quote source's grade).
+- **The buy zone alert** (`kind: "buy_zone_wait"`, caution; A16's middle frame, DD 0847 1): rows 규칙 · 진입 조건 "확인 대기 ·
+  가격 구간 도달" · 다음 "손절 $22.00 · 1차 익절 $32.00" (the person's stop and 1st target on the symbol, not expired; either
+  alone; no row with neither) · 시장. Every rule alert's stop line (the card's and the call's "손절선 …") reads a stop that
+  is not expired (DD 1441 1).
+- **The `시장` row** (DD 0847 0) on every rule alert, expiry, gap and run card: the person's stage heads as judged ("탈출
+  3단계 · 회복 최소 1단계", 회복 판정 보류, 회복 단계 미확정) when the board has a reading that is not stale (before 08:00 KST the
+  last one stands); else "확인 불가" (no reading yet, a day missed, sources off). Calls (rule alerts, mock stop records,
+  zero-sellable skips) end on the same reading (DD 0924 1): "시장 단계는 탈출 3단계, 회복 최소 1단계예요." / "시장 단계는 탈출
+  3단계이고, 회복은 판정 보류예요." / "시장 단계는 탈출 3단계이고, 회복 단계는 아직 몰라요.", else "시장 상태는 이번에는 확인하지
+  못했어요.".
+- `InvestAlertCard.ruleId` is absent on a symbol's own card (gap, split). Cards say "ATR 1.5배"; ATR14 is named in this
+  contract and the ledger only.
 
 ## Web Push (B1c) — the lock-screen line
 

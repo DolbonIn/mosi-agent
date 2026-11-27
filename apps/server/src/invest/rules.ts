@@ -18,6 +18,8 @@ export type PriorReason = "first" | "edited" | "resumed" | "gap";
 /** seen_slot markers left by the person's saves (a real slot key starts with the market) */
 export const SEEN_EDITED = "@edited";
 export const SEEN_RESUMED = "@resumed";
+/** B2c-2: the server stopped the rule on a split or a merge; any save by the person watches it again (team-lead 0856) */
+export const SEEN_SPLIT = "@split";
 
 export type Judge = "in" | "out" | "wait";
 
@@ -165,6 +167,7 @@ export function stateText(w: RuleWatchState, until: string | null): string {
 /** the sheet's footnote under the result sentence (DD 2008 §5, DD 2042-b §1) */
 export function stateFoot(w: RuleWatchState): string | undefined {
   if (w.state === "hit" && w.hit_at) return `${longKst(w.hit_at)}에 닿았어요. 가격이 조건 밖으로 나갔다가 다시 닿으면 그때 또 알려요.`;
+  if (w.state === "paused" && w.paused_at && w.seen_slot === SEEN_SPLIT) return `${longKst(w.paused_at)}에 분할이나 병합으로 보여서 멈췄어요. 가격을 확인하고 저장하면 다시 봐요.`;
   if (w.state === "paused" && w.paused_at) return `${longKst(w.paused_at)}에 닿아서 멈췄어요.`;
   return undefined;
 }

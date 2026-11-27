@@ -47,6 +47,8 @@ export interface Quote {
   at: number;
   source: SourceKey;
   name?: string;
+  /** the day chart's first bar (Yahoo 1d/5m, B2c-2's gap): its open and when it began; absent when the body has none */
+  open?: { price: number; at: number };
 }
 
 /** One gate per app: serialises requests per host and keeps the pause state in invest_source_state. */
@@ -168,6 +170,15 @@ export function parseYahooQuote(text: string, symbol: string): Quote | "not_foun
   const time = finite(meta?.regularMarketTime);
   if (price == null || price <= 0 || time == null) return null;
   const name = typeof meta?.longName === "string" && meta.longName.trim() ? meta.longName.trim() : typeof meta?.shortName === "string" && meta.shortName.trim() ? meta.shortName.trim() : undefined;
+  // the first bar with an open (a bar before the first trade has none)
+  const r = j.chart.result?.[0];
+  const opens = r?.indicators?.quote?.[0]?.open;
+  let open: Quote["open"];
+  if (Array.isArray(opens) && Array.isArray(r?.timestamp)) {
+    const i = opens.findIndex((x) => (finite(x) ?? 0) > 0);
+    const t = i >= 0 ? finite(r.timestamp[i]) : null;
+    if (i >= 0 && t != null) open = { price: finite(opens[i])!, at: t * 1000 };
+  }
   return {
     symbol,
     price,
@@ -175,6 +186,7 @@ export function parseYahooQuote(text: string, symbol: string): Quote | "not_foun
     at: time * 1000,
     source: "yahoo",
     ...(name ? { name: name.slice(0, 80) } : {}),
+    ...(open ? { open } : {}),
   };
 }
 

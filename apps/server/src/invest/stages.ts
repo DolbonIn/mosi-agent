@@ -153,9 +153,11 @@ export function escapeHead(s: Assessed, missing: (k: InputKey) => Missing): Stag
   return { stage: e.floor, floor: true, text: `탈출 최소 ${e.floor}단계`, ...(b ? { pending: `${b.why} ${up} 여부는 아직 몰라요.`, pendingTone: b.tone } : {}) };
 }
 
+export const RECOVERY_HOLD = "회복 판정 보류";
+
 export function recoveryHead(s: Assessed, missing: (k: InputKey) => Missing): StageHead {
   const r = s.recovery;
-  if (r.stage === "hold") return { stage: null, text: "회복 판정 보류", pending: `회복 신호는 ${r.gauge.met}개지만 심각 신호가 있어서 맞는 단계가 없어요.`, pendingTone: "caution" };
+  if (r.stage === "hold") return { stage: null, text: RECOVERY_HOLD, pending: `회복 신호는 ${r.gauge.met}개지만 심각 신호가 있어서 맞는 단계가 없어요.`, pendingTone: "caution" };
   if (r.stage !== null) return { stage: r.stage, name: RECOVERY_NAMES[r.stage], text: `회복 ${r.stage}단계` };
   const b = becauseOf(r.open, missing);
   const pending = b ? { pending: `${b.why} 회복 단계는 아직 몰라요.`, pendingTone: b.tone } : {};
@@ -311,6 +313,33 @@ export type StagesView =
     };
 
 export const STAGES_OFF = "지금은 지표를 받지 않아서 단계를 판정하지 않아요.";
+
+/**
+ * An invest alert's `시장` row (DD 0847 0, A16's 탈출·회복 단계): the board's heads without the stage names —
+ * 탈출 3단계 · 회복 1단계, 탈출 최소 2단계 · 회복 판정 보류; 확인 불가 while the board is off, has no row yet, or is stale.
+ */
+/** the board's heads while its reading is the current one (judged, not stale: yesterday's stands until 08:00; DD 0924 0) */
+export function currentHeads(core: Core, userId: string, now: number): { escape: StageHead; recovery: StageHead } | null {
+  const v = stagesView(core, userId, now);
+  return v.kind === "judged" && !v.stale ? { escape: v.escape, recovery: v.recovery } : null;
+}
+
+export function stageRowText(core: Core, userId: string, now: number): string {
+  const h = currentHeads(core, userId, now);
+  if (!h) return "확인 불가";
+  const word = (kind: "탈출" | "회복", x: StageHead) => (x.stage == null ? x.text : `${kind} ${x.floor ? "최소 " : ""}${x.stage}단계`);
+  return `${word("탈출", h.escape)} · ${word("회복", h.recovery)}`;
+}
+
+/** the call's market sentence from the current heads (DD 0924 1); null → the call says it could not check */
+export function stageCallOf(h: { escape: StageHead; recovery: StageHead } | null): string | null {
+  if (!h || h.escape.stage == null) return null;
+  if (h.recovery.stage != null) return `시장 단계는 ${h.escape.text}, ${h.recovery.text}예요.`;
+  if (h.recovery.text === RECOVERY_HOLD) return `시장 단계는 ${h.escape.text}이고, 회복은 판정 보류예요.`;
+  return `시장 단계는 ${h.escape.text}이고, 회복 단계는 아직 몰라요.`;
+}
+
+export const stageCallText = (core: Core, userId: string, now: number): string | null => stageCallOf(currentHeads(core, userId, now));
 
 export const headsOf = (j: Judged) => {
   const miss = (k: InputKey) => j.missing[k] ?? null;

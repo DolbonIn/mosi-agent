@@ -301,8 +301,9 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     const { alice } = await people(h);
     const tool = investTools(h.app.core, alice.id).find((t) => t.name === "invest_snapshot")!;
     expect(tool.description).toContain("단계는 판정본만 말해요. 지금 값은 값으로만 말해요."); // team-lead 0437 2
-    // DD 0717 1: off is the server's setting: nothing to turn on, no promise to tell later
-    expect(tool.description).toContain("When the board is off, that is how this server is set up, not a setting the person can change: do not ask them to turn anything on, and do not promise to check again or tell them later.");
+    // DD 0717 1, DD 0907 1: off → its sentence and nothing more: no board, no setting, no other check, no promise
+    expect(tool.description).toContain("When it is off, relay the sentence it gives and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later.");
+    expect(tool.description).not.toContain("set up");
     const ctx = { userId: alice.id, threadId: null, now: () => new Date(h.clock.t) } as never;
     h.clock.t = KST(2026, 12, 1, 7, 0);
     expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: "첫 판정은 오늘 08:00에 나와요.", data: { stages: { kind: "none", none: "첫 판정은 오늘 08:00에 나와요." } } });

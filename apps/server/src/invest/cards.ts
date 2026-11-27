@@ -4,9 +4,10 @@
  * talks about an order beyond "주문은 내지 않았어요" (A17).
  */
 import type { InvestAlertCard, InvestAlertKind, InvestCall, InvestStopCard } from "@pickle/protocol";
-import { atText, footLine, kst, kstWithEastern, num, pct, shares } from "@pickle/quant";
+import { atText, footLine, kst, kstWithEastern, num, pct, rate, shares } from "@pickle/quant";
 import { ieyo } from "../util.ts";
 import type { Market } from "./calendar.ts";
+import type { Gap, Run, Split } from "./intraday.ts";
 import { SOURCE_TABLE, type SourceKey } from "./sources.ts";
 import { actionText, dayWords, eulReul, iGa, INTRADAY_ONLY, kindWord, money, moneyNum, noPriorLine, ruleLeft, zoneText, type PriorReason, type RuleSpec } from "./rules.ts";
 
@@ -41,6 +42,12 @@ export interface AlertInput {
   /** real mode, a stop judged on intraday prices because no ATR was known (team-lead 2052: never a silent change) */
   intradayOnly?: boolean;
   call?: InvestCall;
+  /** the `시장` row (stages.ts stageRowText); 확인 불가 when absent */
+  stageRow?: string;
+  /** the call's market sentence (stages.ts stageCallText); the could-not-check line when absent */
+  stageCall?: string;
+  /** the buy zone's `다음` row: the person's 1st target on this symbol, if any (with stopPrice) */
+  firstTarget?: number | null;
 }
 
 export function alertKind(r: Pick<RuleSpec, "kind">): InvestAlertKind {
@@ -50,7 +57,8 @@ export function alertKind(r: Pick<RuleSpec, "kind">): InvestAlertKind {
     case "target":
       return "target";
     case "buy_zone":
-      return "buy_zone_met";
+      // price alone (team-lead 0747 8a: the market half is not checked) → the entry waits; buy_zone_met is for later
+      return "buy_zone_wait";
     case "resistance":
       return "breakout";
     case "invalidate":
@@ -120,7 +128,7 @@ function alertTitle(i: AlertInput): { title: string; lines: string[] } {
     case "target":
       title = `${iGa(sym)} ${kindWord("target", r.level)} 관찰가에 닿았어요`;
       break;
-    case "buy_zone_met":
+    case "buy_zone_wait":
       title = `${iGa(sym)} 매수 검토 구간에 들어왔어요`;
       break;
     case "breakout":
@@ -137,9 +145,11 @@ function alertTitle(i: AlertInput): { title: string; lines: string[] } {
   return { title, lines };
 }
 
-/** DD 1935 §2-1 tone: danger for stop alerts, invalidation and a custom price below; none otherwise */
+/** DD 1935 §2-1 tone: danger for stop alerts, invalidation and a custom price below; caution for the buy zone (DD 0847
+ * 1, A16's middle frame); none otherwise */
 function alertTone(r: RuleSpec): "danger" | "caution" | undefined {
   if (r.kind === "stop" || r.kind === "invalidate") return "danger";
+  if (r.kind === "buy_zone") return "caution";
   if (r.kind === "alert" && r.direction === "below") return "danger";
   return undefined;
 }
@@ -151,7 +161,13 @@ export function alertCard(i: AlertInput): InvestAlertCard {
   const sub = [changeText(i.obs), distanceText(m, r, i.obs.price)].filter(Boolean).join(" · ");
   const rows: { label: string; value: string }[] = [{ label: "규칙", value: `${ruleLeft(m, r)} · ${actionText(r.action, i.mode)}` }];
   if (i.holding) rows.push({ label: "보유", value: holdingRow(m, i.holding, i.obs.price) });
-  rows.push({ label: "시장", value: "확인 불가" });
+  if (r.kind === "buy_zone") {
+    // A16's middle frame (DD 0847 1): the entry waits on what is not checked here; then the person's own next prices
+    rows.push({ label: "진입 조건", value: "확인 대기 · 가격 구간 도달" });
+    const next = [i.stopPrice != null ? `손절 ${money(m, i.stopPrice)}` : null, i.firstTarget != null ? `1차 익절 ${money(m, i.firstTarget)}` : null].filter((s): s is string => !!s);
+    if (next.length) rows.push({ label: "다음", value: next.join(" · ") });
+  }
+  rows.push({ label: "시장", value: i.stageRow ?? "확인 불가" });
   if (r.kind === "target" && i.nextTarget)
     rows.push({ label: "다음", value: `${i.nextTarget.level}차 익절 ${money(m, i.nextTarget.price)}까지 ${pct((i.nextTarget.price / i.obs.price - 1) * 100)}` });
   const notes: string[] = [];
@@ -186,7 +202,7 @@ export function alertCard(i: AlertInput): InvestAlertCard {
 }
 
 /** the expiry alert (DD 2010 §2): no price, no sub, no glyph */
-export function expiredCard(i: { alertId: string; ruleId: string; rule: RuleSpec; market: Market; mode: "mock" | "real"; createdAt: number; at: number; now: number; call?: InvestCall }): InvestAlertCard {
+export function expiredCard(i: { alertId: string; ruleId: string; rule: RuleSpec; market: Market; mode: "mock" | "real"; createdAt: number; at: number; now: number; call?: InvestCall; stageRow?: string }): InvestAlertCard {
   const r = i.rule;
   const until = r.until_day!;
   const start = new Date(i.createdAt + 9 * 3_600_000);
@@ -203,7 +219,7 @@ export function expiredCard(i: { alertId: string; ruleId: string; rule: RuleSpec
     rows: [
       { label: "규칙", value: `${ruleLeft(i.market, r)} · ${actionText(r.action, i.mode)}` },
       { label: "기간", value: `${start.getUTCMonth() + 1}월 ${start.getUTCDate()}일–${dayWords(until)}` },
-      { label: "시장", value: "확인 불가" },
+      { label: "시장", value: i.stageRow ?? "확인 불가" },
     ],
     ...(i.call ? { call: i.call } : {}),
     notes: [],
@@ -282,7 +298,7 @@ export function alertBanner(i: AlertInput): { title: string; body: string } {
       return { title: `${r.symbol} 손절 관찰가 도달`, body: `${p} · 손절선 ${level} · 주문은 내지 않았어요` };
     case "target":
       return { title: `${r.symbol} ${kindWord("target", r.level)} 관찰가 도달`, body: `${p} · ${levelLabel(r)} ${level}` };
-    case "buy_zone_met":
+    case "buy_zone_wait":
       return { title: `${r.symbol} 매수 검토 구간 진입`, body: `${p} · 매수 검토 ${level}` };
     case "breakout":
       return i.noPrior
@@ -293,6 +309,142 @@ export function alertBanner(i: AlertInput): { title: string; body: string } {
     default:
       return { title: `${r.symbol} 내가 정한 가격 도달`, body: `${p} · 알림 가격 ${level}` };
   }
+}
+
+// ───────────────────────────── B2c-2: gap, a run above the buy zone, split (DD 0847 2–4) ─────────────────────────────
+
+/** `ATR 1.3배` (DD 0847: the screen says the multiple; the 14 days are the contract's) */
+const atrWord = (atrs: number) => `ATR ${num(atrs, 1)}배`;
+
+export interface GapInput {
+  alertId: string;
+  symbol: string;
+  market: Market;
+  gap: Gap;
+  open: number;
+  prevClose: number;
+  /** the previous close's market day */
+  prevDay: string;
+  obs: Pick<Observation, "at" | "source">;
+  now: number;
+  stageRow: string;
+}
+
+/** a big gap at the open (A14 급격한 갭; caution both ways: A17's big gap is a risk either way) */
+export function gapCard(i: GapInput): InvestAlertCard {
+  const m = i.market;
+  const p = rate(i.gap.pct, 1);
+  return {
+    type: "invest_alert",
+    alertId: i.alertId,
+    symbol: i.symbol,
+    kind: "gap",
+    tone: "caution",
+    title: `${iGa(i.symbol)} 전일 종가보다 ${p} ${i.gap.up ? "높게" : "낮게"} 시작했어요`,
+    at: i.obs.at,
+    atText: atText(i.obs.at, i.now),
+    price: moneyNum(m, i.open),
+    rows: [
+      { label: "시가", value: money(m, i.open) },
+      { label: "전일 종가", value: `${money(m, i.prevClose)} · ${dayWords(i.prevDay)}` },
+      { label: "갭", value: `${p} · ${atrWord(i.gap.atrs)}` },
+      { label: "시장", value: i.stageRow },
+    ],
+    notes: [],
+    foot: obsFoot(m, i.obs),
+    disclaimer: true,
+  };
+}
+
+export function gapBanner(i: GapInput): { title: string; body: string } {
+  return { title: `${i.symbol} 갭 ${i.gap.up ? "상승" : "하락"} 출발`, body: `시가 ${money(i.market, i.open)} · 전일 종가 대비 ${rate(i.gap.pct, 1)}` };
+}
+
+export interface RunInput {
+  alertId: string;
+  ruleId: string;
+  rule: RuleSpec;
+  market: Market;
+  mode: "mock" | "real";
+  run: Run;
+  obs: Observation;
+  now: number;
+  stageRow: string;
+}
+
+/** A14 추격 금지: no buy signal, the strategy to look at again; the word 추격 is never on the screen (DD 0847 2) */
+export function runCard(i: RunInput): InvestAlertCard {
+  const r = i.rule;
+  const m = i.market;
+  return {
+    type: "invest_alert",
+    alertId: i.alertId,
+    ruleId: i.ruleId,
+    symbol: r.symbol,
+    kind: "chase",
+    tone: "caution",
+    title: `${iGa(r.symbol)} 매수 검토 구간 위로 크게 벗어났어요`,
+    titleLines: [`${money(m, i.obs.price)}까지 올라왔어요.`, "전략을 다시 봐야 해요."],
+    at: i.obs.at,
+    atText: atText(i.obs.at, i.now),
+    price: moneyNum(m, i.obs.price),
+    rows: [
+      { label: "규칙", value: `${ruleLeft(m, r)} · ${actionText(r.action, i.mode)}` },
+      { label: "벗어난 폭", value: `구간 위 ${money(m, i.run.over)} · ${rate(i.run.pct, 1)} · ${atrWord(i.run.atrs)}` },
+      { label: "시장", value: i.stageRow },
+    ],
+    notes: [],
+    foot: obsFoot(m, i.obs),
+    disclaimer: true,
+  };
+}
+
+export function runBanner(i: RunInput): { title: string; body: string } {
+  return { title: `${i.rule.symbol} 매수 검토 구간 크게 벗어남`, body: `${money(i.market, i.obs.price)} · 매수 검토 ${zoneText(i.market, i.rule.lo!, i.rule.hi!)}` };
+}
+
+export interface SplitInput {
+  alertId: string;
+  symbol: string;
+  market: Market;
+  split: Split;
+  /** the last price this server saw on the previous market day */
+  seen: { price: number; day: string };
+  prevClose: number;
+  obs: Pick<Observation, "at" | "source">;
+  /** the rules the server stopped */
+  held: number;
+  now: number;
+}
+
+/** a split or a merge read from the prices (DD 0847 4): what the server did comes first; no price is changed */
+export function splitCard(i: SplitInput): InvestAlertCard {
+  const m = i.market;
+  const s = SOURCE_TABLE[i.obs.source as SourceKey];
+  return {
+    type: "invest_alert",
+    alertId: i.alertId,
+    symbol: i.symbol,
+    kind: "split",
+    tone: "danger",
+    title: `${i.symbol} 가격 규칙을 멈췄어요`,
+    // a ratio worked out from prices: 보여요; never 1:10 or 2:1 (which way they read is unclear)
+    titleLines: [i.split.kind === "merge" ? `${i.split.ratio}주가 1주로 합쳐진 것으로 보여요.` : `1주가 ${i.split.ratio}주로 나뉜 것으로 보여요.`, "규칙을 열어 저장하면 다시 봐요."],
+    at: i.obs.at,
+    atText: atText(i.obs.at, i.now),
+    rows: [
+      { label: "지난 거래일에 본 가격", value: `${money(m, i.seen.price)} · ${dayWords(i.seen.day)}` },
+      { label: "전일 종가", value: `${money(m, i.prevClose)} · ${s?.name ?? i.obs.source} · ${s?.grade ?? ""}`.replace(/ · $/, "") },
+      { label: "멈춘 규칙", value: `${i.held}개` },
+    ],
+    notes: ["규칙 가격은 바꾸지 않았어요."],
+    foot: obsFoot(m, i.obs),
+    disclaimer: true,
+  };
+}
+
+export function splitBanner(i: SplitInput): { title: string; body: string } {
+  return { title: `${i.symbol} 가격 규칙 멈춤`, body: `분할이나 병합으로 보여요 · 규칙 ${i.held}개` };
 }
 
 export function expiredBanner(r: RuleSpec, market: Market): { title: string; body: string } {
@@ -340,7 +492,7 @@ function spokenPosition(market: Market, price: number, stop: number | null, hold
   return out;
 }
 
-/** G7 ④: B1 reads no market state, and says so */
+/** G7 ④: no current stage reading (off, none, stale) → the call says so */
 const MARKET_UNKNOWN = "시장 상태는 이번에는 확인하지 못했어요.";
 
 export function alertCallLine(agentName: string, i: AlertInput): string {
@@ -354,7 +506,7 @@ export function alertCallLine(agentName: string, i: AlertInput): string {
     case "target":
       what = `${iGa(r.symbol)} ${kindWord("target", r.level)} 관찰가 ${spoken(m, r.price!)}에 닿았어요.`;
       break;
-    case "buy_zone_met":
+    case "buy_zone_wait":
       what = `${iGa(r.symbol)} 매수 검토 구간 ${spoken(m, r.lo!)}에서 ${spoken(m, r.hi!)} 사이에 들어왔어요.`;
       break;
     default:
@@ -363,18 +515,19 @@ export function alertCallLine(agentName: string, i: AlertInput): string {
   const parts = [`${ieyo(agentName)}. 투자 알림이에요.`, what, `지금 가격은 ${spoken(m, i.obs.price)}예요.`];
   parts.push(...spokenPosition(m, i.obs.price, r.kind === "stop" ? null : i.stopPrice, i.holding));
   if (r.kind === "stop") parts.push("주문은 내지 않았어요.");
-  parts.push(MARKET_UNKNOWN);
+  parts.push(i.stageCall ?? MARKET_UNKNOWN);
   return parts.join(" ");
 }
 
-export function stopCallLine(agentName: string, r: RuleSpec, market: Market, card: InvestStopCard, price: number, holding: Holding | null): string {
-  if (card.state === "skipped") return `${ieyo(agentName)}. ${iGa(r.symbol)} 손절선 ${spoken(market, r.price!)}에 닿았는데, 팔 수 있는 수량이 0주라서 주문을 내지 않았어요. ${MARKET_UNKNOWN}`;
+export function stopCallLine(agentName: string, r: RuleSpec, market: Market, card: InvestStopCard, price: number, holding: Holding | null, stageCall?: string): string {
+  const marketLine = stageCall ?? MARKET_UNKNOWN;
+  if (card.state === "skipped") return `${ieyo(agentName)}. ${iGa(r.symbol)} 손절선 ${spoken(market, r.price!)}에 닿았는데, 팔 수 있는 수량이 0주라서 주문을 내지 않았어요. ${marketLine}`;
   return [
     `${ieyo(agentName)}. 모의 손절을 기록했어요.`,
     `${iGa(r.symbol)} 손절선 ${spoken(market, r.price!)} 아래인 ${spoken(market, price)}에 닿았어요.`,
     ...spokenPosition(market, price, null, holding),
     "모의 주문이라 실제 주문은 내지 않았어요.",
-    MARKET_UNKNOWN,
+    marketLine,
   ].join(" ");
 }
 

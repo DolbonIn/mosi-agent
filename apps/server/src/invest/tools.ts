@@ -94,7 +94,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const snapshot: ToolDef = {
     name: "invest_snapshot",
     description:
-      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When the board is off, that is how this server is set up, not a setting the person can change: do not ask them to turn anything on, and do not promise to check again or tell them later.",
+      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When it is off, relay the sentence it gives and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
     icon: "chart",
     title: () => "시장 단계 확인",
