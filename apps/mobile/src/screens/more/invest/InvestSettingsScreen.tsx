@@ -114,7 +114,8 @@ function TossSection({ s, openSheet }: { s: InvestSettingsView; openSheet: (el: 
   const row = tossRow(s.toss);
   const ip = s.toss.outboundIp;
   return (
-    <ListSection title="토스증권" footer={feet(tossFoot(s.toss))} className="iv-toss">
+    // no group title: the first row already says 토스증권 (DD 1238 §3, the 잠금 화면 알림 group's rule)
+    <ListSection footer={feet(tossFoot(s.toss))} className="iv-toss">
       {alert && <NoticeRow signal={alert.tone} text={alert.text} className="iv-toss-alert" onPress={alert.opens ? openSheet : undefined} />}
       {row.value === null ? (
         <ListRow title="토스증권" subtitle={row.subtitle ?? undefined} className="iv-toss-row" />
@@ -179,7 +180,7 @@ function FitRow({ title, value, className, accessory, onClick }: { title: string
       title={titleNode}
       detail={stacked ? undefined : value}
       subtitle={stacked ? value : undefined}
-      className={`${className}${stacked ? " is-stacked" : ""}`}
+      className={`iv-fit-row ${className}${stacked ? " is-stacked" : ""}`}
       accessory={accessory}
       onClick={onClick}
     />

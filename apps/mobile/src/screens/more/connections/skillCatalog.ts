@@ -53,7 +53,7 @@ export const SKILL_COPY: SkillCopy[] = [
     auth: "fields",
     unlocks: "계좌 · 보유 종목 조회",
     does: "계좌와 보유 종목, 시세를 조회만 해요. 주문은 넣지 않아요.",
-    keyFoot: "모시에만 쓰는 키를 새로 만들어 넣어 주세요. 같은 키를 다른 앱이나 프로그램에서 쓰면 모시의 시세 확인과 주문이 끊겨요.",
+    keyFoot: "모시에만 쓰는 키를 새로 만들어 넣어 주세요. 같은 키를 다른 앱이나 프로그램에서 쓰면 모시의 시세 확인이 끊겨요.",
     issue: { where: "토스증권 PC 웹 › 설정 › Open API", url: "https://www.tossinvest.com" },
     examples: ["내 토스증권 보유 종목 보여 줘", "삼성전자 지금 얼마야?"],
   },

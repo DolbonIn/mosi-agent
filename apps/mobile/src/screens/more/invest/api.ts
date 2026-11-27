@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPatch, apiPost, type ApiOptions } from "../../../api/client";
-import type { InvestOverview, InvestRuleChanges, InvestRuleDraft, InvestRulePreview, InvestSettingsPatch, InvestSettingsView, InvestTossStatus } from "@pickle/protocol";
+import type { InvestOverview, InvestRuleChanges, InvestRuleDraft, InvestRulePreview, InvestSettingsPatch, InvestSettingsView, InvestSymbolDetail, InvestTossStatus } from "@pickle/protocol";
 import { ruleChanges } from "./rules";
 
 /**
@@ -11,6 +11,8 @@ import { ruleChanges } from "./rules";
 const enc = encodeURIComponent;
 
 export const overview = (opts?: ApiOptions) => apiGet<InvestOverview>("/api/invest", opts);
+/** one watched symbol (its screen, DD 0914): its row, rules, last 5 alerts and chart; 404 not_watched once it is not */
+export const symbolDetail = (symbol: string, opts?: ApiOptions) => apiGet<InvestSymbolDetail>(`/api/invest/symbols/${enc(symbol)}`, opts);
 // an edit's preview is of the changes PATCH will send (the server reads `changes` against the rule; the draft rides along)
 export const previewRule = (draft: InvestRuleDraft, ruleId: string | null, opts?: ApiOptions) =>
   apiPost<InvestRulePreview>("/api/invest/rules/preview", ruleId ? { ...draft, ruleId, changes: ruleChanges(draft) } : draft, opts);

@@ -10,6 +10,7 @@ import type {
   InvestRuleRow,
   InvestSettingsView,
   InvestStages,
+  InvestSymbolDetail,
   InvestTri,
   InvestWatch,
 } from "@pickle/protocol";
@@ -340,8 +341,9 @@ export function tossFoot(t: Pick<Toss, "error" | "outboundIp">): string[] {
 export const canCheckToss = (t: Pick<Toss, "connected" | "error">) => t.connected && t.error?.code !== "off";
 
 /**
- * Why 실제 주문 cannot be turned on: one sentence, the first that applies (DD 0103-b B, until B3's server sentence).
- * The device key's (first in that order) comes with B3's enable, which signs with it.
+ * Why 실제 주문 cannot be turned on: one sentence, the first that applies (DD 0103-b B). For B3, when the switch can be
+ * turned on: before it, nothing turns it on, so these would promise what cannot happen; modeFoot says MODE_NOT_YET
+ * instead (DD 1238 §2). The device key's (first in that order) comes with B3's enable, which signs with it.
  */
 export function modeReason(blockers: InvestSettingsView["realBlockers"]): string | null {
   if (blockers.includes("toss_off")) return "지금은 토스증권에 연결할 수 없어서 실제 주문을 켤 수 없어요.";
@@ -350,24 +352,27 @@ export function modeReason(blockers: InvestSettingsView["realBlockers"]): string
   return null;
 }
 
-/** 주문 모드's footer: what the paper mode does, orders still being checked, why it cannot be turned on */
-export function modeFoot(s: Pick<InvestSettingsView, "mode" | "openOrders" | "realBlockers">): string[] {
+/** before B3 the switch cannot be turned on whatever blocks it or not: one reason, the same for everyone (DD 1238 §2) */
+export const MODE_NOT_YET = "실제 주문은 아직 준비 중이라 켤 수 없어요.";
+
+/** 주문 모드's footer: what the paper mode does, orders still being checked, why it cannot be turned on (paper only) */
+export function modeFoot(s: Pick<InvestSettingsView, "mode" | "openOrders">): string[] {
   const out: string[] = [];
   if (s.mode === "mock") out.push("모의 모드에서는 주문을 내지 않고, 팔았을 시점과 가격만 기록해요.");
   if (s.openOrders > 0) out.push(`보내 둔 주문 ${s.openOrders}건은 체결을 계속 확인해요.`);
-  const why = s.mode === "mock" ? modeReason(s.realBlockers) : null;
-  if (why) out.push(why);
+  if (s.mode === "mock") out.push(MODE_NOT_YET);
   return out;
 }
 
 /**
- * 전화 (DD 0059 §5-3): a call that cannot go out is said once, in a caution row at the top in the server's words (an
- * unverified number leads to verifying); the footer is the group's sentence before the server's callNote, or alone
- * when the row already says it.
+ * 전화 (DD 0059 §5-3): a call that cannot go out is said once, in a caution row at the top, in the same words as ③'s
+ * row (phoneNotice: a title line, no full stop; DD 1238 §4); an unverified number leads to verifying. The footer is the
+ * group's sentence before the server's callNote, or alone when the row already says it.
  */
 export function callsGroup(s: Pick<InvestSettingsView, "callBlock" | "callNote">): { notice: { text: string; verify: boolean } | null; foot: string } {
   const head = "가격 알림의 전화는 규칙마다 정해요.";
-  if (s.callBlock) return { notice: { text: s.callNote, verify: s.callBlock === "not_verified" }, foot: head };
+  const notice = phoneNotice(s);
+  if (notice) return { notice, foot: head };
   return { notice: null, foot: `${head} ${s.callNote}` };
 }
 
@@ -381,3 +386,39 @@ export const CALL_ROWS: { key: keyof InvestSettingsView["calls"]; title: string;
 /** this device's lock-screen notifications (DD 0059 §5-4); `none`: the server sends none (push_off), so no row */
 export type LockScreen = "on" | "off" | "unsupported" | "none";
 export const LOCK_SCREEN_VALUE: Record<Exclude<LockScreen, "none">, string> = { on: "켜짐", off: "꺼짐", unsupported: "이 기기에서는 받을 수 없어요" };
+
+// ── 종목 화면 (DD 1935 §3-2 ② 331, DD 0914) ──
+
+/** the symbol a route is for: `{ symbol }` from ②'s row, or a chat card's 규칙 보기 `{ symbol, ruleId }` (DD 0914 D6) */
+export function symbolTarget(params: Record<string, unknown> | undefined): { symbol: string; ruleId: string | null } | null {
+  const symbol = params?.symbol;
+  if (typeof symbol !== "string" || !symbol) return null;
+  return { symbol, ruleId: typeof params?.ruleId === "string" && params.ruleId ? params.ruleId : null };
+}
+
+/** 11-27 00:45 in KST: a recent alert's time, in ③'s `닿음 · 11-27 00:45` form (DD 0914 D2) */
+export function kstStamp(ms: number): string {
+  const d = new Date(ms + KST);
+  return `${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")} ${kstClock(ms)}`;
+}
+
+export const ALERTS_EMPTY = "아직 알림이 없어요.";
+export const ALERTS_MAX = 5;
+
+type SymbolAlert = InvestSymbolDetail["alerts"][number];
+
+/**
+ * 최근 알림's rows (DD 0914 D2): the server's words (its symbol-less `line` once it sends one, else its title), the KST
+ * time, and where a tap goes; an alert without its thread or message goes nowhere (no chevron)
+ */
+export function alertRows(alerts: readonly SymbolAlert[]): { id: string; text: string; when: string; to: { threadId: string; messageId: string } | null }[] {
+  return alerts.slice(0, ALERTS_MAX).map((a) => {
+    const line = (a as { line?: unknown }).line;
+    return {
+      id: a.id,
+      text: typeof line === "string" && line ? line : a.title,
+      when: kstStamp(a.at),
+      to: a.threadId && a.messageId ? { threadId: a.threadId, messageId: a.messageId } : null,
+    };
+  });
+}

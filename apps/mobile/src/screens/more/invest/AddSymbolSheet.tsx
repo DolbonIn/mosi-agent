@@ -12,8 +12,9 @@ import * as api from "./api";
  * while the field is empty. The server looks the symbol up; one it cannot find is said in the sheet, which stays open.
  * Added: the sheet closes and the overview, read again, has the new row on top.
  */
-export function presentAddSymbol(source: SheetSource) {
-  presentSheet({ source, title: "종목 추가", render: (sheet) => <AddSymbol sheet={sheet} /> });
+/** `initial`: the symbol filled in (a symbol's screen that is no longer watched, DD 0918 §2); the person still adds it */
+export function presentAddSymbol(source: SheetSource, initial = "") {
+  presentSheet({ source, title: "종목 추가", render: (sheet) => <AddSymbol sheet={sheet} initial={initial} /> });
 }
 
 const clean = (s: string) => s.trim().toUpperCase();
@@ -26,8 +27,8 @@ const plainInput = (el: HTMLInputElement | null) => {
   el.spellcheck = false;
 };
 
-function AddSymbol({ sheet }: { sheet: SheetApi }) {
-  const [symbol, setSymbol] = useState("");
+function AddSymbol({ sheet, initial }: { sheet: SheetApi; initial: string }) {
+  const [symbol, setSymbol] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const s = clean(symbol);
   const watched = !!investRes.store.get().data?.watchlist.some((w) => w.symbol === s);

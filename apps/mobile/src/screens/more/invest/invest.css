@@ -354,9 +354,43 @@
 .iv-mode-anchor {
   scroll-margin-top: var(--top-clear, 0px);
 }
-/* opened for one symbol, its 감시 규칙 group is scrolled to the top of the view: clear of the top bar */
-.iv-rules {
+/* a symbol's screen opened for one rule (a chat card's 규칙 보기): the row is scrolled to the top of the view, clear of
+   the top bar, and tinted a moment once there (DD 0914 D6, DD 0918 §1) */
+.iv-symbol-screen .iv-rule-row {
   scroll-margin-top: var(--top-clear, 0px);
+}
+/* landing.ts: the tint of a row a link arrived at (in 150 ms, out 400 ms; LAND holds the times) */
+/* 최근 알림: the time beside the words while both fit one line, else under them at the right (③'s way), never cut;
+   the time as a list row's detail is drawn (body, --label-2) */
+.iv-alert-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+.iv-alert-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.iv-alert-when {
+  flex: none;
+  margin-left: auto;
+  font-size: var(--t-body);
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.land-tint {
+  background: var(--fill);
+  transition: background-color 150ms ease-out;
+}
+.land-tint-out {
+  transition: background-color 400ms ease-in;
+}
+:root[data-motion="reduce"] .land-tint,
+:root[data-motion="reduce"] .land-tint-out {
+  transition: none;
 }
 /* FitRow's hidden measure: the title and the value at their natural widths, on one line, never seen or read */
 .iv-fit-probe {
@@ -372,7 +406,9 @@
   max-width: none;
   overflow: visible;
 }
-.iv-ip-row.is-stacked .list-row-sub {
+/* a value moved under its title keeps the size and colour it has on the right (DD 1238 §5); the off row's server
+   sentence, a subtitle from the start, stays a subtitle */
+.iv-fit-row.is-stacked .list-row-sub {
   font-size: var(--t-body);
   color: var(--label-2);
 }

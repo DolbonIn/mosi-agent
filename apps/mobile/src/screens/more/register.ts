@@ -25,6 +25,7 @@ export function registerMoreScreens() {
   registerScreen("agent", lazyScreen(() => import("./agent/AgentScreen").then((m) => m.AgentScreen)));
   registerScreen("payment", lazyScreen(() => import("./payment/PaymentScreen").then((m) => m.PaymentScreen)));
   registerScreen("account", lazyScreen(() => import("./profile/AccountScreen").then((m) => m.AccountScreen)));
-  registerScreen("invest", lazyScreen(() => import("./invest/InvestScreen").then((m) => m.InvestScreen)));
+  // `{ symbol }` (②'s row, a chat card's 규칙 보기 `{ symbol, ruleId }`) opens that symbol's screen (DD 0914 D6)
+  registerScreen("invest", lazyScreen(() => import("./invest/InvestRoute").then((m) => m.InvestRoute)));
   registerScreen("invest-settings", lazyScreen(() => import("./invest/InvestSettingsScreen").then((m) => m.InvestSettingsScreen)));
 }

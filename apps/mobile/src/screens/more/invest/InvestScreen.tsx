@@ -1,26 +1,17 @@
-import { useLayoutEffect, useRef } from "react";
 import { nav, type ScreenProps } from "../../../app/nav";
 import { Screen } from "../../../app/Screen";
 import { LargeTitle } from "../../../ui/LargeTitle";
-import { InvestNum, IvDisclaimer } from "../../../ui/Invest";
+import { IvDisclaimer } from "../../../ui/Invest";
 import { ListRow, ListSection } from "../../../ui/List";
 import { investRes, useResource } from "../data";
-import { copyOf, Foot, InlineError, Placeholder, Stack, useAgentName, useRouteVisible } from "../parts";
-import { presentPhone } from "../profile/PhoneSheet";
+import { copyOf, InlineError, Placeholder, Stack, useAgentName, useRouteVisible } from "../parts";
 import { presentAddSymbol } from "./AddSymbolSheet";
 import { useModeCapsule } from "./mode";
 import { NoticeRow } from "./NoticeRow";
-import { scrollToTop } from "./scroll";
-import { presentRule } from "./RuleSheet";
-import { boardOf, gaugeSaid, gaugeTone, isLiveSale, phoneNotice, pricePhrase, ruleGroups, rulesFoot, stageEmptyLine, watchNotice, type StageGauge } from "./rules";
-import type { InvestNum as InvestNumber, InvestOverview, InvestRuleRow, InvestStages, InvestSymbolRow } from "@pickle/protocol";
+import { EmptySection, routeClass, RuleGroup, rulesFootNode, WatchRow } from "./rows";
+import { boardOf, gaugeSaid, gaugeTone, phoneNotice, ruleGroups, stageEmptyLine, watchNotice, type StageGauge } from "./rules";
+import type { InvestOverview, InvestStages } from "@pickle/protocol";
 import "./invest.css";
-
-/** this route's own screen (a second 투자 can sit on the stack: a chat card opens one over the first) */
-const routeClass = (key: string) => `iv-route-${key.replace(/[^A-Za-z0-9_-]/g, "-")}`;
-
-/** the server's number text for ui/InvestNum, or null where it has no number (InvestNum then says 확인 불가) */
-const numText = (n: InvestNumber | null | undefined): string | null => (n && n.v !== null ? n.text : null);
 
 /**
  * 투자 (DD 1935 §3-2, first part: ① 시장 단계, ② 감시 종목, ③ 감시 규칙, ④ 보고서; DD 2008, DD 2010). One read
@@ -32,25 +23,15 @@ const numText = (n: InvestNumber | null | undefined): string | null => (n && n.v
  * The top bar says the order mode; pressed, it opens ⑥ 투자 설정 at 주문 모드 (DD 1935 §3-1, DD 2008 §1's next part).
  * ⑥ is the last row before the A17 sentence.
  *
- * Not here yet (next parts): 11지표 자세히, the symbol screen, ⑤ 덱 and the live-order sheet.
+ * A watched symbol's row opens its screen (InvestSymbolScreen: the same route with `{ symbol }`, DD 0914).
+ *
+ * Not here yet (next parts): 11지표 자세히, ⑤ 덱 and the live-order sheet.
  */
 export function InvestScreen({ route }: ScreenProps) {
   const visible = useRouteVisible(route.key);
   const res = useResource(investRes, visible);
   const d = res.data;
   useModeCapsule(() => nav.push("invest-settings", { focus: "mode" }, { title: "투자 설정" }));
-
-  // opened for one symbol (a chat card's 규칙 보기: { symbol, ruleId }, screens-chat): its 감시 규칙 group at the top of
-  // the view once the overview is here, once; a symbol no longer watched leaves the screen at its top
-  const target = (route.params as { symbol?: unknown } | undefined)?.symbol;
-  const aimed = useRef(false);
-  useLayoutEffect(() => {
-    if (aimed.current || !d || typeof target !== "string") return;
-    aimed.current = true;
-    const group = document.querySelector<HTMLElement>(`.${routeClass(route.key)} .iv-add-rule-${CSS.escape(target)}`)?.closest<HTMLElement>(".list-section");
-    // once only, so its second step is not cancelled by a re-run (StrictMode's, or the next overview)
-    if (group) scrollToTop(group);
-  }, [d, target, route.key]);
 
   return (
     <Screen routeKey={route.key} className={`invest ${routeClass(route.key)}`}>
@@ -66,7 +47,7 @@ export function InvestScreen({ route }: ScreenProps) {
           <>
             <StageSection stages={d.stages} />
             <WatchSection d={d} />
-            <RulesSection d={d} />
+            <RulesSection d={d} scope={routeClass(route.key)} />
             <ReportsSection reports={d.reports} />
             <ListSection className="iv-settings-link">
               <ListRow title="투자 설정" layoutId="iv-settings-row" onClick={() => nav.push("invest-settings", undefined, { title: "투자 설정", titleLayoutId: "iv-settings-row" })} />
@@ -78,20 +59,6 @@ export function InvestScreen({ route }: ScreenProps) {
         ) : null}
       </Stack>
     </Screen>
-  );
-}
-
-/** a section with nothing to list: its title and one footnote, no card (AgentScreen's grammar) */
-function EmptySection({ title, className, children }: { title: string; className: string; children: string }) {
-  return (
-    <section className={`list-section iv-empty ${className}`}>
-      <div className="list">
-        <div className="list-header">
-          <h2 className="list-section-title">{title}</h2>
-        </div>
-        <Foot className="iv-empty-foot">{children}</Foot>
-      </div>
-    </section>
   );
 }
 
@@ -154,94 +121,36 @@ function WatchSection({ d }: { d: InvestOverview }) {
     <ListSection title="감시 종목" footer={foot} className="iv-watch">
       {notice && <NoticeRow signal={notice.tone === "danger" ? "risk" : "caution"} text={notice.text} className="iv-watch-notice" />}
       {d.watchlist.map((w) => (
-        <WatchRow key={w.symbol} w={w} />
+        <WatchRow key={w.symbol} w={w} onPress={() => nav.push("invest", { symbol: w.symbol }, { title: w.symbol })} />
       ))}
       <ListRow title="종목 추가" chevron={false} className="iv-add" onClick={() => presentAddSymbol(document.querySelector<HTMLElement>(".invest .iv-watch .iv-add"))} />
     </ListSection>
   );
 }
 
-function WatchRow({ w }: { w: InvestSymbolRow }) {
-  const h = w.holding;
-  return (
-    <div className="list-row iv-watch-row">
-      <span className="list-row-main">
-        <span className="iv-two">
-          <span className="iv-symbol">{w.symbol}</span>
-          <span className={`iv-second t-copy${h ? " tnum" : ""}`}>{h ? h.line : w.name}</span>
-        </span>
-        <span className="iv-two is-end">
-          <InvestNum value={numText(w.price)} className="iv-price" />
-          {numText(w.price) !== null && w.change && <InvestNum value={numText(w.change)} className={`iv-change${w.stale ? " is-stale" : ""}`} />}
-        </span>
-      </span>
-    </div>
-  );
-}
-
 // ───────────────────────────── ③ 감시 규칙 ─────────────────────────────
 
-function RulesSection({ d }: { d: InvestOverview }) {
+function RulesSection({ d, scope }: { d: InvestOverview; scope: string }) {
   const agentName = useAgentName();
   const groups = ruleGroups(d);
   // no symbol: no rules section at all; ② already says what to do (DD 2008 §2)
   if (!groups.length) return null;
   const notice = d.rules.some((r) => r.action === "call") ? phoneNotice(d.settings) : null;
-  const foot = rulesFoot(d.mode, agentName).map((p) => (
-    <p key={p} className="iv-foot-p">
-      {copyOf(p)}
-    </p>
-  ));
+  const foot = rulesFootNode(d.mode, agentName);
   return (
     <>
       {groups.map((g, i) => (
-        <ListSection key={g.symbol} title={`감시 규칙 · ${g.symbol}`} footer={i === groups.length - 1 ? foot : undefined} className="iv-rules">
-          {i === 0 && notice && <PhoneNotice {...notice} />}
-          {g.rules.map((r) => (
-            <RuleRow key={r.id} r={r} d={d} />
-          ))}
-          <ListRow
-            title="규칙 추가"
-            chevron={false}
-            className={`iv-add iv-add-rule-${g.symbol}`}
-            onClick={() => presentRule(document.querySelector<HTMLElement>(`.invest .iv-add-rule-${CSS.escape(g.symbol)}`), { symbol: g.symbol, rule: null })}
-          />
-        </ListSection>
+        <RuleGroup
+          key={g.symbol}
+          d={d}
+          symbol={g.symbol}
+          rules={g.rules}
+          title={`감시 규칙 · ${g.symbol}`}
+          footer={i === groups.length - 1 ? foot : undefined}
+          notice={i === 0 ? notice : null}
+          scope={scope}
+        />
       ))}
-    </>
-  );
-}
-
-/** calls cannot be placed (DD 2010 §4): said once, at the top; an unverified number leads to verifying it */
-function PhoneNotice({ text, verify }: { text: string; verify: boolean }) {
-  return <NoticeRow signal="caution" text={text} className="iv-phone-notice" onPress={verify ? (el) => presentPhone(el) : undefined} />;
-}
-
-function RuleRow({ r, d }: { r: InvestRuleRow; d: InvestOverview }) {
-  return (
-    <button type="button" className={`list-row is-clickable iv-rule-row iv-rule-${r.id}`} onClick={(e) => presentRule(e.currentTarget, { symbol: r.symbol, rule: r })}>
-      <span className="list-row-main">
-        <span className="iv-rule-title tnum">
-          <PriceTied text={r.left} />
-        </span>
-        <span className="iv-two is-end">
-          <span className={`iv-action${isLiveSale(r, d.mode) ? " is-live" : ""}`}>{r.actionText}</span>
-          <span className={`iv-state tnum${r.state === "expired" ? " is-expired" : ""}`}>{r.stateText}</span>
-        </span>
-      </span>
-    </button>
-  );
-}
-
-/** the server's rule text with its price phrase on one line */
-function PriceTied({ text }: { text: string }) {
-  const p = pricePhrase(text);
-  if (!p) return <>{text}</>;
-  return (
-    <>
-      {p[0]}
-      <span className="iv-tie">{p[1]}</span>
-      {p[2]}
     </>
   );
 }
