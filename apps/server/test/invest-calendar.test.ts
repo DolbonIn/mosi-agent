@@ -1,7 +1,7 @@
 // invest calendar (agent-runtime 2006 §1, 2052 §A-5): NYSE holidays and early closes by rule, daylight time, the KRX
 // table, and the watch slots (G2: from 15 minutes after the open every 5 minutes, then one close check).
 import { describe, expect, test } from "bun:test";
-import { civilDate } from "@pickle/quant";
+import { civilDate, dayNumber, weekday } from "@pickle/quant";
 import {
   closeCheckAt,
   currentSlot,
@@ -14,6 +14,8 @@ import {
   etDate,
   etToEpoch,
   krDay,
+  KR_TABLE,
+  krTableGap,
   marketDaysAfter,
   nextMarketDayStart,
   nextSession,
@@ -91,8 +93,71 @@ describe("KRX table", () => {
     const exam = krDay("2026-11-19");
     if (exam.kind === "open") expect([iso(exam.session.open), iso(exam.session.close)]).toEqual(["2026-11-19T01:00", "2026-11-19T07:30"]);
     else throw new Error("exam day should be open");
-    expect(krDay("2027-01-04")).toEqual({ kind: "unknown" });
-    expect(krDay("2027-01-02")).toEqual({ kind: "closed", reason: "weekend" });
+    expect(krDay("2028-01-03")).toEqual({ kind: "unknown" });
+    expect(krDay("2028-01-01")).toEqual({ kind: "closed", reason: "weekend" });
+  });
+
+  // team-lead 0312: KASI's 2027 public holidays and substitute days, the year-end closure, the two changed days
+  const KRX_2027: [string, string][] = [
+    ["2027-01-01", "신정"],
+    ["2027-02-08", "설날 연휴"],
+    ["2027-02-09", "설날 대체공휴일"],
+    ["2027-03-01", "삼일절"],
+    ["2027-05-03", "노동절 대체공휴일"],
+    ["2027-05-05", "어린이날"],
+    ["2027-05-13", "부처님오신날"],
+    ["2027-07-19", "제헌절 대체공휴일"],
+    ["2027-08-16", "광복절 대체공휴일"],
+    ["2027-09-14", "추석 연휴"],
+    ["2027-09-15", "추석"],
+    ["2027-09-16", "추석 연휴"],
+    ["2027-10-04", "개천절 대체공휴일"],
+    ["2027-10-11", "한글날 대체공휴일"],
+    ["2027-12-27", "성탄절 대체공휴일"],
+    ["2027-12-31", "연말 휴장"],
+  ];
+
+  test("2027: every closed day closed with its name, each a weekday, nothing else closed on a weekday", () => {
+    for (const [day, name] of KRX_2027) expect([day, krDay(day)]).toEqual([day, { kind: "closed", reason: "holiday", name }]);
+    for (const [day] of KRX_2027) expect([day, weekday(dayNumber(day)) >= 1 && weekday(dayNumber(day)) <= 5]).toEqual([day, true]);
+    expect(Object.keys(KR_TABLE[2027]!.closed).sort()).toEqual(KRX_2027.map(([d]) => d));
+    // the weekend days of the long weekends stay weekends; the days around them trade
+    expect(krDay("2027-02-07")).toEqual({ kind: "closed", reason: "weekend" }); // 설날 on a Sunday
+    expect(krDay("2027-05-01")).toEqual({ kind: "closed", reason: "weekend" }); // 노동절 on a Saturday
+    for (const day of ["2027-02-10", "2027-05-04", "2027-05-06", "2027-09-13", "2027-09-17", "2027-12-30"]) expect([day, krDay(day).kind]).toEqual([day, "open"]);
+  });
+
+  test("2027: the first trading day opens at 10:00, the 2028 수능 day runs 10:00–16:30, other days 09:00–15:30", () => {
+    const hours = (day: string) => {
+      const d = krDay(day);
+      if (d.kind !== "open") throw new Error(`${day} should be open`);
+      return [iso(d.session.open), iso(d.session.close)];
+    };
+    expect(hours("2027-01-04")).toEqual(["2027-01-04T01:00", "2027-01-04T06:30"]);
+    expect(hours("2027-11-18")).toEqual(["2027-11-18T01:00", "2027-11-18T07:30"]);
+    expect(hours("2027-01-05")).toEqual(["2027-01-05T00:00", "2027-01-05T06:30"]);
+    expect(hours("2027-11-19")).toEqual(["2027-11-19T00:00", "2027-11-19T06:30"]);
+    expect(Object.keys(KR_TABLE[2027]!.hours ?? {}).sort()).toEqual(["2027-01-04", "2027-11-18"]);
+  });
+
+  test("2027-01-04 is the first market day after 2026-12-30 (the year-end closure, 1 January, the weekend); 2028 is unknown", () => {
+    expect(marketDaysAfter("KR", "2026-12-30", "2027-01-03")).toBe(0);
+    expect(marketDaysAfter("KR", "2026-12-30", "2027-01-04")).toBe(1);
+    expect(iso(nextSession("KR", Date.parse("2026-12-30T07:00:00Z"))!.open)).toBe("2027-01-04T01:00");
+    expect(nextSession("KR", Date.parse("2027-12-30T07:00:00Z"))).toBeNull(); // 12-31 closed, then 2028: unknown
+    expect(krDay("2028-01-03")).toEqual({ kind: "unknown" });
+  });
+
+  test("krTableGap: this year's table, or from 1 December next year's (KST); no clock read", () => {
+    const kst = (iso: string) => Date.parse(`${iso}+09:00`);
+    expect(krTableGap(kst("2026-12-01T00:00:00"))).toBeNull(); // 2027 is here
+    expect(krTableGap(kst("2027-11-30T23:59:59"))).toBeNull();
+    expect(krTableGap(kst("2027-12-01T00:00:00"))).toBe(2028);
+    expect(krTableGap(Date.parse("2027-11-30T15:00:00Z"))).toBe(2028); // 1 December 00:00 KST is 30 November in UTC
+    expect(krTableGap(kst("2027-12-31T23:59:59"))).toBe(2028);
+    expect(krTableGap(kst("2028-01-03T09:00:00"))).toBe(2028);
+    expect(krTableGap(kst("2027-12-01T00:00:00"), { 2027: {}, 2028: {} })).toBeNull();
+    expect(krTableGap(kst("2026-06-01T00:00:00"), { 2027: {} })).toBe(2026);
   });
 });
 
@@ -122,7 +187,8 @@ describe("watch slots", () => {
     expect(currentSlot("US", at("2026-11-27T18:10:00Z"))).toBeNull();
     expect(currentSlot("US", at("2026-11-26T16:00:00Z"))).toBeNull(); // Thanksgiving
     expect(currentSlot("KR", at("2026-11-27T00:15:00Z"))?.key).toBe("KR:2026-11-27:09:15");
-    expect(currentSlot("KR", at("2027-01-04T01:00:00Z"))).toBeNull(); // unknown year
+    expect(currentSlot("KR", at("2027-01-04T01:15:00Z"))?.key).toBe("KR:2027-01-04:10:15"); // the 10:00 open
+    expect(currentSlot("KR", at("2028-01-03T00:15:00Z"))).toBeNull(); // unknown year
   });
 
   test("prevSlot: 5 minutes back, or the last trading day's close check (over a holiday); null across an unknown day", () => {
@@ -160,8 +226,8 @@ describe("watch slots", () => {
     expect(marketDaysAfter("US", "2026-11-27", "2026-12-07")).toBe(6);
     expect(marketDaysAfter("US", "2026-11-25", "2026-11-27")).toBe(1); // Thanksgiving closed, the early close counts
     expect(marketDaysAfter("US", "2026-12-23", "2026-12-28")).toBe(2); // 12-24 (early close) and 12-28; 12-25 closed
-    // 12-31 closed (2026 table); 2027 has no table: its weekdays 01-01, 01-04, 01-05 count, the weekend does not
-    expect(marketDaysAfter("KR", "2026-12-30", "2027-01-05")).toBe(3);
+    // 12-31 closed (2027 table); 2028 has no table: its weekdays 01-03, 01-04 count, the weekend does not
+    expect(marketDaysAfter("KR", "2027-12-30", "2028-01-04")).toBe(2);
   });
 });
 

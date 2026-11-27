@@ -589,6 +589,32 @@ describe("a source read whole and ok moves or drops the finds it no longer lists
     ]);
   });
 
+  test("a KRX year the table lacks: one warning a day with the day's run, from 1 December (team-lead 0312)", async () => {
+    const warns = (w: Awaited<ReturnType<typeof world>>) => {
+      const got: [string, unknown][] = [];
+      const warn = w.h.app.core.log.warn.bind(w.h.app.core.log);
+      w.h.app.core.log.warn = (m: string, f?: Parameters<typeof warn>[1]) => {
+        if (m.startsWith("invest calendar")) got.push([m, f]);
+        warn(m, f);
+      };
+      return got;
+    };
+    const late = await world({ start: KST(2027, 11, 30, 6, 0) });
+    const none = warns(late);
+    await late.beat(KST(2027, 11, 30, 7, 0));
+    expect(late.row("2027-11-30")).not.toBeNull();
+    expect(none).toEqual([]); // 2028 is a month away
+    const w = await world({ start: KST(2027, 12, 1, 6, 0) });
+    const got = warns(w);
+    await w.beat(KST(2027, 12, 1, 6, 59));
+    expect(got).toEqual([]); // before the day's run
+    await w.beat(KST(2027, 12, 1, 7, 0));
+    await w.beat(KST(2027, 12, 1, 9, 0));
+    expect(got).toEqual([["invest calendar: no KRX table for a year the watch needs", { year: 2028 }]]);
+    await w.beat(KST(2027, 12, 2, 7, 0));
+    expect(got).toHaveLength(2);
+  });
+
   test("a source that failed, rested or sent something else changes nothing", async () => {
     const w = await world();
     const alice = await w.person("alice", true);

@@ -32,7 +32,7 @@ import { civilDate, dayNumber, weekday } from "@pickle/quant";
 import type { Core } from "../core.ts";
 import { HttpError } from "../http.ts";
 import { errInfo } from "../log.ts";
-import { etDate, kstDay, marketClock, marketDate, type Market } from "./calendar.ts";
+import { etDate, krTableGap, kstDay, marketClock, marketDate, type Market } from "./calendar.ts";
 import { createEvent, EVENT_MAX_DAYS, EVENT_SPAN_DAYS } from "./events.ts";
 import { discoverEarnings, type EarningsResult } from "./earnings.ts";
 import { SOURCE_TABLE, type DiscoverySource, type SourceGate } from "./sources.ts";
@@ -417,6 +417,9 @@ export async function discoverDay(core: Core, gate: SourceGate, now: number): Pr
   const day = kstDay(now);
   const taken = core.db.sql.query("INSERT OR IGNORE INTO invest_discovery (day, state, started_at) VALUES ($d, 'running', $n)").run({ d: day, n: now }).changes === 1;
   if (!taken) return null;
+  // once a day with the day's row: a KRX year the table lacks (calendar.ts; KR days there are "unknown")
+  const gap = krTableGap(now);
+  if (gap != null) core.log.warn("invest calendar: no KRX table for a year the watch needs", { year: gap });
   const result: DiscoveryResult = { day, sources: {}, added: 0, skipped: 0, moved: 0, removed: 0 };
   const found: Found[] = [];
   const whole: { def: SourceDef; finds: Found[] }[] = [];

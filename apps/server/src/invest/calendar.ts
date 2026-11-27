@@ -169,6 +169,9 @@ export function usDay(day: string): DayInfo {
  * days, the 1 May closure and the 31 December year-end closure; the first trading day and the college entrance exam
  * day open at 10:00 (the exam day also closes an hour late). Source: 법정 공휴일 + 연말 휴장 규정 · 미대조 (team-lead 2215:
  * no KRX document that lists the dates was found, so none was fetched).
+ * 2027 (team-lead 0312): the same rules and source line — the public holidays and substitute days (노동절 on a Saturday
+ * gives Monday 3 May), no national election, 31 December on a Friday; the first trading day (4 January) opens at 10:00
+ * and the 2028 수능 day (18 November) at 10:00–16:30 as in 2026. 미대조: no KRX list for 2027 was found yet.
  */
 export const KR_TABLE: Readonly<Record<number, { closed: Readonly<Record<string, string>>; hours?: Readonly<Record<string, { open: string; close: string }>> }>> = {
   2026: {
@@ -196,7 +199,42 @@ export const KR_TABLE: Readonly<Record<number, { closed: Readonly<Record<string,
       "2026-11-19": { open: "10:00", close: "16:30" },
     },
   },
+  2027: {
+    closed: {
+      "2027-01-01": "신정",
+      "2027-02-08": "설날 연휴",
+      "2027-02-09": "설날 대체공휴일",
+      "2027-03-01": "삼일절",
+      "2027-05-03": "노동절 대체공휴일",
+      "2027-05-05": "어린이날",
+      "2027-05-13": "부처님오신날",
+      "2027-07-19": "제헌절 대체공휴일",
+      "2027-08-16": "광복절 대체공휴일",
+      "2027-09-14": "추석 연휴",
+      "2027-09-15": "추석",
+      "2027-09-16": "추석 연휴",
+      "2027-10-04": "개천절 대체공휴일",
+      "2027-10-11": "한글날 대체공휴일",
+      "2027-12-27": "성탄절 대체공휴일",
+      "2027-12-31": "연말 휴장",
+    },
+    hours: {
+      "2027-01-04": { open: "10:00", close: "15:30" },
+      "2027-11-18": { open: "10:00", close: "16:30" },
+    },
+  },
 };
+
+/**
+ * The year the KRX table lacks at `now` (KST): this year's, or from 1 December next year's; else null. The daily
+ * discovery run warns with it once a day, so a missing year is seen a month before its first day (team-lead 0312).
+ */
+export function krTableGap(now: number, table: Readonly<Record<number, unknown>> = KR_TABLE): number | null {
+  const day = marketDate("KR", now);
+  const y = Number(day.slice(0, 4));
+  if (!table[y]) return y;
+  return day.slice(5) >= "12-01" && !table[y + 1] ? y + 1 : null;
+}
 
 export function krDay(day: string): DayInfo {
   const z = dayNumber(day);
