@@ -145,6 +145,16 @@ export function kst(ms: number): string {
   return `${w.m}월 ${w.d}일 ${w.hm}`;
 }
 
+const WEEKDAY = "일월화수목금토";
+
+/** an event's date and time, KST, with its weekday (DD 0126 §2): 12/1(화) 09:00. A US event at 10:00 Eastern falls on
+ * the next KST day at 00:00, and that is the date written. */
+export function kstDayTime(ms: number): string {
+  if (!finite(ms)) return UNKNOWN_TEXT;
+  const w = wall(ms, 9);
+  return `${w.m}/${w.d}(${WEEKDAY[weekday(w.day)]}) ${w.hm}`;
+}
+
 /** a time in a sentence or foot (DD 2010 §1): the time alone when it falls on today's KST date, else with its date —
  * 00:45 / 11월 26일 06:00. `now` comes from the caller (no clock here). */
 export function atText(ms: number, now: number): string {

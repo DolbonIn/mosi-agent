@@ -1,6 +1,6 @@
 /** The shared formatter (DD 1935 §0-5) and the signal marks (§0-4). */
 import { describe, expect, test } from "bun:test";
-import { MINUS, UNKNOWN_TEXT, atText, basisNote, delay, easternOffset, estimate, footLine, krw, kst, kstWithEastern, num, pct, pp, rate, shares, usd, wonTicks } from "../src/format";
+import { MINUS, UNKNOWN_TEXT, atText, basisNote, delay, easternOffset, estimate, footLine, krw, kst, kstDayTime, kstWithEastern, num, pct, pp, rate, shares, usd, wonTicks } from "../src/format";
 import { SIGNAL_SHAPES, SIGNAL_WORD, TRI_WORD, signalMarkSvg, signalSummary } from "../src/signal";
 
 describe("numbers", () => {
@@ -88,6 +88,18 @@ describe("times", () => {
     expect(atText(Date.UTC(2026, 10, 26, 14, 59), now)).toBe("11월 26일 23:59");
     expect(atText(Date.UTC(2026, 10, 25, 21, 0), Date.UTC(2026, 10, 26, 14, 59))).toBe("06:00"); // both 11월 26일 KST
     expect(atText(Date.UTC(2026, 10, 25, 21, 0), Date.UTC(2026, 10, 26, 15, 0))).toBe("11월 26일 06:00");
+  });
+  test("an event's date: KST, M/D(weekday) HH:MM, the weekday of its own year (DD 0126 §2)", () => {
+    expect(kstDayTime(Date.parse("2026-12-01T09:00:00+09:00"))).toBe("12/1(화) 09:00");
+    expect(kstDayTime(Date.parse("2026-11-27T22:30:00+09:00"))).toBe("11/27(금) 22:30");
+    expect(kstDayTime(Date.parse("2026-11-29T12:00:00+09:00"))).toBe("11/29(일) 12:00");
+    expect(kstDayTime(Date.parse("2025-12-01T09:00:00+09:00"))).toBe("12/1(월) 09:00");
+    // a US release at 10:00 Eastern is the next KST day's 00:00, and that date is written (EST in December, EDT in July)
+    expect(kstDayTime(Date.parse("2026-12-03T10:00:00-05:00"))).toBe("12/4(금) 00:00");
+    expect(kstDayTime(Date.parse("2026-07-01T10:00:00-04:00"))).toBe("7/1(수) 23:00");
+    // KST midnight from the UTC side: 15:00 UTC is the next KST day
+    expect(kstDayTime(Date.UTC(2026, 11, 31, 15, 0))).toBe("1/1(금) 00:00");
+    expect(kstDayTime(NaN)).toBe(UNKNOWN_TEXT);
   });
   test("basis and foot lines", () => {
     expect(basisNote("2026-11-25", "FRED", "A")).toBe("11-25 기준, FRED · A");
