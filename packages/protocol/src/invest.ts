@@ -358,18 +358,62 @@ export interface InvestAlertCard {
   disclaimer?: true;
 }
 
+/**
+ * Why a stop order did not go out (skipped; canceled planned orders show as skipped) or failed. The card's `text` says
+ * it; the code is for tests and styling. B3a adds the real executor's codes (DD 2044 1-2 · 1-4 · 1-5).
+ */
+export type InvestStopReason =
+  | "ip_not_allowed"
+  | "early_close"
+  | "off_hours"
+  | "zero_sellable"
+  | "rejected"
+  | "calendar_unknown"
+  | "not_confirmed"
+  | "ip_paused"
+  | "rate_paused"
+  | "rate_limited"
+  | "toss_not_connected"
+  | "server_off"
+  | "disabled"
+  | "key_removed"
+  | "rule_changed"
+  | "rule_deleted"
+  | "daily_limit"
+  | "rule_day"
+  | "fraction_hours"
+  | "sellable_unknown"
+  | "auth"
+  | "toss_down"
+  | "canceled";
+
+/**
+ * A sell stop's card. mock: `recorded` or `skipped`, never sent. real (B3a, DD 1935 §2-2 · 2044 · 2046-b): `waiting`
+ * (a short Toss pause; sent when it ends), `scheduled` (the next session's first check), `submitted`, `partial`,
+ * `filled` (only after Toss reports FILLED), `unknown` (no answer: look in the Toss app), `failed`, `skipped`. The
+ * server rewrites the stored card at every step (`message` event).
+ */
 export interface InvestStopCard {
   type: "invest_stop";
   orderId: ID;
   ruleId: ID;
   symbol: string;
   mode: InvestMode;
-  state: "recorded" | "submitted" | "filled" | "partial" | "failed" | "skipped";
+  state: "recorded" | "waiting" | "scheduled" | "submitted" | "filled" | "partial" | "unknown" | "failed" | "skipped";
   title: string;
   hero: InvestNum;
+  /** the hero's label when it is not the observed price: `체결가(평균)`, `11월 27일 종가`, `관측가 · 05:58` */
+  sub?: string;
   rows: { label: string; value: string }[];
+  /** real: the one line saying why (scheduled, unknown) */
+  why?: string;
   status?: string;
-  reason?: { code: "ip_not_allowed" | "early_close" | "off_hours" | "zero_sellable" | "rejected" | "calendar_unknown"; text: string; ip?: string };
+  /**
+   * real: the mark by the status or title. loader: something is still to come; check: filled (only after FILLED);
+   * fail: failed (a full circle); caution: skipped, unknown, an ended partial, checks stopped (a half circle)
+   */
+  glyph?: "loader" | "check" | "fail" | "caution";
+  reason?: { code: InvestStopReason; text: string; ip?: string };
   notes: string[];
   call?: InvestCall;
   foot: string;

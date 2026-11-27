@@ -679,7 +679,7 @@ describe("invest Toss status", () => {
       JSON.stringify(w.events),
       w.logs.join("\n"),
       JSON.stringify(w.h.db.sql.query("SELECT * FROM messages").all()),
-      ...["invest_settings", "invest_alerts", "invest_orders", "invest_ledger", "invest_cache", "invest_previews", "invest_calls", "invest_source_state"].map((t) => JSON.stringify(w.h.db.sql.query(`SELECT * FROM ${t}`).all())),
+      ...["invest_settings", "invest_alerts", "invest_orders", "invest_real_orders", "invest_real_confirms", "invest_ledger", "invest_cache", "invest_previews", "invest_calls", "invest_source_state"].map((t) => JSON.stringify(w.h.db.sql.query(`SELECT * FROM ${t}`).all())),
       w.up.calls.map((c) => `${c.path} ${c.auth}`).join("\n"),
     ].join("\n");
     for (const s of secrets) expect(dump).not.toContain(s);
@@ -820,11 +820,11 @@ describe("invest G8 boundaries", () => {
     expect((await api(w, "PATCH", `/api/invest/rules/${r.id}`, { changes: { action: "sell" }, ifRev: r.rev })).status).toBe(200);
   });
 
-  test("G8-1: the Toss client has no order method (B1 reads only)", async () => {
+  test("G8-1: the Toss client's one write is the stop sell (B3a); no buy, cancel or modify", async () => {
     const { TossClient } = await import("../src/invest/toss.ts");
     const names = Object.getOwnPropertyNames(TossClient.prototype).sort();
-    expect(names).toEqual(["account", "base", "candles", "connected", "constructor", "drop", "findAccount", "forget", "get", "holdings", "investorTrading", "issue", "login", "marketDay", "prices", "sellable", "send", "stocks", "token"]);
-    expect(names.some((n) => /order|sell$|buy|cancel/i.test(n))).toBe(false);
+    expect(names).toEqual(["account", "base", "candles", "connected", "constructor", "drop", "findAccount", "forget", "get", "holdings", "investorTrading", "issue", "login", "marketDay", "order", "ordersSince", "prices", "sellStop", "sellable", "send", "stocks", "token"]);
+    expect(names.filter((n) => /order|sell|buy|cancel|modify/i.test(n))).toEqual(["order", "ordersSince", "sellStop", "sellable"]);
   });
 
   test("a used dedupe key is refused; a watch write with a stale rev changes nothing", async () => {

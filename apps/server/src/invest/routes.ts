@@ -328,11 +328,13 @@ export function investRoutes(core: Core) {
       if (!symbol || !idb.watchRow(core.db, userId, symbol)) throw notFound(INVEST_ERRORS.not_watched, "not_watched");
       const n = idb.rules(core.db, userId, symbol).length;
       if (n && c.url.searchParams.get("withRules") !== "1") throw new HttpError(409, "has_rules", hasRules(n), undefined, { count: n });
+      const gone = idb.rules(core.db, userId, symbol).map((x) => x.id);
       core.db.tx(() => {
         idb.deleteSymbolRules(core.db, userId, symbol);
         idb.deleteQuote(core.db, userId, symbol);
         idb.removeWatch(core.db, userId, symbol);
       });
+      for (const id of gone) hub().ruleChanged(userId, id, true);
       await hub().publish(userId);
       return json({ ok: true });
     },
@@ -408,6 +410,7 @@ export function investRoutes(core: Core) {
         if (!cur || cur.rev !== r.rev) throw new HttpError(409, "rule_changed", INVEST_ERRORS.rule_changed, undefined, { rule: cur ? view(userId, cur) : null });
         idb.updateRuleDefinition(core.db, { id: r.id, user_id: userId, ...spec, state, paused_at, seen_slot }, now);
       });
+      hub().ruleChanged(userId, r.id, false);
       await hub().publish(userId);
       return json(view(userId, idb.rule(core.db, userId, r.id)!));
     },
@@ -415,6 +418,7 @@ export function investRoutes(core: Core) {
     removeRule: async (c: Ctx, userId: string) => {
       const r = mineRule(userId, c.params.id);
       idb.deleteRule(core.db, userId, r.id);
+      hub().ruleChanged(userId, r.id, true);
       await hub().publish(userId);
       return json({ ok: true });
     },

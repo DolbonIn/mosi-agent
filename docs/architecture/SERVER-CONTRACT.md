@@ -774,7 +774,8 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   (5 minutes), else `down`. Keys and tokens never reach logs, cards, events or rows; a failure keeps its code alone.
 - `PATCH /api/invest/settings {calls?: {stopResult?, stage?, expiry?}}` → `InvestSettingsView`.
 - Server env: `PICKLE_INVEST_SOURCES=on` lets the server call public sources (off by default: no Yahoo call at all);
-  `PICKLE_TOSS_BASE` (https origin) lets it call Toss (off by default, so tests and QA cannot); `PICKLE_OUTBOUND_IP` is shown
+  `PICKLE_TOSS_BASE` (https origin) lets it call Toss (off by default, so tests and QA cannot); `PICKLE_INVEST_ORDERS=on`
+  lets real stop orders go out (B3a; off by default); `PICKLE_OUTBOUND_IP` is shown
   to the person for Toss's allowed-IP list (never looked up). A 403 or 429 from a public source rests it until the next
   day; a 200 that is not its data (a block page) too. Default User-Agent, one request at a time per host, 10 s limit.
 
@@ -1209,6 +1210,77 @@ Indicator 9 and R6's foreign side (team-lead 1854, DD 1857-b). Code: `apps/serve
   days too (KOSPI is Yahoo's; no sources, no reading at all). Both missing: the basis words alone. Only R6's line
   carries a tail.
 - v16, additive, no rollback: `invest_flows`.
+
+## Invest (B3a) — real stop orders, the executor
+
+A sell stop hit in real mode becomes a real Toss order (team-lead 0052 · 2040 · 2045b; DD 1935 §2-2, 2044, 2046-b).
+Code: `apps/server/src/invest/orders.ts` (the desk), `toss.ts` (`sellStop`, `order`, `ordersSince`), `cards.ts`
+(`realStopCard`, `realStopBanner`, `realStopCallLine`), `hub.ts` (`fire`, `beat`, `ruleChanged`, `onTossRemoved`).
+B3a has no way to turn real mode on and no way to confirm a rule for real selling (B3b adds both), so no real order is
+sent from it; tests write both into the database.
+- **The server switch**: `PICKLE_INVEST_ORDERS=on` (`cfg.invest.orders`). Off (the default): every hit is `skipped
+  server_off` and nothing is POSTed; a restart without it stops real orders.
+- **The gates, in order** (G8): the switch; the rule confirmed at its current rev with a quantity
+  (`invest_real_confirms (rule_id, user_id, rev, qty, at)`, B3b writes it; a save bumps the rev, so a confirmation is
+  gone with any change) → else `skipped not_confirmed`, and Toss's account is not read; the order window; the Toss login
+  (`toss_not_connected`); the Toss pause; the sellable quantity; the day's cap. Mock mode never reaches the desk (the B1
+  record).
+- **The order window**: the regular session from its open until 2 minutes before its close, never on an early-close day
+  (`skipped early_close`, never deferred; a close hit whose next session is an early close is skipped too). After it (the
+  check at the close, the close check) the order is `scheduled` for the next session's first check (open + 15 minutes,
+  KST on the card). An unknown calendar: `skipped calendar_unknown`.
+- **Quantity**: min(sellable quantity, the confirmed quantity); 0 → `skipped zero_sellable`. US fractions only until an
+  hour before the close (after it the whole shares go and the card says what is left; a fraction alone →
+  `fraction_hours`); KR whole shares only.
+- **The order**: `POST /api/v1/orders` with `X-Tossinvest-Account`, body `{clientOrderId, symbol, side: "SELL",
+  orderType: "MARKET", timeInForce: "DAY", quantity}` (a decimal string, ≤ 6 places). `sellStop` has no side argument;
+  there is no buy, cancel, modify or conditional order anywhere (a static test counts: one `side: "SELL"`, no `"BUY"`, one
+  POST to the orders path, one caller of `sellStop`). `clientOrderId` = `m` + 32 base64url characters of
+  sha256(user, rule, rev, hit): one per hit, no user id in it.
+- **Caps**: one real order per rule and market day (`invest_real_orders_day`, a partial unique index; a second hit that
+  day is `skipped rule_day`); a person's orders on one market day never outnumber the symbols in their last holdings
+  read (1 when unread; over it: `skipped daily_limit`). Counted: every order whose POST was made, and a first send in
+  flight. A send that failed before its POST (the login, the account or the token could not be had) is no send: that
+  order, like every order that never went out, frees its day. A skip after the sellable read keeps that quantity, so the
+  call's "47주를 그대로 갖고 있어요" is Toss's number.
+- **Answers** (team-lead 2040 5): 200 → `submitted`. 401 → once more with a new token and the same id, then `failed
+  auth`. 403 → `failed ip_not_allowed`, never resent, the hour's pause, the allowed IP on the card. 429 → `failed
+  rate_limited`. 5xx → not resent, looked for in the order list. No answer (a 200 with no order id too) or 409
+  `request-in-progress` → sent once more with the same id at the next beat (Toss replays the first result for 10
+  minutes), only if the switch and real mode are still on right then (team-lead 2310); otherwise it is looked for, never
+  sent. After that second send only a success or a rejection counts as Toss's word; anything else is looked for. Another
+  409, 400, 422 → `failed rejected` with Toss's message as one line (controls and direction marks out, ≤ 120 characters),
+  on the card only.
+- **Looking for an order** (`searching`): `GET /api/v1/orders?status=OPEN|CLOSED&symbol=&from=<KST day of the send>`,
+  every beat for 5 minutes from the send: a MARKET SELL of the same quantity placed from a minute before the send, not
+  already one of the person's rows. Found → followed as submitted; not found → `unknown` ("토스증권 앱의 주문 내역에서
+  확인해 주세요", never sent again).
+- **Fill checks**: `GET /api/v1/orders/{orderId}` every beat for the first 5 minutes after the send, then every 5
+  minutes, until the session's close + 15 minutes. FILLED → `filled` (the only state that says sold); PARTIAL_FILLED →
+  `partial`; CANCELED/REJECTED/REPLACED with a fill → the partial ended at the close, without → `failed`; still open at
+  the end → `unknown`. Following an order waits out the allowed-IP pause only (the order reads are Toss's ORDER_HISTORY
+  group).
+- **Waiting** (team-lead 2045b): a hit under a 429 pause inside the session waits (`waiting`, no banner, no call) and
+  goes out at the first beat after the pause with its own id; if the pause outlasts the window → `skipped rate_paused`,
+  never carried to the next day. A hit under the 403 pause is skipped at once (`ip_paused`).
+- **Planned orders dropped** (`scheduled`, `waiting`): a rule save or delete (routes, proposal apply, unwatch with rules)
+  → `rule_changed` / `rule_deleted`; real mode off → `disabled`; the Toss login removed → `key_removed`; nothing to sell
+  at the time → `zero_sellable`: no banner, no call. The switch off or an early close at the time: skipped with a banner
+  and a call. At the time the gates run again with the rule as it is then; right before any first POST the row, the rule's
+  rev and confirmation, real mode and the switch are read once more.
+- **The login removed**: planned orders dropped; sent ones are no longer checked and their cards say so (no banner).
+- **The card** (`invest_stop`, `mode: "real"`, one per order, rewritten in place with a `message` event): `state`
+  `waiting` | `scheduled` | `submitted` | `partial` | `filled` | `unknown` | `failed` | `skipped`, `sub` (the hero's
+  label), `why`, `status`, `glyph` (`loader` | `check` | `fail` | `caution`), `reason {code, text, ip?}`. Words: DD 1935
+  §2-2, 2044 §1, 2046-b. The order number shows its last 4 characters only.
+- **Banners and pushes** (title only on the lock screen, tag `invest:<ruleId>`): `실제 · SOXL 손절 주문 예정` / `… 주문 냄` /
+  `… 체결` / `… 일부 체결` / `… 주문 안 됨` / `… 주문 건너뜀` / `… 주문 확인 필요`. None for a wait, a resend, a search, a
+  partial still going, or the person's own drop. **Calls** (`calls.stopResult`): one per outcome — scheduled, filled,
+  failed, skipped, unknown, the partial ended at the close — "실제" said first (DD 2044 §3).
+- **Records**: the row's `[투자 기록]` line (`SOXL 실제 손절 · <title> · 체결 47주 · 평균 $25.58 · 관측 … · 손절선 …`); no
+  account, order number, token or key. The alert row is kind `stop_order`. The vault records a real-mode token's use as
+  `투자 시세 확인과 손절 주문(토스증권)`.
+- v17, additive (new tables only): `invest_real_confirms`, `invest_real_orders`.
 
 ## Web Push (B1c) — the lock-screen line
 

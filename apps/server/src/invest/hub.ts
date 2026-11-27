@@ -1,6 +1,6 @@
 /**
  * The invest hub (agent-runtime 2006 §4–§6, 2052): the overview and its `invest` event, the 5-minute watch, alerts,
- * mock stop records, invest calls and the Toss status. One per app (`core.invest`). The one model call is the daily
+ * mock stop records, real stop orders (B3a: orders.ts, the desk), invest calls and the Toss status. One per app (`core.invest`). The one model call is the daily
  * report's words (report.ts, B2c-1), at most two per person and day.
  */
 import type { InvestCall, InvestOverview, InvestRuleRow, InvestSettingsView, InvestSymbolDetail, InvestSymbolRow, InvestTossStatus, InvestWatch } from "@pickle/protocol";
@@ -98,6 +98,7 @@ import {
   type MarketRead,
   type Stored,
 } from "./report.ts";
+import { OrderDesk } from "./orders.ts";
 import { judgeDay, stageCallText, stageRowText, stagesView, type FlowRead, type JudgmentRow } from "./stages.ts";
 import { alertLine, chartAria, chartFoot, chartLevels, chartNote } from "./symbol.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
@@ -144,6 +145,8 @@ const kstDayKey = (now: number): string => kstDate(now);
 export class InvestHub {
   readonly gate: SourceGate;
   readonly toss: TossClient;
+  /** B3a: real stop orders, from a hit to their end */
+  readonly desk: OrderDesk;
   private sent = new Map<string, string>();
   private holdingsByUser = new Map<string, { at: number; list: TossHolding[] }>();
   private ranSlots = new Set<string>();
@@ -161,6 +164,28 @@ export class InvestHub {
     const f = core.deps.investFetch ?? fetch;
     this.gate = new SourceGate(core, f);
     this.toss = new TossClient(core, f);
+    this.desk = new OrderDesk({
+      core,
+      toss: this.toss,
+      tossUsable: (userId, now) => {
+        const s = idb.getSettings(core.db, userId);
+        return !!s && this.tossUsable(s, now);
+      },
+      recordToss: (userId, error, now) => this.recordToss(userId, error, now),
+      post: (userId, card, record, banner, ruleId) => this.post(userId, card, record, banner ?? { title: card.title, body: "" }, ruleId, !!banner),
+      notify: (userId, banner, threadId, messageId, ruleId) => this.notifyRow(userId, banner, threadId, messageId, ruleId),
+      callLater: (userId, messageId, ref, line, onCall) => this.callLater(userId, messageId, ref, line, onCall),
+      stopResultCalls: (userId) => this.calls(idb.ensureSettings(core.db, userId, core.now())).stopResult,
+      heldCount: (userId) => {
+        const h = this.holdingsByUser.get(userId);
+        return h ? h.list.filter((x) => x.qty > 0).length : null;
+      },
+      holding: (userId, symbol) => this.holding(userId, symbol),
+      dayOverride: (userId) => this.dayOverride(userId),
+      stageCall: (userId, now) => stageCallText(core, userId, now) ?? undefined,
+      agentName: (userId) => core.db.userById(userId)?.agent_name ?? "모시",
+      publish: (userId) => this.publish(userId),
+    });
   }
 
   /** the 30-second clock; a check runs once per slot (calendar.ts) */
@@ -168,7 +193,10 @@ export class InvestHub {
     this.timer ??= setInterval(() => void this.beat(), 30_000);
   }
 
-  /** one beat of the clock: the watch's slot when one is due, the D-1 reminders, and proposals past their time */
+  /**
+   * one beat of the clock: the watch's slot when one is due (then the real orders' due steps: B3a), the D-1 reminders,
+   * and proposals past their time
+   */
   async beat(now = this.core.now()): Promise<void> {
     try {
       expireProposals(this.core, now);
@@ -176,7 +204,10 @@ export class InvestHub {
       this.core.log.error("invest proposal expiry failed", { err: errInfo(err) });
     }
     await Promise.all([
-      this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
+      this.tick(now)
+        .catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) }))
+        .then(() => this.desk.beat(now))
+        .catch((err) => this.core.log.error("invest orders failed", { err: errInfo(err) })),
       this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
       this.discover(now).catch((err) => this.core.log.error("invest discovery failed", { err: errInfo(err) })),
       this.judgeStages(now)
@@ -734,9 +765,17 @@ export class InvestHub {
     await this.checkToss(userId, { floor: false });
   }
 
-  /** the login was deleted or disconnected: real orders back to mock at once, holdings and its session forgotten */
+  /**
+   * the login was deleted or disconnected: real orders back to mock at once (planned ones dropped, sent ones no longer
+   * checked: their cards say so), holdings and its session forgotten
+   */
   async onTossRemoved(userId: string): Promise<void> {
     const { core } = this;
+    try {
+      this.desk.keyRemoved(userId, core.now());
+    } catch (err) {
+      core.log.error("invest orders key removal failed", { user: userId, err: errInfo(err) });
+    }
     this.toss.forget(userId);
     this.connectedMemo.delete(userId);
     this.holdingsByUser.delete(userId);
@@ -1069,6 +1108,15 @@ export class InvestHub {
     return id;
   }
 
+  /** B3a: a rule was saved or deleted (routes, proposals): its planned real orders are not sent (DD 2044 1-2) */
+  ruleChanged(userId: string, ruleId: string, deleted: boolean): void {
+    try {
+      this.desk.ruleChanged(userId, ruleId, deleted);
+    } catch (err) {
+      this.core.log.error("invest orders rule change failed", { user: userId, err: errInfo(err) });
+    }
+  }
+
   /** store the card row in the invest thread, push it and its banner; returns the row id */
   private post(userId: string, card: Parameters<Core["db"]["insertMessage"]>[0]["cards"] extends (infer C)[] | undefined ? C : never, record: string, banner: { title: string; body: string }, ruleId: string, notify = true): { threadId: string; messageId: string } {
     const { core } = this;
@@ -1081,10 +1129,24 @@ export class InvestHub {
     publishMessage(core, messageId);
     publishThread(core, threadId);
     if (!notify) return { threadId, messageId };
+    this.bannerFor(userId, banner, threadId, messageId, ruleId);
+    return { threadId, messageId };
+  }
+
+  /** the banner and push of a row already stored (a real order's next step: B3a); its thread comes up unread */
+  private notifyRow(userId: string, banner: { title: string; body: string }, threadId: string, messageId: string, ruleId: string): void {
+    const { core } = this;
+    core.db.setUnread(threadId, userId, true);
+    core.db.touchThread(threadId, core.now(), banner.title);
+    publishThread(core, threadId);
+    this.bannerFor(userId, banner, threadId, messageId, ruleId);
+  }
+
+  private bannerFor(userId: string, banner: { title: string; body: string }, threadId: string, messageId: string, ruleId: string): void {
+    const { core } = this;
     core.events.publish(userId, { type: "notification", title: banner.title, body: banner.body, threadId, messageId, icon: "chart" });
     // the lock screen gets the banner's title alone (DD 2042-b §4: symbol and event, no amount); one tag per rule
     core.track(core.push.send(userId, { title: banner.title, tag: `invest:${ruleId}`, threadId, messageId }));
-    return { threadId, messageId };
   }
 
   /** one invest call: blocked (not configured / not verified), over the day's 10, or dialled */
@@ -1138,7 +1200,7 @@ export class InvestHub {
         user_id: userId,
         rule_id: r.id,
         symbol: r.symbol,
-        kind: sellStop ? "stop_record" : r.kind,
+        kind: sellStop ? (s.mode === "real" ? "stop_order" : "stop_record") : r.kind,
         dedupe_key: key,
         price: o.price,
         observed_at: o.at,
@@ -1166,6 +1228,12 @@ export class InvestHub {
     ledger({ id: `quote.${r.symbol}`, asOf: new Date(o.at).toISOString(), value: o.price, definition: slot.close ? "마감 뒤 확인 가격" : "5분 감시 가격", source: o.source });
     // the ATR behind a stop's basis, with the day of its last bar (a kept one is up to ATR_KEEP_DAYS market days old)
     if (stopAtr?.atr) ledger({ id: `atr14.${r.symbol}`, asOf: stopAtr.atr.asOf, value: stopAtr.atr.value, definition: "ATR14 (일봉 14일 평균 실제 범위)", source: stopAtr.atr.source });
+    // B3a: real mode hands the hit to the desk (orders.ts), which decides whether and when an order goes out
+    if (sellStop && s.mode === "real") {
+      const out = await this.desk.hit({ userId, rule: r, hitSeq: st.next.hit_seq, obs: o, slot, now, alertId, intradayOnly });
+      if (out.title) idb.setAlertTitle(db, alertId, out.title);
+      return true;
+    }
     if (sellStop) {
       let qty: number | null = null;
       if (this.tossUsable(s, now) && (await this.toss.connected(userId))) {
@@ -1184,7 +1252,7 @@ export class InvestHub {
         mode: "mock",
         client_order_id: key,
         toss_order_id: null,
-        state: card.state,
+        state: card.state === "skipped" ? "skipped" : "recorded",
         qty,
         filled_qty: null,
         avg_price: null,

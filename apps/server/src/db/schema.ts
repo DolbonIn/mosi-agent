@@ -652,4 +652,55 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (user_id, market, day)
   );
   `,
+  // v17 (B3a, team-lead 2040 · 2045b): real stop orders. A rule's real-sale confirmation at one rev and quantity (B3b
+  // writes it), and each real order from its hit to its end. One order per rule and market day (the partial unique
+  // index); the executor's due steps by check_at. New tables only: the v8 tables stay as they are.
+  `
+  CREATE TABLE invest_real_confirms (
+    rule_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rev INTEGER NOT NULL,
+    qty REAL NOT NULL,
+    at INTEGER NOT NULL
+  );
+  CREATE TABLE invest_real_orders (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rule_id TEXT NOT NULL,
+    rule_rev INTEGER NOT NULL,
+    symbol TEXT NOT NULL,
+    client_order_id TEXT NOT NULL UNIQUE,
+    toss_order_id TEXT,
+    state TEXT NOT NULL,
+    reason TEXT,
+    reason_text TEXT,
+    basis TEXT NOT NULL,
+    intraday_only INTEGER NOT NULL DEFAULT 0,
+    observed_price REAL NOT NULL,
+    observed_at INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    stop_price REAL NOT NULL,
+    avg_cost REAL,
+    confirmed_qty REAL,
+    sellable REAL,
+    qty REAL,
+    fraction_left REAL,
+    filled_qty REAL,
+    avg_price REAL,
+    market_day TEXT,
+    due_at INTEGER,
+    sent_at INTEGER,
+    sends INTEGER NOT NULL DEFAULT 0,
+    check_at INTEGER,
+    check_until INTEGER,
+    filled_at INTEGER,
+    stopped_at INTEGER,
+    message_id TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE UNIQUE INDEX invest_real_orders_day ON invest_real_orders(user_id, rule_id, market_day) WHERE market_day IS NOT NULL;
+  CREATE INDEX invest_real_orders_due ON invest_real_orders(check_at) WHERE check_at IS NOT NULL;
+  CREATE INDEX invest_real_orders_user ON invest_real_orders(user_id, state);
+  `,
 ];

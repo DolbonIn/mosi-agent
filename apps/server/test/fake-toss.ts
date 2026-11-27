@@ -56,6 +56,32 @@ export function flowRecord(date: string, foreign: number, o: { institution?: num
   };
 }
 
+/** B3a: one step of a fake order's life; `filled` and `avg` are the execution so far, `at` its last fill (ms) */
+export interface OrderStep {
+  status: string;
+  filled?: number;
+  avg?: number;
+  at?: number;
+}
+
+/** B3a: how the next POST /api/v1/orders answers: a status with Toss's error body, "drop" (the request fails before
+ * Toss), or "lost" (Toss takes the order, the answer never arrives) */
+/** drop: no answer and no order; lost: the order is in, no answer; noid: the order is in, a 200 with no order id */
+export type OrderAnswer = { status: number; code?: string; message?: string } | "drop" | "lost" | "noid";
+
+export interface FakeOrder {
+  orderId: string;
+  clientOrderId: string | null;
+  body: Record<string, unknown>;
+  orderedAt: number;
+  plan: OrderStep[];
+  /** how many times GET /api/v1/orders/{id} answered (the plan's step shown next) */
+  step: number;
+}
+
+/** Toss's time strings: ISO 8601 in KST */
+export const kstIso = (ms: number) => new Date(ms + 9 * 3_600_000).toISOString().replace("Z", "+09:00");
+
 export interface YahooQuote {
   price: number;
   prevClose?: number;
@@ -69,6 +95,7 @@ export interface YahooQuote {
 export function makeInvestUpstream() {
   const calls: FakeCall[] = [];
   let tokenN = 0;
+  let orderN = 0;
   /** every token this fake gave out → the client_id it went to; a token not here (or revoked) answers 401 */
   const tokens = new Map<string, string>();
   const state = {
@@ -107,6 +134,55 @@ export function makeInvestUpstream() {
     /** B2e: KOSPI investor-trading records, oldest first here (served newest first, `count` of them); `tossFlowsBy` per client_id first */
     tossFlows: [] as unknown[],
     tossFlowsBy: new Map<string, unknown[]>(),
+    /**
+     * B3a: orders. POST /api/v1/orders keeps every body here (a BUY too: tests assert none is ever sent) and makes one
+     * order per clientOrderId (Toss replays the first result for 10 minutes). GET /api/v1/orders/{id} shows the
+     * order's plan one step per GET (the last step stays); GET /api/v1/orders?status=OPEN|CLOSED lists them as they are.
+     */
+    tossOrders: [] as FakeOrder[],
+    /** the next POSTs' answers, first first; none left = the order is taken */
+    orderAnswers: [] as OrderAnswer[],
+    /** the plan a new order gets (default: PENDING, then FILLED at its quantity and the symbol's price) */
+    orderPlan: null as OrderStep[] | null,
+    /** the order reads (one order, the list) answer with this status */
+    orderReadStatus: null as number | null,
+    /** the clock for orderedAt (tests hand it the harness clock) */
+    clock: () => Date.now(),
+    /** B3a: the next answers of one Toss path, first first (e.g. "/api/v1/sellable-quantity" → [429]); then as usual */
+    pathStatus: new Map<string, number[]>(),
+    /** B3a: runs as a Toss API call arrives (before its answer): something the person does while Toss is asked */
+    onCall: null as null | ((method: string, path: string) => void),
+  };
+
+  const OPEN_STATUSES = new Set(["PENDING", "PARTIAL_FILLED", "PENDING_CANCEL", "PENDING_REPLACE"]);
+  const stepOf = (o: FakeOrder) => o.plan[Math.min(o.step, o.plan.length - 1)]!;
+  const orderJson = (o: FakeOrder) => {
+    const st = stepOf(o);
+    const kr = /^\d{6}$/.test(String(o.body.symbol));
+    const filled = st.filled ?? 0;
+    return {
+      orderId: o.orderId,
+      symbol: o.body.symbol,
+      side: o.body.side,
+      orderType: o.body.orderType,
+      timeInForce: o.body.timeInForce ?? "DAY",
+      status: st.status,
+      price: null,
+      quantity: String(o.body.quantity),
+      orderAmount: null,
+      currency: kr ? "KRW" : "USD",
+      orderedAt: kstIso(o.orderedAt),
+      canceledAt: null,
+      execution: {
+        filledQuantity: String(filled),
+        averageFilledPrice: st.avg != null ? String(st.avg) : null,
+        filledAmount: st.avg != null ? String(filled * st.avg) : null,
+        commission: null,
+        tax: null,
+        filledAt: st.at != null ? kstIso(st.at) : null,
+        settlementDate: null,
+      },
+    };
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -137,12 +213,47 @@ export function makeInvestUpstream() {
       const bearer = /^Bearer (.+)$/.exec(headers.get("authorization") ?? "")?.[1] ?? "";
       calls[calls.length - 1]!.client = tokens.get(bearer) ?? null;
       if (!tokens.has(bearer) || state.tossRevoked.has(bearer)) return json({ error: { code: "invalid_token" } }, 401);
+      state.onCall?.(init?.method ?? "GET", url.pathname);
+      const once = state.pathStatus.get(url.pathname)?.shift();
+      if (once) return json({ error: { code: "x" } }, once);
       // the account surfaces need X-Tossinvest-Account (openapi.json AccountSeq, required); market data does not
-      if (["/api/v1/holdings", "/api/v1/sellable-quantity", "/api/v1/buying-power"].includes(url.pathname)) {
+      if (["/api/v1/holdings", "/api/v1/sellable-quantity", "/api/v1/buying-power", "/api/v1/orders"].includes(url.pathname) || url.pathname.startsWith("/api/v1/orders/")) {
         const acct = headers.get("x-tossinvest-account");
         if (!acct || !state.tossAccounts.some((a) => String(a.accountSeq) === acct)) return json({ error: { code: "invalid_account" } }, 400);
       }
       if (url.pathname === "/api/v1/accounts") return json({ result: state.tossAccounts });
+      if (url.pathname === "/api/v1/orders" && (init?.method ?? "GET") === "POST") {
+        const b = JSON.parse(body ?? "{}") as Record<string, unknown>;
+        const answer = state.orderAnswers.shift();
+        if (answer === "drop") throw new TypeError("fetch failed");
+        if (answer && typeof answer === "object") return json({ error: { requestId: "req-fake", code: answer.code ?? "x", message: answer.message ?? "" } }, answer.status);
+        const cid = typeof b.clientOrderId === "string" ? b.clientOrderId : null;
+        let o = cid ? state.tossOrders.find((x) => x.clientOrderId === cid) : undefined;
+        if (!o) {
+          const price = state.tossPrices.get(String(b.symbol))?.price ?? 0;
+          o = { orderId: `tso-${String(++orderN).padStart(8, "0")}`, clientOrderId: cid, body: b, orderedAt: state.clock(), plan: state.orderPlan ? [...state.orderPlan] : [{ status: "PENDING" }, { status: "FILLED", filled: Number(b.quantity), avg: price, at: state.clock() }], step: 0 };
+          state.tossOrders.push(o);
+        }
+        if (answer === "lost") throw new TypeError("fetch failed");
+        if (answer === "noid") return json({ result: { clientOrderId: cid } });
+        return json({ result: { orderId: o.orderId, clientOrderId: cid } });
+      }
+      if (url.pathname.startsWith("/api/v1/orders/")) {
+        if (state.orderReadStatus) return json({ error: { code: "x" } }, state.orderReadStatus);
+        const o = state.tossOrders.find((x) => x.orderId === decodeURIComponent(url.pathname.slice("/api/v1/orders/".length)));
+        if (!o) return json({ error: { code: "order-not-found" } }, 404);
+        const out = orderJson(o);
+        o.step++;
+        return json({ result: out });
+      }
+      if (url.pathname === "/api/v1/orders") {
+        if (state.orderReadStatus) return json({ error: { code: "x" } }, state.orderReadStatus);
+        const open = url.searchParams.get("status") === "OPEN";
+        const sym = url.searchParams.get("symbol");
+        const from = url.searchParams.get("from");
+        const orders = state.tossOrders.filter((o) => OPEN_STATUSES.has(stepOf(o).status) === open && (!sym || o.body.symbol === sym) && (!from || kstIso(o.orderedAt).slice(0, 10) >= from)).map(orderJson);
+        return json({ result: { orders, nextCursor: null, hasNext: false } });
+      }
       if (url.pathname === "/api/v1/buying-power") return json({ result: { currency: "KRW", cashBuyingPower: "1000000" } });
       if (url.pathname === "/api/v1/stocks") {
         const syms = (url.searchParams.get("symbols") ?? "").split(",").filter(Boolean);

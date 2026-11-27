@@ -270,6 +270,10 @@ export function setAlertMessage(db: Db, id: string, threadId: string, messageId:
   db.sql.query("UPDATE invest_alerts SET thread_id = $t, message_id = $m WHERE id = $id").run({ id, t: threadId, m: messageId });
 }
 
+export function setAlertTitle(db: Db, id: string, title: string): void {
+  db.sql.query("UPDATE invest_alerts SET title = $t WHERE id = $id").run({ id, t: title });
+}
+
 export function setAlertCall(db: Db, id: string, state: string, at: number): void {
   db.sql.query("UPDATE invest_alerts SET call_state = $s, called_at = $a WHERE id = $id").run({ id, s: state, a: at });
 }
@@ -287,8 +291,9 @@ export function setOrderMessage(db: Db, id: string, messageId: string, now: numb
   db.sql.query("UPDATE invest_orders SET message_id = $m, updated_at = $n WHERE id = $id").run({ id, m: messageId, n: now });
 }
 
+/** real orders sent and still followed (B3a: invest_real_orders) */
 export function openOrders(db: Db, userId: string): number {
-  return (db.sql.query("SELECT COUNT(*) AS n FROM invest_orders WHERE user_id = $u AND mode = 'real' AND state IN ('submitted', 'partial')").get({ u: userId }) as { n: number }).n;
+  return (db.sql.query("SELECT COUNT(*) AS n FROM invest_real_orders WHERE user_id = $u AND state IN ('sending', 'submitted', 'partial', 'searching') AND stopped_at IS NULL").get({ u: userId }) as { n: number }).n;
 }
 
 export function callsSince(db: Db, userId: string, since: number): number {
@@ -360,4 +365,134 @@ export function getPreview(db: Db, userId: string, id: string, now: number): { k
 
 export function usePreview(db: Db, id: string, now: number): void {
   db.sql.query("UPDATE invest_previews SET used_at = $n WHERE id = $id").run({ id, n: now });
+}
+
+// ───────────── B3a: real stop orders (v17) ─────────────
+
+/**
+ * One real stop order, from the hit to its end (orders.ts). States: `waiting` (a 429 pause inside the session),
+ * `scheduled` (the next session's first check), `sending` (POSTed with no answer yet: sent once more with the same
+ * id), `submitted`, `partial`, `searching` (no answer twice, or a 5xx: looked for in the order list), and the ends
+ * `filled`, `partial_closed`, `unknown`, `failed`, `skipped`, `canceled`.
+ */
+export interface RealOrderRow {
+  id: string;
+  user_id: string;
+  rule_id: string;
+  rule_rev: number;
+  symbol: string;
+  client_order_id: string;
+  toss_order_id: string | null;
+  state: "waiting" | "scheduled" | "sending" | "submitted" | "partial" | "searching" | "filled" | "partial_closed" | "unknown" | "failed" | "skipped" | "canceled";
+  reason: string | null;
+  /** a rejection's message from Toss, one line (toss.ts oneLine); shown on the card, never in the model's history */
+  reason_text: string | null;
+  /** close: the close check's official close; intraday: a session check; late: a session check past the order window */
+  basis: "close" | "intraday" | "late";
+  intraday_only: number;
+  observed_price: number;
+  observed_at: number;
+  source: string;
+  stop_price: number;
+  avg_cost: number | null;
+  confirmed_qty: number | null;
+  sellable: number | null;
+  qty: number | null;
+  fraction_left: number | null;
+  filled_qty: number | null;
+  avg_price: number | null;
+  /** the market day the order goes out on (one per rule and day); null once it can no longer go out unsent */
+  market_day: string | null;
+  due_at: number | null;
+  sent_at: number | null;
+  sends: number;
+  check_at: number | null;
+  check_until: number | null;
+  filled_at: number | null;
+  stopped_at: number | null;
+  message_id: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface RealConfirmRow {
+  rule_id: string;
+  user_id: string;
+  rev: number;
+  qty: number;
+  at: number;
+}
+
+/** false: the client order id is taken (the same hit), or the rule already has an order that market day */
+export function insertRealOrder(db: Db, o: RealOrderRow): boolean {
+  const cols = Object.keys(o);
+  return db.sql.query(`INSERT OR IGNORE INTO invest_real_orders (${cols.join(", ")}) VALUES (${cols.map((c) => `$${c}`).join(", ")})`).run(o as unknown as Record<string, string | number | null>).changes > 0;
+}
+
+export function updateRealOrder(db: Db, o: RealOrderRow): void {
+  const cols = Object.keys(o).filter((c) => c !== "id" && c !== "user_id" && c !== "client_order_id" && c !== "created_at");
+  db.sql.query(`UPDATE invest_real_orders SET ${cols.map((c) => `${c} = $${c}`).join(", ")} WHERE id = $id AND user_id = $user_id`).run(o as unknown as Record<string, string | number | null>);
+}
+
+export function realOrder(db: Db, id: string): RealOrderRow | null {
+  return db.sql.query("SELECT * FROM invest_real_orders WHERE id = $id").get({ id }) as RealOrderRow | null;
+}
+
+export function realOrderByClientId(db: Db, clientOrderId: string): RealOrderRow | null {
+  return db.sql.query("SELECT * FROM invest_real_orders WHERE client_order_id = $c").get({ c: clientOrderId }) as RealOrderRow | null;
+}
+
+export function realOrderByTossId(db: Db, userId: string, tossOrderId: string): RealOrderRow | null {
+  return db.sql.query("SELECT * FROM invest_real_orders WHERE user_id = $u AND toss_order_id = $t").get({ u: userId, t: tossOrderId }) as RealOrderRow | null;
+}
+
+/** every order with a step due (to send, send again, check or look for), oldest step first */
+export function dueRealOrders(db: Db, now: number, limit = 100): RealOrderRow[] {
+  return db.sql.query("SELECT * FROM invest_real_orders WHERE check_at IS NOT NULL AND check_at <= $n ORDER BY check_at, rowid LIMIT $l").all({ n: now, l: limit }) as RealOrderRow[];
+}
+
+/** orders not sent yet that would go out later (scheduled, waiting); `ruleId`: that rule's only */
+export function plannedRealOrders(db: Db, userId: string, ruleId?: string): RealOrderRow[] {
+  return db.sql
+    .query(`SELECT * FROM invest_real_orders WHERE user_id = $u AND state IN ('scheduled', 'waiting')${ruleId ? " AND rule_id = $r" : ""} ORDER BY created_at, rowid`)
+    .all(ruleId ? { u: userId, r: ruleId } : { u: userId }) as RealOrderRow[];
+}
+
+/** orders sent and still followed (an answer, a fill, or the order list to come) */
+export function sentRealOrders(db: Db, userId: string): RealOrderRow[] {
+  return db.sql.query("SELECT * FROM invest_real_orders WHERE user_id = $u AND state IN ('sending', 'submitted', 'partial', 'searching') AND stopped_at IS NULL ORDER BY created_at, rowid").all({ u: userId }) as RealOrderRow[];
+}
+
+/** a person's orders sent (or being sent) for one market day: the day's cap counts these (team-lead 2040) */
+/**
+ * The person's orders on a market day for the cap: every row whose orders POST was made (sends > 0), and a first send
+ * in flight (sending, sends 0: inserted right after its gate, before the POST). A row that ends with no POST has no
+ * market day (finish), so it is not counted.
+ */
+export function realOrdersSentOn(db: Db, userId: string, marketDay: string): number {
+  return (db.sql.query("SELECT COUNT(*) AS n FROM invest_real_orders WHERE user_id = $u AND market_day = $d AND (sends > 0 OR state = 'sending')").get({ u: userId, d: marketDay }) as { n: number }).n;
+}
+
+export function setRealOrderMessage(db: Db, id: string, messageId: string, now: number): void {
+  db.sql.query("UPDATE invest_real_orders SET message_id = $m, updated_at = $n WHERE id = $id").run({ id, m: messageId, n: now });
+}
+
+/** the quantity the person confirmed for real selling at a rule's rev (B3b writes it; the executor reads it) */
+export function realConfirm(db: Db, userId: string, ruleId: string): RealConfirmRow | null {
+  return db.sql.query("SELECT * FROM invest_real_confirms WHERE rule_id = $r AND user_id = $u").get({ r: ruleId, u: userId }) as RealConfirmRow | null;
+}
+
+export function confirmReal(db: Db, userId: string, ruleId: string, rev: number, qty: number, now: number): void {
+  db.sql
+    .query("INSERT INTO invest_real_confirms (rule_id, user_id, rev, qty, at) VALUES ($r, $u, $v, $q, $n) ON CONFLICT(rule_id) DO UPDATE SET rev = $v, qty = $q, at = $n WHERE user_id = $u")
+    .run({ r: ruleId, u: userId, v: rev, q: qty, n: now });
+}
+
+/** the alert row of a real order's card: its push title, and how its latest call went */
+export function setAlertTitleByMessage(db: Db, userId: string, messageId: string, title: string): void {
+  db.sql.query("UPDATE invest_alerts SET title = $t WHERE user_id = $u AND message_id = $m").run({ u: userId, m: messageId, t: title });
+}
+
+export function setAlertCallByMessage(db: Db, userId: string, messageId: string, state: string, at: number): void {
+  db.sql.query("UPDATE invest_alerts SET call_state = $s, called_at = $a WHERE user_id = $u AND message_id = $m").run({ u: userId, m: messageId, s: state, a: at });
 }

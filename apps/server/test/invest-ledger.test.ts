@@ -209,13 +209,13 @@ describe("the ledger's nine fields", () => {
     const { h, person, api } = await setup();
     const a = await person("alice");
     h.db.sql.exec(
-      "DROP TABLE invest_flows; DROP TABLE invest_earn_searched; ALTER TABLE invest_watchlist DROP COLUMN security_type; ALTER TABLE invest_watchlist DROP COLUMN toss_name; ALTER TABLE invest_watchlist DROP COLUMN type_asked_day; DROP TABLE invest_event_dismissed; DROP TABLE invest_discovery; DROP TABLE invest_reports; DROP TABLE invest_judgments; DROP TABLE invest_proposals; DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
+      "DROP TABLE invest_real_orders; DROP TABLE invest_real_confirms; DROP TABLE invest_flows; DROP TABLE invest_earn_searched; ALTER TABLE invest_watchlist DROP COLUMN security_type; ALTER TABLE invest_watchlist DROP COLUMN toss_name; ALTER TABLE invest_watchlist DROP COLUMN type_asked_day; DROP TABLE invest_event_dismissed; DROP TABLE invest_discovery; DROP TABLE invest_reports; DROP TABLE invest_judgments; DROP TABLE invest_proposals; DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
     );
     h.db.sql
       .query("INSERT INTO invest_ledger (user_id, id, as_of, value, unit, definition, source_tier, url, confidence, author, created_at) VALUES ($u, 'quote.NVDA', '2026-11-26T15:00:00.000Z', 180.5, 'usd', '5분 감시 가격', '토스증권', NULL, 'A', 'code', 5)")
       .run({ u: a.uid });
     const again = new Db(join(h.dir, "pickle.db"));
-    expect(again.schemaVersion).toBe(16); // v10, then v11 (B2b-1 proposals), v12 (B2b-2 judgments), v13 (B2c-1 reports), v14 (B2d-2a discovery), v15 (B2d-2c earnings), v16 (B2e flows)
+    expect(again.schemaVersion).toBe(17); // v10, then v11 (B2b-1 proposals), v12 (B2b-2 judgments), v13 (B2c-1 reports), v14 (B2d-2a discovery), v15 (B2d-2c earnings), v16 (B2e flows), v17 (B3a real orders)
     expect(again.sql.query("SELECT source, source_tier, confidence FROM invest_ledger WHERE id = 'quote.NVDA'").get()).toEqual({ source: "토스증권", source_tier: "T2", confidence: "A" });
     again.close();
     const [e] = (await api<{ items: InvestLedgerEntry[] }>(a, "GET", "/api/invest/ledger?id=quote.NVDA")).body.items;

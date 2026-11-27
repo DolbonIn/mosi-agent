@@ -194,7 +194,8 @@ export interface ServerConfig {
    * only then (QA and tests never set it); `tossBase` from PICKLE_TOSS_BASE — no Toss call at all without it;
    * `outboundIp` from PICKLE_OUTBOUND_IP — shown for the Toss allowed-IP setting, never looked up
    */
-  invest: { sources: boolean; tossBase: string | null; outboundIp: string | null };
+  /** `orders` (B3a): real stop orders may go to Toss (PICKLE_INVEST_ORDERS=on); absent = off */
+  invest: { sources: boolean; tossBase: string | null; outboundIp: string | null; orders?: boolean };
   /** Web Push (push.ts, B1c): the VAPID contact from PICKLE_PUSH_SUBJECT (mailto: or https:); null = off, no push request */
   push: { subject: string } | null;
   sseHeartbeatMs: number;

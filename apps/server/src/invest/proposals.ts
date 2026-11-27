@@ -459,6 +459,7 @@ export async function decideProposal(core: Core, userId: string, id: string | un
     return fail(card);
   }
   syncCards(core, userId, outcome);
+  for (const i of items) if (i.ruleId) core.invest.ruleChanged(userId, i.ruleId, !!i.remove);
   await core.invest.publish(userId);
   return outcome;
 }

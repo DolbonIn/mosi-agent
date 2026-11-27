@@ -1,6 +1,7 @@
 /**
- * The invest switches from the environment (agent-runtime 2052 §B-1, team-lead 2045 §12-4·5). All three are off unless
- * the operator sets them: QA servers and tests never reach a real quote source or Toss.
+ * The invest switches from the environment (agent-runtime 2052 §B-1, team-lead 2045 §12-4·5, 2040). All are off unless
+ * the operator sets them: QA servers and tests never reach a real quote source or Toss, and no real order is sent unless
+ * PICKLE_INVEST_ORDERS=on (a restart without it stops them).
  */
 import type { ServerConfig } from "../deps.ts";
 
@@ -19,6 +20,7 @@ export function investConfigFromEnv(env: Record<string, string | undefined>): Se
   const ip = env.PICKLE_OUTBOUND_IP?.trim() ?? "";
   return {
     sources: env.PICKLE_INVEST_SOURCES?.trim() === "on",
+    orders: env.PICKLE_INVEST_ORDERS?.trim() === "on",
     tossBase,
     outboundIp: IPV4.test(ip) || (ip.includes(":") && IPV6.test(ip)) ? ip : null,
   };
