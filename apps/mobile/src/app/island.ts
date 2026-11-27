@@ -72,6 +72,11 @@ export interface IslandBanner {
   onExpire?: () => void;
   /** asked when its turn in the queue comes: true drops it unseen (a line whose thread is on screen by then: events.ts) */
   skip?: () => boolean;
+  /**
+   * banners of one group stand for one thing: a newer one takes the place of one still waiting in the queue, which
+   * goes unseen (a thread's lines: only the last waits, DD 2210). The one already up stays.
+   */
+  group?: string;
 }
 
 export interface IslandState {
@@ -458,11 +463,13 @@ export const island = {
     if (islandStore.get().offline) enter("offline", "오프라인");
   },
 
-  /** queue a banner (one at a time). Returns its id. */
+  /** queue a banner (one at a time); one of a group already waiting gives up its place to it. Returns its id. */
   banner(b: Omit<IslandBanner, "id">): number {
     const id = ++bannerSeq;
     const tone = b.tone ?? (b.kind === "error" ? "error" : "default");
-    queue.push({ ...b, tone, id });
+    const at = b.group === undefined ? -1 : queue.findIndex((q) => q.group === b.group);
+    if (at >= 0) queue[at] = { ...b, tone, id };
+    else queue.push({ ...b, tone, id });
     showNextBanner();
     return id;
   },

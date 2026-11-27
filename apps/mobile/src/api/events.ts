@@ -11,7 +11,8 @@ import { appendMessage, applyAgent, catchUp, failRemoteTurn, noteRemoteActivity,
  *   message (other tabs, friend side, steer follow-ups, schedule turns, card status flips) · message_deleted (a row the
  *   server deleted: a failed briefing attempt's event row) · thread_updated ·
  *   agent_status (→ island when no local turn runs) · quota · notification (→ island banner, but not a line's for a
- *   thread on screen: when it comes, and again when its turn in the banner queue comes) · connection ·
+ *   thread on screen: when it comes, and again when its turn in the banner queue comes; a thread's lines still waiting
+ *   give way to its newest) · connection ·
  *   turn_error (a turn the person's steered line went into failed → thread error; island 다시 시도 on the device that
  *   sent the line). steers_dropped goes to screens/chat/composerStore through onServerEvent (lines steered into an app turn
  *   that stopped or failed, which nothing will answer, lose "하던 일에 이어서 전했어요").
@@ -88,6 +89,8 @@ function dispatch(e: ServerEvent) {
         onPress: threadId && openThread ? () => openThread?.(threadId) : undefined,
         // asked again when its turn in the queue comes: the thread may be on screen by then (DD 2210)
         skip: () => seenHere(e),
+        // a thread's lines: a newer one replaces the one still waiting, so quick lines give one banner, the last (DD 2210)
+        group: e.messageId && threadId ? `line:${threadId}` : undefined,
       });
       break;
     }

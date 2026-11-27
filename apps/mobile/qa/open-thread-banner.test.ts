@@ -6,7 +6,8 @@ import type { ServerEvent } from "@pickle/protocol";
  * there, and the banner covered the thread's head saying it again. A line's notification carries the line's
  * `messageId`; one that is not a line (the after-turn "기억했어요", a skipped schedule) carries none and still comes.
  * Banners wait in a queue one at a time: a line's banner is asked again when its turn comes, and goes unseen if its
- * thread is on screen by then (island.ts `skip`, DD 2210); the one already up stays.
+ * thread is on screen by then (island.ts `skip`, DD 2210); the one already up stays. A thread's line banner still waiting
+ * gives its place to the thread's newer line (island.ts `group`, DD 2210 덧붙임): quick lines give one banner, the last.
  * Screens say what is on screen through catchUp.ts showThread (ThreadView `active`, useShownThread). Drives the real
  * events.ts dispatch through a fake EventSource; fetch answers nothing. bun runs every test file in one process: the
  * file starts and ends with resetSession.
@@ -162,5 +163,74 @@ describe("banners waiting in the queue (DD 2210)", () => {
     hide();
     await nextBanner();
     expect(bannerBody()).toBe("나중 줄");
+  });
+});
+
+describe("a thread's lines waiting in the queue: only the last (DD 2210 덧붙임)", () => {
+  test("five quick lines: the first is up at once, the four behind it give one banner, the fifth; then nothing", async () => {
+    for (let i = 1; i <= 5; i++) push(line("t_friend", `빠른 줄 ${i}`));
+    expect(bannerBody()).toBe("빠른 줄 1"); // the one already up stays
+    await nextBanner();
+    expect(bannerBody()).toBe("빠른 줄 5");
+    await nextBanner();
+    expect(bannerTitle()).toBeNull();
+  });
+
+  test("the newer line takes the waiting one's place in the queue (ahead of what came between)", async () => {
+    push(line("t_other", "먼저 온 줄"));
+    push(line("t_friend", "줄 1"));
+    push({ type: "notification", title: "기억했어요", body: "하늘 님과 7시 약속", threadId: "t_friend", icon: "sparkles" });
+    push(line("t_friend", "줄 2"));
+    await nextBanner();
+    expect(bannerBody()).toBe("줄 2");
+    await nextBanner();
+    expect(bannerTitle()).toBe("기억했어요");
+    await nextBanner();
+    expect(bannerTitle()).toBeNull();
+  });
+
+  test("lines of different threads stay apart; each thread keeps its own last", async () => {
+    push(line("t_other", "먼저 온 줄"));
+    push(line("t_a", "a 1"));
+    push(line("t_b", "b 1"));
+    push(line("t_a", "a 2"));
+    push(line("t_b", "b 2"));
+    await nextBanner();
+    expect(bannerBody()).toBe("a 2");
+    await nextBanner();
+    expect(bannerBody()).toBe("b 2");
+    await nextBanner();
+    expect(bannerTitle()).toBeNull();
+  });
+
+  test("what is not a line (no messageId) never gives way: two 기억했어요 of one thread both come", async () => {
+    push(line("t_other", "먼저 온 줄"));
+    push({ type: "notification", title: "기억했어요", body: "첫 약속", threadId: "t_friend", icon: "sparkles" });
+    push({ type: "notification", title: "기억했어요", body: "둘째 약속", threadId: "t_friend", icon: "sparkles" });
+    await nextBanner();
+    expect(bannerBody()).toBe("첫 약속");
+    await nextBanner();
+    expect(bannerBody()).toBe("둘째 약속");
+  });
+
+  test("the line in the waiting place is still asked when its turn comes: its thread on screen by then, nothing drops", async () => {
+    push(line("t_other", "먼저 온 줄"));
+    push(line("t_friend", "줄 1"));
+    push(line("t_friend", "줄 2"));
+    const hide = catchUp.showThread("t_friend");
+    try {
+      await nextBanner();
+      expect(bannerTitle()).toBeNull();
+    } finally {
+      hide();
+    }
+  });
+
+  test("a newer line comes after the thread's banner that is up; it does not change the one up", async () => {
+    push(line("t_friend", "도착했어"));
+    push(line("t_friend", "지금 가는 중"));
+    expect(bannerBody()).toBe("도착했어");
+    await nextBanner();
+    expect(bannerBody()).toBe("지금 가는 중");
   });
 });
