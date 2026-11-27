@@ -73,11 +73,14 @@ function personVault(v: ReturnType<typeof makeFakeVault>): ReturnType<typeof mak
   };
 }
 
-/** `kospiLast`: KOSPI's last close (2,500 on every other day; the 200-day line moves with it); null: no KOSPI at all */
-async function world(o: { tossBase?: string | null; kospiLast?: number | null } = {}) {
+/**
+ * `kospiLast`: KOSPI's last close (2,500 on every other day; the 200-day line moves with it); null: no KOSPI at all.
+ * `kospiDay`: the last bar's day, 11-30 (the market day before the 12-01 judgment) unless a test ages it (DD 2027)
+ */
+async function world(o: { tossBase?: string | null; kospiLast?: number | null; kospiDay?: string } = {}) {
   const up = makeInvestUpstream();
   for (const [k, v] of quietFred()) up.state.fred.set(k, v);
-  const bars = syntheticBars(LAST, 260, 2500, 30);
+  const bars = syntheticBars(new Date(Date.parse(`${o.kospiDay ?? "2026-11-30"}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10), 260, 2500, 30);
   if (typeof o.kospiLast === "number") bars[bars.length - 1] = { ...bars.at(-1)!, o: o.kospiLast, h: o.kospiLast + 15, l: o.kospiLast - 15, c: o.kospiLast };
   if (o.kospiLast !== null) up.state.yahooDaily.set("^KS11", bars);
   const h = await makeHarness({
@@ -114,10 +117,10 @@ async function world(o: { tossBase?: string | null; kospiLast?: number | null } 
 type P = Awaited<ReturnType<Awaited<ReturnType<typeof world>>["person"]>>;
 const row9 = async (p: P) => (await p.detail()).core11.find((r) => r.no === 9)!;
 const r6 = async (p: P) => (await p.detail()).groups.find((g) => g.key === "recover")!.rows.find((r) => r.id === "R6")!;
-/** every row of the detail but R6 (11 indicators, each group's conditions) that carries an R6 tail's words */
+/** every row of the detail but R6 (11 indicators, each group's conditions) that carries a tail's words (R6's, A8's) */
 const tailsBesideR6 = (d: InvestStagesDetail) =>
   [...d.core11.map((r) => [`#${r.no}`, JSON.stringify(r)] as const), ...d.groups.flatMap((g) => g.rows.filter((r) => r.id !== "R6").map((r) => [r.id, JSON.stringify(r)] as const))]
-    .filter(([, s]) => s.includes("외국인 수급은") || s.includes("코스피는"))
+    .filter(([, s]) => s.includes("외국인 수급은") || s.includes("코스피는") || s.includes("원/달러는"))
     .map(([id]) => id);
 
 /** 30 settled weekdays ending 11-30 (the day before the 12-01 judgment) */
@@ -162,9 +165,9 @@ describe("the read (team-lead 1854 1, 3)", () => {
     expect(await row9(carol)).toMatchObject({ signal: "unknown", value: null, basis: "토스증권을 연결하면 받아요" });
     // R6 (DD 2012): bob's foreigners bought 20 days in a row (KOSPI sits on its 200-day line, not above): met on his
     // numbers alone; the rule's order, foreigners first, KOSPI named; carol: the foreign side's reason after the sources
-    expect(await r6(bob)).toMatchObject({ state: "met", detail: "외국인 20거래일 연속 순매수 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
-    expect(await r6(alice)).toMatchObject({ state: "unmet", detail: "외국인 20거래일 연속 순매도 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
-    expect(await r6(carol)).toMatchObject({ state: "unknown", detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · Yahoo(지연 시세) · B+ · 외국인 수급은 토스증권을 연결하면 받아요" });
+    expect(await r6(bob)).toMatchObject({ state: "met", detail: "외국인 20거래일 연속 순매수 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 30일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
+    expect(await r6(alice)).toMatchObject({ state: "unmet", detail: "외국인 20거래일 연속 순매도 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 30일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
+    expect(await r6(carol)).toMatchObject({ state: "unknown", detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 30일 · Yahoo(지연 시세) · B+ · 외국인 수급은 토스증권을 연결하면 받아요" });
     // the tail is R6's alone (DD 2027 2): no other row of carol's says it
     expect(tailsBesideR6(await carol.detail())).toEqual([]);
     // once a day: the next beat asks nobody again
@@ -266,7 +269,7 @@ describe("the read (team-lead 1854 1, 3)", () => {
     await w.judge(EIGHT);
     expect(w.up.calls.slice(mark).filter((c) => c.host === "toss.fake.test")).toEqual([]);
     expect(await row9(alice)).toMatchObject({ value: null, basis: "받을 곳이 아직 없어요" });
-    expect(await r6(alice)).toMatchObject({ state: "met", detail: "코스피 2,600.00 · 200일선 2,500.50 · 11월 26일 · Yahoo(지연 시세) · B+ · 외국인 수급은 받을 곳이 아직 없어요" });
+    expect(await r6(alice)).toMatchObject({ state: "met", detail: "코스피 2,600.00 · 200일선 2,500.50 · 11월 30일 · Yahoo(지연 시세) · B+ · 외국인 수급은 받을 곳이 아직 없어요" });
   });
 
   test("R6's run is the streak its state rests on (DD 2012 1): 5 days met, 4 with KOSPI below unmet; a last day of 0, no run; a read that did not come, said after the sources", async () => {
@@ -281,12 +284,12 @@ describe("the read (team-lead 1854 1, 3)", () => {
     w.up.state.tossFlowsBy.set(gus.client, run(5, 0));
     // hana's read answers with no record at all: nothing today
     await w.judge(EIGHT);
-    const tail = "11월 26일 · 토스증권 · A, Yahoo(지연 시세) · B+";
+    const tail = "11월 30일 · 토스증권 · A, Yahoo(지연 시세) · B+";
     expect(await r6(erin)).toMatchObject({ state: "met", detail: `외국인 5거래일 연속 순매수 · 코스피 2,400.00 · 200일선 2,499.50 · ${tail}` });
     expect(await r6(finn)).toMatchObject({ state: "unmet", detail: `외국인 4거래일 연속 순매수 · 코스피 2,400.00 · 200일선 2,499.50 · ${tail}` });
     expect(await r6(gus)).toMatchObject({ state: "unmet", detail: `코스피 2,400.00 · 200일선 2,499.50 · ${tail}` });
     // KOSPI below and the foreign side missing: 확인 불가 (Kleene OR), and the line says why
-    expect(await r6(hana)).toMatchObject({ state: "unknown", detail: "코스피 2,400.00 · 200일선 2,499.50 · 11월 26일 · Yahoo(지연 시세) · B+ · 외국인 수급은 오늘 받지 못했어요" });
+    expect(await r6(hana)).toMatchObject({ state: "unknown", detail: "코스피 2,400.00 · 200일선 2,499.50 · 11월 30일 · Yahoo(지연 시세) · B+ · 외국인 수급은 오늘 받지 못했어요" });
   });
 
   test("a login whose read finds no session (connected, then not_connected): a read that did not come, never 연결하면 (DD 2027 1)", async () => {
@@ -298,13 +301,13 @@ describe("the read (team-lead 1854 1, 3)", () => {
     conn.sessionFor = async (u, s) => (u === alice.id ? null : real(u, s));
     await w.judge(EIGHT);
     expect(await row9(alice)).toMatchObject({ value: null, basis: "오늘 받지 못했어요" });
-    expect(await r6(alice)).toMatchObject({ detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · Yahoo(지연 시세) · B+ · 외국인 수급은 오늘 받지 못했어요" });
+    expect(await r6(alice)).toMatchObject({ detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 30일 · Yahoo(지연 시세) · B+ · 외국인 수급은 오늘 받지 못했어요" });
     const stored = JSON.parse((w.h.db.sql.query("SELECT json FROM invest_judgments WHERE user_id = $u").get({ u: alice.id }) as { json: string }).json) as { missing: Record<string, unknown> };
     expect(stored.missing.foreignKospi).toBe("today");
     expect(w.rows(alice.id)).toEqual([]);
   });
 
-  test("KOSPI missing, the foreign side here: KOSPI's reason after the sources, unknown at 4 days and met at 6 (DD 2027 3); the tail is R6's alone", async () => {
+  test("KOSPI missing, the foreign side here: KOSPI's reason after the sources, unknown at 4 days and met at 6 (DD 2027 3); R6 and A8 say it (DD 0317 2)", async () => {
     const w = await world({ kospiLast: null });
     const run = (n: number) => SETTLED.map((d, i) => flowRecord(d, i >= 30 - n ? 300 : -200));
     const ivy = await w.person("ivy", true);
@@ -314,8 +317,64 @@ describe("the read (team-lead 1854 1, 3)", () => {
     await w.judge(EIGHT);
     expect(await r6(ivy)).toMatchObject({ state: "unknown", detail: "외국인 4거래일 연속 순매수 · 11월 30일 · 토스증권 · A · 코스피는 오늘 받지 못했어요" });
     expect(await r6(jun)).toMatchObject({ state: "met", detail: "외국인 6거래일 연속 순매수 · 11월 30일 · 토스증권 · A · 코스피는 오늘 받지 못했어요" });
-    expect(tailsBesideR6(await ivy.detail())).toEqual([]);
-    expect(tailsBesideR6(await jun.detail())).toEqual([]);
+    // A8 (KOSPI and 원/달러) says the same, after its own source; no other row does
+    expect(tailsBesideR6(await ivy.detail())).toEqual(["A8"]);
+    expect(tailsBesideR6(await jun.detail())).toEqual(["A8"]);
+    const a8 = (await ivy.detail()).groups.find((g) => g.key === "worse")!.rows.find((r) => r.id === "A8")!;
+    expect(a8).toMatchObject({ state: "unmet", detail: "원/달러 1개월 0.0% · 11월 27일 · FRED · A · 코스피는 오늘 받지 못했어요" }); // unmet on 원/달러 alone: the tail still says why
+  });
+
+  test("KOSPI's last bar three market days back (11-26 at the 12-01 judgment): left out, its date in R6's and A8's tails; 11-27 still read (DD 2027, 0317)", async () => {
+    const w = await world({ kospiDay: "2026-11-26" });
+    const alice = await w.person("alice", true);
+    w.up.state.tossFlowsBy.set(alice.client, ALICE);
+    await w.judge(EIGHT);
+    expect(await r6(alice)).toMatchObject({ state: "unknown", detail: "외국인 20거래일 연속 순매도 · 11월 30일 · 토스증권 · A · 코스피는 11월 26일 값이라 오래됐어요" });
+    const a8 = (await alice.detail()).groups.find((g) => g.key === "worse")!.rows.find((r) => r.id === "A8")!;
+    expect(a8).toMatchObject({ state: "unmet", detail: "원/달러 1개월 0.0% · 11월 27일 · FRED · A · 코스피는 11월 26일 값이라 오래됐어요" });
+    const stored = JSON.parse((w.h.db.sql.query("SELECT json FROM invest_judgments WHERE user_id = $u").get({ u: alice.id }) as { json: string }).json) as {
+      basis: Record<string, unknown>;
+      missing: Record<string, unknown>;
+      old?: Record<string, string>;
+    };
+    expect([stored.basis.kospi, stored.missing.kospi, stored.old?.kospi]).toEqual([null, "today", "2026-11-26"]);
+    // one day later is Yahoo's delay: read
+    const v = await world({ kospiDay: "2026-11-27" });
+    const bob = await v.person("bob", true);
+    v.up.state.tossFlowsBy.set(bob.client, ALICE);
+    await v.judge(EIGHT);
+    expect(await r6(bob)).toMatchObject({ state: "unmet", detail: "외국인 20거래일 연속 순매도 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 27일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
+  });
+
+  test("each person's own cached Toss calendar counts the days: dan's says 11-30 was closed, so KOSPI's 11-26 bar is read for him; eve has none: too old", async () => {
+    const w = await world({ kospiDay: "2026-11-26" });
+    const dan = await w.person("dan", true);
+    const eve = await w.person("eve", true);
+    for (const p of [dan, eve]) w.up.state.tossFlowsBy.set(p.client, ALICE);
+    // what dan's watch kept when Toss told it 11-30 had no session (hub.ts dayOverride reads it)
+    idb.cachePut(w.h.db, `cal:toss:${dan.id}:KR:2026-11-30`, "null", w.h.clock.t, EIGHT + 86_400_000);
+    await w.judge(EIGHT);
+    expect(await r6(dan)).toMatchObject({ state: "unmet", detail: "외국인 20거래일 연속 순매도 · 코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · 토스증권 · A, Yahoo(지연 시세) · B+" });
+    expect(await r6(eve)).toMatchObject({ state: "unknown", detail: "외국인 20거래일 연속 순매도 · 11월 30일 · 토스증권 · A · 코스피는 11월 26일 값이라 오래됐어요" });
+  });
+
+  test("the foreign side's last settled day three market days back: #9 and R6 say its date, not 오늘 받지 못했어요; 11-27 still read (DD 2027, 0317)", async () => {
+    const w = await world();
+    const dan = await w.person("dan", true);
+    const eve = await w.person("eve", true);
+    w.up.state.tossFlowsBy.set(dan.client, BOB.filter((r) => SETTLED[BOB.indexOf(r)]! <= "2026-11-26"));
+    w.up.state.tossFlowsBy.set(eve.client, BOB.filter((r) => SETTLED[BOB.indexOf(r)]! <= "2026-11-27"));
+    await w.judge(EIGHT);
+    expect(await row9(dan)).toMatchObject({ signal: "unknown", value: null, basis: "11월 26일 값이라 오래됐어요" });
+    expect(await r6(dan)).toMatchObject({ state: "unknown", detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 30일 · Yahoo(지연 시세) · B+ · 외국인 수급은 11월 26일 값이라 오래됐어요" });
+    expect(await row9(eve)).toMatchObject({ basis: "11월 27일 · 토스증권 · A" });
+  });
+
+  test("both sides gone, KOSPI too old and no Toss login: R6 says the old date alone, ahead of 연결하면 (DD 0317 1)", async () => {
+    const w = await world({ kospiDay: "2026-11-26" });
+    const fay = await w.person("fay", false);
+    await w.judge(EIGHT);
+    expect(await r6(fay)).toMatchObject({ state: "unknown", detail: "11월 26일 값이라 오래됐어요" });
   });
 
   test("R6 with neither side: the basis words alone (오늘 받지 못했어요 first), no tail", async () => {

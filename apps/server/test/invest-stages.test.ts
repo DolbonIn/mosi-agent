@@ -8,11 +8,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Friend, InviteResponse, InvestOverview, InvestStagesDetail } from "@pickle/protocol";
 import { escapeStage, NO_DATA, pct, recoveryStage, type Condition, type Core11Result } from "@pickle/quant";
-import { etToEpoch } from "../src/invest/calendar.ts";
+import { dayFromToss, etToEpoch, type DayOverride } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
 import { pctChange } from "../src/invest/stage-ledger.ts";
-import { FRED_FEEDS, nextLines, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
+import { FRED_FEEDS, KR_STALE_DAYS, krStale, METHOD_LINES, nextLines, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
 import { INVEST_WHERE_NOTE, investTools } from "../src/invest/tools.ts";
 import { makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
 import { makeHarness, outcome, readSse, type Harness } from "./helpers.ts";
@@ -417,6 +417,51 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(tool.description).not.toContain("answer only from those two sentences"); // 17bb0a8's wording, which let an unknown slip in
     // and neither sentence is quoted in the description, nor an answer's words (no-sample-lines): the model reads them from the result
     for (const quoted of [OFF, AGAIN, "받지 않아서", "판정하지", "다시 받으면", "다시 판정", "정보가 없", "알 수 없", "모르", "알려"]) expect(tool.description).not.toContain(quoted);
+  });
+});
+
+describe("KR daily series too old (DD 2027, team-lead 0312, DD 0317)", () => {
+  const at8 = (day: string) => KST(Number(day.slice(0, 4)), Number(day.slice(5, 7)), Number(day.slice(8, 10)), 8, 0);
+  test("two KR market days ended after the last day, before the judgment day: too old; the judgment day itself never counts", () => {
+    // Tuesday 12-01: 11-30 (the day before) and 11-27 (one late) read; 11-26 too old
+    expect(["2026-11-30", "2026-11-27", "2026-11-26"].map((d) => krStale(d, at8("2026-12-01")))).toEqual([false, false, true]);
+    // a weekend judgment day reads as the Friday after it: Friday and Thursday read, Wednesday too old
+    for (const d of ["2026-12-05", "2026-12-06"]) expect(["2026-12-04", "2026-12-03", "2026-12-02"].map((x) => krStale(x, at8(d)))).toEqual([false, false, true]);
+    // over the 12-25 holiday (a Friday): Monday 12-28 reads 12-24 and 12-23, not 12-22
+    expect(["2026-12-24", "2026-12-23", "2026-12-22"].map((d) => krStale(d, at8("2026-12-28")))).toEqual([false, false, true]);
+    // after the close, today's own bar is no older than today
+    expect(krStale("2026-12-01", KST(2026, 12, 1, 16, 0))).toBe(false);
+  });
+
+  test("the person's cached Toss calendar comes before the table", () => {
+    // Toss says 11-30 was closed: 11-26 has only 11-27 after it → read
+    const closed: DayOverride = (m, day) => (m === "KR" && day === "2026-11-30" ? dayFromToss("KR", day, null) : null);
+    expect(krStale("2026-11-26", at8("2026-12-01"), closed)).toBe(false);
+    // Toss says 12-25 traded: 12-23 has 12-24 and 12-25 after it → too old (the table alone reads it)
+    const open: DayOverride = (m, day) => (m === "KR" && day === "2026-12-25" ? dayFromToss("KR", day, { open: 0, close: 1 }) : null);
+    expect([krStale("2026-12-23", at8("2026-12-28")), krStale("2026-12-23", at8("2026-12-28"), open)]).toEqual([false, true]);
+  });
+
+  test("A8 with KOSPI here and 원/달러 not: 원/달러's reason after the sources, on an unmet day too (DD 0317 2); R6 has no tail", async () => {
+    const fred = quiet();
+    fred.set("DEXKOUS", 404);
+    const { h } = await world(fred);
+    const { alice } = await people(h);
+    await judgeAt(h, ET(9, 0)); // 11-30 23:00 KST: KOSPI's 11-26 bar has only 11-27 after it
+    const d = await alice.detail();
+    const row = (id: string) => d.groups.flatMap((g) => g.rows).find((r) => r.id === id)!;
+    expect(row("A8")).toMatchObject({ state: "unmet", detail: "2,500.00 · 200일선 2,500.00 · 11월 26일 · Yahoo(지연 시세) · B+ · 원/달러는 오늘 받지 못했어요" });
+    expect(row("R6").detail).not.toMatch(/는 오늘|은 오늘|오래됐어요/);
+  });
+
+  test("the method line says the rule's own number, from the constant (DD 0317 3), before the ledger's line", () => {
+    expect(KR_STALE_DAYS).toBe(2);
+    expect(METHOD_LINES.at(-2)).toBe("코스피 일봉과 외국인 수급은 마지막 값 뒤에 끝난 한국 거래일이 2일 이상이면 확인 불가예요.");
+    expect(METHOD_LINES.at(-1)).toMatch(/^원장 값은 /);
+    // one number: the line and the threshold both read the constant
+    const src = readFileSync(join(import.meta.dir, "../src/invest/stages.ts"), "utf8");
+    expect(src).toContain("끝난 한국 거래일이 ${KR_STALE_DAYS}일 이상이면");
+    expect(src).toContain(") >= KR_STALE_DAYS;");
   });
 });
 

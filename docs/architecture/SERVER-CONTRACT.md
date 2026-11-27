@@ -724,7 +724,7 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   stop (400 `sell_not_allowed`). bufferPct 1–20, null = the 5% default (stops only). until: a date from today, within a
   year. At most 60 rules. Errors are `{error, message}` with the DD 2100 copy.
 - The watch: from 15 minutes after the open every 5 minutes to the close, plus one check 5 minutes after the close (US
-  09:45–16:00 ET + 16:05; early closes 13:00 + 13:05; KRX by its 2026 table; holidays and other years: no check). Each
+  09:45–16:00 ET + 16:05; early closes 13:00 + 13:05; KRX by its 2026 and 2027 tables; holidays and other years: no check). Each
   slot runs once per server (a marker in `invest_cache`). A person with Toss follows their own Toss market calendar
   (asked with their token once a market day per market, weekends not asked; kept under their key): Toss's answer decides
   that day for them only (US: open or closed and the regular hours, early closes included; KR: whether KRX trades — no
@@ -898,6 +898,14 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   year's against this year's, the same unit. Too old is unknown, the caution form ("{M월 D일} 값이라 오래됐어요"): 6, 8
   and 11 past 120 days, 7 past 5 US trading days. No figure: "값이 없어요" (quiet). 9 is not a ledger id: its words
   are B2e's.
+- **KR daily series too old** (DD 2027, team-lead 0312, DD 0317): KOSPI's last bar and the person's last kept
+  foreign-flow day are left out when `KR_STALE_DAYS` (2) KR market days or more ended after it before the judgment's
+  KST day. That day itself never counts, so a weekend or holiday judgment reads as the market day before it; the days
+  are the person's cached Toss calendar first, then the KRX table (a year with no table counts its weekdays). At a
+  Tuesday 12-01 judgment 11-30 and 11-27 are read, 11-26 is not. Left out as a read that did not come today (caution,
+  missing `today`), its day kept (`old`): 9's basis and the tails below say `11월 26일 값이라 오래됐어요`. The method
+  line before the ledger's says the constant's number: `코스피 일봉과 외국인 수급은 마지막 값 뒤에 끝난 한국 거래일이 2일
+  이상이면 확인 불가예요.`
 - **`overview.stages: InvestStages`** — `{kind: "off", off}` ("지금은 지표를 받지 않아서 단계를 판정하지 않아요."), `{kind:
   "none", none}` ("첫 판정은 오늘 08:00에 나와요." / "첫 판정은 곧 나와요."), or `{kind: "judged", escape, recovery,
   gauges, next, judgedAt, judgedText, stale?}`. A head is `{stage, name?, floor?, text, pending?, pendingTone?}`: a
@@ -1207,8 +1215,11 @@ Indicator 9 and R6's foreign side (team-lead 1854, DD 1857-b). Code: `apps/serve
   by. KOSPI here and the foreign side not: the reason after the sources, on a met day too: `… · Yahoo(지연 시세) · B+ ·
   외국인 수급은 토스증권을 연결하면 받아요` / `… 오늘 받지 못했어요` / `… 받을 곳이 아직 없어요`. The foreign side here
   and KOSPI not (DD 2027 3): `외국인 4거래일 연속 순매수 · 11월 30일 · 토스증권 · A · 코스피는 오늘 받지 못했어요`, met
-  days too (KOSPI is Yahoo's; no sources, no reading at all). Both missing: the basis words alone. Only R6's line
-  carries a tail.
+  days too (KOSPI is Yahoo's; no sources, no reading at all). Both missing: the basis words alone. A side too old
+  (the age rule above) says its day instead, ahead of the other reasons: `… · 코스피는 11월 26일 값이라 오래됐어요`,
+  `… · 외국인 수급은 11월 26일 값이라 오래됐어요`. A8 (KOSPI and 원/달러; DD 0317 2) carries the same tail, met or not:
+  `원/달러 1개월 0.0% · 11월 27일 · FRED · A · 코스피는 오늘 받지 못했어요`, `… · B+ · 원/달러는 오늘 받지 못했어요`. No
+  other row carries one.
 - v16, additive, no rollback: `invest_flows`.
 
 ## Invest (B3a) — real stop orders, the executor

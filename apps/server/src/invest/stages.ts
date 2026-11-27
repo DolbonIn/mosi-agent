@@ -4,12 +4,13 @@
  * flows of the person's own Toss read for 9 and R6 (B2e), by @pickle/quant's assessStages. The server only gathers the inputs and says where each came from; every comparison and stage rule is
  * quant's. A series that could not be read is left out, so whatever rests on it is unknown (확인 불가), never unmet.
  */
-import { assessStages, momFromIndex, NO_DATA, num, pct, pp, rate, type Point, type StageInput } from "@pickle/quant";
+import { assessStages, civilDate, dayNumber, momFromIndex, NO_DATA, num, pct, pp, rate, type Point, type StageInput } from "@pickle/quant";
 import type { Core } from "../core.ts";
+import { marketDaysAfter, type DayOverride } from "./calendar.ts";
 import { dayWords } from "./forecasts.ts";
 import { fredSeries, indexBars, type FredId } from "./macro.ts";
 import { SOURCE_TABLE } from "./sources.ts";
-import { BREADTH_STALE_US_DAYS, LEDGER_KEYS, ledgerFeed, QUARTERLY_STALE_DAYS, type LedgerKey } from "./stage-ledger.ts";
+import { BREADTH_STALE_US_DAYS, LEDGER_KEYS, ledgerFeed, QUARTERLY_STALE_DAYS } from "./stage-ledger.ts";
 
 /** which FRED series feeds which input (CPILFESL feeds coreCpiMoM through momFromIndex) */
 export const FRED_FEEDS = {
@@ -238,7 +239,7 @@ const DAY_MS = 86_400_000;
 export interface Judged extends Assessed {
   basis: Record<string, InputBasis | null>;
   missing: Partial<Record<InputKey, Missing>>;
-  /** a ledger figure left out for its age: its as-of */
+  /** a ledger figure or a KR daily series left out for its age: its as-of (DD 0426 §1, DD 2027) */
   old?: Partial<Record<InputKey, string>>;
 }
 
@@ -272,17 +273,40 @@ function flowFeed(f: FlowRead): { input: StageInput; basis: Record<string, Input
   return { input: {}, basis: { foreignKospi: null }, missing: { foreignKospi: f.ok ? "today" : f.why } };
 }
 
+/** DD 2027: KR market days ended after a KR daily series' last day, before the judgment day, that make it too old */
+export const KR_STALE_DAYS = 2;
+/** the KR daily series the age rule reads (KOSPI's bars from Yahoo, the person's foreign flows from Toss) */
+const KR_DAILY = ["kospi", "foreignKospi"] as const;
+
+/**
+ * DD 2027 (team-lead 2025, 0312): is a KR daily series whose last day is `last` too old at the judgment day? The 08:00
+ * reading expects the market day before; one more is Yahoo's delay; KR_STALE_DAYS ended after it is a source that
+ * stopped. The judgment day itself is never counted (so a weekend or holiday D reads the same), and the days are the
+ * person's cached Toss calendar first, then the table.
+ */
+export function krStale(last: string, now: number, ov?: DayOverride): boolean {
+  return marketDaysAfter("KR", last, civilDate(dayNumber(kstDayOf(now)) - 1), ov) >= KR_STALE_DAYS;
+}
+
 /** one person's judgment: the shared read plus their ledger figures and their own flows (each person's own) */
 export function judgeFor(core: Core, userId: string, read: StageRead, now: number, flow: FlowRead = NO_FLOW): Judged {
   const feed = ledgerFeed(core, userId, now);
   const fl = flowFeed(flow);
   const input: StageInput = { ...read.input, ...fl.input, ...feed.input };
-  return {
-    ...assessStages(input),
-    basis: { ...read.basis, ...fl.basis, ...feed.basis },
-    missing: { ...missingOf(read), ...fl.missing, ...feed.missing },
-    ...(Object.keys(feed.old).length ? { old: feed.old } : {}),
-  };
+  const basis: Record<string, InputBasis | null> = { ...read.basis, ...fl.basis, ...feed.basis };
+  const missing: Partial<Record<InputKey, Missing>> = { ...missingOf(read), ...fl.missing, ...feed.missing };
+  const old: Partial<Record<InputKey, string>> = { ...feed.old };
+  // DD 2027: a KR daily series too old is left out as one that did not come today, its day kept for the words
+  const ov = core.invest.dayOverride(userId);
+  for (const k of KR_DAILY) {
+    const last = input[k]?.at(-1)?.t;
+    if (!last || !krStale(last, now, ov)) continue;
+    delete input[k];
+    basis[k] = null;
+    missing[k] = "today";
+    old[k] = last;
+  }
+  return { ...assessStages(input), basis, missing, ...(Object.keys(old).length ? { old } : {}) };
 }
 
 const kstHour = (now: number) => Math.floor(((((now + 9 * HOUR) % DAY_MS) + DAY_MS) % DAY_MS) / HOUR);
@@ -458,6 +482,7 @@ export const METHOD_LINES: readonly string[] = [
   "삼성전자·SK하이닉스 이익 전망은 앞으로 12개월의 가운데가 든 회계연도 값을, 같은 회계연도의 3개월 전(앞뒤 15일 안) 값과 비교해요.",
   "빅테크 내년 설비투자 증가율은 회사가 쓰는 회계연도 이름으로 내년 값과 올해 값을 비교해요.",
   "M7 이익 전망은 회사마다 최근 3개월 변화가 0 미만이면 하향으로 봐요.",
+  `코스피 일봉과 외국인 수급은 마지막 값 뒤에 끝난 한국 거래일이 ${KR_STALE_DAYS}일 이상이면 확인 불가예요.`, // DD 0317 3: the rule's own number
   `원장 값은 등급 C를 쓰지 않아요. 이익 전망, M7, 설비투자 값은 기준일이 ${QUARTERLY_STALE_DAYS}일, 시장 폭은 ${BREADTH_STALE_US_DAYS}거래일을 넘으면 확인 불가예요.`, // DD 0710 D13: the rule's own numbers
 ];
 
@@ -532,17 +557,26 @@ const fromLedger = (k: InputKey) => (LEDGER_KEYS as readonly string[]).includes(
 /** why an input is not here, in the basis words (DD 0426 §1, DD 1857-b 2) */
 const MISSING_WORDS = { today: "오늘 받지 못했어요", connect: "토스증권을 연결하면 받아요", none: "받을 곳이 아직 없어요" } as const;
 
+/** the side's name in a two-input row's tail, with its particle (DD 0317 2) */
+const TAIL_NAMES: Partial<Record<InputKey, string>> = { kospi: "코스피는", usdkrw: "원/달러는", foreignKospi: "외국인 수급은" };
+/** the rows that say why their missing side is missing (R6: DD 2012 2, 2027 3; A8: DD 0317 2) */
+const TAILED: Readonly<Record<string, readonly [InputKey, InputKey]>> = { R6: ["foreignKospi", "kospi"], A8: ["kospi", "usdkrw"] };
+
 /**
- * R6 with one side here and the other not: the missing side's reason after the sources, on a met day too. The foreign
- * side's (DD 2012 2): its own why; KOSPI's (DD 2027 3): Yahoo's, so only 오늘 받지 못했어요 (no stage reading at all
- * without sources). Both missing: basisText alone.
+ * R6 and A8 with one side here and the other not: the missing side's reason after the sources, on a met day too — too
+ * old first (`코스피는 11월 24일 값이라 오래됐어요`, DD 0317 1), else its own why (KOSPI and 원/달러 can only be 오늘 받지 못했어요:
+ * no stage reading at all without sources; the foreign side may be 연결하면 or 받을 곳). Both missing or both here: none.
  */
-function r6Tail(j: Judged): string | null {
-  const kospi = !!j.basis.kospi;
-  if (kospi === !!j.basis.foreignKospi) return null;
-  if (!kospi) return `코스피는 ${MISSING_WORDS.today}`;
-  const m = j.missing.foreignKospi;
-  return `외국인 수급은 ${MISSING_WORDS[m === "today" || m === "connect" ? m : "none"]}`;
+function pairTail(j: Judged, id: string, now: number): string | null {
+  const pair = TAILED[id];
+  if (!pair) return null;
+  const [a, b] = pair;
+  if (!!j.basis[a] === !!j.basis[b]) return null;
+  const k = j.basis[a] ? b : a;
+  const old = j.old?.[k];
+  if (old) return `${TAIL_NAMES[k]} ${dayWords(old, now)} 값이라 오래됐어요`;
+  const m = j.missing[k];
+  return `${TAIL_NAMES[k]} ${MISSING_WORDS[m === "today" || m === "connect" ? m : "none"]}`;
 }
 
 /**
@@ -552,7 +586,7 @@ function r6Tail(j: Judged): string | null {
 function basisText(j: Judged, keys: readonly InputKey[], asOf: string | null, now: number): string {
   const present = keys.filter((k) => j.basis[k]).map((k) => j.basis[k]!);
   if (!present.length || !asOf) {
-    const old = keys.map((k) => j.old?.[k as LedgerKey]).filter((d): d is string => !!d).sort().at(-1);
+    const old = keys.map((k) => j.old?.[k]).filter((d): d is string => !!d).sort().at(-1);
     if (old) return `${dayWords(old, now)} 값이라 오래됐어요`;
     if (keys.some((k) => j.missing[k] === "today")) return MISSING_WORDS.today;
     if (keys.some((k) => j.missing[k] === "connect")) return MISSING_WORDS.connect; // DD 1857-b 2
@@ -650,7 +684,7 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
         detail: join(
           (NEEDS[c.id] ?? []).some((k) => j.basis[k]) ? figureText(c.id, c.figures) || null : null,
           basisText(j, NEEDS[c.id] ?? [], c.asOf, now),
-          c.id === "R6" ? r6Tail(j) : null,
+          pairTail(j, c.id, now),
         ),
       })),
       next: groupNext(g.key),
