@@ -38,7 +38,7 @@ const rising = (n: number, from: number): Bar[] => syntheticBars(B, n, from, 1).
 // ───────────────────────────── pure ─────────────────────────────
 
 describe("the chart's words (A1–A3)", () => {
-  test("levels in levelChart's shape: stop, targets by their level, resistance, the buy zone as one band; expired, split-held, alert and invalidate left out", () => {
+  test("levels in levelChart's shape: stop, invalidate, targets by their level, alert, the buy zone as one band, resistance; expired and split-held left out", () => {
     const levels = chartLevels("US", [
       spec({ kind: "stop", price: 25.8 }),
       spec({ kind: "target", level: 1, price: 36.5, direction: "above" }),
@@ -55,8 +55,10 @@ describe("the chart's words (A1–A3)", () => {
     expect(levels).toEqual([
       { kind: "stop", price: 25.8, label: "손절 $25.80 이하" },
       { kind: "stop", price: 24, label: "손절 $24.00 이하" },
+      { kind: "invalidate", price: 28, label: "전략 무효화 $28.00 이하" },
       { kind: "target1", price: 36.5, label: "1차 익절 $36.50 이상" },
       { kind: "target3", price: 44, label: "3차 익절 $44.00 이상" },
+      { kind: "alert", price: 35, label: "가격 알림 $35.00 이상" },
       { kind: "buyZone", price: 30, hi: 31.5, label: "매수 검토 $30.00–31.50" },
       { kind: "resistance", price: 34, label: "저항 $34.00" },
     ]);
@@ -70,6 +72,9 @@ describe("the chart's words (A1–A3)", () => {
     const levels = chartLevels("US", [spec({ kind: "stop", price: 25.8 }), spec({ kind: "target", level: 1, price: 36.5, direction: "above" }), spec({ kind: "buy_zone", lo: 30, hi: 31.5, direction: "inside" })]);
     expect(chartAria("US", bars, levels)).toBe("11월 30일 종가 35.90달러. 손절 25.80, 1차 익절 36.50, 매수 검토 구간 30.00에서 31.50. RSI 100.");
     expect(chartAria("US", bars, [])).toBe("11월 30일 종가 35.90달러. RSI 100.");
+    // alert and invalidate in levelChart's words (DD 1533: no $ on a chart label), the invalidation by the stop
+    const more = chartLevels("US", [spec({ kind: "alert", price: 33, direction: "above" }), spec({ kind: "stop", price: 25.8 }), spec({ kind: "invalidate", price: 27.2, direction: "below" })]);
+    expect(chartAria("US", bars, more)).toBe("11월 30일 종가 35.90달러. 손절 25.80, 무효화 27.20, 알림 33.00. RSI 100.");
     // 14 bars: no RSI yet
     expect(chartAria("US", bars.slice(-14), [])).toBe("11월 30일 종가 35.90달러.");
     const won = syntheticBars(B, 40, 70000, 1000).map((b, i) => ({ ...b, c: 70000 - i * 100 }));
@@ -187,11 +192,12 @@ describe("GET /api/invest/symbols/:symbol", () => {
     expect(d.chart).toMatchObject({
       levels: [
         { kind: "stop", price: 25.8, label: "손절 $25.80 이하" },
+        { kind: "alert", price: 35, label: "가격 알림 $35.00 이상" },
         { kind: "buyZone", price: 28, hi: 29, label: "매수 검토 $28.00–29.00" },
       ],
       asOf: "2026-11-30",
       source: { name: "Yahoo(지연 시세)", grade: "B+", asOf: "2026-11-30" },
-      aria: "11월 30일 종가 30.00달러. 손절 25.80, 매수 검토 구간 28.00에서 29.00. RSI 50.", // flat closes: RSI 50
+      aria: "11월 30일 종가 30.00달러. 손절 25.80, 알림 35.00, 매수 검토 구간 28.00에서 29.00. RSI 50.", // flat closes: RSI 50
       foot: "기준 11월 30일 종가 · Yahoo(지연 시세) · B+",
     });
     expect(d.chart!.bars).toHaveLength(60);

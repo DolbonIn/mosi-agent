@@ -238,7 +238,7 @@ export interface InvestBar {
 }
 
 /** @pickle/quant levelChart's LevelKind: a level's meaning on the chart (buyZone: the band from price up to hi) */
-export type InvestChartLevelKind = "stop" | "target1" | "target2" | "target3" | "resistance" | "support" | "buyZone";
+export type InvestChartLevelKind = "stop" | "target1" | "target2" | "target3" | "resistance" | "support" | "buyZone" | "alert" | "invalidate";
 
 /** a level in levelChart's shape, plus the rule's words (`손절 $25.80 이하`) */
 export interface InvestChartLevel {

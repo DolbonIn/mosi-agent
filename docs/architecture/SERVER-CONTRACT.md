@@ -695,9 +695,10 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
   `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`): the row, the rules, the
   last 5 alerts with `line` (the banner's title without the symbol, DD 0914 D2), and `chart` (symbol chart board: the
-  daily bars, up to 260; `levels` in @pickle/quant levelChart's shape — stop, target1–3, resistance, the buy zone as one
-  band `buyZone` price–hi, each with its rule's words, in that order; left out: expired rules, rules a split or a merge
-  stopped (prices from before it on adjusted bars), and alert and invalidate until levelChart has them; `aria` the
+  daily bars, up to 260; `levels` in @pickle/quant levelChart's shape — stop, invalidate, target1–3, alert (the person's
+  price), the buy zone as one band `buyZone` price–hi, resistance, each with its rule's words, in that order (the aria
+  says 무효화 and 알림 as levelChart labels them, "손절 25.80, 무효화 27.20, 알림 33.00"); left out: expired rules and
+  rules a split or a merge stopped (prices from before it on adjusted bars); `aria` the
   sentence after the chart's name, "11월 26일 종가 32.57달러. 손절 25.80, 1차 익절 36.50, 매수 검토 구간 30.00에서 31.50. RSI
   48." (no levels, no RSI under 15 bars: those sentences left out), the screen putting "SOXL 일봉 40일. " in front with
   the days it drew; `foot` "기준 11월 26일 종가 · Yahoo(지연 시세) · B+", the bars' source and grade). No chart → `chartNote` + `chartNoteTone`: nowhere to get bars "시세를 받지 않아서 차트를 그리지 않아요." (quiet), fewer

@@ -3,10 +3,17 @@
  * @pickle/quant levelChart's shape, its screen-reader sentence, its foot, the note when there is no chart, and each recent
  * alert's line. Pure: no clock, no database, no network.
  */
-import type { InvestChartLevel } from "@pickle/protocol";
-import { LEVEL_WORD, num, rsi, type Bar } from "@pickle/quant";
+import type { InvestChartLevel, InvestChartLevelKind } from "@pickle/protocol";
+import { LEVEL_WORD, num, rsi, type Bar, type LevelKind } from "@pickle/quant";
 import type { Market } from "./calendar.ts";
 import { dayWords, kindWord, ruleLeft, SEEN_SPLIT, type RuleSpec } from "./rules.ts";
+
+/**
+ * The protocol's level kinds are levelChart's, both ways (DD 1539): a kind added to @pickle/quant's LevelKind or to
+ * InvestChartLevelKind alone makes this false, and tsc fails here.
+ */
+type SameKinds<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+export const LEVEL_KINDS_SAME: SameKinds<InvestChartLevelKind, LevelKind> = true;
 
 /** fewer finished daily bars than this → no chart (DD 0914 D5: the screen shows 30 days at the least) */
 export const CHART_MIN_BARS = 30;
@@ -17,13 +24,17 @@ export const CHART_NOTE = {
   missed: "오늘 일봉을 받지 못해서 차트를 그리지 않아요.",
 } as const;
 
-/** the order levels are listed and read in (DD 1935 §2-5's example: 손절, 1차 익절, 매수 검토 구간) */
-const LEVEL_ORDER: readonly InvestChartLevel["kind"][] = ["stop", "target1", "target2", "target3", "buyZone", "resistance", "support"];
+/**
+ * the order levels are listed and read in (DD 1935 §2-5's example: 손절, 1차 익절, 매수 검토 구간): invalidate by the stop
+ * (the price that undoes the strategy), the person's own alert price after the targets
+ */
+const LEVEL_ORDER: readonly InvestChartLevel["kind"][] = ["stop", "invalidate", "target1", "target2", "target3", "alert", "buyZone", "resistance", "support"];
 
 /**
- * The person's levels on the chart: stops, targets 1–3, resistance and the buy zone as one band, in LEVEL_ORDER. Left
- * out: expired rules (no longer watched), rules a split or a merge stopped (their prices are from before it, the bars are
- * adjusted; DD 1442 2), and alert and invalidate until @pickle/quant has their LevelKind (team-lead 0931).
+ * The person's levels on the chart: stops, invalidate, targets 1–3, alert prices, the buy zone as one band and
+ * resistance, in LEVEL_ORDER (alert and invalidate since @pickle/quant has them, team-lead 0931 · 1534). Left out:
+ * expired rules (no longer watched) and rules a split or a merge stopped (their prices are from before it, the bars are
+ * adjusted; DD 1442 2).
  */
 export function chartLevels(market: Market, rules: readonly (RuleSpec & { state: string; seen_slot?: string | null })[]): InvestChartLevel[] {
   const out: InvestChartLevel[] = [];
@@ -35,6 +46,8 @@ export function chartLevels(market: Market, rules: readonly (RuleSpec & { state:
     else if (r.kind === "stop") out.push({ kind: "stop", price: r.price, label });
     else if (r.kind === "target" && (r.level === 1 || r.level === 2 || r.level === 3)) out.push({ kind: `target${r.level}`, price: r.price, label });
     else if (r.kind === "resistance") out.push({ kind: "resistance", price: r.price, label });
+    else if (r.kind === "invalidate") out.push({ kind: "invalidate", price: r.price, label });
+    else if (r.kind === "alert") out.push({ kind: "alert", price: r.price, label });
   }
   return out.sort((a, b) => LEVEL_ORDER.indexOf(a.kind) - LEVEL_ORDER.indexOf(b.kind));
 }
