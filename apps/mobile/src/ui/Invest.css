@@ -4,6 +4,8 @@
 
 /* a signal: the mark (1em, currentColor) beside its word, both in the signal's colour. Colour is never the only cue */
 .sigmark {
+  /* in a sentence the mark stays on its words' line (base.css draws every svg as a block: screens-chat 0129) */
+  display: inline-block;
   width: 1em;
   height: 1em;
   flex: none;
@@ -120,4 +122,139 @@
 }
 .ivmode[data-mode="real"] {
   color: var(--danger);
+}
+
+/* ── the stage board (DD 0059 §1-3, DD 0426 §1): heads, gauge rows, next steps ── */
+.ivstages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ivstage-heads {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ivstage-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* 탈출 2단계 (title3 20/600) and its name (body 17, --label-2) on one line while both fit; else the name moves whole */
+.ivstage-line {
+  margin: 0;
+  font-size: var(--t-title3);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--label);
+  word-break: keep-all;
+  font-variant-numeric: tabular-nums;
+}
+.ivstage-name {
+  display: inline-block;
+  font-size: var(--t-body);
+  font-weight: 400;
+  color: var(--label-2);
+}
+/* an unsettled stage or a missed reading: the half-circle in --caution and a sentence (subhead, --label) */
+.ivstage-caution {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+  word-break: keep-all;
+}
+.ivstage-caution .sigmark {
+  margin-top: calc((1.45em - 1em) / 2);
+}
+.ivstage-caution > span {
+  min-width: 0;
+}
+/* nothing to get a value from yet: no mark, a footnote in --label-2 (DD 0426 §1) */
+.ivstage-quiet,
+.ivstage-judged {
+  margin: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+/* a part of the judgment line: whole on a line while it fits one (the line breaks after " · ") */
+.ivstage-part {
+  display: inline-block;
+}
+.ivstage-heads > .ivstage-judged,
+.ivstage-heads > .ivstage-caution {
+  margin-top: 2px;
+}
+
+/* gauge rows: the word, the cells, the count on one line; the cells under the word when that does not fit */
+.ivgauges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ivgauge {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "word bar tail";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+/* stacked, a row is two lines: more room between rows than inside one */
+.ivgauges.is-stacked {
+  gap: 12px;
+}
+.ivgauges.is-stacked > .ivgauge {
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "word tail"
+    "bar bar";
+}
+.ivgauge-word {
+  grid-area: word;
+  justify-self: start;
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.ivgauge-bar {
+  grid-area: bar;
+  display: block;
+  justify-self: start;
+}
+.ivgauge-tail {
+  grid-area: tail;
+  justify-self: end;
+  white-space: nowrap;
+  font-size: var(--t-subhead);
+  line-height: 1.35;
+  color: var(--label);
+}
+.ivgauge-unknown {
+  font-size: var(--t-footnote);
+  color: var(--label-2);
+}
+
+/* the next steps under the gauges, and the one line of a board with no judgment */
+.ivstage-next {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ivstage-next > p,
+.ivstage-empty {
+  margin: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+.ivstage-empty {
+  font-size: var(--t-subhead);
 }

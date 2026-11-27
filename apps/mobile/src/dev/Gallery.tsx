@@ -18,7 +18,7 @@ import { EmptyState } from "../ui/EmptyState";
 import { BlurGroup, Glass } from "../ui/Glass";
 import { R } from "../ui/geometry";
 import { Icon, ICON_NAMES } from "../ui/Icon";
-import { IvDisclaimer, IvFoot, IvHero, IvRow, IvRows, ModeWord, SignalLabel } from "../ui/Invest";
+import { IvDisclaimer, IvFoot, IvHero, IvRow, IvRows, IvStages, ModeWord, SignalLabel } from "../ui/Invest";
 import { LargeTitle } from "../ui/LargeTitle";
 import { List, ListRow } from "../ui/List";
 import { Odometer } from "../ui/Odometer";
@@ -31,6 +31,7 @@ import { copy } from "../ui/Text";
 import { TextField } from "../ui/TextField";
 import { Toggle } from "../ui/Toggle";
 import { estimate, footLine, krw, kstWithEastern, pct, pp, rate, shares, usd, type Signal } from "@pickle/quant";
+import { STAGE_STATES } from "./stageStates";
 import "./Gallery.css";
 
 const SIGNALS: Signal[] = ["risk", "caution", "normal", "unknown"];
@@ -764,6 +765,21 @@ export default function Gallery() {
             <IvFoot>{footLine(kstWithEastern(Date.UTC(2026, 10, 26, 15, 45)), "토스증권", "A")}</IvFoot>
             <IvDisclaimer />
           </Card>
+        </div>
+      </Section>
+
+      {/* ① 시장 단계's board in its five states (DD 0059 §1-3, DD 0141): synthetic server words */}
+      <Section id="invest-stages" title="투자 · 단계 보드" note="다섯 상태 모두 합성 값이에요." bare>
+        <div className="gal-stack">
+          {STAGE_STATES.map((st) => (
+            <List key={st.name} header={<h3 className="list-section-title">{st.name}</h3>} className="gal-stage" label={st.name}>
+              <div className="list-row gal-stage-row" data-state={st.name}>
+                <div className="list-row-main gal-stage-main">
+                  <IvStages stages={st.stages} />
+                </div>
+              </div>
+            </List>
+          ))}
         </div>
       </Section>
     </Screen>
