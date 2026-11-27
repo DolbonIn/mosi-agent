@@ -1,0 +1,84 @@
+/* InvestChart (DD 2145, DD 1935 §2-5 / §4, DD 0914 D3): the legend above, the SVG at the measured width, the crosshair */
+.ivc {
+  margin: 0;
+  min-width: 0;
+}
+.ivc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+  font-size: var(--t-footnote);
+  line-height: 1.35;
+  color: var(--label-2);
+}
+.ivc-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.ivc-sample {
+  flex: none;
+}
+/* the days shown, at the line's end (on a line of its own, still at the end, when the keys take the width) */
+.ivc-days {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.ivc-plot {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+/* a vertical move scrolls the screen; a sideways one is the crosshair's */
+.ivc-plot.has-crosshair {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ivc-svg,
+.ivc-svg svg {
+  display: block;
+}
+.ivc-hair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.ivc-hair.is-on {
+  opacity: 1;
+  transition-duration: 80ms;
+}
+:root[data-motion="reduce"] .ivc-hair {
+  transition: none;
+}
+.ivc-hair-line {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--label-2);
+}
+/* the reading: anchored to the bar, kept inside the chart; its type at 13 × the text size like the chart's */
+.ivc-read {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: var(--r-field, 10px);
+  background: var(--surface);
+  box-shadow: 0 0 0 0.5px var(--separator), 0 4px 12px rgb(0 0 0 / 0.08);
+  font-size: max(13px, calc(13px * var(--text-scale, 1)));
+  line-height: 1.3;
+  color: var(--label);
+  white-space: nowrap;
+}
+.ivc-read-avg {
+  color: var(--label-2);
+}
