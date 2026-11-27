@@ -324,19 +324,31 @@ function GaugeRow({ gauge }: { gauge: InvestStageGauge }) {
   );
 }
 
-/** a judged board this app can draw: both heads and the gauges (an older server's judged board is drawn as none) */
-const drawable = (s: InvestStages | null | undefined): s is Extract<InvestStages, { kind: "judged" }> =>
+/**
+ * a judged board this app can draw: both heads and the gauges (an older server's judged board is drawn as none). A screen
+ * that sets the board in its own frame asks this, not a rule of its own (DD 0055 §1).
+ */
+export const drawable = (s: InvestStages | null | undefined): s is Extract<InvestStages, { kind: "judged" }> =>
   s?.kind === "judged" && !!s.escape?.text && !!s.recovery?.text && Array.isArray(s.gauges) && Array.isArray(s.next);
+
+/** the line drawn in the board's place: the server's words for off and none, STAGE_UNKNOWN for anything else */
+function emptyLine(s: InvestStages | null | undefined): string {
+  const line = s?.kind === "off" ? s.off : s?.kind === "none" ? s.none : "";
+  return line || STAGE_UNKNOWN;
+}
+
+/**
+ * ①'s one line when there is no board to draw (DD 0055 §1): the text IvStages draws then (off and none in the server's
+ * words, STAGE_UNKNOWN otherwise); null when the board is drawn.
+ */
+export const stageEmptyLine = (s: InvestStages | null | undefined): string | null => (drawable(s) ? null : emptyLine(s));
 
 /**
  * ① 시장 단계's board (DD 0059 §1-3): the head, the three gauge rows, and the next steps (footnote, --label-2). With no
  * judgment (off, none, a kind this app does not know) one line in the server's words, --label-2: no gauges, no next.
  */
 export function IvStages({ stages }: { stages: InvestStages | null | undefined }) {
-  if (!drawable(stages)) {
-    const line = stages?.kind === "off" ? stages.off : stages?.kind === "none" ? stages.none : STAGE_UNKNOWN;
-    return <p className="ivstage-empty t-copy">{copy(line || STAGE_UNKNOWN)}</p>;
-  }
+  if (!drawable(stages)) return <p className="ivstage-empty t-copy">{copy(emptyLine(stages))}</p>;
   return (
     <div className="ivstages">
       <IvStageHead heads={[stages.escape, stages.recovery]} judged={stages.judgedText} stale={stages.stale} />
