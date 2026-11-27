@@ -97,7 +97,7 @@ export const usesInvest = (core: Core, userId: string): boolean => !!idb.getSett
  * server whose sources are off too. No tool names, no sample answer, nothing to raise unasked.
  */
 export const INVEST_WHERE_NOTE =
-  "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요.";
+  "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요. 물으면 볼 수 있는 곳만 말하고, 나중에 해 줄 일은 약속하지 않아요.";
 
 /** the system prompt's invest line: INVEST_WHERE_NOTE for someone without the invest tools, else null */
 export const investPromptNote = (core: Core, userId: string): string | null => (usesInvest(core, userId) ? null : INVEST_WHERE_NOTE);
@@ -111,7 +111,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const snapshot: ToolDef = {
     name: "invest_snapshot",
     description:
-      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When it is off it gives two sentences, summary and data.again: relay both, once, and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later. If they then ask why or when, answer only from those two sentences, which hold the reason and the condition: never say the reason is unknown or that nobody told you, and name no person, switch, setting or notification.",
+      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When it is off it gives two sentences, summary and data.again: relay both, once, and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later. If they then ask why, the first sentence is the answer; if they ask when, the second sentence's condition is the answer, given as that condition: those two sentences are the whole answer. Add nothing saying the reason or the time is unknown, unconfirmed or out of your sight. Never guess a time or a date. Never say nobody told you, and name no person, switch, setting or notification.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
     icon: "chart",
     title: () => "시장 단계 확인",

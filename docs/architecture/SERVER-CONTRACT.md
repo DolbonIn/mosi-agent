@@ -916,13 +916,16 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   the server's setting: the model never asks the person to turn it on nor promises to tell them later (DD 0717).
   Off gives two sentences: `summary` is the board's line (the chip shows it), `data.again` the condition it judges
   again on ("지표를 다시 받으면 단계도 다시 판정해요."), for the model alone: the board stays one line (DD 1526-b).
-  The description has the model relay both once and answer a later why or when from those two alone, never "the
-  reason is unknown", no person, switch, setting or notification; it quotes neither sentence.
+  The description has the model relay both once; a later why is answered by the first, a when by the second's
+  condition as it stands, and those two are the whole answer: nothing added saying the reason or the time is unknown
+  or unconfirmed, no guessed time or date, no person, switch, setting or notification (DD 1636, after 17bb0a8's real
+  turn added an unknown). It quotes neither sentence nor any answer's words.
 - **Someone without the invest tools** (no invest settings, i.e. never opened the invest screen: `GET /api/invest`
   stores them): their turn's system prompt gets one server line right after the launcher's prompt (its cache prefix
   unchanged): `# 투자`, that Mosi shows the market stages on the invest screen, that this person has never opened it
-  so they cannot be read here, and not to raise it unasked. Where, never a value, so a server whose sources are off
-  says it too. No tool names, no answer to copy. Never in a friend's thread or with someone else speaking (no invest tools there either); gone once
+  so they cannot be read here, not to raise it unasked, and when asked to say only where it is seen and promise
+  nothing for later (DD 1636: 17bb0a8's real turn promised to check and tell). Where, never a value, so a server whose
+  sources are off says it too. No tool names, no answer to copy. Never in a friend's thread or with someone else speaking (no invest tools there either); gone once
   they use invest (DD 1520 · 1551, team-lead 1550).
 - **The model's ledger figures**: `invest_ledger_add` saves a figure only with the address of a page web_read gave this
   turn or in the thread's recent history (`ToolContext.pages`, filled by the server from web_read results) and only if

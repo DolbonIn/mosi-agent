@@ -331,12 +331,15 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: OFF, data: { stages: { kind: "off", off: OFF }, again: AGAIN } });
     expect((await alice.overview()).stages).toEqual({ kind: "off", off: OFF });
     expect((await alice.detail()).stages).toEqual({ kind: "off", off: OFF });
-    // (나) a follow-up's why or when from the two sentences alone: never "unknown", no person, switch, setting or notification
-    expect(tool.description).toContain(
-      "If they then ask why or when, answer only from those two sentences, which hold the reason and the condition: never say the reason is unknown or that nobody told you, and name no person, switch, setting or notification.",
-    );
-    // and neither sentence is quoted in the description (no-sample-lines): the model reads them from the result
-    for (const quoted of [OFF, AGAIN, "받지 않아서", "판정하지", "다시 받으면", "다시 판정"]) expect(tool.description).not.toContain(quoted);
+    // (나) a follow-up: why is the first sentence, when the second's condition, and that is all (DD 1526-b, 1636): nothing
+    // added saying unknown, no guessed time or date, no person, switch, setting or notification — each clause counts
+    expect(tool.description).toContain("If they then ask why, the first sentence is the answer; if they ask when, the second sentence's condition is the answer, given as that condition: those two sentences are the whole answer.");
+    expect(tool.description).toContain("Add nothing saying the reason or the time is unknown, unconfirmed or out of your sight.");
+    expect(tool.description).toContain("Never guess a time or a date.");
+    expect(tool.description).toContain("Never say nobody told you, and name no person, switch, setting or notification.");
+    expect(tool.description).not.toContain("answer only from those two sentences"); // 17bb0a8's wording, which let an unknown slip in
+    // and neither sentence is quoted in the description, nor an answer's words (no-sample-lines): the model reads them from the result
+    for (const quoted of [OFF, AGAIN, "받지 않아서", "판정하지", "다시 받으면", "다시 판정", "정보가 없", "알 수 없", "모르", "알려"]) expect(tool.description).not.toContain(quoted);
   });
 });
 
@@ -532,10 +535,12 @@ describe("someone without invest settings hears where the stages are shown (DD 1
     expect(count((await ask(h, a.token, a.session.mainThreadId)).system, WHERE)).toBe(1);
   });
 
-  test("the line word for word (DD 1607: each sentence counts), naming no tool, quoting nothing, no answer to copy", () => {
+  test("the line word for word (DD 1607: each sentence counts; DD 1636: the fourth), naming no tool, quoting nothing, no answer to copy", () => {
     expect(INVEST_WHERE_NOTE).toBe(
-      "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요.",
+      "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요. 물으면 볼 수 있는 곳만 말하고, 나중에 해 줄 일은 약속하지 않아요.",
     );
+    // no answer's words for the model to copy (DD 1636)
+    for (const said of ["확인해서", "알려", "확인해 드", "봐 드"]) expect(INVEST_WHERE_NOTE).not.toContain(said);
     expect(INVEST_WHERE_NOTE).not.toMatch(/[a-z]+_[a-z]+/);
     expect(INVEST_WHERE_NOTE).not.toMatch(/["'`\u201c\u201d\u2018\u2019\u300c\u300d]/);
     expect(INVEST_WHERE_NOTE).not.toMatch(/예를 들어|예시|처럼 말/);
