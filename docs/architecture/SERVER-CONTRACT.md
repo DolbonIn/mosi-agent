@@ -1218,8 +1218,10 @@ Indicator 9 and R6's foreign side (team-lead 1854, DD 1857-b). Code: `apps/serve
   days too (KOSPI is Yahoo's; no sources, no reading at all). Both missing: the basis words alone. A side too old
   (the age rule above) says its day instead, ahead of the other reasons: `… · 코스피는 11월 26일 값이라 오래됐어요`,
   `… · 외국인 수급은 11월 26일 값이라 오래됐어요`. A8 (KOSPI and 원/달러; DD 0317 2) carries the same tail, met or not:
-  `원/달러 1개월 0.0% · 11월 27일 · FRED · A · 코스피는 오늘 받지 못했어요`, `… · B+ · 원/달러는 오늘 받지 못했어요`. No
-  other row carries one.
+  `원/달러 1개월 0.0% · 11월 27일 · FRED · A · 코스피는 오늘 받지 못했어요`, `코스피 2,500.00 · 200일선 2,500.00 · 11월
+  26일 · Yahoo(지연 시세) · B+ · 원/달러는 오늘 받지 못했어요`. No other row carries one. A condition over two series names
+  every number of its figure line (A7, R5, R6, A8: `코스피 2,500.00 · 200일선 2,500.00 · 원/달러 1개월 5.2%`; DD 0426-b);
+  one series (A3, R3, D3: the S&P 500) stays unnamed.
 - v16, additive, no rollback: `invest_flows`.
 
 ## Invest (B3a) — real stop orders, the executor

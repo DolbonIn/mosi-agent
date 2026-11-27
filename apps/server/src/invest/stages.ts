@@ -501,7 +501,11 @@ const p2 = (x: unknown) => (typeof x === "number" ? pp(x, 2) : null);
 const hyp = (x: unknown) => (typeof x === "number" ? `${num(x, 2)}%p` : null);
 const join = (...xs: (string | null)[]) => xs.filter((x): x is string => !!x).join(" · ");
 
-/** the figure line under a condition: 22.40 / 3.60%p · 6개월 최저보다 +0.60%p / 6,120.00 · 200일선 5,850.00 */
+/**
+ * the figure line under a condition: 22.40 / 3.60%p · 6개월 최저보다 +0.60%p / 6,120.00 · 200일선 5,850.00. A condition
+ * over two series names every number (A7, R5, R6, A8: DD 0426-b); one series (A3, R3, D3: the S&P 500) stays unnamed,
+ * its text says which
+ */
 function figureText(id: string, f: Fig): string {
   const vsMa = () => join(n2(f.close) ?? n2(f.kospi), f.ma200 != null ? `200일선 ${n2(f.ma200)}` : null);
   switch (id) {
@@ -528,7 +532,8 @@ function figureText(id: string, f: Fig): string {
     case "A7":
       return join(f.sahm != null ? `삼의 법칙 ${n2(f.sahm)}` : null, typeof f.claims4w === "number" ? `실업수당 4주 평균 ${num(f.claims4w)}건` : null);
     case "A8":
-      return join(vsMa(), typeof f.usdkrw1m === "number" ? `원/달러 1개월 ${pct(f.usdkrw1m, 1)}` : null);
+      // DD 0426-b: KOSPI named, as in R6, so a 원/달러 tail never reads as the unnamed number's
+      return join(f.kospi != null ? `코스피 ${n2(f.kospi)}` : null, f.ma200 != null ? `200일선 ${n2(f.ma200)}` : null, typeof f.usdkrw1m === "number" ? `원/달러 1개월 ${pct(f.usdkrw1m, 1)}` : null);
     case "D4":
       return join(f.sahm != null ? `삼의 법칙 ${n2(f.sahm)}` : null);
     case "D5":

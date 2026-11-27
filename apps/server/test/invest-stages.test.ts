@@ -450,8 +450,18 @@ describe("KR daily series too old (DD 2027, team-lead 0312, DD 0317)", () => {
     await judgeAt(h, ET(9, 0)); // 11-30 23:00 KST: KOSPI's 11-26 bar has only 11-27 after it
     const d = await alice.detail();
     const row = (id: string) => d.groups.flatMap((g) => g.rows).find((r) => r.id === id)!;
-    expect(row("A8")).toMatchObject({ state: "unmet", detail: "2,500.00 · 200일선 2,500.00 · 11월 26일 · Yahoo(지연 시세) · B+ · 원/달러는 오늘 받지 못했어요" });
+    expect(row("A8")).toMatchObject({ state: "unmet", detail: "코스피 2,500.00 · 200일선 2,500.00 · 11월 26일 · Yahoo(지연 시세) · B+ · 원/달러는 오늘 받지 못했어요" }); // DD 0426-b: named
     expect(row("R6").detail).not.toMatch(/는 오늘|은 오늘|오래됐어요/);
+  });
+
+  test("A8 names its KOSPI number beside 원/달러 (DD 0426-b); A3 and R3 over the S&P 500 alone stay unnamed", async () => {
+    const { h } = await world(quiet());
+    const { alice } = await people(h);
+    await judgeAt(h, ET(9, 0));
+    const d = await alice.detail();
+    const row = (id: string) => d.groups.flatMap((g) => g.rows).find((r) => r.id === id)!;
+    expect(row("A8").detail).toBe("코스피 2,500.00 · 200일선 2,500.00 · 원/달러 1개월 0.0% · 11월 26일 · Yahoo(지연 시세) · B+, FRED · A");
+    expect([row("A3").detail, row("R3").detail]).toEqual(["5,906.00 · 200일선 5,607.50 · 11월 27일 · FRED · A", "5,906.00 · 200일선 5,607.50 · 11월 27일 · FRED · A"]);
   });
 
   test("the method line says the rule's own number, from the constant (DD 0317 3), before the ledger's line", () => {
