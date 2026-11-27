@@ -426,17 +426,19 @@ type Fig = Record<string, number | string | boolean | null>;
 const n2 = (x: unknown) => (typeof x === "number" ? num(x, 2) : null);
 const r2 = (x: unknown) => (typeof x === "number" ? rate(x, 2) : null);
 const p2 = (x: unknown) => (typeof x === "number" ? pp(x, 2) : null);
+/** a spread's level (the high-yield spread): an unsigned %p, as the report's §2 and the A1 rule (DD 1520) */
+const hyp = (x: unknown) => (typeof x === "number" ? `${num(x, 2)}%p` : null);
 const join = (...xs: (string | null)[]) => xs.filter((x): x is string => !!x).join(" · ");
 
-/** the figure line under a condition: 22.40 / 3.60% · 6개월 최저보다 +0.60%p / 6,120.00 · 200일선 5,850.00 */
+/** the figure line under a condition: 22.40 / 3.60%p · 6개월 최저보다 +0.60%p / 6,120.00 · 200일선 5,850.00 */
 function figureText(id: string, f: Fig): string {
   const vsMa = () => join(n2(f.close) ?? n2(f.kospi), f.ma200 != null ? `200일선 ${n2(f.ma200)}` : null);
   switch (id) {
     case "A1":
     case "D1":
-      return join(r2(f.hy), f.fromLow != null ? `6개월 최저보다 ${p2(f.fromLow)}` : null);
+      return join(hyp(f.hy), f.fromLow != null ? `6개월 최저보다 ${p2(f.fromLow)}` : null);
     case "R2":
-      return join(r2(f.hy), f.offHigh20 != null ? `20거래일 최고보다 ${num(f.offHigh20 as number, 2)}%p 좁음` : null, f.fromLow != null ? `6개월 최저보다 ${p2(f.fromLow)}` : null);
+      return join(hyp(f.hy), f.offHigh20 != null ? `20거래일 최고보다 ${num(f.offHigh20 as number, 2)}%p 좁음` : null, f.fromLow != null ? `6개월 최저보다 ${p2(f.fromLow)}` : null);
     case "A2":
     case "D2":
     case "R1":
@@ -500,7 +502,7 @@ function core11Value(no: number, v: number | null, extras: Fig): string | null {
     case 2:
       return pp(v!, 2);
     case 3:
-      return typeof extras.now === "number" ? rate(extras.now, 2) : null;
+      return hyp(extras.now);
     case 4:
       return pct(v!, 1);
     case 5:

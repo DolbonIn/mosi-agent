@@ -224,7 +224,7 @@ export function setAlertCall(db: Db, id: string, state: string, at: number): voi
 }
 
 export function recentAlerts(db: Db, userId: string, symbol: string, limit = 5): AlertRow[] {
-  return db.sql.query("SELECT * FROM invest_alerts WHERE user_id = $u AND symbol = $s ORDER BY created_at DESC, id DESC LIMIT $l").all({ u: userId, s: symbol, l: limit }) as AlertRow[];
+  return db.sql.query("SELECT * FROM invest_alerts WHERE user_id = $u AND symbol = $s ORDER BY created_at DESC, rowid DESC LIMIT $l").all({ u: userId, s: symbol, l: limit }) as AlertRow[];
 }
 
 export function insertOrder(db: Db, o: OrderRow): boolean {

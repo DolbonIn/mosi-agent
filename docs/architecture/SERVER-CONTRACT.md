@@ -693,7 +693,16 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"; with live rules `foot` "그래서 규칙을
   확인하지 않아요.", plus " 토스증권을 연결하면 확인해요." on a server with Toss; `quotesFoot` null), `ok`, `closed`, `blind` (live rules
   and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
-  `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`).
+  `quotesFoot`). `GET /api/invest/symbols/:symbol` → `InvestSymbolDetail` (404 `not_watched`): the row, the rules, the
+  last 5 alerts with `line` (the banner's title without the symbol, DD 0914 D2), and `chart` (symbol chart board: the
+  daily bars, up to 260; `levels` in @pickle/quant levelChart's shape — stop, target1–3, resistance, the buy zone as one
+  band `buyZone` price–hi, each with its rule's words, in that order; left out: expired rules, rules a split or a merge
+  stopped (prices from before it on adjusted bars), and alert and invalidate until levelChart has them; `aria` the
+  sentence after the chart's name, "11월 26일 종가 32.57달러. 손절 25.80, 1차 익절 36.50, 매수 검토 구간 30.00에서 31.50. RSI
+  48." (no levels, no RSI under 15 bars: those sentences left out), the screen putting "SOXL 일봉 40일. " in front with
+  the days it drew; `foot` "기준 11월 26일 종가 · Yahoo(지연 시세) · B+", the bars' source and grade). No chart → `chartNote` + `chartNoteTone`: nowhere to get bars "시세를 받지 않아서 차트를 그리지 않아요." (quiet), fewer
+  than 30 bars "일봉이 아직 모자라서 차트를 그리지 않아요." (quiet), not received "오늘 일봉을 받지 못해서 차트를 그리지 않아요."
+  (caution).
 - Event `invest {rev, overview}`: the whole overview whenever it changed (a quote, a rule, a watch state, Toss, settings),
   to the person's devices only. `rev` follows the settings rule: max(previous + 1, server clock), never lowered; an
   unchanged overview sends nothing. `hello.investRev` (absent before the first use) tells a device that slept to re-read.
@@ -898,7 +907,9 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   ("오늘 08:00 판정을 하지 못했어요. 12월 2일 판정이에요."), never before today's 08:00.
 - `GET /api/invest/stages` → `InvestStagesDetail {stages, core11[11] {no, name, signal, value | null, basis, reason},
   groups[worse A1–A8, severe D1–D5, recover R1–R6] {rows {id, text, state, stateText, detail}, next}, method[],
-  disclaimer: true}`; off or before the first row: empty core11 and groups.
+  disclaimer: true}`; off or before the first row: empty core11 and groups. The high-yield spread's level is an
+  unsigned %p here as in the report's §2: core11 row 3's value and the A1 · D1 · R2 figure lines (`3.60%p · 6개월
+  최저보다 +0.60%p`; DD 1520). Rates stay in %, their changes in %p.
 - **`invest_snapshot`** (same offer as B2b-1's tools): the stored heads, next lines, judgedText, stale, core11 and the
   conditions as the screen words them; its description: "단계는 판정본만 말해요. 지금 값은 값으로만 말해요.", and off is
   the server's setting: the model never asks the person to turn it on nor promises to tell them later (DD 0717).

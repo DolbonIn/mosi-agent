@@ -98,6 +98,7 @@ import {
   type Stored,
 } from "./report.ts";
 import { judgeDay, stageCallText, stageRowText, stagesView, type JudgmentRow } from "./stages.ts";
+import { alertLine, chartAria, chartFoot, chartLevels, chartNote } from "./symbol.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
 import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 
@@ -457,23 +458,37 @@ export class InvestHub {
     const s = idb.ensureSettings(core.db, userId, core.now());
     const q = idb.quotes(core.db, userId).find((x) => x.symbol === symbol);
     const rs = idb.rules(core.db, userId, symbol);
-    const blind = this.watchState(s, core.now(), rs, await this.hasSource(userId)).state === "blind";
-    const bars = await this.dailyBars(symbol, w.market, userId);
-    const levels = rs.flatMap((r) =>
-      r.kind === "buy_zone"
-        ? [
-            { kind: "buy_zone_lo", label: "매수 검토 아래", price: r.lo! },
-            { kind: "buy_zone_hi", label: "매수 검토 위", price: r.hi! },
-          ]
-        : r.price != null
-          ? [{ kind: r.kind, label: ruleLeft(w.market, r), price: r.price }]
-          : [],
-    );
+    const source = await this.hasSource(userId);
+    const blind = this.watchState(s, core.now(), rs, source).state === "blind";
+    const bars = source ? await this.dailyBars(symbol, w.market, userId) : null;
+    const note = chartNote({ source, bars: bars ? bars.bars.length : null });
+    const levels = chartLevels(w.market, rs);
+    const shown = bars && !note ? bars.bars.slice(-260) : null;
+    const asOf = shown?.at(-1)?.t;
     return {
       row: this.symbolRow(userId, w, q, blind),
       rules: rs.map((r) => this.ruleRow(r, s.mode)),
-      alerts: idb.recentAlerts(core.db, userId, symbol).map((a) => ({ id: a.id, kind: a.kind, title: a.title, at: a.created_at, threadId: a.thread_id, messageId: a.message_id })),
-      chart: bars ? { bars: bars.bars.slice(-260), levels, asOf: bars.bars.at(-1)!.t, source: { name: SOURCE_TABLE[bars.source].name, grade: SOURCE_TABLE[bars.source].grade, asOf: bars.bars.at(-1)!.t } } : null,
+      alerts: idb.recentAlerts(core.db, userId, symbol).map((a) => ({
+        id: a.id,
+        kind: a.kind,
+        title: a.title,
+        line: alertLine(a, a.rule_id ? (rs.find((r) => r.id === a.rule_id)?.level ?? null) : null),
+        at: a.created_at,
+        threadId: a.thread_id,
+        messageId: a.message_id,
+      })),
+      chart:
+        bars && shown && asOf
+          ? {
+              bars: shown,
+              levels,
+              asOf,
+              source: { name: SOURCE_TABLE[bars.source].name, grade: SOURCE_TABLE[bars.source].grade, asOf },
+              aria: chartAria(w.market, shown, levels),
+              foot: chartFoot(asOf, SOURCE_TABLE[bars.source]),
+            }
+          : null,
+      ...(note ?? {}),
     };
   }
 

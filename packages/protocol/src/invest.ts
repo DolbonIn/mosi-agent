@@ -237,12 +237,32 @@ export interface InvestBar {
   v: number;
 }
 
+/** @pickle/quant levelChart's LevelKind: a level's meaning on the chart (buyZone: the band from price up to hi) */
+export type InvestChartLevelKind = "stop" | "target1" | "target2" | "target3" | "resistance" | "support" | "buyZone";
+
+/** a level in levelChart's shape, plus the rule's words (`손절 $25.80 이하`) */
+export interface InvestChartLevel {
+  kind: InvestChartLevelKind;
+  price: number;
+  hi?: number;
+  label: string;
+}
+
 export interface InvestSymbolDetail {
   row: InvestSymbolRow;
   rules: InvestRuleRow[];
-  /** the last 5 alerts, newest first */
-  alerts: { id: ID; kind: string; title: string; at: Millis; threadId: ID | null; messageId: ID | null }[];
-  chart: { bars: InvestBar[]; levels: { kind: string; label: string; price: number }[]; asOf: string; source: InvestSource } | null;
+  /** the last 5 alerts, newest first; `line` is the banner's title without the symbol (`손절 관찰가 도달`, DD 0914 D2) */
+  alerts: { id: ID; kind: string; title: string; line: string; at: Millis; threadId: ID | null; messageId: ID | null }[];
+  /**
+   * the level chart (screens-more 0913 A1–A3): `levels` in levelChart's shape (alert and invalidate rules are not drawn
+   * until levelChart has them; expired rules and rules a split stopped never), `aria` the screen reader's sentence after
+   * the chart's name (the screen puts "SOXL 일봉 40일. " in front, the days it drew; DD 1442 1), `foot` "기준 11월 26일
+   * 종가 · Yahoo(지연 시세) · B+"
+   */
+  chart: { bars: InvestBar[]; levels: InvestChartLevel[]; asOf: string; source: InvestSource; aria: string; foot: string } | null;
+  /** chart null: why, in the server's words, and its tone (DD 0914 A3) */
+  chartNote?: string;
+  chartNoteTone?: "quiet" | "caution";
 }
 
 export interface InvestRuleDraft {

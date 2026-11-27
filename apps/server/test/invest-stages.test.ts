@@ -272,7 +272,7 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(d.core11).toHaveLength(11);
     const row = (no: number) => d.core11.find((r) => r.no === no)!;
     expect(row(1)).toEqual({ no: 1, name: "미국 10년물 금리", signal: "normal", value: "4.50%", basis: "11월 27일 · FRED · A", reason: "4.50% ≤ 5%" });
-    expect(row(3)).toMatchObject({ signal: "risk", value: "3.60%" });
+    expect(row(3)).toMatchObject({ signal: "risk", value: "3.60%p" }); // DD 1520: a spread level in %p, no sign
     expect(row(10)).toMatchObject({ signal: "risk", value: "0.3%", basis: "11월 1일 · FRED · A" });
     // 6, 7, 8 and 11 come from the person's ledger (값이 없어요 until a figure is in it); 9 has nowhere yet
     for (const no of [6, 7, 8, 11]) expect(row(no)).toMatchObject({ signal: "unknown", value: null, basis: "값이 없어요" });
@@ -285,7 +285,10 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     const a2 = d.groups[0]!.rows.find((r) => r.id === "A2")!;
     expect(a2).toEqual({ id: "A2", text: "VIX 종가 25 이상 2거래일 연속", state: "unmet", stateText: "미충족", detail: "20.00 · 11월 27일 · FRED · A" });
     expect(d.groups[0]!.rows.find((r) => r.id === "A6")).toMatchObject({ state: "unknown", stateText: "확인 불가", detail: "값이 없어요" });
-    expect(d.groups[0]!.rows.find((r) => r.id === "A1")!.detail).toBe("3.60% · 6개월 최저보다 +0.60%p · 11월 27일 · FRED · A");
+    expect(d.groups[0]!.rows.find((r) => r.id === "A1")!.detail).toBe("3.60%p · 6개월 최저보다 +0.60%p · 11월 27일 · FRED · A");
+    // D1 and R2 read the same level: the same %p, and no figure line or value says it in % (DD 1520)
+    expect([d.groups[1]!.rows.find((r) => r.id === "D1")!.detail, d.groups[2]!.rows.find((r) => r.id === "R2")!.detail].map((s) => s.split(" · ")[0])).toEqual(["3.60%p", "3.60%p"]);
+    expect([...d.groups.flatMap((g) => g.rows.map((r) => r.detail)), ...d.core11.map((r) => r.value ?? "")].filter((s) => /\b3\.60%(?!p)/.test(s))).toEqual([]);
     expect(d.groups.map((g) => g.next)).toEqual(["2단계 조건에 악화 신호가 2개 이상이면 탈출 3단계예요. 지금 2개예요.", "심각 신호가 2개 이상이면 탈출 4단계예요. 지금 0개예요.", expect.any(String)]);
     expect(d.method.length).toBeGreaterThan(3);
     // DD 0710 D13: the stale rule in its numbers (120 days, 5 US trading days)

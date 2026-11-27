@@ -194,6 +194,10 @@ describe("the 08:00 report", () => {
     const input = JSON.parse(w.chats[0]!.user) as Record<string, unknown>;
     expect(Object.keys(input)).toEqual(["day", "judgedAt", "holiday", "stages", "signals", "next", "core11", "met", "market", "etf", "events", "highlights", "horizons"]);
     for (const word of ["alice", "bob", "하늘", "깽이"]) expect(w.chats[0]!.user).not.toContain(word);
+    // DD 1520: the spread's level reaches the model in %p only — core11, the met conditions' figures and the market row
+    const hy = input as { core11: { name: string; value: string | null }[]; met: string[] };
+    expect([hy.core11.find((r) => r.name === "하이일드 스프레드")?.value, hy.met.find((m) => m.startsWith("하이일드 스프레드 3.5%p"))?.match(/\(([^ ]+) ·/)?.[1]]).toEqual(["3.60%p", "3.60%p"]);
+    expect(w.chats[0]!.user.match(/3\.60%(?!p)/g)).toBeNull();
     // overview.reports and the screen
     const id = card(one).reportId;
     const ov = (await w.get<InvestOverview>(a, "/api/invest")).body;
