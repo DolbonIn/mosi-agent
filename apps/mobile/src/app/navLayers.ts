@@ -23,6 +23,24 @@ export function mv(key: string, init?: { x: number; o: number }): LayerMV {
 }
 export const rootKey = (tab: TabId) => `root:${tab}`;
 
+/** where a push leaves the layer underneath (NavStack's push, the back swipe at rest) */
+export const UNDER = { x: -24, o: 0 } as const;
+
+/**
+ * A stack that is not empty when it first mounts (a setTab + push in one tick onto a tab not visited yet: 규칙 보기, a
+ * notification tap): every layer under its top (the root included) starts where a push leaves it, hidden from the
+ * first frame; only the top shows, and the tab's own entrance is the one motion (DD 2142, screens-chat 2140). Back is
+ * the usual pop, which brings the layer underneath forward.
+ */
+export function startUnder(tab: TabId, stack: readonly { key: string }[]): void {
+  const keys = [rootKey(tab), ...stack.map((r) => r.key)];
+  for (const k of keys.slice(0, -1)) {
+    const l = mv(k);
+    l.x.jump(UNDER.x);
+    l.o.jump(UNDER.o);
+  }
+}
+
 // ── back swipe controller (driven by the Shell's edge gesture) ──
 let swipeW = 390;
 let swipe: { top: LayerMV; under: LayerMV } | null = null;

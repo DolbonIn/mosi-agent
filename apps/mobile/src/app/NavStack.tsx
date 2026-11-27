@@ -4,7 +4,7 @@ import type { TabId } from "@pickle/protocol";
 import { EXIT, SPRING, springTo } from "../motion/springs";
 import { getTier } from "../motion/tier";
 import { getScreen, getTabRoot, navStore, setOverriddenTabs, TAB_ORDER, tabSwitchedAt, useNav, useRegistryVersion, type Route } from "./nav";
-import { layers, mv, rootKey } from "./navLayers";
+import { layers, mv, rootKey, startUnder, UNDER } from "./navLayers";
 import { createActiveSource, RouteActiveContext } from "./routeActive";
 import { prefetchLazyScreens } from "./startup";
 import "./NavStack.css";
@@ -96,8 +96,9 @@ function rampFromTap(o: MotionValue<number>, at: number): () => void {
 
 function TabLayer({ tab, active, content }: { tab: TabId; active: boolean; content?: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  // a tab visited for the first time mounts already active: it still enters (only the app's first tab doesn't)
-  const entering = useRef(active && navStore.get().last === "tab" && !getTier().reduceMotion);
+  // a tab visited for the first time mounts already active: it still enters (only the app's first tab doesn't, which
+  // mounts before any switch) — also when a push came in the same tick as the switch (DD 2142: the one motion)
+  const entering = useRef(active && tabSwitchedAt() > 0 && !getTier().reduceMotion);
   const l = mv(`tab:${tab}`, { x: 0, o: active && !entering.current ? 1 : entering.current ? TAB_ENTER_FROM : 0 });
   const y = useMotionValue(entering.current ? 6 : 0);
   const prev = useRef<boolean | null>(null);
@@ -156,7 +157,11 @@ interface Rendered {
 
 function Stack({ tab }: { tab: TabId }) {
   const stack = useNav((s) => s.stacks[tab]);
-  const [rendered, setRendered] = useState<Rendered[]>(() => stack.map((route) => ({ route, leaving: false })));
+  const [rendered, setRendered] = useState<Rendered[]>(() => {
+    // mounting already pushed: only the top shows (the layers under it start where a push leaves them)
+    startUnder(tab, stack);
+    return stack.map((route) => ({ route, leaving: false }));
+  });
   const prev = useRef(stack);
 
   // reconcile: pushed routes mount and animate in; popped ones play their exit before unmounting
@@ -180,8 +185,8 @@ function Stack({ tab }: { tab: TabId }) {
       } else {
         springTo(top.x, 0, "camera");
         animate(top.o, 1, { ...SPRING.fade, delay: 0.06 });
-        springTo(below.x, -24, "camera");
-        animate(below.o, 0, EXIT);
+        springTo(below.x, UNDER.x, "camera");
+        animate(below.o, UNDER.o, EXIT);
       }
     }
     if (removed.length) {

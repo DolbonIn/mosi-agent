@@ -12,6 +12,9 @@ import { createStore, useStore } from "../lib/createStore";
  *   registerScreen("call", lazyScreen(() => import("./call/CallScreen").then((m) => m.CallScreen)))
  * nav.push / nav.setTab wait for a lazy screen's chunk before they start the transition (so the page never slides in
  * empty), and NavStack prefetches every lazy screen on idle after the first load, so that wait is normally zero.
+ * While setTab waits, the tab it goes to is the one push / current / popToRoot act on (`pendingTab`), and the switch
+ * also waits for what is pushed onto it meanwhile: a setTab + push in one tick (규칙 보기, a notification tap) lands on
+ * the new tab, and the tab arrives with that screen already on top (DD 2131 §2, DD 2142).
  * A pushed screen's large title can morph from the row that opened it: give the row `layoutId` and pass the same id
  * as `titleLayoutId` (LargeTitle reads it from the route).
  */
@@ -71,6 +74,22 @@ export function setComposeHandler(fn: ComposeHandler | null) {
 }
 
 let tabAt = 0;
+
+/**
+ * a tab switch that waits for chunks: the tab root's, and each screen pushed onto that tab while it waits (`waits`
+ * counts them). push / current / popToRoot act on this tab; pop and canGoBack stay on the tab on screen (the back
+ * gesture and the back button act on what is shown). null: nothing waits.
+ */
+interface PendingTab {
+  tab: TabId;
+  waits: number;
+  done(): void;
+}
+let pending: PendingTab | null = null;
+/** the tab a switch waits to show (null: none) */
+export const pendingTab = (): TabId | null => pending?.tab ?? null;
+/** the tab nav acts on: the one a switch waits for, else the one on screen */
+const goingTab = (): TabId => pending?.tab ?? navStore.get().tab;
 /** when the latest tab switch started (the tap, or a lazy root's chunk arriving): a first visit's entrance is timed
  *  from here, however late its first render and frames land */
 export const tabSwitchedAt = () => tabAt;
@@ -78,26 +97,44 @@ export const tabSwitchedAt = () => tabAt;
 export const nav = {
   setTab(tab: TabId) {
     const s = navStore.get();
+    if (pending) {
+      if (pending.tab === tab) return;
+      // a later choice drops the waiting one; back to the tab on screen, nothing more happens (no pop to its root)
+      pending = null;
+      if (tab === s.tab) return;
+    }
     if (tab === s.tab) {
       // tapping the active tab pops to its root (iOS)
       if (s.stacks[tab].length) nav.popToRoot();
       return;
     }
-    whenLoaded(overriddenTabs.has(tab) ? undefined : roots.get(tab), () => {
-      const cur = navStore.get();
-      if (cur.tab === tab) return;
-      const dir = TAB_ORDER.indexOf(tab) >= TAB_ORDER.indexOf(cur.tab) ? 1 : -1;
-      tabAt = performance.now();
-      navStore.patch({ tab, tabDir: dir, instant: false, last: "tab", drawer: false });
-    });
+    const p: PendingTab = {
+      tab,
+      waits: 1,
+      done() {
+        if (pending !== p || --p.waits > 0) return;
+        pending = null;
+        const cur = navStore.get();
+        if (cur.tab === tab) return;
+        const dir = TAB_ORDER.indexOf(tab) >= TAB_ORDER.indexOf(cur.tab) ? 1 : -1;
+        tabAt = performance.now();
+        navStore.patch({ tab, tabDir: dir, instant: false, last: "tab", drawer: false });
+      },
+    };
+    pending = p;
+    whenLoaded(overriddenTabs.has(tab) ? undefined : roots.get(tab), p.done);
   },
   push(screen: string, params?: Record<string, unknown>, opts: { title?: string; titleLayoutId?: string } = {}): string {
-    const tab = navStore.get().tab;
+    // onto the tab a switch waits for, if one does: that switch then waits for this screen too
+    const p = pending;
+    const tab = p?.tab ?? navStore.get().tab;
     const key = `${screen}#${++seq}`;
     const route: Route = { key, screen, params, ...opts };
+    if (p) p.waits++;
     whenLoaded(screens.get(screen), () => {
       const s = navStore.get();
       navStore.patch({ stacks: { ...s.stacks, [tab]: [...s.stacks[tab], route] }, instant: false, last: "push", drawer: false });
+      p?.done();
     });
     return key;
   },
@@ -111,16 +148,16 @@ export const nav = {
   },
   popToRoot() {
     const s = navStore.get();
-    for (const r of s.stacks[s.tab]) scrolls.delete(r.key);
-    navStore.patch({ stacks: { ...s.stacks, [s.tab]: [] }, instant: false, last: "pop" });
+    const tab = goingTab();
+    for (const r of s.stacks[tab]) scrolls.delete(r.key);
+    navStore.patch({ stacks: { ...s.stacks, [tab]: [] }, instant: false, last: "pop" });
   },
   /**
    * Empty states and suggestion chips (MOTION-SPEC §8.14): go to the chat (the given thread, else the default chat at
    * the chat root), put `text` into that thread's draft and focus the composer — nothing is sent.
    */
   compose(text: string, threadId?: string) {
-    const s = navStore.get();
-    if (s.tab !== "chat") nav.setTab("chat");
+    if (goingTab() !== "chat") nav.setTab("chat");
     if (threadId) {
       const top = nav.current();
       if (!(top?.screen === "thread" && top.params?.threadId === threadId)) nav.push("thread", { threadId });
@@ -140,10 +177,9 @@ export const nav = {
   toggleDrawer() {
     navStore.patch({ drawer: !navStore.get().drawer });
   },
-  /** top route of the current tab (null = the tab root) */
+  /** top route of the current tab, or of the tab a switch waits for (null = the tab root) */
   current(): Route | null {
-    const s = navStore.get();
-    const stack = s.stacks[s.tab];
+    const stack = navStore.get().stacks[goingTab()];
     return stack[stack.length - 1] ?? null;
   },
   canGoBack() {
@@ -168,6 +204,14 @@ export function registerScreen(name: string, component: ComponentType<ScreenProp
 export function registerTabRoot(tab: TabId, component: ComponentType<ScreenProps>) {
   roots.set(tab, component);
   registryStore.set((n) => n + 1);
+}
+/** tests only: forget a registration, so a test leaves the registry as it found it (DD 2359) */
+export function unregisterScreen(name: string) {
+  if (screens.delete(name)) registryStore.set((n) => n + 1);
+}
+/** tests only: forget a tab root (as unregisterScreen) */
+export function unregisterTabRoot(tab: TabId) {
+  if (roots.delete(tab)) registryStore.set((n) => n + 1);
 }
 export const getScreen = (name: string) => screens.get(name);
 export const getTabRoot = (tab: TabId) => roots.get(tab);

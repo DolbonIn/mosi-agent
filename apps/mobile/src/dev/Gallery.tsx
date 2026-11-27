@@ -755,6 +755,10 @@ export default function Gallery() {
               <IvRow label="손절선까지" value={pct(-7.39)} />
               <IvRow label="보유" value={shares(47)} />
               <IvRow label="평가액" value={estimate(usd(1204))} />
+              {/* a row value's boxes (DD 2225 I2, DD 2131 ③): " · " items, a bracketed part, an estimate's tail with words */}
+              <IvRow label="신호" value="악화 2/8 · 심각 0/5 · 회복 3/6" />
+              <IvRow label="체결 시각" value={kstWithEastern(Date.UTC(2026, 10, 26, 15, 47))} />
+              <IvRow label="예상 금액" value={`약 ${usd(1204.14)}(추정, 관측가 기준)`} />
               <IvRow label="HY 스프레드" value={rate(4.12)} />
               <IvRow label="전월 대비" value={pp(0.24)} />
               <IvRow label="삼성전자" value={krw(189_400)} />

@@ -56,16 +56,47 @@ export function InvestNum({ value, className }: { value: string | null | undefin
   return <span className={`tnum ${className ?? ""}`}>{figure(value)}</span>;
 }
 
-const EST = "(추정)";
-/** a formatted figure; an estimate's trailing "(추정)" in --label-2 (DD 1935 §0-5, DD 2224): "약 $1,204.00(추정)" */
-function figure(value: string): ReactNode {
-  if (!value.endsWith(EST) || value.length === EST.length) return glued(value);
+/** a short bracketed part: "(미 동부 10:47)", "(추정, 관측가 기준)" */
+const GROUP = /\([^()]{1,24}\)/;
+/** an estimate's tail: "(추정)", "(추정, 관측가 기준)" */
+const EST_TAIL = /^\(추정[,)]/;
+
+/**
+ * one item of a figure: a bracketed part is one box, so a line breaks before its "(" or not at all (DD 2131 ③:
+ * "00:47(미 동부 / 10:47)" at 320, text size 130 %); an estimate's tail, "(추정)" or "(추정, …)", is that box in
+ * --label-2 (DD 2224, 2131 ③: "약 $1,204.14(추정, 관측가 기준)")
+ */
+function piece(text: string): ReactNode {
+  const m = GROUP.exec(text);
+  if (!m || m[0].length === text.length) return glued(text);
+  const pre = text.slice(0, m.index);
+  const post = text.slice(m.index + m[0].length);
   return (
     <>
-      {glued(value.slice(0, -EST.length))}
-      <span className="ivest">{EST}</span>
+      {pre && glued(pre)}
+      <span className={!post && EST_TAIL.test(m[0]) ? "ivest" : "ivgroup"}>{m[0]}</span>
+      {post && glued(post)}
     </>
   );
+}
+
+/**
+ * a formatted figure: each " · " item one box, the dot ending the item before (DD 2225 I2: "악화 2/8 · 심각 0/5 ·
+ * 회복 / 3/6" at 320, text size 130 %), so a line breaks after a " · " or before a bracketed part; inside a box only
+ * when it is wider than the whole line
+ */
+function figure(value: string): ReactNode {
+  const items = value.split(" · ");
+  if (items.length === 1) return piece(value);
+  return items.map((it, i) => (
+    <Fragment key={i}>
+      {i > 0 && " "}
+      <span className="ivitem">
+        {piece(it)}
+        {i < items.length - 1 && " ·"}
+      </span>
+    </Fragment>
+  ));
 }
 
 /** a card's group of rows: a hairline and 12px above, 6px between rows */
