@@ -6,11 +6,15 @@ import { island } from "../../../app/island";
  * resolved, or execCommand returned true) — never before.
  */
 
-export async function copyText(text: string): Promise<void> {
+/** `quiet`: no banner, for a button that says 복사했어요 on its own label (DD 0059 §5-1) */
+export async function copyText(text: string, opts: { quiet?: boolean } = {}): Promise<void> {
+  const done = () => {
+    if (!opts.quiet) island.banner({ icon: "checkmark", title: "복사했어요" });
+  };
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
-      island.banner({ icon: "checkmark", title: "복사했어요" });
+      done();
       return;
     }
   } catch {
@@ -32,7 +36,7 @@ export async function copyText(text: string): Promise<void> {
   }
   ta.remove();
   if (!ok) throw new Error("클립보드에 복사하지 못했어요. 길게 눌러 직접 복사해 주세요.");
-  island.banner({ icon: "checkmark", title: "복사했어요" });
+  done();
 }
 
 /** System share sheet when there is one; otherwise copy. Resolves "shared" | "copied" | "cancelled". */

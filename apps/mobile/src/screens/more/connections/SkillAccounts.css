@@ -113,6 +113,13 @@
 }
 
 /* two summary rows: 어디서 발급하나요 (a link out) · 보관 기간 (opens in place) */
+/* a footnote under the fields (DD 2010 §6) */
+.sk-key-foot {
+  margin: -4px 0 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
 .sk-folds {
   display: flex;
   flex-direction: column;

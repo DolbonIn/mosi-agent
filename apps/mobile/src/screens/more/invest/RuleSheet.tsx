@@ -3,6 +3,8 @@ import { isAborted, toApiError } from "../../../api/client";
 import { createStore, useStore, type Store } from "../../../lib/createStore";
 import { Button } from "../../../ui/Button";
 import { ConfirmButton } from "../../../ui/ConfirmButton";
+import { ContentSwap } from "../../../motion/ContentSwap";
+import { useTierValue } from "../../../motion/tier";
 import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { presentSheet, type SheetApi, type SheetSource } from "../../../ui/Sheet";
 import { SignalMark } from "../../../ui/Invest";
@@ -14,7 +16,6 @@ import * as api from "./api";
 import {
   actionChoices,
   BUFFER_RANGE,
-  CALL_NOTE,
   canOnce,
   canSell,
   defaultAction,
@@ -22,13 +23,15 @@ import {
   draftOf,
   isHeld,
   marketOf,
+  mustSee,
   KIND_WORD,
   NEW_KINDS,
   ONCE_NOTE,
   parseBufferPct,
   parsePrice,
-  phoneNotice,
   ruleChanges,
+  SEE_LABEL,
+  seenKey,
   sheetTitle,
   toRuleDraft,
   untilDefault,
@@ -46,8 +49,9 @@ import type { InvestAction, InvestMode, InvestRulePreview, InvestRuleRow, Invest
  * are the preview's), direction (가격 알림 only), what happens (a choice list; 매도 only for a stop on a held symbol),
  * 한 번 알리고 멈추기 (not on a sale), a 기한 switch with its date row. A hit or paused rule says so at the top: that is
  * its state now, not what saving does. The result sentence is the server's (POST /rules/preview, with its own numbers):
- * pinned over save with its warning while that stays within a third of the sheet, else at the end of the scroll content
- * with only save pinned (DD 2341: decided on measured heights, never a line count); save waits for the sentence of the draft as it stands, and stays off while nothing changed
+ * pinned over save with its warning while that stays within a third of the sheet, else in the scroll content after the
+ * inputs and before 규칙 지우기, with only save pinned (DD 2341: decided on measured heights, never a line count; DD 0225:
+ * there a live sale or a --danger warning reads 내용 보기 until its block has been in view); save waits for the sentence of the draft as it stands, and stays off while nothing changed
  * (but a paused rule's 다시 감시하기, which arms it as it is). A stop above the price now still saves, under the server's
  * --danger warning. A live sale (preview confirm "hold") saves with ConfirmButton and its previewId. Server first: the
  * screen changes when the write is confirmed and the overview is read again.
@@ -195,11 +199,11 @@ function RuleForm({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
   const lo = parsePrice(d.lo);
   const hiBad = d.kind === "buy_zone" && d.hi.trim() !== "" && (parsePrice(d.hi) === null || (lo !== null && (parsePrice(d.hi) ?? 0) <= lo));
   const now = Date.now();
-  // the server's note once a preview has it; the same sentences from the settings until then
-  const callLine = action === "call" ? (s.preview?.callNote ?? phoneNotice(ctx.settings)?.text ?? CALL_NOTE) : null;
+  // the server's note: a preview's once it has one, the settings' until then (B1b; DD 2341: the app keeps no copy)
+  const callLine = action === "call" ? (s.preview?.callNote ?? ctx.settings.callNote) : null;
   const delNote = ctx.rule ? deleteNote(ctx.rule, ctx.mode) : null;
   // the buffer's price and footnote come with the preview (the last one stays while the next is read); its default
-  // number is the server's, the rule's or the last preview's (DD 2135: never one of the screen's own)
+  // number is the server's: the last preview's, the rule's, else the settings' operating default (B1b, DD 2341)
   const pv = s.preview;
   const pvFresh = !!pv && s.previewKey === draftKey(ctx, d).key;
   const bufferBad = parseBufferPct(d.bufferPct) === undefined;
@@ -241,7 +245,7 @@ function RuleForm({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
           onChange={(bufferPct) => set({ bufferPct })}
           inputMode="decimal"
           enterKeyHint="done"
-          placeholder={lastDefault.current?.replace(/[\s%]/g, "")}
+          placeholder={(lastDefault.current ?? (ctx.settings.bufferPctDefault.v != null ? ctx.settings.bufferPctDefault.text : undefined))?.replace(/[\s%]/g, "")}
           error={bufferBad ? BUFFER_RANGE : undefined}
           hint={bufferFoot}
           trailing={
@@ -301,6 +305,8 @@ function RuleForm({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
         )}
       </div>
 
+      {/* the result too tall to pin (DD 2341): in the scroll content after the inputs, before 규칙 지우기 (DD 0225) */}
+      {s.resultInBody && <ResultBlock ctx={ctx} />}
       {ctx.rule && (
         <div className="iv-danger">
           {delNote && <p className="iv-note t-copy">{copyOf(delNote)}</p>}
@@ -324,11 +330,12 @@ function RuleForm({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
           />
         </div>
       )}
-      {/* the result too tall to pin (DD 2341): the scroll content's end, just over save */}
-      {s.resultInBody && <ResultBlock ctx={ctx} />}
     </div>
   );
 }
+
+/** ConfirmButton's second step, for the one save button that also says 내용 보기 */
+const CONFIRM_LABEL = "한 번 더 누르면 실행돼요";
 
 /** pinned under the form: save, and over it the result while it fits a third of the sheet */
 function RuleFooter({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
@@ -396,6 +403,61 @@ function RuleFooter({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
   const paused = ctx.rule?.state === "paused";
   const off = !fresh || (!fresh.changed && !paused);
 
+  // read before saving (DD 0225): a live sale or a --danger warning in the scroll content asks for 내용 보기 first
+  const reduce = useTierValue("reduceMotion");
+  const [seen, setSeen] = useState<string | null>(null);
+  const shownKey = seenKey(fresh);
+  const needs = mustSee({ inBody: s.resultInBody, liveSale: !!draft && draft.action === "sell" && ctx.mode === "real", warning: !!fresh?.warning, off });
+  const see = needs && seen !== shownKey;
+  // the button starts afresh each time it comes to say 내용 보기 (a failed save's 다시 시도하기 would hide it), and keeps
+  // its instance when 내용 보기 turns into the save label, so that change morphs in place
+  const seeFor = useRef("");
+  if (see) seeFor.current = shownKey ?? "";
+  const view = () => {
+    const block = foot.current?.closest(".sheet-panel")?.querySelector<HTMLElement>(".sheet-body .iv-result-block") ?? null;
+    const sc = block?.closest<HTMLElement>(".sheet-body") ?? null;
+    if (!block || !sc) return null;
+    const b = sc.getBoundingClientRect();
+    // the body's end padding is where its edge thins rows out: the block counts as seen above it
+    return { block, sc, r: block.getBoundingClientRect(), top: b.top, end: b.bottom - (parseFloat(getComputedStyle(sc).paddingBottom) || 0) };
+  };
+  // seen once its block has been fully in view (its end, for a block taller than the view), whether by 내용 보기 or by
+  // scrolling there; checked on scroll, on size changes and when the sentence changes (one still in view stays seen)
+  useLayoutEffect(() => {
+    if (!needs || !shownKey) return;
+    const v = view();
+    if (!v) return;
+    const check = () => {
+      const w = view();
+      if (!w) return;
+      const fits = w.r.height <= w.end - w.top;
+      if (w.r.bottom <= w.end + 0.5 && (!fits || w.r.top >= w.top - 0.5)) setSeen(shownKey);
+    };
+    check();
+    let frame = 0;
+    const later = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(check);
+    };
+    v.sc.addEventListener("scroll", later, { passive: true });
+    const ro = new ResizeObserver(later);
+    ro.observe(v.sc);
+    ro.observe(v.block);
+    return () => {
+      cancelAnimationFrame(frame);
+      v.sc.removeEventListener("scroll", later);
+      ro.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needs, shownKey, s.resultInBody]);
+  // 내용 보기: the block's end to the view's end (its top, if taller), smoothly unless motion is reduced
+  const reveal = () => {
+    const v = view();
+    if (!v) return;
+    const delta = v.r.height > v.end - v.top ? v.r.top - v.top : v.r.bottom - v.end;
+    v.sc.scrollTo({ top: v.sc.scrollTop + delta, behavior: reduce ? "auto" : "smooth" });
+  };
+
   const save = async () => {
     const p = fresh!;
     sheet.setBusy(true);
@@ -420,16 +482,25 @@ function RuleFooter({ ctx, sheet }: { ctx: Ctx; sheet: SheetApi }) {
     ctx.st.patch({ error: err.message });
   };
 
+  const label = see ? SEE_LABEL : hold ? (paused ? "길게 눌러 다시 감시하기" : "길게 눌러 저장") : paused ? "다시 감시하기" : "저장";
   return (
     <div ref={foot} className="iv-rule-foot">
       {!s.resultInBody && <ResultBlock ctx={ctx} />}
-      {hold ? (
-        <ConfirmButton key={key} label={paused ? "길게 눌러 다시 감시하기" : "길게 눌러 저장"} disabled={off} onConfirm={save} onSuccess={() => sheet.close()} onError={onError} />
-      ) : (
-        <Button key={key} tone="primary" size="lg" fullWidth disabled={off} action={save} onSuccess={() => sheet.close()} onError={onError}>
-          {paused ? "다시 감시하기" : "저장"}
-        </Button>
-      )}
+      {/* one button, so 내용 보기 morphs into the save label in place (ConfirmButton's hold and two taps, written out) */}
+      <Button
+        key={`${key}|${seeFor.current}`}
+        tone="primary"
+        size="lg"
+        fullWidth
+        disabled={see ? false : off}
+        confirm={!see && hold ? { label: CONFIRM_LABEL, holdMs: 1200, hint: "길게 누르거나, 두 번 눌러 확인해요" } : undefined}
+        action={see ? undefined : save}
+        onClick={see ? reveal : undefined}
+        onSuccess={() => sheet.close()}
+        onError={onError}
+      >
+        <ContentSwap swapKey={label}>{label}</ContentSwap>
+      </Button>
     </div>
   );
 }

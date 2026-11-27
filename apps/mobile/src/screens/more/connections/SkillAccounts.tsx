@@ -16,6 +16,7 @@ import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Sheet } from "../../../ui/Sheet";
 import { TextField } from "../../../ui/TextField";
 import { Sentences } from "../../../ui/Text";
+import { useInvestLive } from "../data";
 import { ago, dateKo, josa, KEEP_FOR, keepForLabel } from "../format";
 import { InlineError, Note, SectionLabel, StatusPill, useAgentName, useUserId, type PillTone } from "../parts";
 import { lockSentence, SKILL_COPY, SKILL_HIDDEN, skillCopy, type SkillCopy, type SkillIssue } from "./skillCatalog";
@@ -262,6 +263,15 @@ export function SkillSheet({ serviceId, source, open, onClose, onClosed, form: s
     tried.current = true;
     void loadConnections();
   }, [loaded, loading]);
+  // …and once that list arrives, a service it says is connected shows its management, as when opened from the list
+  // (투자 설정's 토스증권 row opens this sheet too), unless the person has started typing
+  const settled = useRef(loaded);
+  useEffect(() => {
+    if (settled.current || !loaded) return;
+    settled.current = true;
+    if (!startOnForm && state === "connected" && phase === "form" && !Object.values(values).some((v) => v.trim())) setPhase("manage");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
 
   const soon = state === "soon";
   const fields = provider?.fields ?? [];
@@ -456,6 +466,11 @@ export function SkillSheet({ serviceId, source, open, onClose, onClosed, form: s
                 />
               ))}
             </form>
+            {copy?.keyFoot ? (
+              <p className="sk-key-foot t-copy">
+                <Sentences text={copy.keyFoot} />
+              </p>
+            ) : null}
             <div className="sk-folds">
               {copy?.issue ? <IssueRow issue={copy.issue} /> : null}
               <Fold title={provider && kindOf(provider) === "login" ? "로그인 정보 보관" : "키 보관"} value={keepForLabel(keepFor)}>
@@ -596,6 +611,9 @@ function ManageView({ does, connection, kind }: { does: string; connection: Conn
 
 function DisconnectSkill({ id, name, kind, agentName, onDone, onBusy }: { id: string; name: string; kind: "login" | "token"; agentName: string; onDone: () => void; onBusy: (b: boolean) => void }) {
   const [error, setError] = useState<string | null>(null);
+  // the one Toss connection is also 투자's: with real orders on, the server turns them back to paper (DD 0212)
+  const live = useInvestLive();
+  const realOff = id === "toss-investment" && live ? " 실제 주문도 꺼지고 모의 주문으로 돌아가요." : "";
   const run = async () => {
     setError(null);
     onBusy(true);
@@ -612,7 +630,7 @@ function DisconnectSkill({ id, name, kind, agentName, onDone, onBusy }: { id: st
   return (
     <div className="sk-disconnect">
       <Note className="sk-disconnect__note">
-        <Sentences text={`연결을 해제하면 ${josa(agentName, "이가")} 더 이상 ${josa(name, "을를")} 쓰지 않아요. 저장한 ${kind === "login" ? "로그인 정보" : "키"}도 함께 지워요.`} />
+        <Sentences text={`연결을 해제하면 ${josa(agentName, "이가")} 더 이상 ${josa(name, "을를")} 쓰지 않아요. 저장한 ${kind === "login" ? "로그인 정보" : "키"}도 함께 지워요.${realOff}`} />
       </Note>
       <InlineError>{error}</InlineError>
       {/* the check draws only after the server confirmed the revoke; then the sheet folds away */}

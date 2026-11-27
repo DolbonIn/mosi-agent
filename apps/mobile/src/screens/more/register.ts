@@ -26,4 +26,5 @@ export function registerMoreScreens() {
   registerScreen("payment", lazyScreen(() => import("./payment/PaymentScreen").then((m) => m.PaymentScreen)));
   registerScreen("account", lazyScreen(() => import("./profile/AccountScreen").then((m) => m.AccountScreen)));
   registerScreen("invest", lazyScreen(() => import("./invest/InvestScreen").then((m) => m.InvestScreen)));
+  registerScreen("invest-settings", lazyScreen(() => import("./invest/InvestSettingsScreen").then((m) => m.InvestSettingsScreen)));
 }

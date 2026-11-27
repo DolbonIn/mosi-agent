@@ -6,7 +6,6 @@ import {
   STAGE_EMPTY,
   stageEmptyLine,
   BUFFER_RANGE,
-  CALL_NOTE,
   canOnce,
   canSell,
   defaultAction,
@@ -17,6 +16,9 @@ import {
   isLiveSale,
   kstDay,
   marketOf,
+  mustSee,
+  SEE_LABEL,
+  seenKey,
   ONCE_NOTE,
   parseBufferPct,
   parsePrice,
@@ -33,6 +35,18 @@ import {
   untilMin,
   watchNotice,
   type Draft,
+  CALL_ROWS,
+  callsGroup,
+  canCheckToss,
+  kstClock,
+  LOCK_SCREEN_VALUE,
+  modeFoot,
+  modeReason,
+  TOSS_AUTH_FOOT,
+  TOSS_IP_FOOT,
+  tossAlert,
+  tossFoot,
+  tossRow,
 } from "../src/screens/more/invest/rules";
 import type { InvestNum, InvestRuleRow, InvestSymbolRow } from "@pickle/protocol";
 
@@ -137,9 +151,12 @@ describe("the draft the sheet sends", () => {
     expect(toRuleDraft(draft({ kind: "alert", direction: "inside" }), "SOXL", true)?.direction).toBe("below");
     expect(toRuleDraft(draft({ kind: "resistance", direction: "above", price: "34.10" }), "SOXL", true)).not.toHaveProperty("direction");
   });
-  test("a range for 매수 검토: both ends, the upper above the lower", () => {
+  test("a range for 매수 검토: both ends, the upper above the lower (equal ends are no range)", () => {
     expect(toRuleDraft(draft({ kind: "buy_zone", lo: "30", hi: "31.50" }), "SOXL", false)).toEqual({ symbol: "SOXL", kind: "buy_zone", action: "notify", until: null, once: false, lo: 30, hi: 31.5 });
     expect(toRuleDraft(draft({ kind: "buy_zone", lo: "31.5", hi: "30" }), "SOXL", false)).toBeNull();
+    // the same price at both ends is no range (the server answers 400 to lo == hi; the app never sends it: lead 0519 I7)
+    expect(toRuleDraft(draft({ kind: "buy_zone", lo: "30", hi: "30" }), "SOXL", false)).toBeNull();
+    expect(toRuleDraft(draft({ kind: "buy_zone", lo: "30", hi: "30.00" }), "SOXL", false)).toBeNull();
     expect(toRuleDraft(draft({ kind: "buy_zone", lo: "30", hi: "" }), "SOXL", false)).toBeNull();
   });
   test("nothing sendable without a price; a sale the symbol cannot make is never sent", () => {
@@ -217,7 +234,6 @@ describe("sentences DD wrote for the screen", () => {
     expect(phoneNotice({ callBlock: "not_verified" })).toEqual({ text: "번호를 인증하지 않아 전화를 걸 수 없어요", verify: true });
     expect(phoneNotice({ callBlock: "not_configured" })).toEqual({ text: "지금은 전화를 걸 수 없어요", verify: false });
     expect(phoneNotice({ callBlock: null })).toBeNull();
-    expect(CALL_NOTE).toBe("앱에서 인증한 번호로 걸어요. 하루 10통까지예요.");
   });
   test("the rules footer: the paper mode's meaning before who changes alert prices (DD 2008 §1)", () => {
     expect(rulesFoot("mock", "모시")).toEqual(["모의 주문이라 손절선에 닿아도 주문을 내지 않고, 팔았을 시점과 가격만 기록해요.", "알림 가격은 모시가 혼자 바꾸지 않아요. 바꾸자는 제안은 채팅에서 확인을 받아요."]);
@@ -253,6 +269,22 @@ describe("the screen's tones and groups", () => {
     expect(marketOf({ watchlist: [] }, "SOXL")).toBe("US");
     expect(marketOf({ watchlist: [] }, "005930")).toBe("KR");
     expect(marketOf({ watchlist: [sym("X1", "KR")] }, "X1")).toBe("KR");
+  });
+  test("read before saving (DD 0225): only a result in the scroll content, only with save on, for a live sale or a warning", () => {
+    const base = { inBody: true, liveSale: false, warning: false, off: false };
+    expect(mustSee({ ...base, liveSale: true })).toBe(true);
+    expect(mustSee({ ...base, warning: true })).toBe(true);
+    expect(mustSee(base)).toBe(false);
+    expect(mustSee({ ...base, liveSale: true, warning: true, inBody: false })).toBe(false);
+    expect(mustSee({ ...base, liveSale: true, warning: true, off: true })).toBe(false);
+    expect(SEE_LABEL).toBe("내용 보기");
+  });
+  test("read before saving: seen per sentence and warning, nothing before the server has spoken", () => {
+    const a = { sentence: "SOXL 손절을 $27.00에서 $26.00으로 바꿔요.", warning: null };
+    expect(seenKey(null)).toBeNull();
+    expect(seenKey(a)).toBe(seenKey({ ...a }));
+    expect(seenKey(a)).not.toBe(seenKey({ ...a, sentence: "SOXL 손절을 $27.00에서 $25.00으로 바꿔요." }));
+    expect(seenKey(a)).not.toBe(seenKey({ ...a, warning: "지금 가격 $32.57보다 높아서, 바꾸면 바로 손절 조건이 돼요." }));
   });
   test("② no quote source: the server's sentence on top (caution) and its foot under the group (DD 0225)", () => {
     const foot = "그래서 규칙을 확인하지 않아요. 토스증권을 연결하면 확인해요.";
@@ -304,5 +336,70 @@ describe("the screen's tones and groups", () => {
     // the empty line (DD 0600): off and none in the server's words; an unknown kind or nothing keeps today's line
     expect(none.map((s) => stageEmptyLine(s as InvestStages | null))).toEqual(["지금은 지표를 받지 않아서 단계를 판정하지 않아요.", "첫 판정은 오늘 08:00에 나와요.", STAGE_EMPTY, STAGE_EMPTY, STAGE_EMPTY]);
     expect(STAGE_EMPTY).toBe("아직 판정이 없어요. 매일 오전 8시에 판정해요.");
+  });
+});
+
+describe("⑥ 투자 설정 (DD 1935 §3-4, DD 2010 §4 / §6, DD 0059 §5, DD 0103-b)", () => {
+  const at = kst(2026, 11, 27, 0, 45);
+  type Code = "ip_not_allowed" | "auth" | "rate_limited" | "down" | "off";
+  const err = (code: Code, text: string) => ({ code, at, text });
+  test("times in KST, across UTC's date", () => {
+    expect(kstClock(at)).toBe("00:45");
+    expect(kstClock(kst(2026, 11, 26, 23, 5))).toBe("23:05");
+  });
+  test("the 토스증권 row: connected with the last check that worked, or not; off: the server's sentence underneath, no value, nothing to press", () => {
+    expect(tossRow({ connected: true, okAt: at, error: null })).toEqual({ value: "연결됨 · 확인 00:45", subtitle: null, opens: true });
+    expect(tossRow({ connected: true, okAt: null, error: null })).toEqual({ value: "연결됨", subtitle: null, opens: true });
+    expect(tossRow({ connected: false, okAt: null, error: null })).toEqual({ value: "연결 안 됨", subtitle: null, opens: true });
+    // the server's text as sent (unlike B1b's, so the screen cannot be writing its own)
+    expect(tossRow({ connected: false, okAt: null, error: err("off", "서버 문장: 토스 없음") })).toEqual({ value: null, subtitle: "서버 문장: 토스 없음", opens: false });
+    // a refusal leaves the value
+    expect(tossRow({ connected: true, okAt: at, error: err("rate_limited", "x") }).value).toBe("연결됨 · 확인 00:45");
+  });
+  test("the group's top row: the server's words · when; what the person must fix in red, passing refusals as caution; only a cut key opens the sheet", () => {
+    expect(tossAlert({ error: err("ip_not_allowed", "막혔어요(IP)") })).toEqual({ tone: "risk", text: "막혔어요(IP) · 00:45", opens: false });
+    expect(tossAlert({ error: err("auth", "끊겼어요") })).toEqual({ tone: "risk", text: "끊겼어요 · 00:45", opens: true });
+    expect(tossAlert({ error: err("rate_limited", "잠시 막았어요") })).toEqual({ tone: "caution", text: "잠시 막았어요 · 00:45", opens: false });
+    expect(tossAlert({ error: err("down", "연결하지 못했어요") })?.tone).toBe("caution");
+    expect(tossAlert({ error: err("off", "토스 없음") })).toBeNull();
+    expect(tossAlert({ error: null })).toBeNull();
+  });
+  test("the group's footer: a cut key's why, then the IP sentence only with an IP", () => {
+    expect(tossFoot({ error: null, outboundIp: "203.0.113.7" })).toEqual([TOSS_IP_FOOT]);
+    expect(tossFoot({ error: null, outboundIp: null })).toEqual([]);
+    expect(tossFoot({ error: err("auth", "x"), outboundIp: "203.0.113.7" })).toEqual([TOSS_AUTH_FOOT, TOSS_IP_FOOT]);
+    expect(tossFoot({ error: err("off", "토스 없음"), outboundIp: null })).toEqual([]);
+    expect(tossFoot({ error: err("ip_not_allowed", "x"), outboundIp: null })).toEqual([]);
+    expect(TOSS_AUTH_FOOT).toBe("같은 키를 다른 곳에서 쓰면 이렇게 끊겨요. 모시에만 쓰는 키를 다시 넣어 주세요.");
+  });
+  test("연결 확인 only where there is a connection to check", () => {
+    expect(canCheckToss({ connected: true, error: null })).toBe(true);
+    expect(canCheckToss({ connected: true, error: err("auth", "x") })).toBe(true);
+    expect(canCheckToss({ connected: false, error: null })).toBe(false);
+    expect(canCheckToss({ connected: false, error: err("off", "x") })).toBe(false);
+  });
+  test("why 실제 주문 cannot be turned on: one sentence, the first that applies (DD 0103-b B)", () => {
+    expect(modeReason(["toss_ip_blocked", "toss_off"])).toBe("지금은 토스증권에 연결할 수 없어서 실제 주문을 켤 수 없어요.");
+    expect(modeReason(["toss_never_ok", "toss_ip_blocked"])).toBe("토스증권이 접속을 막고 있어서 지금은 켤 수 없어요.");
+    expect(modeReason(["toss_not_connected"])).toBe("토스증권을 연결하고 시세 확인이 한 번 성공하면 켤 수 있어요.");
+    expect(modeReason(["toss_never_ok"])).toBe("토스증권을 연결하고 시세 확인이 한 번 성공하면 켤 수 있어요.");
+    expect(modeReason([])).toBeNull();
+  });
+  test("주문 모드's footer: the paper mode, open orders, the one reason", () => {
+    const paper = "모의 모드에서는 주문을 내지 않고, 팔았을 시점과 가격만 기록해요.";
+    expect(modeFoot({ mode: "mock", openOrders: 0, realBlockers: [] })).toEqual([paper]);
+    expect(modeFoot({ mode: "mock", openOrders: 0, realBlockers: ["toss_off"] })).toEqual([paper, "지금은 토스증권에 연결할 수 없어서 실제 주문을 켤 수 없어요."]);
+    expect(modeFoot({ mode: "real", openOrders: 2, realBlockers: [] })).toEqual(["보내 둔 주문 2건은 체결을 계속 확인해요."]);
+    // a live mode gives no reason (it is on)
+    expect(modeFoot({ mode: "real", openOrders: 0, realBlockers: ["toss_ip_blocked"] })).toEqual([]);
+  });
+  test("전화: the group's sentence before the server's callNote; a call that cannot go out is the top row's, said once", () => {
+    expect(callsGroup({ callBlock: null, callNote: "서버: 하루 7통까지예요." })).toEqual({ notice: null, foot: "가격 알림의 전화는 규칙마다 정해요. 서버: 하루 7통까지예요." });
+    expect(callsGroup({ callBlock: "not_verified", callNote: "서버: 인증 안 됨." })).toEqual({ notice: { text: "서버: 인증 안 됨.", verify: true }, foot: "가격 알림의 전화는 규칙마다 정해요." });
+    expect(callsGroup({ callBlock: "not_configured", callNote: "서버: 못 걸어요." })).toEqual({ notice: { text: "서버: 못 걸어요.", verify: false }, foot: "가격 알림의 전화는 규칙마다 정해요." });
+    expect(CALL_ROWS.map((r) => [r.key, r.title, r.subtitle ?? null])).toEqual([["stopResult", "손절 결과", "모의 기록, 체결, 실패, 건너뜀"], ["stage", "단계 변화", null], ["expiry", "감시 기간 만료", null]]);
+  });
+  test("잠금 화면 알림's values (DD 0059 §5-4)", () => {
+    expect(LOCK_SCREEN_VALUE).toEqual({ on: "켜짐", off: "꺼짐", unsupported: "이 기기에서는 받을 수 없어요" });
   });
 });

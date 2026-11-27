@@ -6,6 +6,7 @@ import type {
   InvestRuleChanges,
   InvestRuleDraft,
   InvestRuleKind,
+  InvestRulePreview,
   InvestRuleRow,
   InvestSettingsView,
   InvestStages,
@@ -191,7 +192,6 @@ export function phoneNotice(s: Pick<InvestSettingsView, "callBlock">): { text: s
   if (s.callBlock === "not_configured") return { text: "지금은 전화를 걸 수 없어요", verify: false };
   return null;
 }
-export const CALL_NOTE = "앱에서 인증한 번호로 걸어요. 하루 10통까지예요.";
 
 /**
  * ③ footer, a paragraph each: the paper mode's meaning first (DD 2008 §1), then who changes alert prices (G8-5). Two
@@ -210,6 +210,18 @@ export function pricePhrase(text: string): [string, string, string] | null {
   const m = /(?:\$\d[\d,]*(?:\.\d+)?(?:–\d[\d,]*(?:\.\d+)?)?|\d[\d,]*(?:–\d[\d,]*)?원)(?:\s+(?:이하|이상))?/.exec(text);
   return m ? [text.slice(0, m.index), m[0], text.slice(m.index + m[0].length)] : null;
 }
+
+/**
+ * Read before saving (DD 0225 §invest-4): when the result is too tall to pin and sits in the scroll content, a live sale
+ * (the real mode, 매도) or a --danger warning cannot be saved until its block has been fully in view once; till then the
+ * one button says 내용 보기 and scrolls to it. Only while the save is otherwise on (nothing to save, nothing to read
+ * first). Seen is kept per sentence and warning: a new one off screen asks again.
+ */
+export function mustSee(o: { inBody: boolean; liveSale: boolean; warning: boolean; off: boolean }): boolean {
+  return o.inBody && !o.off && (o.liveSale || o.warning);
+}
+export const seenKey = (p: Pick<InvestRulePreview, "sentence" | "warning"> | null): string | null => (p ? `${p.sentence}\n${p.warning ?? ""}` : null);
+export const SEE_LABEL = "내용 보기";
 
 /** a live sale's action word is red (DD 1935 §1: "실제" in --danger) */
 export const isLiveSale = (r: Pick<InvestRuleRow, "action">, mode: InvestOverview["mode"]) => r.action === "sell" && mode === "real";
@@ -279,3 +291,93 @@ export function gaugeSaid(g: StageGauge): string {
   const unknown = g.cells.filter((c) => c === "unknown").length;
   return `${g.label} ${g.cells.length}개 중 ${met}개 충족${unknown ? `, 확인 불가 ${unknown}개` : ""}`;
 }
+
+// ── ⑥ 투자 설정 (DD 1935 §3-4, DD 2010 §4 / §6, DD 0059 §5, DD 0103-b A–C) ──
+
+/** 00:45 in KST (the screen's data lines: times of a check, a refusal) */
+export function kstClock(ms: number): string {
+  const d = new Date(ms + KST);
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+type Toss = InvestSettingsView["toss"];
+
+/**
+ * The 토스증권 row (DD 0103-b A): its value (연결됨 · 확인 00:45 / 연결됨 / 연결 안 됨) and whether it opens the one
+ * connection sheet. A server that has no Toss at all (`off`) gives no value: its own sentence is the row's second line,
+ * and there is nothing to press (connecting would change nothing). A refusal leaves the value as it is (the row above says it).
+ */
+export function tossRow(t: Pick<Toss, "connected" | "okAt" | "error">): { value: string | null; subtitle: string | null; opens: boolean } {
+  if (t.error?.code === "off") return { value: null, subtitle: t.error.text, opens: false };
+  if (!t.connected) return { value: "연결 안 됨", subtitle: null, opens: true };
+  return { value: t.okAt ? `연결됨 · 확인 ${kstClock(t.okAt)}` : "연결됨", subtitle: null, opens: true };
+}
+
+/**
+ * The row at the top of the 토스증권 group: the server's words · when (DD 0103-b A). What the person must fix (a key cut
+ * off, a refusal by the allowed IP) in --danger; a passing refusal or no answer as caution. Only a cut key opens the
+ * connection sheet (to put the key in again); the IP's fix is the 허용 IP row below. None for `off` (said on the row).
+ */
+export function tossAlert(t: Pick<Toss, "error">): { tone: "risk" | "caution"; text: string; opens: boolean } | null {
+  const e = t.error;
+  if (!e || e.code === "off") return null;
+  const fix = e.code === "ip_not_allowed" || e.code === "auth";
+  return { tone: fix ? "risk" : "caution", text: `${e.text} · ${kstClock(e.at)}`, opens: e.code === "auth" };
+}
+
+export const TOSS_IP_FOOT = "토스증권 Open API 설정에서 이 IP를 허용해 주세요. IP가 바뀌면 시세 확인과 주문이 멈추고, 바로 알려 드려요.";
+export const TOSS_AUTH_FOOT = "같은 키를 다른 곳에서 쓰면 이렇게 끊겨요. 모시에만 쓰는 키를 다시 넣어 주세요.";
+
+/**
+ * The 토스증권 group's footer, a paragraph each: why a key was cut off (DD 2010 §6), then the IP's sentence, which
+ * goes with the 허용 IP row: no IP from the server, no row and no sentence (DD 0103-b A).
+ */
+export function tossFoot(t: Pick<Toss, "error" | "outboundIp">): string[] {
+  return [...(t.error?.code === "auth" ? [TOSS_AUTH_FOOT] : []), ...(t.outboundIp ? [TOSS_IP_FOOT] : [])];
+}
+
+/** 연결 확인 is offered where there is a connection to check */
+export const canCheckToss = (t: Pick<Toss, "connected" | "error">) => t.connected && t.error?.code !== "off";
+
+/**
+ * Why 실제 주문 cannot be turned on: one sentence, the first that applies (DD 0103-b B, until B3's server sentence).
+ * The device key's (first in that order) comes with B3's enable, which signs with it.
+ */
+export function modeReason(blockers: InvestSettingsView["realBlockers"]): string | null {
+  if (blockers.includes("toss_off")) return "지금은 토스증권에 연결할 수 없어서 실제 주문을 켤 수 없어요.";
+  if (blockers.includes("toss_ip_blocked")) return "토스증권이 접속을 막고 있어서 지금은 켤 수 없어요.";
+  if (blockers.includes("toss_not_connected") || blockers.includes("toss_never_ok")) return "토스증권을 연결하고 시세 확인이 한 번 성공하면 켤 수 있어요.";
+  return null;
+}
+
+/** 주문 모드's footer: what the paper mode does, orders still being checked, why it cannot be turned on */
+export function modeFoot(s: Pick<InvestSettingsView, "mode" | "openOrders" | "realBlockers">): string[] {
+  const out: string[] = [];
+  if (s.mode === "mock") out.push("모의 모드에서는 주문을 내지 않고, 팔았을 시점과 가격만 기록해요.");
+  if (s.openOrders > 0) out.push(`보내 둔 주문 ${s.openOrders}건은 체결을 계속 확인해요.`);
+  const why = s.mode === "mock" ? modeReason(s.realBlockers) : null;
+  if (why) out.push(why);
+  return out;
+}
+
+/**
+ * 전화 (DD 0059 §5-3): a call that cannot go out is said once, in a caution row at the top in the server's words (an
+ * unverified number leads to verifying); the footer is the group's sentence before the server's callNote, or alone
+ * when the row already says it.
+ */
+export function callsGroup(s: Pick<InvestSettingsView, "callBlock" | "callNote">): { notice: { text: string; verify: boolean } | null; foot: string } {
+  const head = "가격 알림의 전화는 규칙마다 정해요.";
+  if (s.callBlock) return { notice: { text: s.callNote, verify: s.callBlock === "not_verified" }, foot: head };
+  return { notice: null, foot: `${head} ${s.callNote}` };
+}
+
+/** the 전화 group's rows: events no rule decides (DD 2010 §4, DD 0103-b C), in the server's keys */
+export const CALL_ROWS: { key: keyof InvestSettingsView["calls"]; title: string; subtitle?: string }[] = [
+  { key: "stopResult", title: "손절 결과", subtitle: "모의 기록, 체결, 실패, 건너뜀" },
+  { key: "stage", title: "단계 변화" },
+  { key: "expiry", title: "감시 기간 만료" },
+];
+
+/** this device's lock-screen notifications (DD 0059 §5-4); `none`: the server sends none (push_off), so no row */
+export type LockScreen = "on" | "off" | "unsupported" | "none";
+export const LOCK_SCREEN_VALUE: Record<Exclude<LockScreen, "none">, string> = { on: "켜짐", off: "꺼짐", unsupported: "이 기기에서는 받을 수 없어요" };

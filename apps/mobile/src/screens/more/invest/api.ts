@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPatch, apiPost, type ApiOptions } from "../../../api/client";
-import type { InvestOverview, InvestRuleChanges, InvestRuleDraft, InvestRulePreview } from "@pickle/protocol";
+import type { InvestOverview, InvestRuleChanges, InvestRuleDraft, InvestRulePreview, InvestSettingsPatch, InvestSettingsView, InvestTossStatus } from "@pickle/protocol";
 import { ruleChanges } from "./rules";
 
 /**
@@ -19,3 +19,7 @@ export const patchRule = (id: string, changes: InvestRuleChanges, ifRev: number,
   apiPatch<unknown>(`/api/invest/rules/${enc(id)}`, { changes, ifRev, ...(previewId ? { previewId } : {}) });
 export const deleteRule = (id: string) => apiDelete(`/api/invest/rules/${enc(id)}`);
 export const addWatch = (symbol: string) => apiPost<unknown>("/api/invest/watchlist", { symbol });
+/** PATCH /api/invest/settings: today only which events call (DD 2010 §4); the server answers its settings view */
+export const patchSettings = (patch: InvestSettingsPatch) => apiPatch<InvestSettingsView>("/api/invest/settings", patch);
+/** POST /api/invest/toss/check: the server asks Toss now (429 toss_check_too_soon within a minute of the last) */
+export const checkToss = () => apiPost<InvestTossStatus>("/api/invest/toss/check");

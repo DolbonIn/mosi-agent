@@ -332,3 +332,47 @@
 .iv-result-warn.has-mark .iv-mark {
   margin-top: calc((1.45em - 1em) / 2);
 }
+
+/* ⑥ 투자 설정: the outbound IP in tabular figures; 연결 확인 with the server's sentence beside it */
+.iv-ip {
+  font-variant-numeric: tabular-nums;
+}
+.iv-check-row .list-row-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 2px;
+  padding-block: 6px;
+}
+.iv-check-note {
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+/* opened from the capsule, 주문 모드 is scrolled to the top of the view: clear of the top bar */
+.iv-mode-anchor {
+  scroll-margin-top: var(--top-clear, 0px);
+}
+/* opened for one symbol, its 감시 규칙 group is scrolled to the top of the view: clear of the top bar */
+.iv-rules {
+  scroll-margin-top: var(--top-clear, 0px);
+}
+/* FitRow's hidden measure: the title and the value at their natural widths, on one line, never seen or read */
+.iv-fit-probe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+.iv-fit-probe .list-row-detail {
+  max-width: none;
+  overflow: visible;
+}
+.iv-ip-row.is-stacked .list-row-sub {
+  font-size: var(--t-body);
+  color: var(--label-2);
+}
