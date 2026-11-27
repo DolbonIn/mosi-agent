@@ -214,7 +214,11 @@ export interface InvestOverview {
   /** newest first */
   watchlist: InvestSymbolRow[];
   rules: InvestRuleRow[];
-  /** B2: the last 3 */
+  /**
+   * B2c-1: the last 3 daily reports, newest first. title 11월 27일(금) · 탈출 2 · 회복 1 (탈출 최소 2 · 회복 보류 · 회복
+   * 미확정; another KST year named, DD 0733 C); line: the summary's first line, or the no-summary line. A row opens
+   * GET /api/invest/reports/:id (DD 0059 §2-4).
+   */
   reports: { id: ID; title: string; line: string; threadId: ID; messageId: ID }[];
   /** C */
   decks: { id: ID; headline: string; meta: string; attachmentId: ID; thumbUrl: string }[];
@@ -375,22 +379,110 @@ export interface InvestRuleChangeCard {
   disclaimer?: true;
 }
 
+/**
+ * The 08:00 daily report's card (B2c-1; A13 · A15, DD 1935 §2-4, DD 0059 §2, DD 0733). Everything but `summary` is code's;
+ * the full eight sections are GET /api/invest/reports/:reportId (the card's head opens it).
+ */
 export interface InvestDailyCard {
   type: "invest_daily";
   reportId: ID;
+  /** 시장 위험 보고서 */
   title: string;
+  /** 11월 27일(금) 08:00 — the judgment's time */
   atText: string;
-  highlights: { tone: "danger" | "caution"; text: string }[];
+  /** 휴장일이라 11월 25일(수) 마감 기준이에요. — a US holiday between the last session and now (A13; a weekend alone is not one) */
+  holidayNote?: string;
+  /**
+   * A13's top lines, at most 2 (DD 1935 §2-4 2): danger = a severe-side break (HY 4.0%p, VIX 30); caution = a worse-side
+   * break (HY 3.5%p, VIX 25, an index under its 200-day line), a rule expired or its invalidation met; plain = recovery
+   * news (DD 0733 B). A stage move is not here: the stage line says it (DD 0828 1a)
+   */
+  highlights: { tone: "danger" | "caution" | "plain"; text: string }[];
+  /** the lines beyond the 2 shown: 외 2건 */
   moreCount?: number;
+  /** 탈출 2단계 경계 · 회복 1단계 바닥 탐색 (the board's heads; break only at ·) */
   stageLine: string;
-  stageSub: string;
+  /** 어제와 같아요 · 탈출 2 → 3단계 · 탈출 최소 2단계 → 탈출 3단계 · 11월 26일 판정과 같아요; absent on the first judgment */
+  stageSub?: string;
+  /** the stage line's tone (DD 0828 1a): danger = the escape stage up to 4; caution = the escape stage up, the recovery stage down */
+  stageTone?: "danger" | "caution";
+  /** 오늘 지표 2개를 받지 못했어요. — core indicators whose source did not answer today, unless `pending` says so (caution, DD 0828 2) */
+  dataGap?: string;
+  /** the model's 3 lines (one sentence each, ≤ 60 characters); empty when `summaryNote` is there */
   summary: string[];
+  /** 오늘은 요약을 쓰지 못했어요. — no valid summary after the second try (caution, DD 0733 3) */
+  summaryNote?: string;
   tally: { signal: InvestSignal; label: string; count: number }[];
+  /** 11지표 위험 3 · 경계 2 · 정상 5 · 확인 불가 1 / 신호 악화 3/8 · 심각 1/5 · 회복 2/6 */
   rows: { label: string; value: string }[];
+  /** the stage's pending sentence when a stage is not settled */
   pending?: string;
+  /** D-1 (team-lead 0056) for a person whose report goes out that day: head 11월 28일 일정 (· 5개 when more), 3 rows at most */
+  events?: { head: string; rows: { title: string; value: string }[] };
   deck: { state: "none" | "making" | "ready"; deckId?: ID };
+  /** 기준 11월 27일 08:00 · FRED · Yahoo(지연 시세) 외 2곳 */
   foot: string;
   disclaimer?: true;
+}
+
+/** one condition row of the report (the 11지표와 단계 조건 screen's row): only the met ones are listed (DD 0059 §2-5 4·5) */
+export type InvestReportCondition = InvestStagesDetail["groups"][number]["rows"][number];
+
+/** A15's eight sections in their fixed order (DD 0059 §2-5); every word and number is code's but `paragraph` and the scenario cells */
+export type InvestReportSection =
+  | {
+      key: "conclusion";
+      title: "핵심 결론";
+      heads: InvestStageHead[];
+      /** 어제와 같아요 / 회복 0 → 1단계; absent on the first judgment */
+      change?: string;
+      /** the model's sentences, one per line; empty when `note` is there */
+      paragraph: string[];
+      /** 오늘은 요약을 쓰지 못했어요. (caution) */
+      note?: string;
+      /** 판정 신뢰도 · 높음 | 보통 | 낮음 · 확인 불가 1개 */
+      confidence: { label: string; value: "높음" | "보통" | "낮음"; sub: string };
+    }
+  | {
+      key: "market";
+      title: "주요 시장 데이터";
+      /** value null → 확인 불가; sub 변화 −0.42% · 11월 26일 · FRED · A / 오늘 받지 못했어요 */
+      rows: { name: string; value: string | null; sub: string }[];
+    }
+  | { key: "core11"; title: "핵심 11지표"; tally: string; rows: InvestStagesDetail["core11"] }
+  | { key: "worse"; title: "악화·위험 신호"; gauges: InvestStageGauge[]; rows: InvestReportCondition[]; next: string[] }
+  | { key: "recovery"; title: "회복 신호"; gauges: InvestStageGauge[]; rows: InvestReportCondition[]; next: string[] }
+  | {
+      key: "etf";
+      title: "ETF 검토 가격";
+      /** per watched symbol with a rule: the last close (hero) and the review rows; `(추정)` on the expected rates; 보유 중일 때만 해당 on stop and targets unless held (A14) */
+      groups: { symbol: string; price: { value: string; sub: string } | null; rows: { label: string; value: string; sub?: string }[] }[];
+      empty?: string;
+    }
+  | {
+      key: "scenarios";
+      title: "향후 시나리오";
+      /** 다음 거래일 · 5거래일 · 20거래일 × 상승 · 횡보 · 하락, words only (no probability: no verified model, A15 §7); all or none */
+      rows: { horizon: string; up: string; flat: string; down: string }[];
+      /** 오늘은 시나리오를 쓰지 못했어요. */
+      empty?: string;
+    }
+  | {
+      key: "events";
+      title: "주요 경제 일정";
+      /** KST first; 8 at most; no consensus column (nowhere to get it, DD 0733 6) */
+      rows: { when: string; title: string; foot: string }[];
+      empty?: string;
+    };
+
+/** GET /api/invest/reports/:reportId (the person's own; else 404) */
+export interface InvestReport {
+  id: ID;
+  /** 11월 27일 보고서 */
+  title: string;
+  atText: string;
+  sections: InvestReportSection[];
+  disclaimer: true;
 }
 
 export interface InvestLevelChartCard {

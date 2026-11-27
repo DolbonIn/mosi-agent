@@ -260,7 +260,7 @@ const kstDayOf = (now: number) => new Date(now + 9 * HOUR).toISOString().slice(0
 export function latestJudgment(core: Core, userId: string): JudgmentRow | null {
   return core.db.sql.query("SELECT * FROM invest_judgments WHERE user_id = $u ORDER BY day DESC LIMIT 1").get({ u: userId }) as JudgmentRow | null;
 }
-function judgmentBefore(core: Core, userId: string, day: string): JudgmentRow | null {
+export function judgmentBefore(core: Core, userId: string, day: string): JudgmentRow | null {
   return core.db.sql.query("SELECT * FROM invest_judgments WHERE user_id = $u AND day < $d ORDER BY day DESC LIMIT 1").get({ u: userId, d: day }) as JudgmentRow | null;
 }
 
@@ -312,7 +312,7 @@ export type StagesView =
 
 export const STAGES_OFF = "지금은 지표를 받지 않아서 단계를 판정하지 않아요.";
 
-const headsOf = (j: Judged) => {
+export const headsOf = (j: Judged) => {
   const miss = (k: InputKey) => j.missing[k] ?? null;
   return { escape: escapeHead(j, miss), recovery: recoveryHead(j, miss) };
 };
@@ -448,15 +448,15 @@ const fromLedger = (k: InputKey) => (LEDGER_KEYS as readonly string[]).includes(
  * 11월 26일 · FRED · A / 11월 26일 · FRED · A, Yahoo(지연 시세) · B+ / 받을 곳이 아직 없어요 / 오늘 받지 못했어요; a ledger
  * input: 값이 없어요 / 8월 1일 값이라 오래됐어요 (DD 0426 §1)
  */
-function basisText(j: Judged, keys: readonly InputKey[], asOf: string | null, at: number): string {
+function basisText(j: Judged, keys: readonly InputKey[], asOf: string | null, now: number): string {
   const present = keys.filter((k) => j.basis[k]).map((k) => j.basis[k]!);
   if (!present.length || !asOf) {
     const old = keys.map((k) => j.old?.[k as LedgerKey]).filter((d): d is string => !!d).sort().at(-1);
-    if (old) return `${dayWords(old, at)} 값이라 오래됐어요`;
+    if (old) return `${dayWords(old, now)} 값이라 오래됐어요`;
     if (keys.some((k) => j.missing[k] === "today")) return "오늘 받지 못했어요";
     return keys.some(fromLedger) ? "값이 없어요" : "받을 곳이 아직 없어요";
   }
-  return `${dayWords(asOf, at)} · ${[...new Set(present.map((b) => `${b.source} · ${b.grade}`))].join(", ")}`;
+  return `${dayWords(asOf, now)} · ${[...new Set(present.map((b) => `${b.source} · ${b.grade}`))].join(", ")}`;
 }
 
 const COMPANY: Readonly<Record<string, string>> = { samsung: "삼성전자", hynix: "SK하이닉스" };
@@ -519,7 +519,7 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
       name: it.name,
       signal: it.signal,
       value: it.signal === "unknown" && it.no !== 6 && it.no !== 11 ? null : core11Value(it.no, it.value, it.extras),
-      basis: basisText(j, NEEDS[`#${it.no}`] ?? [], it.asOf, row.at),
+      basis: basisText(j, NEEDS[`#${it.no}`] ?? [], it.asOf, now), // DD 0731 E5: the year by the reading time, as judgedText
       reason: it.no === 6 ? it.reason.replace(/samsung|hynix/g, (id) => COMPANY[id]!) : it.reason,
     })),
     groups: GROUPS.map((g) => ({
@@ -531,7 +531,7 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
         state: c.status,
         stateText: STATE_WORD[c.status],
         // no input of it here: the basis alone (a figure of nothing would read as a value)
-        detail: join((NEEDS[c.id] ?? []).some((k) => j.basis[k]) ? figureText(c.id, c.figures) || null : null, basisText(j, NEEDS[c.id] ?? [], c.asOf, row.at)),
+        detail: join((NEEDS[c.id] ?? []).some((k) => j.basis[k]) ? figureText(c.id, c.figures) || null : null, basisText(j, NEEDS[c.id] ?? [], c.asOf, now)),
       })),
       next: groupNext(g.key),
     })),

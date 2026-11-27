@@ -304,6 +304,7 @@ export function createApp(deps: AppDeps): App {
   // invest (B1): overview, watchlist, rules, Toss status, call settings — no model call behind any of them
   r.on("GET", "/api/invest", authed(invest.overview));
   r.on("GET", "/api/invest/stages", authed(invest.stages));
+  r.on("GET", "/api/invest/reports/:id", authed(invest.report));
   r.on("GET", "/api/invest/symbols/:symbol", authed(invest.symbol));
   r.on("POST", "/api/invest/watchlist", authed(invest.addWatch));
   r.on("DELETE", "/api/invest/watchlist/:symbol", authed(invest.removeWatch));

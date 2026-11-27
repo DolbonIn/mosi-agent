@@ -134,6 +134,8 @@ export interface SessionBootstrap {
 export interface UserSettings {
   notifications: {
     briefing: boolean; // daily briefing push
+    /** the 08:00 daily invest report's push (B2c-1, DD 0733 2): off keeps the report in the invest thread, only the push goes */
+    investReport: boolean;
     taskDone: boolean;
     friendMessages: boolean;
     marketing: boolean; // 혜택·소식 알림 (선택 동의)

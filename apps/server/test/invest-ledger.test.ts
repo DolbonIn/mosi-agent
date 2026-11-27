@@ -209,13 +209,13 @@ describe("the ledger's nine fields", () => {
     const { h, person, api } = await setup();
     const a = await person("alice");
     h.db.sql.exec(
-      "DROP TABLE invest_judgments; DROP TABLE invest_proposals; DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
+      "DROP TABLE invest_reports; DROP TABLE invest_judgments; DROP TABLE invest_proposals; DROP TABLE invest_forecasts; DROP TABLE invest_events; DROP TABLE invest_event_reminders; DROP INDEX invest_ledger_recent; ALTER TABLE invest_ledger DROP COLUMN source; PRAGMA user_version = 9;",
     );
     h.db.sql
       .query("INSERT INTO invest_ledger (user_id, id, as_of, value, unit, definition, source_tier, url, confidence, author, created_at) VALUES ($u, 'quote.NVDA', '2026-11-26T15:00:00.000Z', 180.5, 'usd', '5분 감시 가격', '토스증권', NULL, 'A', 'code', 5)")
       .run({ u: a.uid });
     const again = new Db(join(h.dir, "pickle.db"));
-    expect(again.schemaVersion).toBe(12); // v10, then v11 (B2b-1 proposals), v12 (B2b-2 judgments)
+    expect(again.schemaVersion).toBe(13); // v10, then v11 (B2b-1 proposals), v12 (B2b-2 judgments), v13 (B2c-1 reports)
     expect(again.sql.query("SELECT source, source_tier, confidence FROM invest_ledger WHERE id = 'quote.NVDA'").get()).toEqual({ source: "토스증권", source_tier: "T2", confidence: "A" });
     again.close();
     const [e] = (await api<{ items: InvestLedgerEntry[] }>(a, "GET", "/api/invest/ledger?id=quote.NVDA")).body.items;

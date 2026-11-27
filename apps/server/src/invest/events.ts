@@ -6,8 +6,8 @@
  * - D-1 goes at 08:00 KST on the day before the event's market date, whatever the market does that day (a holiday's
  *   eve too). The day is the event's own date: a US event on Tuesday ET reminds on Monday 08:00 KST.
  * - It goes once per person, event (market and title) and day, by any path: the reminder row is claimed before the
- *   card is stored, in one transaction. Deleting the event keeps that row, so adding it back sends nothing again. The
- *   daily report (B2c) claims the same row when it carries the line instead of a card.
+ *   card is stored, in one transaction. Deleting the event keeps that row, so adding it back sends nothing again. For
+ *   a person whose 08:00 report goes out today the report (B2c-1) claims the same row and carries the line instead.
  * - Several due for one person at once: one card, a row each, titled "일정 N개"; the in-app banner is its title alone.
  */
 import type { InvestAuthor, InvestEvent, InvestEventCard, InvestEventKind, InvestGrade, InvestMarket, InvestTier } from "@pickle/protocol";
@@ -178,7 +178,7 @@ export function listEvents(db: Db, userId: string, q: { from?: string | null; to
 }
 
 /** by day, then timed events by instant, untimed last (by market, then title) */
-function sortEvents(rows: EventRow[]): EventRow[] {
+export function sortEvents(rows: EventRow[]): EventRow[] {
   return rows.sort((a, b) => a.day.localeCompare(b.day) || (eventAt(a) ?? Infinity) - (eventAt(b) ?? Infinity) || a.market.localeCompare(b.market) || a.title.localeCompare(b.title));
 }
 

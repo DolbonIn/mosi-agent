@@ -16,12 +16,17 @@ import { cacheGet, cachePut } from "./db.ts";
 import { parseYahooDaily, SOURCE_TABLE } from "./sources.ts";
 
 /** the FRED series B2b-2 reads (0212: rates, credit, jobs, conditions; 0243: VIX, S&P 500, KRW and JPY from FRED) */
-/** A2 1–5 and 10 (CPILFESL: core CPI, seasonally adjusted, monthly; its MoM is A2 10, A5 A4 and A6 R5), A3/A5 VIX, S&P 500, FX */
-export const FRED_IDS = ["DGS10", "DGS2", "DFEDTARU", "BAMLH0A0HYM2", "UNRATE", "CPILFESL", "SAHMREALTIME", "IC4WSA", "NFCI", "VIXCLS", "SP500", "DEXKOUS", "DEXJPUS"] as const;
+/**
+ * A2 1–5 and 10 (CPILFESL: core CPI, seasonally adjusted, monthly; its MoM is A2 10, A5 A4 and A6 R5), A3/A5 VIX, S&P 500,
+ * FX; NASDAQ100 for the daily report's market table only (B2c-1, team-lead 0747)
+ */
+export const FRED_IDS = ["DGS10", "DGS2", "DFEDTARU", "BAMLH0A0HYM2", "UNRATE", "CPILFESL", "SAHMREALTIME", "IC4WSA", "NFCI", "VIXCLS", "SP500", "DEXKOUS", "DEXJPUS", "NASDAQ100"] as const;
 export type FredId = (typeof FRED_IDS)[number];
-/** what FRED does not carry, from Yahoo (0243: "^KS11처럼 FRED에 없는 것만") */
-export const YAHOO_INDICES = ["^KS11"] as const;
+/** what FRED does not carry, from Yahoo (0243: "^KS11처럼 FRED에 없는 것만"; ^SOX for the daily report, team-lead 0747) */
+export const YAHOO_INDICES = ["^KS11", "^SOX"] as const;
 export type YahooIndex = (typeof YAHOO_INDICES)[number];
+/** whose market days an index's bars are dated by */
+export const INDEX_MARKET: Readonly<Record<YahooIndex, "US" | "KR">> = { "^KS11": "KR", "^SOX": "US" };
 
 /** a FRED read lasts this long for everyone (the daily series move once a day; a 6-hour read catches the morning one) */
 export const FRED_CACHE_MS = 6 * 60 * 60_000;
@@ -100,17 +105,17 @@ export function yahooIndexUrl(symbol: YahooIndex): string {
   return `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
 }
 
-/** an index's daily bars from Yahoo (KOSPI: Korean market days), or null */
+/** an index's daily bars from Yahoo (KOSPI: Korean market days; the semiconductor index: US ones), or null */
 export async function indexBars(core: Core, symbol: YahooIndex): Promise<{ bars: Bar[]; asOf: string; source: { name: string; grade: "A" | "B+" } } | null> {
   const bars = await readThrough(
     core,
     "yahoo",
     yahooIndexUrl(symbol),
     (t) => {
-      const b = parseYahooDaily(t, (ms) => marketDate("KR", ms));
+      const b = parseYahooDaily(t, (ms) => marketDate(INDEX_MARKET[symbol], ms));
       return b && b.length ? b : null;
     },
-    (now) => dailyUntil("KR", now),
+    (now) => dailyUntil(INDEX_MARKET[symbol], now),
   );
   return bars ? { bars, asOf: bars.at(-1)!.t, source: SOURCE_TABLE.yahoo } : null;
 }

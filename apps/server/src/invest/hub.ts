@@ -1,10 +1,11 @@
 /**
  * The invest hub (agent-runtime 2006 §4–§6, 2052): the overview and its `invest` event, the 5-minute watch, alerts,
- * mock stop records, invest calls and the Toss status. One per app (`core.invest`). No model call anywhere here.
+ * mock stop records, invest calls and the Toss status. One per app (`core.invest`). The one model call is the daily
+ * report's words (report.ts, B2c-1), at most two per person and day.
  */
 import type { InvestCall, InvestOverview, InvestRuleRow, InvestSettingsView, InvestSymbolDetail, InvestSymbolRow, InvestTossStatus, InvestWatch } from "@pickle/protocol";
 import { atr, atText, num, pct, shares, type Bar } from "@pickle/quant";
-import { publishMessage, publishThread, type Core } from "../core.ts";
+import { publishMessage, publishThread, settingsOf, type Core } from "../core.ts";
 import { errInfo } from "../log.ts";
 import { dial, myPhoneView, PHONE_TOOL_TIMEOUT_MS, readMyPhone } from "../phone.ts";
 import { kstDate, kstParts, kstToEpoch } from "../kst.ts";
@@ -65,7 +66,29 @@ import {
   step,
   stopBasis,
 } from "./rules.ts";
-import { judgeDay, stagesView } from "./stages.ts";
+import {
+  assemble,
+  buildReport,
+  claimReport,
+  dueReports,
+  eventLines,
+  eventRowsAhead,
+  judgmentOf,
+  lastSent,
+  markSent,
+  readMarket,
+  recentReports,
+  reportHoldsReminders,
+  reportRecord,
+  retakeReport,
+  staleMaking,
+  takeCall,
+  writeWords,
+  type EtfInput,
+  type MarketRead,
+  type Stored,
+} from "./report.ts";
+import { judgeDay, stagesView, type JudgmentRow } from "./stages.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
 import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 
@@ -119,6 +142,7 @@ export class InvestHub {
   private ticking: Promise<{ slots: number; alerts: number }> | null = null;
   private reminding: Promise<number> | null = null;
   private judging: Promise<number> | null = null;
+  private reporting: Promise<number> | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private core: Core) {
@@ -142,8 +166,78 @@ export class InvestHub {
     await Promise.all([
       this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
       this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
-      this.judgeStages(now).catch((err) => this.core.log.error("invest stages failed", { err: errInfo(err) })),
+      this.judgeStages(now)
+        .catch((err) => this.core.log.error("invest stages failed", { err: errInfo(err) }))
+        .then(() => this.sendReports(now))
+        .catch((err) => this.core.log.error("invest report failed", { err: errInfo(err) })),
     ]);
+  }
+
+  /** after the day's readings: each person's 08:00 report whose row is not taken yet (report.ts; one run at a time) */
+  sendReports(now = this.core.now()): Promise<number> {
+    if (this.reporting) return this.reporting;
+    this.reporting = this.makeReports(now).finally(() => (this.reporting = null));
+    return this.reporting;
+  }
+
+  private async makeReports(now: number): Promise<number> {
+    const { core } = this;
+    if (!core.cfg.invest.sources) return 0;
+    const stale = staleMaking(core, now);
+    const due = dueReports(core, now);
+    if (!stale.length && !due.length) return 0;
+    const read = await readMarket(core);
+    let n = 0;
+    const one = async (id: string, row: JudgmentRow) => {
+      try {
+        if (await this.makeReport(id, row, read, now)) n++;
+      } catch (err) {
+        core.log.error("invest report failed", { user: row.user_id, err: errInfo(err) });
+      }
+    };
+    for (const r of stale) {
+      const row = judgmentOf(core, r.user_id, r.day);
+      if (row && retakeReport(core, r, now)) await one(r.id, row);
+    }
+    for (const row of due) {
+      const id = newId("ir");
+      // the row first: a second run or a restart finds it taken and calls no model for it
+      if (claimReport(core, id, row, now)) await one(id, row);
+    }
+    return n;
+  }
+
+  /** one person's report: code's sections, the model's words (calls counted on the row), then the card in one transaction */
+  private async makeReport(id: string, row: JudgmentRow, read: MarketRead, now: number): Promise<boolean> {
+    const { core } = this;
+    const { db } = core;
+    const userId = row.user_id;
+    const user = db.userById(userId);
+    if (!user) return false;
+    const knowsHoldings = this.holdingsByUser.has(userId);
+    const etf: EtfInput[] = [];
+    for (const w of idb.watchlist(db, userId)) {
+      const rules = idb.rules(db, userId, w.symbol);
+      if (!rules.length) continue;
+      etf.push({ symbol: w.symbol, market: w.market, rules, bars: await this.dailyBars(w.symbol, w.market, userId), held: knowsHoldings ? !!this.holding(userId, w.symbol) : null });
+    }
+    const prev = lastSent(core, userId, row.day);
+    const prevSeen = prev?.json ? (JSON.parse(prev.json) as Stored).seen : {};
+    const built = buildReport({ core, userId, row, read, etf, events: eventRowsAhead(core, userId, now), prevSeen, since: prev?.sent_at ?? row.at - 86_400_000, reportId: id, now });
+    if (!built) return false;
+    const words = await writeWords(core, built.input, () => takeCall(core, id));
+    // DD 0733 2: off keeps the report in the thread; only its push and banner stay home
+    const push = settingsOf(user).notifications.investReport;
+    const sent = db.tx(() => {
+      const claimed = (dueReminders(db, now).get(userId) ?? []).filter((r) => claimReminder(db, r, "daily", now));
+      const stored = assemble(built, words, eventLines(claimed, now), row.day, row.at);
+      const { threadId, messageId } = this.post(userId, stored.card, reportRecord(stored), { title: built.pushTitle, body: "" }, `report:${row.day}`, push);
+      noteReminderMessage(db, claimed, messageId);
+      if (!markSent(core, id, stored, threadId, messageId, core.now())) throw new Error("report already sent");
+      return true;
+    });
+    await this.publish(userId).catch((err) => core.log.error("invest publish failed", { err: errInfo(err) }));
+    return sent;
   }
 
   /** from 08:00 KST, today's stage reading for each invest user who has none (one run at a time) */
@@ -159,6 +253,7 @@ export class InvestHub {
     await this.ticking?.catch(() => undefined);
     await this.reminding?.catch(() => undefined);
     await this.judging?.catch(() => undefined);
+    await this.reporting?.catch(() => undefined);
   }
 
   // ───────────────────────────── settings and views ─────────────────────────────
@@ -321,7 +416,7 @@ export class InvestHub {
       stages: stagesView(this.core, userId, now),
       watchlist: wl.map((w) => this.symbolRow(userId, w, qs.get(w.symbol), blind)),
       rules: rs.map((r) => this.ruleRow(r, s.mode)),
-      reports: [],
+      reports: recentReports(this.core, userId, now),
       decks: [],
       settings: await this.settingsView(userId),
       quotesFoot,
@@ -702,7 +797,8 @@ export class InvestHub {
   /**
    * The D-1 reminders due now (events.ts): per person one card with every event of theirs due, each event's reminder
    * claimed in the same transaction that stores the card, so a second tick, a restart or a later path sends nothing.
-   * B2c: a person whose 08:00 daily report is on gets the line in it instead (the same claim, via "daily").
+   * B2c-1: for a person whose 08:00 report goes out today the card waits (up to an hour past 08:00) and the report
+   * carries the lines instead (the same claim, via "daily"); what the report did not take goes as a card after it.
    */
   remindEvents(now = this.core.now()): Promise<number> {
     if (this.reminding) return this.reminding;
@@ -716,6 +812,7 @@ export class InvestHub {
     const { core } = this;
     let sent = 0;
     for (const [userId, due] of dueReminders(core.db, now)) {
+      if (reportHoldsReminders(core, userId, now)) continue;
       try {
         sent += core.db.tx(() => {
           const rows = due.filter((r) => claimReminder(core.db, r, "card", now));
@@ -747,7 +844,7 @@ export class InvestHub {
   }
 
   /** store the card row in the invest thread, push it and its banner; returns the row id */
-  private post(userId: string, card: Parameters<Core["db"]["insertMessage"]>[0]["cards"] extends (infer C)[] | undefined ? C : never, record: string, banner: { title: string; body: string }, ruleId: string): { threadId: string; messageId: string } {
+  private post(userId: string, card: Parameters<Core["db"]["insertMessage"]>[0]["cards"] extends (infer C)[] | undefined ? C : never, record: string, banner: { title: string; body: string }, ruleId: string, notify = true): { threadId: string; messageId: string } {
     const { core } = this;
     const threadId = this.ensureThread(userId);
     const messageId = newId("m");
@@ -757,6 +854,7 @@ export class InvestHub {
     core.db.touchThread(threadId, now, banner.title);
     publishMessage(core, messageId);
     publishThread(core, threadId);
+    if (!notify) return { threadId, messageId };
     core.events.publish(userId, { type: "notification", title: banner.title, body: banner.body, threadId, messageId, icon: "chart" });
     // the lock screen gets the banner's title alone (DD 2042-b §4: symbol and event, no amount); one tag per rule
     core.track(core.push.send(userId, { title: banner.title, tag: `invest:${ruleId}`, threadId, messageId }));

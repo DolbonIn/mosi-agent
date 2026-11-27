@@ -578,4 +578,24 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (user_id, day)
   );
   `,
+  // v13 (B2c-1, A13 · A15, DD 0059 §2, team-lead 0747): one daily report per person and KST day. The row is taken
+  // before the model is called (state making), so a second beat or a restart never calls it again; calls counts the
+  // model calls (2 at most). json holds the eight sections and the card; the message is the invest thread's row.
+  `
+  CREATE TABLE invest_reports (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('making', 'sent')),
+    calls INTEGER NOT NULL DEFAULT 0,
+    judged_at INTEGER NOT NULL,
+    json TEXT,
+    thread_id TEXT,
+    message_id TEXT,
+    created_at INTEGER NOT NULL,
+    sent_at INTEGER,
+    UNIQUE (user_id, day)
+  );
+  CREATE INDEX invest_reports_user ON invest_reports (user_id, day DESC);
+  `,
 ];

@@ -688,8 +688,8 @@ The same voice, streamed as it is generated: first audio in about 0.25 s instead
 ## Invest (B1) — 나의 모시 > 투자
 Watch prices, keep price rules, alert. No model call anywhere in B1, and no order: the Toss client reads only
 (prices, holdings, sellable quantity). Types: `packages/protocol/src/invest.ts`. Code: `apps/server/src/invest/`.
-- `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages (B2b-2), reports: [],
-  decks: []}`. Every figure is a server string (`InvestNum {v, text, unit}`; @pickle/quant format.ts) — screens format
+- `GET /api/invest` → `InvestOverview {rev, mode, watchlist, rules, settings, quotesFoot, watch, stages (B2b-2), reports
+  (B2c-1), decks: []}`. Every figure is a server string (`InvestNum {v, text, unit}`; @pickle/quant format.ts) — screens format
   nothing. `watch.state`: `off` (no source on this server: "지금은 시세를 받지 않아요"; with live rules `foot` "그래서 규칙을
   확인하지 않아요.", plus " 토스증권을 연결하면 확인해요." on a server with Toss; `quotesFoot` null), `ok`, `closed`, `blind` (live rules
   and no quote for 15 minutes of a session; `tone` danger when a real sell stop is live, else caution; `foot` replaces
@@ -806,7 +806,7 @@ US event: "오늘은 2026-11-26(미 동부)예요."), "기한 2025-12-10은 이�
   does that day), one `invest_event` card per person in the invest thread with every event of theirs due (one row each,
   KST order; title the heading, or "일정 N개"), `disclaimer: true`, no buttons; banner and push title alone, push tag
   `invest:event:<day>`. Once per person, market, day and title by any path: the claim and the card are one transaction;
-  a deleted event added back sends nothing again; B2c's daily report takes the same claim when it carries the line. An
+  a deleted event added back sends nothing again; the 08:00 report (B2c-1) takes the same claim when it carries the line. An
   event the person or the model added at or after that 08:00 gets no D-1 (it was just said); one code added (author
   `code`) goes at the next beat (DD 0405 F).
 
@@ -862,8 +862,8 @@ rule (A12 · G8-5). Code: `apps/server/src/invest/tools.ts`, `proposals.ts`.
 
 No route and no model behind it; B2b-2's snapshot reads it. Code: `apps/server/src/invest/macro.ts`. FRED's fredgraph
 CSV (no key; `FRED · A`) for DGS10 DGS2 DFEDTARU BAMLH0A0HYM2 UNRATE CPILFESL SAHMREALTIME IC4WSA NFCI VIXCLS SP500
-DEXKOUS DEXJPUS, from the 1st of January three years back; Yahoo's chart JSON (`Yahoo(지연 시세) · B+`) only for what FRED does not
-carry (`^KS11`). The public-source rules hold for both hosts: nothing called unless `PICKLE_INVEST_SOURCES=on`, the
+DEXKOUS DEXJPUS and NASDAQ100 (B2c-1's market table), from the 1st of January three years back; Yahoo's chart JSON
+(`Yahoo(지연 시세) · B+`) only for what FRED does not carry (`^KS11` on Korean market days, `^SOX` on US ones, B2c-1). The public-source rules hold for both hosts: nothing called unless `PICKLE_INVEST_SOURCES=on`, the
 default User-Agent, one request at a time per host, a 403/429 or a 200 that is not the series rests that source until
 the next US market day (its figures read 확인 불가 meanwhile; a junk body is never cached), one read serves everyone (6 hours
 for FRED, Yahoo's daily rule for KOSPI). A day without a value (empty cell or ".") is a null point; the series' `asOf`
@@ -907,6 +907,59 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   the number is written on that page (sign aside; numbers inside addresses do not count). Else 400-style
   `ledger_unsourced` with the sentence, nothing saved. The person's own paths are unchanged.
 
+## Invest (B2c-1) — the 08:00 report
+
+Code: `apps/server/src/invest/report.ts` (A13 · A15, DD 1935 §2-4, DD 0059 §2, DD 0733, team-lead 0747).
+- **Who and when**: right after a person's stage reading of the KST day is stored (the same beat), every day, weekends
+  and holidays too, for each person the board judges. None when the server takes no public sources. No setting turns the
+  report off; `notifications.investReport` (default on) turns off its banner and push only: the card still goes to the
+  invest thread, unread.
+- **One row first** (migration v13 `invest_reports`, one per person and KST day, state `making` → `sent`): the row is
+  taken before the model is called and counts each call; two calls at most per person and day (a second only when the
+  first gave no good summary). A row a restart left `making` is taken again after 10 minutes with the calls it has left
+  (never a third). The model is one plain call (no tools, JSON back) and is not counted against `PICKLE_DAILY_TOKENS`.
+- **Code writes every number and word** but the summary's three lines (the main risk factor, the main recovery factor,
+  the market picture), §1's paragraph (2–5 sentences on the same three) and §7's cells. The stages, their change, the
+  missing data and the confidence are code's alone (DD 0828 1). The server checks what the model wrote: a number must be
+  one in the data it was given (sign aside; "200일선 · 50일선" are names), no probability with a number, no markdown
+  marks, no summary or §1 sentence on the stages, missing data or trust, the summary three sentences of at most 60
+  characters each (§1 120, §7 cells 40). A sentence that fails is left out; §7 is all or nothing (DD 0733 3); no good summary after the second call: `summaryNote` "오늘은
+  요약을 쓰지 못했어요." (caution), the same line in §1, §7 `empty` "오늘은 시나리오를 쓰지 못했어요.".
+- **The card** (`invest_daily`, A17 at the end): title "시장 위험 보고서", `atText` "12월 1일(화) 08:00", `holidayNote`
+  "휴장일이라 11월 25일(수) 마감 기준이에요." when a US holiday lies between the last session and 08:00 (a weekend alone is
+  not one); `highlights` at most two and `moreCount` — danger: high-yield 4.0%p or VIX 30 crossed upward; caution:
+  high-yield 3.5%p or VIX 25 crossed upward, the S&P 500 or KOSPI under its 200-day line, a rule expired or its
+  invalidation met since the last report; plain: a line crossed back down, back over the 200-day line. A crossing
+  compares the series' last two values and is told once (not again while the series has no newer value). `stageLine`
+  the board's heads, `stageSub` the change from the reading before (absent on the first) with `stageTone` danger when the
+  escape stage moves up to 4, caution when it moves up otherwise or the recovery stage moves down (a stage move is never
+  a top line, DD 0828 1a); `dataGap` "오늘 지표 N개를 받지 못했어요." (caution) for core indicators whose source did not
+  answer today, left out when `pending` already says so (nowhere to get one is the tally's and §1's confidence's, DD
+  0828 2); `tally`, `rows` (11지표 · 신호), `pending`, `events` (below), `deck {state: "none"}` until C, `foot` "기준 12월
+  1일 08:00 · FRED · Yahoo(지연 시세)" (up to three sources named; four or more: two and "외 N곳").
+- **Push**: title alone "시장 위험 보고서 · 탈출 3단계" / "… · 탈출 최소 2단계" (the card's name, DD 0828 6), body "", tag
+  `invest:report:<day>`.
+- **D-1**: for a person whose report goes out today the report carries the D-1 lines (`events {head "12월 2일 일정 4개",
+  rows ≤ 3 {title, value}}`) under the same claim (via `daily`), so no `invest_event` card goes for them. Until the
+  report is sent, and at most until 09:00 KST, the D-1 card waits; after that it goes on its own and the report carries
+  no line of it.
+- **`overview.reports`**: the last three sent, newest first: `{id, title "12월 1일(화) · 탈출 3 · 회복 최소 1" (탈출 최소 N
+  · 회복 보류 · 회복 미확정; another KST year named when read), line (the summary's first line or the no-summary line),
+  threadId, messageId}`.
+- `GET /api/invest/reports/:id` → `InvestReport {id, title "12월 1일 보고서", atText, sections[8], disclaimer: true}`
+  (another KST year named when read); someone else's or an unknown id: 404 `report_not_found` "볼 수 없는 보고서예요.".
+  Sections in A15's order: `conclusion` (the heads, the change, the paragraph or `note`, 판정 신뢰도 높음 with none of
+  the 11 unknown, 보통 with 1–3, 낮음 with 4 or more), `market` (S&P500 · 나스닥100 · 필라델피아 반도체 지수 · 코스피 · VIX
+  · 10년물 · 2년물 · 하이일드 스프레드 · 엔/달러 · 원/달러: the last value, `변화 … · as-of · source · grade`; missing
+  "오늘 받지 못했어요"), `core11` (the board's rows), `worse` · `recovery` (the gauges, only the met conditions, the
+  board's next lines), `etf` (per watched symbol with rules: the last daily close, buy zone, targets and stop with
+  "보유 중일 때만 해당" unless Toss says it is held, 예상 수익률 · 예상 손실률 "(추정)", 손익비 "2.09" or "2.09 / 3.73" with
+  a 2nd target, 진입 조건 — A10's price and market together, the market half not checked (team-lead 0747 8a): in the
+  zone "확인 대기 · 가격 구간 도달", out of it "미충족 · 가격이 구간 위예요 | 아래예요" — and always 전략: "재검토 필요" with
+  the reason when a rule expired or its invalidation was met, else "만료·무효화 없음"), `scenarios` (다음 거래일 · 5거래일 · 20거래일 × 상승 ·
+  횡보 · 하락, words only), `events` (the next 8, KST first).
+- 컨센서스: 받을 곳 없음 (A15 §8's column is left out until there is somewhere to get it; DD 0733 6).
+
 ## Web Push (B1c) — the lock-screen line
 
 - Nothing is sent unless the server env has `PICKLE_PUSH_SUBJECT` (`mailto:` or `https:`, the VAPID contact; team-lead
@@ -927,7 +980,8 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
 - What is sent (`WebPushPayload`, RFC 8291 aes128gcm + RFC 8292 VAPID, TTL 4 h, urgency high): `{v: 1, title, body: "",
   tag, threadId?, messageId?}`. The title is the invest banner's title (DD 2042-b §4: symbol and event, e.g. "SOXL 손절 관찰가
   도달", "SOXL 모의 손절 기록", "SOXL 감시 기간 끝"; blind is "시세 확인 멈춤" with no row); no amount, quantity or average price.
-  `tag` is `invest:<ruleId>` (a later line of the same rule replaces it) or `invest:blind`; a tap opens the row.
+  `tag` is `invest:<ruleId>` (a later line of the same rule replaces it), `invest:event:<day>`, `invest:report:<day>` or
+  `invest:blind`; a tap opens the row.
 - A push service's 404/410 drops the subscription; anything else (429, 5xx, no answer) keeps it with its status, no retry.
   Pushes go out after the card is stored, in the background: a slow push service never holds the watch. Endpoints are
   never logged.

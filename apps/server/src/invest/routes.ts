@@ -10,6 +10,7 @@ import { bad, HttpError, json, notFound, readJson, type Ctx } from "../http.ts";
 import { newId } from "../util.ts";
 import { marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import * as idb from "./db.ts";
+import { reportView } from "./report.ts";
 import { stagesDetail } from "./stages.ts";
 import { createEvent, deleteEvent, listEvents, setEventRemind } from "./events.ts";
 import { createForecast, ERROR_CAUSES, ERROR_CAUSE_WORD, forecastRows, forecastScore, judgeForecast, listForecasts, OUTCOMES, OUTCOME_WORD } from "./forecasts.ts";
@@ -48,6 +49,7 @@ export const INVEST_ERRORS = {
   toss_check_too_soon: "조금 뒤에 다시 확인해 주세요.",
   too_many_watch: `감시 종목은 ${MAX_WATCH}개까지 둘 수 있어요.`,
   too_many_rules: `규칙은 ${MAX_RULES}개까지 둘 수 있어요.`,
+  report_not_found: "볼 수 없는 보고서예요.",
 } as const;
 
 /** ?limit=N, a whole number; anything else is the route's default */
@@ -278,6 +280,12 @@ export function investRoutes(core: Core) {
   return {
     overview: async (_c: Ctx, userId: string) => json(await hub().overview(userId)),
     stages: async (_c: Ctx, userId: string) => json(stagesDetail(core, userId, core.now())),
+    /** B2c-1: one sent daily report of the person's own (anyone else's reads as missing) */
+    report: async (c: Ctx, userId: string) => {
+      const r = c.params.id ? reportView(core, userId, c.params.id, core.now()) : null;
+      if (!r) throw notFound(INVEST_ERRORS.report_not_found, "report_not_found");
+      return json(r);
+    },
 
     symbol: async (c: Ctx, userId: string) => {
       const symbol = normalizeSymbol(c.params.symbol);

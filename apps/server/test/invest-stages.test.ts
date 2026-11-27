@@ -199,6 +199,8 @@ describe("the day's judgment (v12)", () => {
     h.clock.t = KST(2027, 1, 1, 7, 0);
     const early = (await alice.overview()).stages as { stale?: string; judgedText: string };
     expect([early.stale, early.judgedText]).toEqual([undefined, "2026년 12월 31일 08:00 판정 · 2026년 12월 30일 판정과 같아요"]);
+    // DD 0731 E5: on the same screen the as-of days take their year by the reading time too
+    expect((await alice.detail()).core11.find((r) => r.no === 1)?.basis).toBe("2026년 11월 27일 · FRED · A");
     h.clock.t = KST(2027, 1, 1, 9, 0);
     expect(((await alice.overview()).stages as { stale?: string }).stale).toBe("오늘 08:00 판정을 하지 못했어요. 2026년 12월 31일 판정이에요.");
     await judgeAt(h, KST(2027, 1, 1, 9, 0));

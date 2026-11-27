@@ -4,7 +4,7 @@ import { isRecord } from "./util.ts";
 
 export function defaultSettings(): UserSettings {
   return {
-    notifications: { briefing: true, taskDone: true, friendMessages: true, marketing: false, briefingTime: "07:30" },
+    notifications: { briefing: true, investReport: true, taskDone: true, friendMessages: true, marketing: false, briefingTime: "07:30" },
     privacy: { friendsCanSeeSchedule: false, friendsCanAskMyPickle: true, shareLocation: false, memoryEnabled: true },
     display: { theme: "system", reduceMotion: "system", reduceTransparency: "system", textScale: 1 },
     confirmBeforeSend: true,
@@ -21,7 +21,7 @@ const hhmm: Validator = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\
 const scale: Validator = (v) => typeof v === "number" && Number.isFinite(v) && v >= 0.9 && v <= 1.3;
 
 const SCHEMA: Record<string, Record<string, Validator> | Validator> = {
-  notifications: { briefing: bool, taskDone: bool, friendMessages: bool, marketing: bool, briefingTime: hhmm },
+  notifications: { briefing: bool, investReport: bool, taskDone: bool, friendMessages: bool, marketing: bool, briefingTime: hhmm },
   privacy: { friendsCanSeeSchedule: bool, friendsCanAskMyPickle: bool, shareLocation: bool, memoryEnabled: bool },
   display: {
     theme: oneOf("system", "light", "dark"),
