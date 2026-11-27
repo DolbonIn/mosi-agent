@@ -14,7 +14,7 @@ import { prewarmAudio } from "./call/audioUnlock";
 import { useKeptThread, useShownThread } from "./catchUp";
 import { launchCall } from "./call/launch";
 import { Composer } from "./Composer";
-import { dropStoppedSteers, errorAnchorOf, errorRowAfter, markReceipt, turnStarted, useReceipts } from "./composerStore";
+import { dropStoppedSteers, errorAnchorOf, errorRowAfter, markReceipt, turnStarted, useErrorWait, useReceipts } from "./composerStore";
 import { EmptyThread } from "./EmptyThread";
 import { DateSeparator, DraftRow, draftHasContent, FollowUpRow, markSchedulesSeen, MessageRow, offerScheduleUndo, peerFace, type RowContext } from "./Messages";
 import { arrivedBelow, type NewsMark } from "./newsBelow";
@@ -415,8 +415,11 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   const lastFailed = data.failed[data.failed.length - 1];
   // the turn failed with nothing of theirs left unsent (the error row below). The lines it had read lose "하던 일에
   // 이어서 전했어요" when the server names them (`steers_dropped`, composerStore, for any turn that failed); a line it
-  // left queued keeps the receipt, a follow-up turn answers it
-  const turnFailed = !!data.error && !lastFailed && !data.streaming;
+  // left queued keeps the receipt, a follow-up turn answers it. With such lines just above its place the row waits a
+  // moment for that notice (useErrorWait), so no frame draws it above a receipt that is about to go; the wait row stays
+  // meanwhile and gives way to it in the same commit (DraftRow held)
+  const errorWaits = useErrorWait(threadId);
+  const turnFailed = !!data.error && !lastFailed && !data.streaming && !errorWaits;
   const receipts = useReceipts();
   // that row stays with the turn that failed: right after its rows (errorAnchorOf, above the lines it handed to a
   // follow-up turn: errorRowAfter). What comes later (the follow-up's answer, a line from another device, its wait row)
@@ -462,8 +465,9 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
           }),
           live && <Row key={live.id} m={live} prev={items[items.length - 1]} ctx={ctx} failed={false} fresh={false} live streaming={data.streaming} />,
         ]}
-        <DraftRow draft={data.draft} streaming={data.streaming} ctx={ctx} onStop={stop} />
-        <FollowUpRow tail={items.slice(-4).map((m) => `${m.id}:${m.role}`).join(",")} streaming={data.streaming} spec={friend ? null : ctx.agentSpec} />
+        {/* while the error row waits (errorWaits) the turn's rows stay as they were: its wait row, no follow-up row yet */}
+        <DraftRow draft={data.draft} streaming={data.streaming} held={errorWaits} ctx={ctx} onStop={stop} />
+        <FollowUpRow tail={items.slice(-4).map((m) => `${m.id}:${m.role}`).join(",")} streaming={data.streaming || errorWaits} spec={friend ? null : ctx.agentSpec} />
         {footer}
         {errorAt === null && errorRow}
       </div>

@@ -329,9 +329,15 @@ export const draftHasContent = (draft: StreamingDraft | null): boolean =>
  * The running turn (MOTION-SPEC §8.4 first-token timeline): 0–150 ms nothing → the turn head with a still one-line
  * placeholder → at 1 s the status text → from 2 s the elapsed seconds → after 15 s without events "오래 걸리고
  * 있어요 · 멈추기". The head is the one the answer keeps: the face stays put and the first line lands under it.
+ * `held`: the turn has ended but its error row waits for the server's `steers_dropped` (composerStore useErrorWait): the
+ * row stays as it was last drawn, its seconds stopped and 멈추기 doing nothing, until the error row takes its place in
+ * one commit (DD 1741: no frame with neither).
  */
-export function DraftRow({ draft, streaming, ctx, onStop }: { draft: StreamingDraft | null; streaming: boolean; ctx: RowContext; onStop: () => void }) {
+export function DraftRow({ draft, streaming, held = false, ctx, onStop }: { draft: StreamingDraft | null; streaming: boolean; held?: boolean; ctx: RowContext; onStop: () => void }) {
   const [now, setNow] = useState(() => performance.now());
+  const shown = useRef<ReactNode>(null);
+  const heldNow = useRef(held);
+  heldNow.current = held;
   const started = turnStarted.get(ctx.threadId) ?? now;
   const stalled = useIsland((s) => s.stalled && s.threadId === ctx.threadId);
   const hasContent = draftHasContent(draft);
@@ -353,12 +359,16 @@ export function DraftRow({ draft, streaming, ctx, onStop }: { draft: StreamingDr
     if (draft?.cards.length) offerScheduleUndo(draft.cards);
   }, [draft?.cards]);
 
-  // with content the answer is a row of the list (ThreadView → MessageRow live), so the final message takes it over
-  if ((!streaming && !draft) || hasContent) return null;
-  if (!streaming || elapsed < 120) return null;
+  if (held) return shown.current;
+  // with content the answer is a row of the list (ThreadView → MessageRow live), so the final message takes it over;
+  // nothing before 120 ms
+  if (!streaming || hasContent || elapsed < 120) return (shown.current = null);
   const status = draft?.status || "생각하는 중";
   const secs = Math.floor(elapsed / 1000);
-  return (
+  const stopUnlessHeld = () => {
+    if (!heldNow.current) onStop();
+  };
+  return (shown.current = (
     <div className="msg-row msg-asst msg-live" data-placeholder="" aria-busy="true">
       <div className="asst asst-wait">
         <WaitHead spec={ctx.thread?.kind === "friend" ? null : ctx.agentSpec}>
@@ -374,14 +384,14 @@ export function DraftRow({ draft, streaming, ctx, onStop }: { draft: StreamingDr
         {stalled && (
           <span className="wait-stall">
             오래 걸리고 있어요 ·{" "}
-            <button type="button" className="wait-stop" onClick={onStop}>
+            <button type="button" className="wait-stop" onClick={stopUnlessHeld}>
               멈추기
             </button>
           </span>
         )}
       </div>
     </div>
-  );
+  ));
 }
 
 /**

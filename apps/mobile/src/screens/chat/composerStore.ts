@@ -111,6 +111,7 @@ onServerEvent((e) => {
   for (const id of e.messageIds) droppedSteers.add(id);
   const s = receipts.get();
   forget(e.messageIds.filter((id) => s[id] === "steered"));
+  endErrorWait(e.threadId); // the same task as the receipts it took: one render draws the row without them
 });
 /** a `steers_dropped` named this line: its turn stopped or failed and nothing will answer it (the call asks for its notes) */
 export const steerDropped = (id: ID) => droppedSteers.has(id);
@@ -195,12 +196,58 @@ messagesStore.subscribe(() => {
     }
   }
   for (const id in s) if (s[id] !== prev[id] && !errorAnchor.has(id)) anchorError(id);
+  for (const id in s) {
+    const t = s[id]!;
+    const p = prev[id];
+    if (t === p) continue;
+    if (!t.error) endErrorWait(id);
+    else if (!t.streaming && !(p?.error && !p.streaming)) waitForDrops(id, t.items); // the row goes up now
+  }
 });
 onServerEvent((e) => {
-  if (e.type === "turn_error") anchorError(e.threadId); // events.ts set the error first; listeners run after
+  if (e.type !== "turn_error") return;
+  anchorError(e.threadId); // events.ts set the error first; listeners run after
+  // a row already up moves to this turn's end (a follow-up failed too): it waits there as a new one does
+  const t = messagesStore.get()[e.threadId];
+  if (t?.error && !t.streaming) waitForDrops(e.threadId, t.items);
 });
 /** the row this thread's error row follows (undefined: no error row, or its rows are not loaded yet) */
 export const errorAnchorOf = (threadId: ID): ID | null | undefined => errorAnchor.get(threadId);
+
+/**
+ * An error row that waits a moment for the server's `steers_dropped` (DD 0010). It goes up (the turn's stream closed,
+ * or a `turn_error` came) with the person's lines just above its place still marked "하던 일에 이어서 전했어요", so it
+ * would go above them (errorRowAfter). The server names the lines the failed turn had read before that stream closes,
+ * or right after the `turn_error`, but on /api/events: another connection than the turn's stream, which may come a frame
+ * later. Drawn at once, the row stood one frame above a line whose receipt then went, and moved below it. So it waits
+ * for that notice, at most ERROR_WAIT_MS: a turn that read none of those lines names none (they go to a follow-up turn
+ * and keep their receipts), and a notice that comes even later takes its receipts with the row up.
+ */
+export const ERROR_WAIT_MS = 250;
+const errorWait = createStore<Record<ID, true>>({});
+const waitTimers = new Map<ID, ReturnType<typeof setTimeout>>();
+function waitForDrops(threadId: ID, items: readonly Row[]) {
+  const anchor = errorAnchor.get(threadId);
+  const at = anchor ? items.findIndex((m) => m.id === anchor) : -1;
+  const s = receipts.get();
+  if (at < 0 || errorRowAfter(items, anchor, (id) => s[id] === "steered") === at) return;
+  clearTimeout(waitTimers.get(threadId));
+  waitTimers.set(threadId, setTimeout(() => endErrorWait(threadId), ERROR_WAIT_MS));
+  if (!errorWait.get()[threadId]) errorWait.set((p) => ({ ...p, [threadId]: true }));
+}
+function endErrorWait(threadId: ID) {
+  clearTimeout(waitTimers.get(threadId));
+  waitTimers.delete(threadId);
+  if (!errorWait.get()[threadId]) return;
+  errorWait.set((p) => {
+    const next = { ...p };
+    delete next[threadId];
+    return next;
+  });
+}
+/** this thread's error row waits for the server's `steers_dropped` (ThreadView keeps it off screen meanwhile) */
+export const useErrorWait = (threadId: ID) => useStore(errorWait, (s) => !!s[threadId], Object.is);
+export const errorWaiting = (threadId: ID): boolean => !!errorWait.get()[threadId];
 /**
  * Where the error row goes among `items`: the index of the row it follows. That is its anchor, moved up past the
  * person's lines still marked "하던 일에 이어서 전했어요" (`steered`): the failed turn never read them, a follow-up turn
