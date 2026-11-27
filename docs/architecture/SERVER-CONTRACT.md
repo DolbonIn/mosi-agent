@@ -1032,6 +1032,47 @@ Code: `apps/server/src/invest/intraday.ts` (pure), `hub.ts`, `cards.ts` (A14 매
 - `InvestAlertCard.ruleId` is absent on a symbol's own card (gap, split). Cards say "ATR 1.5배"; ATR14 is named in this
   contract and the ledger only.
 
+## Invest (B2d-2a) — new events from public calendars
+
+Code only: no route, no model, nobody's token (`apps/server/src/invest/discovery.ts`, on the hub's 30-second beat, one
+run at a time; team-lead 0052 B2d, 1550, 1618; DD 1551). From 07:00 KST every day, weekends and holidays too, the KST
+day's row in `invest_discovery` is taken first (as the 08:00 report's row), so a second beat or a restart reads nothing
+again that day; a run cut short is not retaken (the next day finds the same events). Nothing is called unless
+`PICKLE_INVEST_SOURCES=on`; B2e-0's public-source rules hold for the three hosts, one after another: a 403/429 or a 200
+that is not the calendar rests that host until the next US market day and the run goes on without it (the day's result
+keeps `{code, found: 0, text: "확인 불가"}` for it).
+- **Federal Register** (`연방관보 · A`, DD 1711; one fixed query for everyone, team-lead 1550 3): `documents.json`, the
+  Industry and Security Bureau and USTR, type RULE, significant, effective from the ET day. Kept: a significant document
+  with a document number, an effective date and its federalregister.gov address whose title or abstract says
+  semiconductor, export control, Section 232 or Section 301. USTR or a tariff word (Section 232/301, tariff, duty) reads
+  `미국 관세 규정 시행`, else `미국 수출통제 규정 시행`; no time, kind `policy`, url the document, item `fr:<number>`.
+- **FOMC** (`연준 · A`): fomccalendars.htm, each "YYYY FOMC Meetings" panel; the decision is a meeting's last day (across
+  a month too, "Apr/May 30-1") at 14:00 ET, `FOMC 금리 결정`, kind `policy`, item `fomc:<first day>`. A notation vote or
+  other words in the days is left out.
+- **BLS** (`BLS · A`): bls.ics; CPI, the Employment Situation and PPI (items `cpi:2026-11` · `nfp:…` · `ppi:…` by the
+  reference month, the release day `ppi:2026-12-11` when none is written; team-lead 1712), DTSTART a US Eastern wall
+  time, UTC or a date. `미국 11월 CPI 발표` · `미국 11월 고용보고서 발표` · `미국 11월 PPI 발표` with the reference month only
+  when the event writes "Month YYYY" (else `미국 CPI 발표`: never guessed, DD 1551); kind `macro`, url the release
+  schedule page.
+- **What goes in** (team-lead 1647): from the market's today, FOMC and BLS up to `EVENT_SPAN_DAYS` (60, the calendar's
+  default window; the run rolls it on daily) ahead, the Federal Register up to `EVENT_MAX_DAYS` (732, the draft's two years). Each person with invest settings (B2b-1) gets each find as author
+  `code`, `sourceTier` T1, the source's name and grade, `remind` on; day the market's date and time its wall clock as any
+  US event (`when` shows the KST day first, "12월 10일 04:00(미 동부 14:00)", DD 1551). Left alone, no error: the same
+  market, day and title already there (the person's own too, unchanged), a find that person deleted, a person at 200
+  upcoming.
+- **Deleting a find** (`DELETE /api/invest/events/:id` on a row that has `disc_source` and `disc_item`) marks
+  `invest_event_dismissed (user_id, source, item, day, symbol '')` in the same transaction (team-lead 1618). A mark is
+  matched by source, item and symbol (team-lead 1712: an item names one occurrence, so a find the source moves stays
+  deleted; the day is kept as a record): that person's later runs skip it, others keep theirs. Deleting the person's or
+  the model's own event marks nothing.
+- **Nothing announces a find** (DD 1551 6): the calendar, the 08:00 report's events and D-1 show it as any code event (a
+  find dated tomorrow goes at that 08:00 KST D-1).
+- **Not yet**: a find the source later moves or drops stays as it was (a run only adds); BEA and the BoK's MPC
+  (B2d-2b), company earnings (B2d-2c).
+- v14, additive, no rollback: `invest_discovery (day PK, state running|done, started_at, finished_at, result JSON)`,
+  `invest_event_dismissed (user_id → users cascade, source, item, day, symbol '', dismissed_at; PK the first five)`,
+  `invest_events.disc_source` and `disc_item` (null on rows before v14 and on the person's and the model's).
+
 ## Web Push (B1c) — the lock-screen line
 
 - Nothing is sent unless the server env has `PICKLE_PUSH_SUBJECT` (`mailto:` or `https:`, the VAPID contact; team-lead

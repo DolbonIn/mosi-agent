@@ -473,7 +473,7 @@ export function investRoutes(core: Core) {
     patchEvent: async (c: Ctx, userId: string) => json(setEventRemind(core.db, userId, c.params.id, await readJson(c.req), core.now())),
 
     removeEvent: async (c: Ctx, userId: string) => {
-      deleteEvent(core.db, userId, c.params.id);
+      deleteEvent(core.db, userId, c.params.id, core.now());
       return json({ ok: true });
     },
   };

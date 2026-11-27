@@ -598,4 +598,28 @@ export const MIGRATIONS: string[] = [
   );
   CREATE INDEX invest_reports_user ON invest_reports (user_id, day DESC);
   `,
+  // v14 (B2d-2a, team-lead 1550 · 1618): new events found in public calendars once a day from 07:00 KST. The KST day's
+  // run row is taken first (one run a day; a second beat or a restart reads nothing again). A found event keeps its
+  // source and item; deleting it marks that key for the person (source · item · day · symbol, '' without a symbol), so
+  // the next run does not put it back.
+  `
+  CREATE TABLE invest_discovery (
+    day TEXT PRIMARY KEY,
+    state TEXT NOT NULL CHECK (state IN ('running', 'done')),
+    started_at INTEGER NOT NULL,
+    finished_at INTEGER,
+    result TEXT
+  );
+  ALTER TABLE invest_events ADD COLUMN disc_source TEXT;
+  ALTER TABLE invest_events ADD COLUMN disc_item TEXT;
+  CREATE TABLE invest_event_dismissed (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    source TEXT NOT NULL,
+    item TEXT NOT NULL,
+    day TEXT NOT NULL,
+    symbol TEXT NOT NULL DEFAULT '',
+    dismissed_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, source, item, day, symbol)
+  );
+  `,
 ];

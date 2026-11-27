@@ -49,6 +49,9 @@ export interface EventRow {
   remind: number;
   created_at: number;
   updated_at: number;
+  /** a found event's source and item (discovery.ts, v14); null for the person's and the model's */
+  disc_source: string | null;
+  disc_item: string | null;
 }
 
 const invalid = invalidOf("invalid_event");
@@ -115,7 +118,7 @@ function checkEvent(body: unknown, now: number) {
   return { market, day: b.day, time, kind, title, symbol, ...sourceOf(b, invalid), remind: b.remind !== false };
 }
 
-export function createEvent(db: Db, userId: string, body: unknown, author: InvestAuthor, now: number): InvestEvent {
+export function createEvent(db: Db, userId: string, body: unknown, author: InvestAuthor, now: number, disc?: { source: string; item: string }): InvestEvent {
   const e = checkEvent(body, now);
   return db.tx(() => {
     const same = db.sql.query("SELECT * FROM invest_events WHERE user_id = $u AND market = $m AND day = $d AND title = $t").get({ u: userId, m: e.market, d: e.day, t: e.title }) as EventRow | null;
@@ -139,6 +142,8 @@ export function createEvent(db: Db, userId: string, body: unknown, author: Inves
       remind: e.remind ? 1 : 0,
       created_at: now,
       updated_at: now,
+      disc_source: disc?.source ?? null,
+      disc_item: disc?.item ?? null,
     };
     const cols = Object.keys(row);
     db.sql.query(`INSERT INTO invest_events (${cols.join(", ")}) VALUES (${cols.map((c) => `$${c}`).join(", ")})`).run(row as unknown as Record<string, string | number | null>);
@@ -161,9 +166,16 @@ export function setEventRemind(db: Db, userId: string, id: string | undefined, b
   return eventView(db, { ...r, remind: b.remind ? 1 : 0, updated_at: now }, now);
 }
 
-export function deleteEvent(db: Db, userId: string, id: string | undefined): void {
+/** a found event deleted is marked for that person (team-lead 1550 5, 1618), so discovery does not put it back */
+export function deleteEvent(db: Db, userId: string, id: string | undefined, now = Date.now()): void {
   const r = eventRow(db, userId, id);
-  db.sql.query("DELETE FROM invest_events WHERE id = $id AND user_id = $u").run({ id: r.id, u: userId });
+  db.tx(() => {
+    db.sql.query("DELETE FROM invest_events WHERE id = $id AND user_id = $u").run({ id: r.id, u: userId });
+    if (r.disc_source && r.disc_item)
+      db.sql
+        .query("INSERT OR IGNORE INTO invest_event_dismissed (user_id, source, item, day, symbol, dismissed_at) VALUES ($u, $s, $i, $d, $y, $n)")
+        .run({ u: userId, s: r.disc_source, i: r.disc_item, d: r.day, y: r.symbol ?? "", n: now });
+  });
 }
 
 export function listEvents(db: Db, userId: string, q: { from?: string | null; to?: string | null }, now: number): InvestEvent[] {

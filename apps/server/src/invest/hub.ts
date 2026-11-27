@@ -26,6 +26,7 @@ import {
   type Market,
   type Slot,
 } from "./calendar.ts";
+import { discoverDay, type DiscoveryResult } from "./discovery.ts";
 import { claimReminder, dueReminders, eventCard, eventRecord, noteReminderMessage } from "./events.ts";
 import { writeLedger } from "./ledger.ts";
 import { expireProposals } from "./proposals.ts";
@@ -153,6 +154,7 @@ export class InvestHub {
   private reminding: Promise<number> | null = null;
   private judging: Promise<number> | null = null;
   private reporting: Promise<number> | null = null;
+  private discovering: Promise<DiscoveryResult | null> | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private core: Core) {
@@ -176,11 +178,19 @@ export class InvestHub {
     await Promise.all([
       this.tick(now).catch((err) => this.core.log.error("invest tick failed", { err: errInfo(err) })),
       this.remindEvents(now).catch((err) => this.core.log.error("invest D-1 failed", { err: errInfo(err) })),
+      this.discover(now).catch((err) => this.core.log.error("invest discovery failed", { err: errInfo(err) })),
       this.judgeStages(now)
         .catch((err) => this.core.log.error("invest stages failed", { err: errInfo(err) }))
         .then(() => this.sendReports(now))
         .catch((err) => this.core.log.error("invest report failed", { err: errInfo(err) })),
     ]);
+  }
+
+  /** from 07:00 KST, the day's new events from the public calendars (discovery.ts; one run at a time, one a day) */
+  discover(now = this.core.now()): Promise<DiscoveryResult | null> {
+    if (this.discovering) return this.discovering;
+    this.discovering = discoverDay(this.core, this.gate, now).finally(() => (this.discovering = null));
+    return this.discovering;
   }
 
   /** after the day's readings: each person's 08:00 report whose row is not taken yet (report.ts; one run at a time) */

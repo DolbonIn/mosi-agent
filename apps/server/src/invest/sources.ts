@@ -1,6 +1,7 @@
 /**
  * Public sources for the invest watch (agent-runtime 2052 §A-4, team-lead 2045 and its 21:2x correction): Yahoo chart
- * JSON for quotes and daily bars, and since B2e-0 (team-lead 0243) FRED's fredgraph CSV for the macro series (macro.ts).
+ * JSON for quotes and daily bars, and since B2e-0 (team-lead 0243) FRED's fredgraph CSV for the macro series (macro.ts);
+ * since B2d-2a the calendars new events are found in (discovery.ts): the Federal Register, the Fed's FOMC page, BLS.
  * Toss (the person's own key) is toss.ts. Stooq is out: it answers this server with a JavaScript browser
  * check instead of its CSV (mobile-foundation 2118), and a bot check is never worked around.
  *
@@ -14,7 +15,9 @@ import type { Core } from "../core.ts";
 import { nextMarketDayStart, type Market } from "./calendar.ts";
 import { cacheGet, cachePut, sourcePausedUntil, sourceRecord } from "./db.ts";
 
-export type SourceKey = "toss" | "yahoo" | "fred";
+/** the calendars discovery.ts reads (B2d-2a) */
+export type DiscoverySource = "fedreg" | "fomc" | "bls";
+export type SourceKey = "toss" | "yahoo" | "fred" | DiscoverySource;
 export type PublicSource = Exclude<SourceKey, "toss">;
 
 /** the source table (2006 §3, 2045 §12-12): name and grade as screens show them */
@@ -22,6 +25,9 @@ export const SOURCE_TABLE: Readonly<Record<SourceKey, { name: string; grade: "A"
   toss: { name: "토스증권", grade: "A" },
   yahoo: { name: "Yahoo(지연 시세)", grade: "B+" },
   fred: { name: "FRED", grade: "A" },
+  fedreg: { name: "연방관보", grade: "A" }, // DD 1711: the Federal Register as Korean readers know it
+  fomc: { name: "연준", grade: "A" },
+  bls: { name: "BLS", grade: "A" },
 };
 
 /** keyed public APIs a person may connect later (2045 and its correction): listed, never called in B1 */
@@ -33,7 +39,13 @@ export const KEYED_SOURCES = [
 ] as const;
 
 export const SOURCE_TIMEOUT_MS = 10_000;
-const HOSTS: Readonly<Record<PublicSource, string>> = { yahoo: "query1.finance.yahoo.com", fred: "fred.stlouisfed.org" };
+const HOSTS: Readonly<Record<PublicSource, string>> = {
+  yahoo: "query1.finance.yahoo.com",
+  fred: "fred.stlouisfed.org",
+  fedreg: "www.federalregister.gov",
+  fomc: "www.federalreserve.gov",
+  bls: "www.bls.gov",
+};
 
 export type SourceResult =
   | { ok: true; status: number; text: string }

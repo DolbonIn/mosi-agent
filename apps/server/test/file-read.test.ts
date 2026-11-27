@@ -629,7 +629,7 @@ describe("a schedule's file", () => {
     expect(cols()).not.toContain("attachment_id");
     const again = new Db(join(h.dir, "pickle.db"));
     expect(again.schemaVersion).toBe(MIGRATIONS.length);
-    expect(MIGRATIONS.length).toBe(13);
+    expect(MIGRATIONS.length).toBe(14);
     again.close();
     expect(cols()).toEqual(expect.arrayContaining(["attachment_id", "attachment_name"]));
     const [s] = await schedules(me.token);

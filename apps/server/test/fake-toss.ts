@@ -63,6 +63,10 @@ export function makeInvestUpstream() {
     yahooDaily: new Map<string, Bar[]>(),
     /** FRED fredgraph CSV per series id: the body to send, or a status (403, 429, 500); an id not set answers 404 */
     fred: new Map<string, string | number>(),
+    /** B2d-2a's calendars: the body each answers with, or a status (403, 429, 500); unset answers 404 */
+    fedreg: null as string | number | null,
+    fomc: null as string | number | null,
+    bls: null as string | number | null,
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -203,6 +207,12 @@ export function makeInvestUpstream() {
       if (v === undefined) return new Response("Not Found", { status: 404 });
       return new Response(v, { status: 200, headers: { "content-type": "text/csv" } });
     }
+
+    const calendar = (v: string | number | null, type: string) =>
+      typeof v === "number" ? new Response("blocked", { status: v }) : v === null ? new Response("Not Found", { status: 404 }) : new Response(v, { status: 200, headers: { "content-type": type } });
+    if (url.host === "www.federalregister.gov" && url.pathname === "/api/v1/documents.json") return calendar(state.fedreg, "application/json");
+    if (url.host === "www.federalreserve.gov" && url.pathname === "/monetarypolicy/fomccalendars.htm") return calendar(state.fomc, "text/html");
+    if (url.host === "www.bls.gov" && url.pathname === "/schedule/news_release/bls.ics") return calendar(state.bls, "text/calendar");
 
     throw new Error(`fake upstream: unexpected ${url.host}`);
   }) as typeof fetch;
