@@ -10,9 +10,11 @@ import { copy, glued } from "../../../ui/Text";
 /**
  * The rule change confirmation (DD 1935 §2-3; G8-5, A12): the model only proposes, the server changes the rule only
  * after the person presses 바꾸기 here. A question, exactly what changes (지금 → 바꿀 값, unchanged fields not listed),
- * the reason with its basis, the exact result, a danger line when the new stop is above the price, then two buttons:
+ * the reason with its basis, the exact result, a danger line when the new stop is above the price (only while it asks:
+ * DD 0636), then two buttons:
  * side by side with 바꾸기 on the right when both labels fit, else both full width, 바꾸기 on top (DD 1949). A real
- * sell rule's 바꾸기 is a ConfirmButton (hold 1.2 s or tap twice). Decided, the buttons give way to one foot line.
+ * sell rule's 바꾸기 is a ConfirmButton (hold 1.2 s or tap twice). Decided, the buttons give way to one foot line and the
+ * danger line goes (nothing is asked any more; the reason and the result stay as the record, the foot line says how it went).
  * The answer is the server's: the loader runs until it answers, and the card takes the card the server sends back.
  * Until a press here is answered the card is the message's own, so a later word from the server (another device
  * decided, the proposal expired: the message comes again) is drawn as it comes (lead 2235b M1: no copy of the prop).
@@ -93,7 +95,8 @@ export function InvestRuleChangeCardView({ card: given, interactive = true }: { 
           </Fragment>
         ))}
       </p>
-      {card.warning && (
+      {/* the danger line only while the card asks (DD 0636, 0638: applied, kept, expired, stale draw none) */}
+      {pending && card.warning && (
         <p className="ivrc-warning" data-signal="risk">
           <SignalMark signal="risk" />
           {copy(card.warning, { sentences: false })}

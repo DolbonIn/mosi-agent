@@ -144,6 +144,23 @@ describe("invest_rule_change (DD 1935 §2-3; the server's card, B2b-1)", () => {
     }
   });
 
+  test("the danger line only while the card asks (DD 0636, 0638): decided, it goes; the reason and the result stay, the foot line right after the result", () => {
+    const base = RULE_CHANGES["rc-real"]!;
+    expect(base.warning).toBeTruthy();
+    const asking = view(base);
+    expect(count(asking, 'class="ivrc-warning"')).toBe(1);
+    expect(text(element(asking, "ivrc-warning"))).toBe(base.warning!);
+    for (const status of ["applied", "kept", "expired", "stale"] as const) {
+      const out = view({ ...base, status, decidedAt: status === "applied" || status === "kept" ? Date.now() - 60_000 : undefined });
+      expect([status, count(out, "ivrc-warning")]).toEqual([status, 0]);
+      expect(text(out)).not.toContain(base.warning!);
+      expect(text(element(out, "ivrc-reason-text"))).toBe(base.reason!);
+      const result = element(out, "ivrc-result");
+      expect(text(result)).toBe(base.result);
+      expect(out.slice(out.indexOf(result) + result.length)).toMatch(/^<p class="ivrc-done"/);
+    }
+  });
+
   test("not interactive (a shared view): the buttons are there but cannot be pressed", () => {
     const out = view(RULE_CHANGES["rc-mock"]!, false);
     const actions = element(out, "ivrc-actions");

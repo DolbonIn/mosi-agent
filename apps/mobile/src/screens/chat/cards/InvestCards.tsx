@@ -103,26 +103,41 @@ export function InvestAlertCardView({ card, interactive = true }: { card: Invest
   );
 }
 
-function stopGlyph(card: InvestStopCard): Signal | null {
-  if (card.state === "failed") return "risk";
-  if (card.state === "skipped") return "caution";
-  return null;
+type StopGlyph = NonNullable<InvestStopCard["glyph"]>;
+
+/**
+ * the stop card's one mark (DD 2314 §5): the server's glyph first (a real card: loader while something is still to
+ * come, check after FILLED, fail, caution; a planned order none); a mock record has none and goes by its state:
+ * skipped at zero sellable the half circle, recorded none
+ */
+function stopGlyph(card: InvestStopCard): StopGlyph | null {
+  if (card.glyph) return card.glyph;
+  return card.state === "skipped" ? "caution" : null;
 }
 
-/** 체결 확인 중 with a small loader while the order is out; the check only after the server saw FILLED (G8-7) */
-function StopStatus({ card }: { card: InvestStopCard }) {
+/**
+ * loader: a small spinner (still under reduced motion), always on a status line (it comes with one); check: the stroke,
+ * always before the title (filled has no status line, DD 0117); fail / caution: the full / half circle, either place.
+ * `className` for the title's place (.ivcard-glyph)
+ */
+function StopMark({ glyph, className }: { glyph: StopGlyph; className?: string }) {
+  if (glyph === "loader") return <span className="ivspin" aria-hidden="true" />;
+  if (glyph === "check")
+    return (
+      <svg className={`ivcheck ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m5 12.5 4.5 4.5L19 7.5" />
+      </svg>
+    );
+  return <SignalMark signal={glyph === "fail" ? "risk" : "caution"} className={className} />;
+}
+
+/** the status line (체결 확인 중, 주문 예정 · …): the mark before its words when the card has one; the words one block */
+function StopStatus({ card, glyph }: { card: InvestStopCard; glyph: StopGlyph | null }) {
   if (!card.status) return null;
-  const waiting = card.state === "submitted" || card.state === "partial";
-  const done = card.state === "filled";
   return (
     <p className="ivstatus" data-state={card.state} role="status">
-      {waiting && <span className="ivspin" aria-hidden="true" />}
-      {done && (
-        <svg className="ivcheck" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="m5 12.5 4.5 4.5L19 7.5" />
-        </svg>
-      )}
-      {copy(card.status, { sentences: false })}
+      {glyph && <StopMark glyph={glyph} />}
+      <span className="ivstatus-text">{copy(card.status, { sentences: false })}</span>
     </p>
   );
 }
@@ -146,6 +161,8 @@ function IpValue({ ip }: { ip: string }) {
 
 export function InvestStopCardView({ card, interactive = true }: { card: InvestStopCard; interactive?: boolean }) {
   const glyph = stopGlyph(card);
+  // the mark before the status line when there is one, else before the title (DD 2314 §5)
+  const titleGlyph = card.status ? null : glyph;
   // a skipped mock record's title is its reason: said once (DD Say it once)
   const reason = card.reason && card.reason.text !== card.title ? card.reason.text : null;
   return (
@@ -155,11 +172,16 @@ export function InvestStopCardView({ card, interactive = true }: { card: InvestS
         <span>{` · ${card.symbol} 손절`}</span>
       </div>
       <h3 className="ccard-title ivcard-title">
-        {glyph && <SignalMark signal={glyph} className="ivcard-glyph" />}
+        {titleGlyph && <StopMark glyph={titleGlyph} className="ivcard-glyph" />}
         {copy(card.title, { sentences: false })}
       </h3>
-      <IvHero value={figure(card.hero)} />
-      <StopStatus card={card} />
+      {/* the hero and its label right under it (체결가(평균), 11월 27일 종가: DD 2314 §5); then why, a subhead */}
+      <div className="ivcard-price">
+        <IvHero value={figure(card.hero)} />
+        {card.sub && <p className="ivcard-sub">{copy(card.sub, { sentences: false })}</p>}
+      </div>
+      {card.why && <p className="ivstop-why">{copy(card.why)}</p>}
+      <StopStatus card={card} glyph={glyph} />
       {reason && <p className="ivcard-reason">{copy(reason)}</p>}
       {(card.rows.length > 0 || card.reason?.ip) && (
         <IvRows>

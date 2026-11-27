@@ -25,7 +25,8 @@
 .ivcard-notes p,
 .ivcard-reason,
 .ivcall,
-.ivstatus {
+.ivstatus,
+.ivstop-why {
   margin: 0;
   font-size: var(--t-subhead);
   line-height: 1.45;
@@ -62,11 +63,24 @@
   margin-right: 0.3em;
 }
 
-/* 체결 확인 중 with a small loader; the check once FILLED is seen (no motion while still, reduced motion: none) */
+/* the status line: its mark (DD 2314 §5: loader, check, half or full circle) then its words, one block beside it; the
+   mark centred on the first line, so a status of two lines (토스증권 연결을 지워서 체결 확인을 멈췄어요. …) hangs */
 .ivstatus {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
+}
+.ivstatus > .ivspin {
+  margin-top: calc((1.45em - 0.9em) / 2);
+}
+.ivstatus > .sigmark {
+  margin-top: calc((1.45em - 1em) / 2);
+}
+/* the check before the title (filled has no status line): inline, in the line of the title's first word (base.css
+   draws every svg as a block); a loader always comes with a status line */
+.ivcard-title > .ivcheck {
+  display: inline-block;
+  vertical-align: -0.125em;
 }
 .ivspin {
   width: 0.9em;

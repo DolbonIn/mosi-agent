@@ -32,6 +32,9 @@ import { TextField } from "../ui/TextField";
 import { Toggle } from "../ui/Toggle";
 import { estimate, footLine, krw, kstWithEastern, pct, pp, rate, shares, usd, type Signal } from "@pickle/quant";
 import { STAGE_STATES } from "./stageStates";
+import { InvestStopCardView } from "../screens/chat/cards/InvestCards";
+import { STOP_STATES } from "../screens/chat/cards/stopStates";
+import "../screens/chat/cards/cards.css";
 import "./Gallery.css";
 
 const SIGNALS: Signal[] = ["risk", "caution", "normal", "unknown"];
@@ -783,6 +786,21 @@ export default function Gallery() {
                 </div>
               </div>
             </List>
+          ))}
+        </div>
+      </Section>
+
+      {/* the 투자 stop card in every state the server sends (DD 2314 §5): the server's own cards (stopStates.ts), synthetic;
+          a card is paper itself, so under a list header but not in a list group */}
+      <Section id="invest-stop" title="투자 · 손절 카드" note="서버가 보내는 상태 모두, 합성 값이에요." bare>
+        <div className="gal-stack">
+          {STOP_STATES.map((st) => (
+            <div key={st.name} className="list" data-state={st.name}>
+              <div className="list-header">
+                <h3 className="list-section-title">{st.name}</h3>
+              </div>
+              <InvestStopCardView card={st.card} interactive={false} />
+            </div>
           ))}
         </div>
       </Section>
