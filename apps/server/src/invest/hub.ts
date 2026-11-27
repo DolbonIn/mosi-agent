@@ -98,10 +98,10 @@ import {
   type MarketRead,
   type Stored,
 } from "./report.ts";
-import { judgeDay, stageCallText, stageRowText, stagesView, type JudgmentRow } from "./stages.ts";
+import { judgeDay, stageCallText, stageRowText, stagesView, type FlowRead, type JudgmentRow } from "./stages.ts";
 import { alertLine, chartAria, chartFoot, chartLevels, chartNote } from "./symbol.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
-import { TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
+import { TOSS_FLOW_COUNT, TossClient, type TossErrorCode, type TossHolding } from "./toss.ts";
 
 export const DEFAULT_CALLS = { stopResult: true, stage: false, expiry: false } as const;
 /** quotes missing this long during the session = blind (2006 §3) */
@@ -263,7 +263,7 @@ export class InvestHub {
   /** from 08:00 KST, today's stage reading for each invest user who has none (one run at a time) */
   judgeStages(now = this.core.now()): Promise<number> {
     if (this.judging) return this.judging;
-    this.judging = judgeDay(this.core, now).finally(() => (this.judging = null));
+    this.judging = judgeDay(this.core, now, (u) => this.flowsFor(u, now)).finally(() => (this.judging = null));
     return this.judging;
   }
 
@@ -684,6 +684,28 @@ export class InvestHub {
       idb.markTypeAsked(db, userId, asked, day);
       this.recordToss(userId, r.error, now);
     }
+  }
+
+  /**
+   * B2e (team-lead 1854, DD 1857-b): KOSPI investors' daily trading for this person's judgment, asked once with their
+   * own token (the Toss pause and its record apply). Settled days (KST days before today) are kept as their rows, and
+   * only their rows feed their judgment; a read with no settled day, or a failed one, gives them nothing today.
+   */
+  async flowsFor(userId: string, now: number): Promise<FlowRead> {
+    const { db } = this.core;
+    if (!this.toss.base()) return { ok: false, why: "none" };
+    if (!(await this.toss.connected(userId))) return { ok: false, why: "connect" };
+    if (!this.tossUsable(idb.ensureSettings(db, userId, now), now)) return { ok: false, why: "today" };
+    const r = await this.toss.investorTrading(userId);
+    this.recordToss(userId, r.ok ? null : r.error, now);
+    // the person has a login (checked above): any failure from here is a read that did not come (DD 2027 1)
+    if (!r.ok) return { ok: false, why: "today" };
+    const today = kstDayKey(now);
+    const settled = r.value.filter((d) => d.day < today);
+    if (!settled.length) return { ok: false, why: "today" };
+    idb.putFlows(db, userId, "KOSPI", settled, now);
+    const rows = idb.flows(db, userId, "KOSPI", today, TOSS_FLOW_COUNT);
+    return { ok: true, points: rows.map((x) => ({ t: x.day, v: x.foreign_net / 1e8 })) };
   }
 
   private tossUsable(s: idb.InvestSettingsRow, now: number): boolean {

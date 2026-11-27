@@ -27,6 +27,35 @@ export interface TossQuote {
   time?: string;
 }
 
+/** B2e: one record of GET /api/v1/market-indicators/{KOSPI|KOSDAQ}/investor-trading (openapi 1.2.28), amounts as strings */
+export interface FlowRecord {
+  date: string;
+  updatedAt: string;
+  individual: { buyAmount: string; sellAmount: string };
+  foreigner: { buyAmount: string; sellAmount: string };
+  institution: { buyAmount: string; sellAmount: string; breakdown: Record<string, { buyAmount: string; sellAmount: string }> };
+  otherCorporation: { buyAmount: string; sellAmount: string };
+}
+
+/**
+ * a synthetic record whose foreigners net `foreign` 억원 (individuals and institutions take the other side; the four
+ * groups' buys and sells balance, as the openapi says); amounts in won as decimal strings
+ */
+export function flowRecord(date: string, foreign: number, o: { institution?: number; updatedAt?: string } = {}): FlowRecord {
+  const E = 100_000_000;
+  const side = (net: number, gross: number) => ({ buyAmount: String(Math.round((gross + net / 2) * E)), sellAmount: String(Math.round((gross - net / 2) * E)) });
+  const inst = o.institution ?? Math.round(-foreign / 2);
+  const indiv = -foreign - inst;
+  return {
+    date,
+    updatedAt: o.updatedAt ?? `${date}T18:10:00+09:00`,
+    individual: side(indiv, 50_000),
+    foreigner: side(foreign, 38_000),
+    institution: { ...side(inst, 21_000), breakdown: {} },
+    otherCorporation: side(0, 4_500),
+  };
+}
+
 export interface YahooQuote {
   price: number;
   prevClose?: number;
@@ -75,6 +104,9 @@ export function makeInvestUpstream() {
     /** B2d-2c: GET /api/v1/stocks per symbol (securityType, Korean name); `tossStocksBy` per client_id first */
     tossStocks: new Map<string, { securityType: string; name: string }>(),
     tossStocksBy: new Map<string, Map<string, { securityType: string; name: string }>>(),
+    /** B2e: KOSPI investor-trading records, oldest first here (served newest first, `count` of them); `tossFlowsBy` per client_id first */
+    tossFlows: [] as unknown[],
+    tossFlowsBy: new Map<string, unknown[]>(),
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -165,6 +197,13 @@ export function makeInvestUpstream() {
           currency: kr ? "KRW" : "USD",
         }));
         return json({ result: { candles, nextBefore: null } });
+      }
+      const mi = /^\/api\/v1\/market-indicators\/([^/]+)\/investor-trading$/.exec(url.pathname);
+      if (mi) {
+        if (mi[1] !== "KOSPI" && mi[1] !== "KOSDAQ") return json({ error: { code: "unsupported-symbol" } }, 400);
+        const mine = state.tossFlowsBy.get(tokens.get(bearer) ?? "") ?? state.tossFlows;
+        const records = [...mine].reverse().slice(0, Number(url.searchParams.get("count") ?? 10));
+        return json({ result: { nextUntil: null, records } });
       }
       const cal = /^\/api\/v1\/market-calendar\/(US|KR)$/.exec(url.pathname);
       if (cal) {

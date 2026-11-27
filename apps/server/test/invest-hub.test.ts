@@ -823,7 +823,7 @@ describe("invest G8 boundaries", () => {
   test("G8-1: the Toss client has no order method (B1 reads only)", async () => {
     const { TossClient } = await import("../src/invest/toss.ts");
     const names = Object.getOwnPropertyNames(TossClient.prototype).sort();
-    expect(names).toEqual(["account", "base", "candles", "connected", "constructor", "drop", "findAccount", "forget", "get", "holdings", "issue", "login", "marketDay", "prices", "sellable", "send", "stocks", "token"]);
+    expect(names).toEqual(["account", "base", "candles", "connected", "constructor", "drop", "findAccount", "forget", "get", "holdings", "investorTrading", "issue", "login", "marketDay", "prices", "sellable", "send", "stocks", "token"]);
     expect(names.some((n) => /order|sell$|buy|cancel/i.test(n))).toBe(false);
   });
 

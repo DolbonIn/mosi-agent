@@ -7,7 +7,7 @@
  */
 import { sma } from "./indicators";
 import { capexBelowTwo, hyFigures, judgeCore11, type Core11Input, type Core11Result, type Extra } from "./risk11";
-import { allOf, anyOf, atOrBefore, holds, inARow, latest, monthChangePct, present, r9 } from "./series";
+import { allOf, anyOf, atOrBefore, holds, inARow, latest, monthChangePct, present, r9, streak } from "./series";
 import type { Point, Tri } from "./types";
 
 /** the master prompt's conditions, word for word */
@@ -195,7 +195,14 @@ export function recoverySignals(input: StageInput): Condition[] {
       "R6",
       R.R6!,
       anyOf(inARow(flows, 5, (v) => v > 0), holds(kospi.last?.ma200 != null ? kospi.last.close - kospi.last.ma200 : null, (v) => v > 0)),
-      { foreignDay: flows.at(-1) ?? null, kospi: kospi.last?.close ?? null, ma200: kospi.last?.ma200 ?? null },
+      {
+        foreignDay: flows.at(-1) ?? null,
+        // the run inARow counts, for the line (DD 2012 1): days in a row of net buying, of net selling
+        foreignBuyRun: flows.length ? streak(flows, (v) => v > 0) : null,
+        foreignSellRun: flows.length ? streak(flows, (v) => v < 0) : null,
+        kospi: kospi.last?.close ?? null,
+        ma200: kospi.last?.ma200 ?? null,
+      },
       at(input.foreignKospi),
       kospi.last?.t,
     ),

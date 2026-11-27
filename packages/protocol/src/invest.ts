@@ -188,7 +188,7 @@ export interface InvestStagesDetail {
     signal: "normal" | "caution" | "risk" | "unknown";
     /** 4.50% · null → 확인 불가 */
     value: string | null;
-    /** 11월 26일 · FRED · A / 받을 곳이 아직 없어요 / 오늘 받지 못했어요 */
+    /** 11월 26일 · FRED · A / 받을 곳이 아직 없어요 / 오늘 받지 못했어요 / 토스증권을 연결하면 받아요 (B2e: 9, no Toss login) */
     basis: string;
     reason: string;
   }[];

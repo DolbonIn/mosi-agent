@@ -1,13 +1,14 @@
 /**
  * B2b-2: the A2 → A5 → A6 reading (the 11 core indicators, A1–A8, D1–D5, R1–R6 and the two stages) over the macro
- * series B2e-0 reads and the person's own ledger figures for 6, 7, 8 and 11 (stage-ledger.ts), by @pickle/quant's
- * assessStages. The server only gathers the inputs and says where each came from; every comparison and stage rule is
+ * series B2e-0 reads, the person's own ledger figures for 6, 7, 8 and 11 (stage-ledger.ts) and the KOSPI foreign
+ * flows of the person's own Toss read for 9 and R6 (B2e), by @pickle/quant's assessStages. The server only gathers the inputs and says where each came from; every comparison and stage rule is
  * quant's. A series that could not be read is left out, so whatever rests on it is unknown (확인 불가), never unmet.
  */
 import { assessStages, momFromIndex, num, pct, pp, rate, type Point, type StageInput } from "@pickle/quant";
 import type { Core } from "../core.ts";
 import { dayWords } from "./forecasts.ts";
 import { fredSeries, indexBars, type FredId } from "./macro.ts";
+import { SOURCE_TABLE } from "./sources.ts";
 import { BREADTH_STALE_US_DAYS, LEDGER_KEYS, ledgerFeed, QUARTERLY_STALE_DAYS, type LedgerKey } from "./stage-ledger.ts";
 
 /** which FRED series feeds which input (CPILFESL feeds coreCpiMoM through momFromIndex) */
@@ -111,10 +112,11 @@ export const NEEDS: Readonly<Record<string, readonly InputKey[]>> = {
 };
 
 /**
- * why an input is missing: "none" — nowhere to get it yet (DD 0426: the quiet form); "today" — its source is there but
- * it did not come (failed, or too old: the caution form); null — it is here
+ * why an input is missing: "none" — nowhere to get it yet (DD 0426: the quiet form); "connect" — it comes once the
+ * person connects 토스증권 (B2e, DD 1857-b 2: quiet too); "today" — its source is there but it did not come (failed,
+ * paused, or too old: the caution form); null — it is here
  */
-export type Missing = "none" | "today" | null;
+export type Missing = "none" | "connect" | "today" | null;
 
 const ESCAPE_NAMES = { 1: "관찰", 2: "경계", 3: "방어 준비", 4: "회피" } as const;
 const RECOVERY_NAMES = { 0: "하락 진행", 1: "바닥 탐색", 2: "분할 재진입 검토", 3: "추세 회복" } as const;
@@ -127,7 +129,7 @@ function becauseOf(open: readonly string[], missing: (k: InputKey) => Missing): 
   for (const id of open) {
     const keys = (NEEDS[id] ?? []).filter((k) => missing(k));
     if (!keys.length) unexplained++;
-    for (const k of keys) (missing(k) === "none" ? none : today).add(k);
+    for (const k of keys) (missing(k) === "today" ? today : none).add(k);
   }
   const t = today.size + unexplained;
   if (!none.size && !t) return null;
@@ -247,25 +249,38 @@ export interface JudgmentRow {
   json: string;
 }
 
-/** inputs nobody can give yet: no source and no ledger id (DD 0426: the quiet form; invest_flows comes with B2e) */
-export const NO_SOURCE: readonly InputKey[] = ["foreignKospi"];
-
 /** why each fetched input is missing in this reading */
 export function missingOf(read: StageRead): Partial<Record<InputKey, Missing>> {
   const out: Partial<Record<InputKey, Missing>> = {};
-  for (const k of NO_SOURCE) out[k] = read.input[k] == null ? "none" : null;
   for (const [k, b] of Object.entries(read.basis)) out[k as InputKey] = b ? null : "today";
   return out;
 }
 
-/** one person's judgment: the shared read plus their ledger figures (the ledger is each person's own) */
-export function judgeFor(core: Core, userId: string, read: StageRead, now: number): Judged {
+/**
+ * B2e (team-lead 1854, DD 1857-b): foreigners' daily net KOSPI buying in 억원, settled days of this person's own Toss
+ * read, or why it is not here: "none" — the server has no Toss; "connect" — the person has no Toss login; "today" —
+ * paused, refused, failed or empty today
+ */
+export type FlowRead = { ok: true; points: readonly Point[] } | { ok: false; why: "none" | "connect" | "today" };
+const NO_FLOW: FlowRead = { ok: false, why: "none" };
+
+function flowFeed(f: FlowRead): { input: StageInput; basis: Record<string, InputBasis | null>; missing: Partial<Record<InputKey, Missing>> } {
+  if (f.ok && f.points.length) {
+    const toss = SOURCE_TABLE.toss;
+    return { input: { foreignKospi: f.points }, basis: { foreignKospi: { asOf: f.points.at(-1)!.t, source: toss.name, grade: toss.grade } }, missing: { foreignKospi: null } };
+  }
+  return { input: {}, basis: { foreignKospi: null }, missing: { foreignKospi: f.ok ? "today" : f.why } };
+}
+
+/** one person's judgment: the shared read plus their ledger figures and their own flows (each person's own) */
+export function judgeFor(core: Core, userId: string, read: StageRead, now: number, flow: FlowRead = NO_FLOW): Judged {
   const feed = ledgerFeed(core, userId, now);
-  const input: StageInput = { ...read.input, ...feed.input };
+  const fl = flowFeed(flow);
+  const input: StageInput = { ...read.input, ...fl.input, ...feed.input };
   return {
     ...assessStages(input),
-    basis: { ...read.basis, ...feed.basis },
-    missing: { ...missingOf(read), ...feed.missing },
+    basis: { ...read.basis, ...fl.basis, ...feed.basis },
+    missing: { ...missingOf(read), ...fl.missing, ...feed.missing },
     ...(Object.keys(feed.old).length ? { old: feed.old } : {}),
   };
 }
@@ -286,10 +301,10 @@ function investUsers(core: Core): string[] {
 }
 
 /**
- * from 08:00 KST: each invest user without today's row gets one (the series are read once for all, the ledger per
- * person). Sources off: none. Returns the number of rows written.
+ * from 08:00 KST: each invest user without today's row gets one (the series are read once for all, the ledger and the
+ * flows per person: `flowsOf` asks with that person's own token). Sources off: none. Returns the number of rows written.
  */
-export async function judgeDay(core: Core, now: number): Promise<number> {
+export async function judgeDay(core: Core, now: number, flowsOf?: (userId: string) => Promise<FlowRead>): Promise<number> {
   if (!core.cfg.invest.sources || kstHour(now) < JUDGE_HOUR_KST) return 0;
   const day = kstDayOf(now);
   const due = investUsers(core).filter((u) => !core.db.sql.query("SELECT 1 FROM invest_judgments WHERE user_id = $u AND day = $d").get({ u, d: day }));
@@ -297,7 +312,14 @@ export async function judgeDay(core: Core, now: number): Promise<number> {
   const read = await readStageInput(core);
   let n = 0;
   for (const u of due) {
-    const j = JSON.stringify(judgeFor(core, u, read, now));
+    // a flows read that throws is the caution form for that person; the judgment is still made
+    const flow = flowsOf
+      ? await flowsOf(u).catch((): FlowRead => {
+          core.log.warn("invest flows failed", { user: u });
+          return { ok: false, why: "today" };
+        })
+      : NO_FLOW;
+    const j = JSON.stringify(judgeFor(core, u, read, now, flow));
     n += core.db.sql.query("INSERT OR IGNORE INTO invest_judgments (user_id, day, at, json) VALUES ($u, $d, $at, $j)").run({ u, d: day, at: now, j }).changes;
   }
   return n;
@@ -486,34 +508,70 @@ function figureText(id: string, f: Fig): string {
     case "R5":
       return join(f.dgs2 != null && f.fedUpper != null ? `2년물 ${r2(f.dgs2)} · 상단 ${r2(f.fedUpper)}` : null, typeof f.mom === "number" ? `전월 대비 ${rate(f.mom, 1)}` : null);
     case "R6":
-      return vsMa();
+      // DD 2012 1: the rule's order, foreigners first; KOSPI named, with or without the foreign side
+      return join(foreignRun(f), f.kospi != null ? `코스피 ${n2(f.kospi)}` : null, f.ma200 != null ? `200일선 ${n2(f.ma200)}` : null);
     default:
       return "";
   }
 }
 
+/** 외국인 6거래일 연속 순매수 / 외국인 2거래일 연속 순매도; a last day of exactly 0, or no flows: none */
+function foreignRun(f: Fig): string | null {
+  if (typeof f.foreignBuyRun === "number" && f.foreignBuyRun > 0) return `외국인 ${f.foreignBuyRun}거래일 연속 순매수`;
+  if (typeof f.foreignSellRun === "number" && f.foreignSellRun > 0) return `외국인 ${f.foreignSellRun}거래일 연속 순매도`;
+  return null;
+}
+
 const fromLedger = (k: InputKey) => (LEDGER_KEYS as readonly string[]).includes(k);
 
+/** why an input is not here, in the basis words (DD 0426 §1, DD 1857-b 2) */
+const MISSING_WORDS = { today: "오늘 받지 못했어요", connect: "토스증권을 연결하면 받아요", none: "받을 곳이 아직 없어요" } as const;
+
 /**
- * 11월 26일 · FRED · A / 11월 26일 · FRED · A, Yahoo(지연 시세) · B+ / 받을 곳이 아직 없어요 / 오늘 받지 못했어요; a ledger
- * input: 값이 없어요 / 8월 1일 값이라 오래됐어요 (DD 0426 §1)
+ * R6 with one side here and the other not: the missing side's reason after the sources, on a met day too. The foreign
+ * side's (DD 2012 2): its own why; KOSPI's (DD 2027 3): Yahoo's, so only 오늘 받지 못했어요 (no stage reading at all
+ * without sources). Both missing: basisText alone.
+ */
+function r6Tail(j: Judged): string | null {
+  const kospi = !!j.basis.kospi;
+  if (kospi === !!j.basis.foreignKospi) return null;
+  if (!kospi) return `코스피는 ${MISSING_WORDS.today}`;
+  const m = j.missing.foreignKospi;
+  return `외국인 수급은 ${MISSING_WORDS[m === "today" || m === "connect" ? m : "none"]}`;
+}
+
+/**
+ * 11월 26일 · FRED · A / 11월 26일 · FRED · A, Yahoo(지연 시세) · B+ / 받을 곳이 아직 없어요 / 오늘 받지 못했어요 /
+ * 토스증권을 연결하면 받아요 (B2e); a ledger input: 값이 없어요 / 8월 1일 값이라 오래됐어요 (DD 0426 §1)
  */
 function basisText(j: Judged, keys: readonly InputKey[], asOf: string | null, now: number): string {
   const present = keys.filter((k) => j.basis[k]).map((k) => j.basis[k]!);
   if (!present.length || !asOf) {
     const old = keys.map((k) => j.old?.[k as LedgerKey]).filter((d): d is string => !!d).sort().at(-1);
     if (old) return `${dayWords(old, now)} 값이라 오래됐어요`;
-    if (keys.some((k) => j.missing[k] === "today")) return "오늘 받지 못했어요";
-    return keys.some(fromLedger) ? "값이 없어요" : "받을 곳이 아직 없어요";
+    if (keys.some((k) => j.missing[k] === "today")) return MISSING_WORDS.today;
+    if (keys.some((k) => j.missing[k] === "connect")) return MISSING_WORDS.connect; // DD 1857-b 2
+    return keys.some(fromLedger) ? "값이 없어요" : MISSING_WORDS.none;
   }
   return `${dayWords(asOf, now)} · ${[...new Set(present.map((b) => `${b.source} · ${b.grade}`))].join(", ")}`;
 }
 
 const COMPANY: Readonly<Record<string, string>> = { samsung: "삼성전자", hynix: "SK하이닉스" };
 
+/**
+ * indicator 9's value, foreigners' 20-day net KOSPI buying in 억원 (DD 1857-b 3): 1조 (1만 억) and up in 조 with one
+ * decimal, else 억 with commas; signed, U+2212: 20일 −1.2조원 / 20일 +3,400억원 / 20일 0억원
+ */
+export function flowSumText(eok: number): string {
+  return Math.abs(eok) >= 9_999.5 ? `20일 ${num(eok / 10_000, 1, { sign: true })}조원` : `20일 ${num(eok, 0, { sign: true })}억원`;
+}
+
+/** rows whose value is shown while their signal is unknown: 6 and 11 per company, 9 its 20-day sum (DD 1857-b 3) */
+const VALUE_WHEN_UNKNOWN: readonly number[] = [6, 9, 11];
+
 /** the row's value in its unit; null → the app's 확인 불가 */
 function core11Value(no: number, v: number | null, extras: Fig): string | null {
-  if (v == null && no !== 6 && no !== 11) return null;
+  if (v == null && !VALUE_WHEN_UNKNOWN.includes(no)) return null;
   switch (no) {
     case 1:
     case 7:
@@ -535,6 +593,8 @@ function core11Value(no: number, v: number | null, extras: Fig): string | null {
     }
     case 8:
       return `하향 ${v}곳`;
+    case 9:
+      return typeof extras.sum20 === "number" ? flowSumText(extras.sum20) : null;
     default:
       return null;
   }
@@ -568,7 +628,7 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
       no: it.no,
       name: it.name,
       signal: it.signal,
-      value: it.signal === "unknown" && it.no !== 6 && it.no !== 11 ? null : core11Value(it.no, it.value, it.extras),
+      value: it.signal === "unknown" && !VALUE_WHEN_UNKNOWN.includes(it.no) ? null : core11Value(it.no, it.value, it.extras),
       basis: basisText(j, NEEDS[`#${it.no}`] ?? [], it.asOf, now), // DD 0731 E5: the year by the reading time, as judgedText
       reason: it.no === 6 ? it.reason.replace(/samsung|hynix/g, (id) => COMPANY[id]!) : it.reason,
     })),
@@ -581,7 +641,11 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
         state: c.status,
         stateText: STATE_WORD[c.status],
         // no input of it here: the basis alone (a figure of nothing would read as a value)
-        detail: join((NEEDS[c.id] ?? []).some((k) => j.basis[k]) ? figureText(c.id, c.figures) || null : null, basisText(j, NEEDS[c.id] ?? [], c.asOf, now)),
+        detail: join(
+          (NEEDS[c.id] ?? []).some((k) => j.basis[k]) ? figureText(c.id, c.figures) || null : null,
+          basisText(j, NEEDS[c.id] ?? [], c.asOf, now),
+          c.id === "R6" ? r6Tail(j) : null,
+        ),
       })),
       next: groupNext(g.key),
     })),

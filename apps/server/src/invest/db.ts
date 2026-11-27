@@ -169,6 +169,33 @@ export function markTypeAsked(db: Db, userId: string, asked: string[], day: stri
   for (const s of asked) q.run({ d: day, u: userId, s });
 }
 
+// ───────────── flows (v16) ─────────────
+
+export interface FlowRow {
+  user_id: string;
+  market: string;
+  day: string;
+  individual_net: number | null;
+  foreign_net: number;
+  institution_net: number | null;
+  fetched_at: number;
+}
+
+/** B2e: settled days of this person's own Toss read, net in won; a day already kept takes the newer read */
+export function putFlows(db: Db, userId: string, market: "KOSPI", days: readonly { day: string; individual: number | null; foreign: number; institution: number | null }[], now: number): void {
+  const q = db.sql.query(
+    "INSERT INTO invest_flows (user_id, market, day, individual_net, foreign_net, institution_net, fetched_at) VALUES ($u, $m, $d, $i, $f, $n, $at) ON CONFLICT (user_id, market, day) DO UPDATE SET individual_net = excluded.individual_net, foreign_net = excluded.foreign_net, institution_net = excluded.institution_net, fetched_at = excluded.fetched_at",
+  );
+  db.tx(() => {
+    for (const x of days) q.run({ u: userId, m: market, d: x.day, i: x.individual, f: x.foreign, n: x.institution, at: now });
+  });
+}
+
+/** this person's own latest `limit` days before `beforeDay`, oldest first */
+export function flows(db: Db, userId: string, market: "KOSPI", beforeDay: string, limit: number): FlowRow[] {
+  return (db.sql.query("SELECT * FROM invest_flows WHERE user_id = $u AND market = $m AND day < $d ORDER BY day DESC LIMIT $n").all({ u: userId, m: market, d: beforeDay, n: limit }) as FlowRow[]).reverse();
+}
+
 export function removeWatch(db: Db, userId: string, symbol: string): boolean {
   return db.sql.query("DELETE FROM invest_watchlist WHERE user_id = $u AND symbol = $s").run({ u: userId, s: symbol }).changes > 0;
 }

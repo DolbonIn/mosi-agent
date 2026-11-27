@@ -886,16 +886,17 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
 `assessStages` (A2 → A5 → A6), never the server's or the model's.
 - **Judged once a day** (migration v12 `invest_judgments`, one row per person and KST day): from 08:00 KST the beat
   judges each person who uses invest (settings or a watched symbol) without today's row. The macro series (B2e-0) are
-  read once for all; indicators 6, 7 and 11 come from that person's own ledger. Off when the server takes no public
-  sources. The screen, `invest_snapshot` and the reports read the stored row only.
+  read once for all; indicators 6, 7 and 11 come from that person's own ledger, 9 and R6's foreign side from that
+  person's own Toss read (B2e below). Off when the server takes no public sources. The screen, `invest_snapshot` and
+  the reports read the stored row only.
 - **Ledger ids** (team-lead 0437 1a; the person's or the model's figures, code never edits one; grade C never used):
   `stage.eps.samsung.<FY>` / `stage.eps.hynix.<FY>` — the fiscal year holding the middle of the next 12 months, its
   newest figure against the same id's figure nearest 3 months before it (within 15 days, the same unit), (a − b) ÷ |b|
   × 100; `stage.breadth200` (pct); `stage.m7.<AAPL|MSFT|GOOGL|AMZN|META|NVDA|TSLA>` (pct, the recent 3-month change
   of the 12M forward estimate; below 0 is down, team-lead 0511); `stage.capex.MSFT|GOOGL|META|AMZN.<FY>` — next KST
   year's against this year's, the same unit. Too old is unknown, the caution form ("{M월 D일} 값이라 오래됐어요"): 6, 8
-  and 11 past 120 days, 7 past 5 US trading days. No figure: "값이 없어요" (quiet). 9 has nowhere yet (invest_flows
-  comes with B2e): "받을 곳이 아직 없어요".
+  and 11 past 120 days, 7 past 5 US trading days. No figure: "값이 없어요" (quiet). 9 is not a ledger id: its words
+  are B2e's.
 - **`overview.stages: InvestStages`** — `{kind: "off", off}` ("지금은 지표를 받지 않아서 단계를 판정하지 않아요."), `{kind:
   "none", none}` ("첫 판정은 오늘 08:00에 나와요." / "첫 판정은 곧 나와요."), or `{kind: "judged", escape, recovery,
   gauges, next, judgedAt, judgedText, stale?}`. A head is `{stage, name?, floor?, text, pending?, pendingTone?}`: a
@@ -1171,6 +1172,41 @@ another person.
   `candidates`, `passed`, `dropped` by reason, `search: "failed"`, `model: "failed"`, `conflict`; `{ error: true }` when
   the step threw. Counts only, in the log too (the model's tokens logged, not counted against the daily quota).
 - v15, additive, no rollback: `invest_watchlist.security_type`, `toss_name`, `type_asked_day`; `invest_earn_searched`.
+
+## Invest (B2e) — KOSPI foreign flows
+
+Indicator 9 and R6's foreign side (team-lead 1854, DD 1857-b). Code: `apps/server/src/invest/hub.ts` (`flowsFor`),
+`toss.ts` (`investorTrading`), `stages.ts`.
+- **The read**: at each person's 08:00 judgment (the beat that writes their day's row), once, with that person's own
+  Toss token: `GET /api/v1/market-indicators/KOSPI/investor-trading?interval=1d&count=30`. KOSPI only; KOSDAQ is never
+  asked. The Toss pause and record hold as for any Toss read: paused, no call; a 403 pauses an hour, a 429 five
+  minutes. No order path.
+- **Settled days only**: records of KST days before the judgment's day. Today's provisional record is neither kept nor
+  used (it takes one of the 30). A group's net is buy − sell in won (whole numbers; the openapi's decimal strings). A
+  record without a day, or without foreigners' two amounts, is left out.
+- **Rows** (v16 `invest_flows (user_id, market, day, individual_net, foreign_net, institution_net, fetched_at)`, one per
+  person, market and day; a later read rewrites a kept day): a person's rows feed only that person's judgment. Nothing
+  read with one person's token reaches another person's judgment or deck. The judgment reads the person's latest 30
+  kept days, and only after that day's read brought a settled day. A read that failed, was paused or brought none gives
+  nothing that day; kept rows are not used then.
+- **quant's input** `foreignKospi`: `foreign_net` ÷ 1e8 (억원). R6 is judged on these numbers. 9 stays without a judgment
+  (`대규모 순매도 지속 여부 판단 없음`; team-lead 1854 4: no threshold made up).
+- **The screen** (`GET /api/invest/stages`): 9's value is the 20-day net sum (quant's sum20) while its signal stays
+  unknown. `20일 −1.2조원` from 1조 (1만 억) up, in 조 with one decimal; otherwise `20일 +3,400억원`, in 억 with commas.
+  Signed with U+2212, zero unsigned; fewer than 20 days: null (확인 불가). Basis `11월 30일 · 토스증권 · A`, the last
+  settled day. No Toss login: `토스증권을 연결하면 받아요` (counted with `값이 없어서` in a head's pending, the quiet
+  form). A login but nothing today: `오늘 받지 못했어요` (caution), whatever the read's failure (a login whose session
+  cannot be had at read time too: never the `연결하면` words; DD 2027 1). Toss off on the server (no
+  `PICKLE_TOSS_BASE`): `받을 곳이 아직 없어요`.
+- **R6's line** (DD 2012): the rule's order, foreigners first, KOSPI named on every day: `외국인 6거래일 연속 순매수 ·
+  코스피 2,512.00 · 200일선 2,480.00 · 11월 26일 · 토스증권 · A, Yahoo(지연 시세) · B+` (`… 연속 순매도`; a last day of
+  exactly 0: no run). The run is quant's R6 figure (`foreignBuyRun`, `foreignSellRun`), the streak its state is decided
+  by. KOSPI here and the foreign side not: the reason after the sources, on a met day too: `… · Yahoo(지연 시세) · B+ ·
+  외국인 수급은 토스증권을 연결하면 받아요` / `… 오늘 받지 못했어요` / `… 받을 곳이 아직 없어요`. The foreign side here
+  and KOSPI not (DD 2027 3): `외국인 4거래일 연속 순매수 · 11월 30일 · 토스증권 · A · 코스피는 오늘 받지 못했어요`, met
+  days too (KOSPI is Yahoo's; no sources, no reading at all). Both missing: the basis words alone. Only R6's line
+  carries a tail.
+- v16, additive, no rollback: `invest_flows`.
 
 ## Web Push (B1c) — the lock-screen line
 

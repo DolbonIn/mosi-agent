@@ -637,4 +637,19 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (symbol, market, subject)
   );
   `,
+  // v16 (B2e, team-lead 1854, DD 1857-b): KOSPI investors' daily net trading in won (buy − sell), asked with that
+  // person's own Toss token at their 08:00 judgment. Settled days only (KST days before the asking day); a person's rows
+  // feed that person's judgment and nobody else's.
+  `
+  CREATE TABLE invest_flows (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    market TEXT NOT NULL,
+    day TEXT NOT NULL,
+    individual_net INTEGER,
+    foreign_net INTEGER NOT NULL,
+    institution_net INTEGER,
+    fetched_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, market, day)
+  );
+  `,
 ];

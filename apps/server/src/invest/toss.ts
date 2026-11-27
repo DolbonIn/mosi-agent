@@ -18,8 +18,8 @@
  * - Bodies, error texts, keys and tokens never reach logs, cards, events or the model: a failure keeps its code alone.
  *
  * The response shapes follow the public openapi.json (1.2.28, read 2026-11-26; test/fake-toss.ts serves the same shapes
- * with synthetic values). The token, and so every read here, is the person's own: it serves their watch only
- * (team-lead 2253).
+ * with synthetic values). The token, and so every read here, is the person's own: it serves their watch and their own
+ * stage judgment only (team-lead 2253, 1854).
  */
 import type { ConnectionSession } from "@pickle/agent";
 import type { Bar } from "@pickle/quant";
@@ -33,6 +33,8 @@ export const TOSS_SERVICE = "toss-investment";
 export const TOSS_TOKEN_SKEW_MS = 60_000;
 export const TOSS_TIMEOUT_MS = 10_000;
 export const TOSS_IP_PAUSE_MS = 3_600_000;
+/** B2e: how many daily KOSPI investor records one judgment asks for (indicator 9's 20-day sum, R6's 5 days) */
+export const TOSS_FLOW_COUNT = 30;
 
 export type TossErrorCode = "ip_not_allowed" | "auth" | "rate_limited" | "down" | "off" | "not_connected";
 export type TossResult<T> = { ok: true; value: T } | { ok: false; error: TossErrorCode };
@@ -159,6 +161,44 @@ export function readMarketDay(market: Market, j: unknown): TossMarketDay | null 
   const open = instant(rec(reg)?.startTime);
   const close = instant(rec(reg)?.endTime);
   return open != null && close != null ? { date, session: { open, close } } : null;
+}
+
+/** B2e: one KOSPI day of investors' trading, net (buy − sell) in won per group */
+export interface TossFlowDay {
+  day: string;
+  individual: number | null;
+  foreign: number;
+  institution: number | null;
+}
+
+/** a won amount: a whole number (openapi: a decimal string, KRW), never negative */
+const won = (x: unknown): number | null => {
+  if (typeof x === "string") return /^\d{1,16}$/.test(x.trim()) ? Number(x.trim()) : null;
+  return typeof x === "number" && Number.isSafeInteger(x) && x >= 0 ? x : null;
+};
+const netOf = (x: unknown): number | null => {
+  const buy = won(rec(x)?.buyAmount);
+  const sell = won(rec(x)?.sellAmount);
+  return buy != null && sell != null ? buy - sell : null;
+};
+
+/**
+ * GET /api/v1/market-indicators/KOSPI/investor-trading?interval=1d → {result: {records (newest first), nextUntil}}
+ * (openapi 1.2.28 InvestorTradingRecord: buy and sell amounts per investor group, KRW); here oldest first, one record
+ * a day, net per group. A record without a day or without foreigners' two amounts is left out.
+ */
+export function readInvestorTrading(j: unknown): TossFlowDay[] {
+  const list = rec(rec(j)?.result)?.records;
+  const out: TossFlowDay[] = [];
+  for (const it of Array.isArray(list) ? list : []) {
+    const r = rec(it);
+    const day = str(r?.date);
+    const foreign = netOf(r?.foreigner);
+    if (!r || !day || !/^\d{4}-\d{2}-\d{2}$/.test(day) || foreign == null) continue;
+    out.push({ day, individual: netOf(r.individual), foreign, institution: netOf(r.institution) });
+  }
+  out.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+  return out.filter((d, i) => i === 0 || d.day !== out[i - 1]!.day);
 }
 
 export function readSellable(j: unknown): number | null {
@@ -376,6 +416,15 @@ export class TossClient {
   async marketDay(userId: string, market: Market, date: string): Promise<TossResult<TossMarketDay | null>> {
     const r = await this.get(userId, `/api/v1/market-calendar/${market}?date=${encodeURIComponent(date)}`);
     return r.ok ? { ok: true, value: readMarketDay(market, r.value) } : r;
+  }
+
+  /**
+   * B2e (team-lead 1854): KOSPI investors' daily trading, the last TOSS_FLOW_COUNT records, asked with this person's
+   * token for their own judgment. KOSPI only: indicator 9 and R6 read KOSPI.
+   */
+  async investorTrading(userId: string): Promise<TossResult<TossFlowDay[]>> {
+    const r = await this.get(userId, `/api/v1/market-indicators/KOSPI/investor-trading?interval=1d&count=${TOSS_FLOW_COUNT}`);
+    return r.ok ? { ok: true, value: readInvestorTrading(r.value) } : r;
   }
 
   async sellable(userId: string, symbol: string): Promise<TossResult<number | null>> {
