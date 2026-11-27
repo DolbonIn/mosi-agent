@@ -249,7 +249,7 @@ export interface DeckData {
     recovery: { head: DeckStageHead; gauge: { met: number; unknown: number; of: 6 } };
     /** the scenario word: A 연착륙 · B 둔화 · C 침체 */
     scenario: string;
-    /** a stage that moved since the last report: "탈출 2단계 → 3단계" (drawn as the slide's highlighted line) */
+    /** what moved since the last report, the 투자 screen's words: "탈출 2 → 3단계" (drawn as the slide's highlighted line) */
     moved?: string;
     conditions: { escape: DeckCondition[]; severe: DeckCondition[]; recovery: DeckCondition[] };
     /** what the next stage up still needs: the app's nextLines, word for word; null when it names none */

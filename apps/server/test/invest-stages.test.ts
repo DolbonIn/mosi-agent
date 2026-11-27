@@ -4,8 +4,10 @@
  * @pickle/quant judges. Bodies are synthetic (test/fake-toss.ts); nothing real is called.
  */
 import { afterEach, describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Friend, InviteResponse, InvestOverview, InvestStagesDetail } from "@pickle/protocol";
-import { escapeStage, pct, recoveryStage, type Condition, type Core11Result } from "@pickle/quant";
+import { escapeStage, NO_DATA, pct, recoveryStage, type Condition, type Core11Result } from "@pickle/quant";
 import { etToEpoch } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
@@ -150,7 +152,7 @@ describe("the day's judgment (v12)", () => {
     const { h, up } = await world(calm());
     const { alice, bob } = await people(h);
     h.clock.t = KST(2026, 12, 1, 7, 0);
-    expect((await alice.overview()).stages).toEqual({ kind: "none", none: "첫 판정은 오늘 08:00에 나와요." });
+    expect((await alice.overview()).stages).toEqual({ kind: "none", none: "첫 판정은 오늘 오전 8시에 나와요." });
     expect(await judgeAt(h, KST(2026, 12, 1, 7, 59))).toBe(0);
     expect(up.calls).toHaveLength(0);
     expect(await judgeAt(h, KST(2026, 12, 1, 8, 0))).toBe(1);
@@ -344,6 +346,14 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     // 6, 7, 8 and 11 come from the person's ledger (값이 없어요 until a figure is in it); 9 has nowhere yet
     for (const no of [6, 7, 8, 11]) expect(row(no)).toMatchObject({ signal: "unknown", value: null, basis: "값이 없어요" });
     expect(row(9)).toMatchObject({ signal: "unknown", value: null, basis: "받을 곳이 아직 없어요" });
+    // DD 0058: a row with no figure at all has no reason (its basis says it); any other reason stays, #6's names replaced
+    expect([row(7).reason, row(8).reason]).toEqual(["", ""]);
+    expect(row(9).reason).toBe("대규모 순매도 지속 여부 판단 없음");
+    expect(row(6).reason).toMatch(/^삼성전자·SK하이닉스 미확인/);
+    expect(d.core11.filter((r) => r.reason === NO_DATA || r.reason.includes("데이터 없음")).map((r) => r.no)).toEqual([]);
+    expect(d.core11.filter((r) => r.signal !== "unknown" && !r.reason).map((r) => r.no)).toEqual([]);
+    // compared by quant's own constant, never by a second copy of its words
+    expect(readFileSync(join(import.meta.dir, "../src/invest/stages.ts"), "utf8").includes(NO_DATA)).toBe(false);
     expect(d.groups.map((g) => [g.key, g.title, g.rows.length])).toEqual([
       ["worse", "악화 신호 A1–A8", 8],
       ["severe", "심각 신호 D1–D5", 5],
@@ -376,7 +386,7 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(tool.description).not.toContain("set up");
     const ctx = { userId: alice.id, threadId: null, now: () => new Date(h.clock.t) } as never;
     h.clock.t = KST(2026, 12, 1, 7, 0);
-    expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: "첫 판정은 오늘 08:00에 나와요.", data: { stages: { kind: "none", none: "첫 판정은 오늘 08:00에 나와요." } } });
+    expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: "첫 판정은 오늘 오전 8시에 나와요.", data: { stages: { kind: "none", none: "첫 판정은 오늘 오전 8시에 나와요." } } });
     await judgeAt(h, KST(2026, 12, 1, 8, 0));
     const out = await tool.run({}, ctx);
     expect(out.ok).toBe(true);

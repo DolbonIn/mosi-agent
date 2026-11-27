@@ -141,7 +141,8 @@ const judged = (no: number, signal: Signal, value: number | null, asOf: string |
   extras,
   mayBeRisk: false,
 });
-const NO_DATA = "데이터 없음";
+/** an indicator's reason when it has no figure at all: the server compares by this, never by a copy of the words (DD 0058) */
+export const NO_DATA = "데이터 없음";
 
 /** the high-yield figures A2's row 3, A5's A1/D1 and A6's R2 read: current, 6-month low and high, 20-day high, changes.
  * The 6-month figures need a series reaching back six months, the 20-day high twenty observations; short of that they

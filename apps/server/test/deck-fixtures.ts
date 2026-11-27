@@ -378,25 +378,28 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   // the conditions, each status what its value says (DD 1704 1): (a) stage 2 with A1 alone, recovery 1 with R2·R5·R6;
   // (b) A4 and A6 not read today (core CPI and CAPEX missing) → 최소 2단계; (c) A1·A2·A3·A6 and D3 → stage 3
   const vix = `VIX ${figureText(figures.vix!)}`;
-  const aStatus: Record<string, Tri> = { A1: "met", A2: c ? "met" : "unmet", A3: c ? "met" : "unmet", A4: b ? "unknown" : "unmet", A5: "unmet", A6: b ? "unknown" : c ? "met" : "unmet", A7: "unmet", A8: "unmet" };
-  const dStatus: Record<string, Tri> = { D1: "unmet", D2: "unmet", D3: c ? "met" : "unmet", D4: "unmet", D5: b ? "unknown" : "unmet" };
-  const rStatus: Record<string, Tri> = { R1: "unmet", R2: "met", R3: "unmet", R4: "unmet", R5: b ? "unknown" : "met", R6: "met" };
+  const triOf = (b: boolean, c: boolean) => ({
+    a: { A1: "met", A2: c ? "met" : "unmet", A3: c ? "met" : "unmet", A4: b ? "unknown" : "unmet", A5: "unmet", A6: b ? "unknown" : c ? "met" : "unmet", A7: "unmet", A8: "unmet" } as Record<string, Tri>,
+    d: { D1: "unmet", D2: "unmet", D3: c ? "met" : "unmet", D4: "unmet", D5: b ? "unknown" : "unmet" } as Record<string, Tri>,
+    r: { R1: "unmet", R2: "met", R3: "unmet", R4: "unmet", R5: b ? "unknown" : "met", R6: "met" } as Record<string, Tri>,
+  });
+  const { a: aStatus, d: dStatus, r: rStatus } = triOf(b, c);
   // A1 says the spread's level as the grid's no. 3 and the figure do (unsigned %p, DD 1520) and its rise over the low
   const hyLine = `${figureText(figures.hy!)} · 6개월 최저보다 ${VALUES[2]}`;
   const values: Record<string, string> = {
     A1: hyLine,
     A2: c ? `${vix} · 2일째` : vix,
     A3: c ? "200일선 아래 3일째" : "200일선 아래 2일째",
-    A4: b ? "확인 불가" : `MoM ${figureText(figures.core_cpi!)}`,
+    ...(b ? {} : { A4: `MoM ${figureText(figures.core_cpi!)}` }),
     A5: `${figureText(figures.ust10y!)} · 0일`,
-    A6: b ? "자료 없음" : VALUES[10]!,
+    ...(b ? {} : { A6: VALUES[10]! }),
     A7: "삼의 법칙 0.27 · 4주 평균 22.4만 건",
     A8: "200일선 위",
     D1: hyLine,
     D2: vix,
     D3: c ? "200일선 5.2% 아래" : "200일선 2.1% 아래",
     D4: "삼의 법칙 0.27",
-    D5: b ? "자료 없음" : c ? "NFCI −0.31" : "NFCI −0.48",
+    ...(b ? {} : { D5: c ? "NFCI −0.31" : "NFCI −0.48" }),
     R1: c ? `${vix} · 0일` : `${vix} · 3일째`,
     R2: `${figureText(figures.hy!)} · 20거래일 최고보다 0.60%p 좁음`,
     R3: "200일선 아래",
@@ -409,7 +412,8 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   const stages = deckStages(assessedOf(items, aStatus, dStatus, rStatus), {
     values,
     scenario: c ? "C 침체 경계" : "B 둔화",
-    ...(c ? { moved: "탈출 2단계 → 3단계" } : {}),
+    // (c): the day before was (a)'s reading, 탈출 2단계 경계
+    ...(c ? { before: (({ a, d, r }) => assessedOf(items, a, d, r))(triOf(false, false)) } : {}),
     sources: ["fred", "cboe", "bls", "krx", "rule"],
     missing: (k) => (missingToday.has(k) ? "today" : null),
   });

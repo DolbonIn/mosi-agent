@@ -129,6 +129,9 @@ function slideRefs(s: Slide): { field: string; id: string }[] {
   }
 }
 
+/** a capture as the kept page may carry it: the picture itself, never a link (lead 1651 1) */
+export const CAPTURE_SRC = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/;
+
 const count = (n: unknown, lo: number, hi: number) => Array.isArray(n) && n.length >= lo && n.length <= hi;
 
 /** the captures a slide can draw (an asset the store no longer has is left out, and said) */
@@ -224,6 +227,8 @@ export function validateDeck(spec: DeckSpec, data: DeckData): DeckFail[] {
         });
         const here = presentCaptures(s, data);
         if ((s.captures ?? []).length && !here.length) at("FA4-11", "보여 줄 캡처가 없어요(캡처 저장소에 없는 asset)");
+        // lead 1651 1: the kept page loads nothing from outside, so a capture is a data: picture
+        for (const cp of here) if (!CAPTURE_SRC.test(data.captures[cp.assetId]!.src)) at("FA4-11", `캡처 ${cp.assetId}는 data: 그림이 아니에요`);
         captures += here.length;
         break;
       }

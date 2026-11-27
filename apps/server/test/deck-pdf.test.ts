@@ -10,10 +10,10 @@ import { accepted, buildDeck, CHECK_FAIL, DECK_FACE, DECK_FILE_MAX, deckPages, N
 import { pageCheckExpression, type DomReport } from "../src/deck/check";
 import { CHROME_FLAGS, DEFAULT_CHROME, withChrome } from "../src/deck/chrome";
 import { DECK_FONT_FAMILY, fontFacts, fontFileSrc, judgeFont, loadDeckFont, NO_FONT_FAIL, NO_FONT_ROW, type DeckFont } from "../src/deck/font";
-import { deckCss, FA3, FONT_LICENCE, LOCAL_FONT_SRC } from "../src/deck";
+import { deckCss, FA3, FONT_LICENCE, LOCAL_FONT_SRC, renderDeck } from "../src/deck";
 import { DISCLAIMER } from "@pickle/quant";
 import { narrowDots } from "../src/deck/text";
-import { deckFixture, synthCapture } from "./deck-fixtures";
+import { deckFixture, DOT_PNG, synthCapture } from "./deck-fixtures";
 
 const CHROME = process.env.PICKLE_DECK_CHROME || DEFAULT_CHROME;
 const HAS_CHROME = existsSync(CHROME);
@@ -121,6 +121,22 @@ describe("the archived page never carries the font file, with no font and no bro
       expect(faces.length).toBe(1);
       for (const f of faces) expect(f).toMatch(/src:local\("[^"]+"\)(, local\("[^"]+"\))*;/);
       expect(archived.split(LOCAL_FONT_SRC).join("@")).toBe(html.split(fontFileSrc(path)).join("@"));
+    });
+  }
+  for (const k of ["a", "b", "c"] as const) {
+    test(`fixture ${k}, with real capture pictures: the kept page has no script, no file:, and loads nothing that is not data: (lead 1651 1)`, () => {
+      const { spec, data } = deckFixture(k, synthCapture);
+      const { archived } = deckPages(spec, data, { font: { path } });
+      expect(archived).not.toMatch(/<script|<iframe|<object|<embed|<link|<base|<meta[^>]+http-equiv|@import|srcset=|\bon[a-z]+=/i);
+      expect(archived.toLowerCase()).not.toContain("file:");
+      // every address the page names, as an attribute or a CSS url(), is data: (the captures, the ring); none goes out
+      const addrs = [...archived.matchAll(/\b(?:src|href|xlink:href|poster|action|data)=["']([^"']*)["']|url\(\s*["']?([^"')]+)/gi)].map((m) => (m[1] ?? m[2])!);
+      expect(addrs.length).toBeGreaterThan(0);
+      expect(addrs.filter((a) => !a.startsWith("data:"))).toEqual([]);
+      // the pictures are the captures and nothing else; no font bytes (a font as data:, or a woff/ttf/otf format)
+      expect(archived.match(/<img\b/g)!.length).toBe(k === "b" ? 3 : 4);
+      expect(archived).not.toMatch(/data:(font|application\/(x-)?font)|format\(["']?(woff2?|truetype|opentype)/i);
+      for (const id of Object.keys(data.captures)) if (archived.includes(`data-capture="${id}"`)) expect(archived).toContain(data.captures[id]!.src);
     });
   }
   test("buildDeck draws both pages through deckPages and keeps the archived one (a source check: the build itself needs Chrome and the font)", () => {
@@ -341,6 +357,120 @@ describe.skipIf(!HAS_CHROME)("the rendered-page check (DD 1935 §5-3), in Chrome
 // ---- the whole build, with the real font
 
 const samplesOut = process.env.PICKLE_DECK_SAMPLES_OUT;
+
+type CapBox = { n: number; area: { w: number; h: number }; cells: { cap: number[]; frame: number[]; img: number[]; cc: number[]; cm: number[]; ccText: number[]; cmText: number[] }[] };
+/** each capture area of a deck page in Chrome: the cells, their frames, pictures, captions and the lines under them */
+async function captureBoxes(html: string): Promise<CapBox[]> {
+  return withChrome(CHROME, async (page) => {
+    const f = `${page.dir}/p.html`;
+    await Bun.write(f, html);
+    await page.viewport(1280, 720);
+    await page.goto(`file://${f}`);
+    return page.evaluate<CapBox[]>(`[...document.querySelectorAll(".cap-l")].map((l) => {
+      const r = (e) => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom].map((v) => Math.round(v * 10) / 10); };
+      // the text itself (a grid item is stretched to its row; the words may take less)
+      const t = (e) => { const g = document.createRange(); g.selectNodeContents(e); return r(g); };
+      const a = l.getBoundingClientRect();
+      return { n: Number(l.closest(".page").dataset.n), area: { w: a.width, h: a.height }, cells: [...l.querySelectorAll(".cap")].map((c) => ({ cap: r(c), frame: r(c.querySelector(".frame")), img: r(c.querySelector("img")), cc: r(c.querySelector(".cc")), cm: r(c.querySelector(".cm")), ccText: t(c.querySelector(".cc")), cmText: t(c.querySelector(".cm")) })) };
+    })`);
+  });
+}
+
+describe.skipIf(!HAS_CHROME)("a slide with two captures puts them side by side, each with its caption under it (DD 2236 3)", () => {
+  test(
+    "(a), at real capture shapes: two cells of the area's full height, about as big as one capture alone; one capture takes the whole width",
+    async () => {
+      const { spec, data } = deckFixture("a", synthCapture);
+      const boxes = await captureBoxes(renderDeck(spec, data));
+      const two = boxes.filter((b) => b.cells.length === 2);
+      const one = boxes.filter((b) => b.cells.length === 1);
+      expect([two.length, one.length]).toEqual([1, 2]);
+      for (const b of two) {
+        const [l, r] = b.cells as [CapBox["cells"][0], CapBox["cells"][0]];
+        // side by side: the same top and bottom, the right cell after the left one with the 14px gap
+        expect([l.cap[1], l.cap[3]]).toEqual([r.cap[1], r.cap[3]]);
+        expect(Math.round(r.cap[0]! - l.cap[2]!)).toBe(14);
+        // each cell is the area's full height and half its width
+        expect(Math.round(l.cap[3]! - l.cap[1]!)).toBe(Math.round(b.area.h));
+        for (const c of [l, r]) {
+          expect(Math.round(c.cap[2]! - c.cap[0]!)).toBe(Math.round((b.area.w - 14) / 2));
+          // the frame takes what the caption leaves (DD: about 325 × 368), and the caption is under its own frame
+          expect(c.frame[3]! - c.frame[1]!).toBeGreaterThanOrEqual(340);
+          expect(c.cc[1]!).toBeGreaterThanOrEqual(c.frame[3]!);
+          expect([c.cc[0]! >= c.cap[0]! - 0.5, c.cc[2]! <= c.cap[2]! + 0.5, c.cm[0]! >= c.cap[0]! - 0.5, c.cm[2]! <= c.cap[2]! + 0.5]).toEqual([true, true, true, true]);
+        }
+        // the portrait post is about as big as it is alone (DD: about 292 × 366), the square reply wider than stacked
+        expect(l.img[3]! - l.img[1]!).toBeGreaterThanOrEqual(340);
+        expect(r.img[2]! - r.img[0]!).toBeGreaterThanOrEqual(300);
+      }
+      for (const b of one) expect(Math.round(b.cells[0]!.cap[2]! - b.cells[0]!.cap[0]!)).toBe(Math.round(b.area.w));
+    },
+    60_000,
+  );
+  test(
+    "a long line under one caption and a short one under the other: the two frames and the two captions still line up",
+    async () => {
+      const { spec, data } = deckFixture("a", synthCapture);
+      // the left cell's line runs to three lines in any font, the right one's stays short
+      data.captures["cap-post"] = { ...data.captures["cap-post"]!, account: "@sample_analyst_with_a_much_longer_account_name_than_usual" };
+      const [b] = (await captureBoxes(renderDeck(spec, data))).filter((x) => x.cells.length === 2);
+      const [l, r] = b!.cells as [CapBox["cells"][0], CapBox["cells"][0]];
+      // the case is what it says: the left line is at least a line taller
+      expect(l.cmText[3]! - l.cmText[1]! - (r.cmText[3]! - r.cmText[1]!)).toBeGreaterThanOrEqual(15);
+      expect([l.frame[1], l.frame[3], l.cc[1]]).toEqual([r.frame[1], r.frame[3], r.cc[1]]);
+      expect([l.cap[1], l.cap[3]]).toEqual([r.cap[1], r.cap[3]]);
+      // the account wider than its cell wraps inside it (it ran 66 px into the gap and the next cell), the cells stay even
+      expect([l.cmText[0]! >= l.cap[0]! - 0.5, l.cmText[2]! <= l.cap[2]! + 0.5]).toEqual([true, true]);
+      expect(Math.abs(l.cap[2]! - l.cap[0]! - (r.cap[2]! - r.cap[0]!))).toBeLessThanOrEqual(1);
+    },
+    60_000,
+  );
+  test(
+    "a caption word wider than its cell (keep-all, no space in it) wraps inside the cell, never into the next one",
+    async () => {
+      const { spec, data } = deckFixture("a", synthCapture);
+      const slide = spec.slides.find((x) => x.kind === "issue+capture" && x.captures.some((c) => c.assetId === "cap-post"));
+      if (!slide || slide.kind !== "issue+capture") throw new Error("no slide with the post");
+      slide.captures.find((c) => c.assetId === "cap-post")!.caption = "신용스프레드확대와하이일드채권금리상승을함께짚은긴게시물이에요(합성)";
+      const [b] = (await captureBoxes(renderDeck(spec, data))).filter((x) => x.cells.length === 2);
+      const [l, r] = b!.cells as [CapBox["cells"][0], CapBox["cells"][0]];
+      // it ran 72 px past its cell before: now two lines, inside it, and the cells stay even
+      expect(l.ccText[3]! - l.ccText[1]!).toBeGreaterThanOrEqual(30);
+      expect([l.ccText[0]! >= l.cap[0]! - 0.5, l.ccText[2]! <= l.cap[2]! + 0.5]).toEqual([true, true]);
+      expect(Math.abs(l.cap[2]! - l.cap[0]! - (r.cap[2]! - r.cap[0]!))).toBeLessThanOrEqual(1);
+      expect([l.frame[3], l.cc[1]]).toEqual([r.frame[3], r.cc[1]]);
+    },
+    60_000,
+  );
+  test(
+    "two captures of far apart shapes, one with a much longer caption: the two cells still split the width evenly, and nothing leaves the area (lead 0308 F14)",
+    async () => {
+      const { spec, data } = deckFixture("a");
+      // a narrow tall picture (1:5) beside a wide one (4:1); the picture's size is its width and height, the file a dot
+      data.captures["cap-post"] = { ...data.captures["cap-post"]!, src: DOT_PNG, width: 240, height: 1200 };
+      data.captures["cap-reply"] = { ...data.captures["cap-reply"]!, src: DOT_PNG, width: 2400, height: 600 };
+      const slide = spec.slides.find((x) => x.kind === "issue+capture" && x.captures.some((c) => c.assetId === "cap-reply"));
+      if (!slide || slide.kind !== "issue+capture") throw new Error("no slide with the reply");
+      const cap = slide.captures.find((c) => c.assetId === "cap-reply")!;
+      cap.caption = "같은 글에 달린 반박 답글로, 스프레드가 곧 다시 좁혀질 것이라는 주장과 그 근거를 길게 적은 글이에요(합성)";
+      const [b] = (await captureBoxes(renderDeck(spec, data))).filter((x) => x.cells.length === 2);
+      const [l, r] = b!.cells as [CapBox["cells"][0], CapBox["cells"][0]];
+      // the case is what it says: the right caption runs to more lines than the left one
+      expect(r.ccText[3]! - r.ccText[1]! - (l.ccText[3]! - l.ccText[1]!)).toBeGreaterThanOrEqual(15);
+      const w = (x: number[]) => x[2]! - x[0]!;
+      expect(Math.abs(w(l.cap) - w(r.cap))).toBeLessThanOrEqual(1);
+      expect(Math.round(w(l.cap) + 14 + w(r.cap))).toBe(Math.round(b!.area.w));
+      // nothing leaves the area: cells inside it, frames inside their cells, pictures inside their frames
+      const area = [l.cap[0]!, l.cap[1]!, l.cap[0]! + b!.area.w, l.cap[1]! + b!.area.h];
+      const inside = (x: number[], o: number[]) => x[0]! >= o[0]! - 0.5 && x[1]! >= o[1]! - 0.5 && x[2]! <= o[2]! + 0.5 && x[3]! <= o[3]! + 0.5;
+      for (const c of [l, r]) expect([inside(c.cap, area), inside(c.frame, c.cap), inside(c.img, c.frame), inside(c.cc, c.cap), inside(c.cm, c.cap)]).toEqual([true, true, true, true, true]);
+      // each picture fills its frame along one side (contain): the tall one its height, the wide one its width
+      expect(Math.round(l.img[3]! - l.img[1]!)).toBe(Math.round(l.frame[3]! - l.frame[1]! - 2));
+      expect(Math.round(w(r.img))).toBe(Math.round(w(r.frame) - 2));
+    },
+    60_000,
+  );
+});
 
 describe.skipIf(!HAS_CHROME || !FONT_PATH)("the licence line with the deck's font (DD 0103-b F)", () => {
   test(

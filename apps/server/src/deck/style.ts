@@ -123,12 +123,12 @@ mark.hl{background:${c.marker};color:inherit;padding:0 .08em;-webkit-box-decorat
 .gg-side .next{font-weight:600;color:${c.ink}}
 .gg-side .note{margin-top:10px;font-weight:500;color:${c.ink2}}
 /* capture */
-.cap-l{position:absolute;left:0;top:0;width:662px;height:416px;display:flex;flex-direction:column;gap:14px}
-.cap{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
-.cap .frame{flex:1 1 0;min-height:0;background:${c.card};border:1px solid ${c.rule2};border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cap-l{position:absolute;left:0;top:0;width:662px;height:416px;display:grid;grid-auto-columns:1fr;grid-template-rows:minmax(0,1fr) auto auto;column-gap:14px}
+.cap{grid-row:1/4;display:grid;grid-template-rows:subgrid;min-width:0;min-height:0}
+.cap .frame{min-height:0;background:${c.card};border:1px solid ${c.rule2};border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .cap img{display:block;max-width:100%;max-height:100%;object-fit:contain}
-.cap .cc{margin-top:8px;font-size:15px;line-height:1.35;color:${c.ink2};letter-spacing:-.2px}
-.cap .cm{font-size:15px;line-height:1.35;color:${c.foot};letter-spacing:-.2px}
+.cap .cc{margin-top:8px;font-size:15px;line-height:1.35;color:${c.ink2};letter-spacing:-.2px;overflow-wrap:anywhere}
+.cap .cm{font-size:15px;line-height:1.35;color:${c.foot};letter-spacing:-.2px;overflow-wrap:anywhere}
 .cap-r{position:absolute;left:686px;top:0;width:466px;display:flex;flex-direction:column;gap:14px}
 .pt{padding:16px 20px}
 .pt .lab{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:${c.mute};letter-spacing:.4px}

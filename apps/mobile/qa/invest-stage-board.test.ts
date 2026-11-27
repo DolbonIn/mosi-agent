@@ -199,7 +199,7 @@ describe("the board (IvStages)", () => {
   });
   test("off and none: one line in the server's words, no gauges, no next, no head", () => {
     for (const [stages, line] of [
-      [{ kind: "none", none: "첫 판정은 오늘 08:00에 나와요." }, "첫 판정은 오늘 08:00에 나와요."],
+      [{ kind: "none", none: "첫 판정은 오늘 오전 8시에 나와요." }, "첫 판정은 오늘 오전 8시에 나와요."],
       [{ kind: "off", off: "지금은 지표를 받지 않아서 단계를 판정하지 않아요." }, "지금은 지표를 받지 않아서 단계를 판정하지 않아요."],
     ] as [InvestStages, string][]) {
       const m = html(createElement(IvStages, { stages }));

@@ -4,7 +4,7 @@
  * flows of the person's own Toss read for 9 and R6 (B2e), by @pickle/quant's assessStages. The server only gathers the inputs and says where each came from; every comparison and stage rule is
  * quant's. A series that could not be read is left out, so whatever rests on it is unknown (확인 불가), never unmet.
  */
-import { assessStages, momFromIndex, num, pct, pp, rate, type Point, type StageInput } from "@pickle/quant";
+import { assessStages, momFromIndex, NO_DATA, num, pct, pp, rate, type Point, type StageInput } from "@pickle/quant";
 import type { Core } from "../core.ts";
 import { dayWords } from "./forecasts.ts";
 import { fredSeries, indexBars, type FredId } from "./macro.ts";
@@ -334,6 +334,11 @@ function moved(kind: "탈출" | "회복", prev: StageHead, now: StageHead): stri
   return `${prev.text} → ${now.text}`;
 }
 
+/** what moved since the reading before, one phrase per kind: the 투자 screen's judged line and the deck's moved line (DD 2236) */
+export function stageChanges(prev: { escape: StageHead; recovery: StageHead }, now: { escape: StageHead; recovery: StageHead }): string[] {
+  return [moved("탈출", prev.escape, now.escape), moved("회복", prev.recovery, now.recovery)].filter((x): x is string => !!x);
+}
+
 export type StagesView =
   | { kind: "off"; off: string }
   | { kind: "none"; none: string }
@@ -391,7 +396,7 @@ export const headsOf = (j: Judged) => {
 export function stagesView(core: Core, userId: string, now: number): StagesView {
   if (!core.cfg.invest.sources) return { kind: "off", off: STAGES_OFF };
   const row = latestJudgment(core, userId);
-  if (!row) return { kind: "none", none: kstHour(now) < JUDGE_HOUR_KST ? "첫 판정은 오늘 08:00에 나와요." : "첫 판정은 곧 나와요." };
+  if (!row) return { kind: "none", none: kstHour(now) < JUDGE_HOUR_KST ? "첫 판정은 오늘 오전 8시에 나와요." : "첫 판정은 곧 나와요." };
   const j = JSON.parse(row.json) as Judged;
   const { escape, recovery } = headsOf(j);
   const prevRow = judgmentBefore(core, userId, row.day);
@@ -400,7 +405,7 @@ export function stagesView(core: Core, userId: string, now: number): StagesView 
   let judgedText = `${dayWords(row.day, now)} ${hm(row.at)} 판정`;
   if (prevRow) {
     const p = headsOf(JSON.parse(prevRow.json) as Judged);
-    const changes = [moved("탈출", p.escape, escape), moved("회복", p.recovery, recovery)].filter(Boolean);
+    const changes = stageChanges(p, { escape, recovery });
     const yesterday = row.day === today && prevRow.day === kstDayOf(Date.parse(`${row.day}T12:00:00Z`) - DAY_MS - 9 * HOUR);
     const same = yesterday ? "어제와 같아요" : `${dayWords(prevRow.day, now)} 판정과 같아요`;
     judgedText += changes.length ? ` · ${changes.join(" · ")}` : ` · ${same}`;
@@ -630,7 +635,8 @@ export function stagesDetail(core: Core, userId: string, now: number): StagesDet
       signal: it.signal,
       value: it.signal === "unknown" && !VALUE_WHEN_UNKNOWN.includes(it.no) ? null : core11Value(it.no, it.value, it.extras),
       basis: basisText(j, NEEDS[`#${it.no}`] ?? [], it.asOf, now), // DD 0731 E5: the year by the reading time, as judgedText
-      reason: it.no === 6 ? it.reason.replace(/samsung|hynix/g, (id) => COMPANY[id]!) : it.reason,
+      // DD 0058: no figure at all says nothing the basis does not say better (값이 없어요, 받을 곳이 아직 없어요, …)
+      reason: it.reason === NO_DATA ? "" : it.no === 6 ? it.reason.replace(/samsung|hynix/g, (id) => COMPANY[id]!) : it.reason,
     })),
     groups: GROUPS.map((g) => ({
       key: g.key,

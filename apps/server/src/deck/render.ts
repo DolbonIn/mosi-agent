@@ -147,6 +147,8 @@ export const VAL_MAX = 300;
 
 /** a value's pieces, each kept whole: "3.92%p ·" and "6개월 최저보다 +0.77%p" (the dot stays with the piece before it) */
 export function valuePieces(v: string): string[] {
+  // an empty value (an unknown condition with nothing known, DD 2236) is an empty cell, not an empty piece
+  if (!v) return [];
   const ps = v.split(" · ");
   return ps.map((p, i) => (i < ps.length - 1 ? `${p} ·` : p));
 }
@@ -271,8 +273,9 @@ function body(c: Ctx, s: Slide, n: number): string {
       const caps = presentCaptures(s, d)
         .map((cp) => {
           const a = d.captures[cp.assetId]!;
-          const meta = [a.outlet, a.account, kst(a.capturedAt), a.grade].filter(Boolean).join(" · ");
-          return `<figure class="cap" data-capture="${esc(cp.assetId)}" style="margin:0"><div class="frame"><img src="${esc(a.src)}" width="${a.width}" height="${a.height}" alt="${esc(fill(cp.caption, d.figures, c.words).plain)}" data-viz="capture" data-url="${esc(a.url)}"></div><figcaption class="cc">${c.t(cp.caption)}</figcaption><div class="cm">${esc(meta)}</div></figure>`;
+          // the time and the grade as one piece, so a narrow cell never leaves the grade alone on a line
+          const meta = [esc(a.outlet), a.account ? esc(a.account) : "", `<span class="nw">${esc([kst(a.capturedAt), a.grade].filter(Boolean).join(" · "))}</span>`].filter(Boolean).join(" · ");
+          return `<figure class="cap" data-capture="${esc(cp.assetId)}" style="margin:0"><div class="frame"><img src="${esc(a.src)}" width="${a.width}" height="${a.height}" alt="${esc(fill(cp.caption, d.figures, c.words).plain)}" data-viz="capture" data-url="${esc(a.url)}"></div><figcaption class="cc">${c.t(cp.caption)}</figcaption><div class="cm">${meta}</div></figure>`;
         })
         .join("");
       for (const cp of presentCaptures(s, d)) c.sources.add(`capture:${cp.assetId}`);

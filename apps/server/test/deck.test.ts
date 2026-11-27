@@ -1,14 +1,16 @@
 /** The deck generator's JSON checks and F-A HTML (DD 1935 §5, DD 0059 §6, DD 0103-b F): the three samples, synthetic. */
 import { describe, expect, test } from "bun:test";
-import { DISCLAIMER, DISCLAIMER_PLAYBOOK, textW } from "@pickle/quant";
+import { DISCLAIMER, DISCLAIMER_PLAYBOOK, kst, textW } from "@pickle/quant";
 import { inflateSync } from "node:zlib";
 import { chars, deckCss, fill, figureText, FONT_LICENCE, kstStamp, lintModelText, LOCAL_FONT_SRC, methodBars, renderDeck, validateDeck, type DeckFail, type DeckSpec, type Slide } from "../src/deck";
 import { ESCAPE_A_RULES, ESCAPE_D_RULES, RECOVERY_RULES, type Grid11Item, type Tri } from "@pickle/quant";
 import { deckStages, noteIdsFor } from "../src/deck/stages";
 import { nextLineHtml, valuePieces } from "../src/deck/render";
 import { narrowDots } from "../src/deck/text";
-import { noteNames } from "../src/deck/validate";
-import { escapeHead, gaugesOf, nextLines, recoveryHead, type Assessed, type InputKey, type Missing } from "../src/invest/stages";
+import { CAPTURE_SRC, noteNames } from "../src/deck/validate";
+import { escapeHead, gaugesOf, nextLines, recoveryHead, stageChanges, type Assessed, type InputKey, type Missing } from "../src/invest/stages";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { assessedOf, deckFixture, FIXTURE_AS_OF, synthCapture } from "./deck-fixtures";
 
 const rules = (f: DeckFail[]) => f.map((x) => x.rule);
@@ -47,11 +49,49 @@ describe("the three samples (DD 0059 §6-1)", () => {
     expect(data.core11!.items.filter((i) => i.signal === "unknown").length).toBe(3);
     expect(textOf(pages(html)[8]!.html)).toContain("확인 불가");
   });
+  test("a capture is drawn only as a data: picture, so the kept page loads nothing from outside (lead 1651 1)", () => {
+    expect(["data:image/png;base64,iVBORw0K", "data:image/jpeg;base64,/9j/4AAQ+x==", synthCapture("cap-post").src].map((x) => CAPTURE_SRC.test(x))).toEqual([true, true, true]);
+    expect(["https://example.org/x.png", "file:///tmp/x.png", "data:image/svg+xml;base64,PHN2Zz4=", "data:image/png;base64,iVBOR\"onerror=x", "//cdn.example/x.png"].map((x) => CAPTURE_SRC.test(x))).toEqual([false, false, false, false, false]);
+    for (const src of ["https://example.org/x.png", "data:image/svg+xml;base64,PHN2Zz4="]) {
+      const { spec, data } = deckFixture("a");
+      data.captures["cap-post"] = { ...data.captures["cap-post"]!, src };
+      const f = validateDeck(spec, data).filter((x) => x.rule === "FA4-11");
+      expect([src, f.map((x) => x.what)]).toEqual([src, ["캡처 cap-post는 data: 그림이 아니에요"]]);
+    }
+    expect(validateDeck(deckFixture("a").spec, deckFixture("a").data).filter((x) => x.rule === "FA4-11")).toEqual([]);
+  });
+  test("a capture's outlet and account are a captured page's own text: drawn escaped wherever they go, never as markup (lead 0308 F3)", () => {
+    const { spec, data } = deckFixture("a");
+    const outlet = `채널<b>굵게</b>&"'`;
+    const account = `@계정</figure><i>"'&`;
+    const ids = Object.keys(data.captures);
+    for (const id of ids) data.captures[id] = { ...data.captures[id]!, outlet, account };
+    const html = renderDeck(spec, data);
+    // never the raw text: no element made from it, no figure closed by it
+    for (const raw of [outlet, account, "<b>", "</b>", "<i>", "</figure><i>"]) expect([raw, html.includes(raw)]).toEqual([raw, false]);
+    // the capture line, the sources slide and the footers all say it, as text
+    const cms = [...html.matchAll(/<figure class="cap" data-capture="([^"]+)"[\s\S]*?<div class="cm">([\s\S]*?)<\/div><\/figure>/g)];
+    expect(cms.length).toBe(4);
+    for (const [, id, cm] of cms) expect([id, textOf(undot(cm!))]).toEqual([id, [outlet, account, kst(data.captures[id!]!.capturedAt), data.captures[id!]!.grade].join(" · ")]);
+    const plain = textOf(undot(html));
+    expect(plain.split(`${outlet} · ${account} · 캡처`).length - 1).toBe(ids.length);
+    expect(textOf(undot([...html.matchAll(/<span class="l" data-role="foot-left">([\s\S]*?)<\/span>/g)].map((m) => m[1]).join("\n"))).includes(outlet)).toBe(true);
+  });
+  test("a capture's line under its caption keeps the time and the grade together, so a half-width cell never leaves the grade alone (DD 2236 3)", () => {
+    const { spec, data } = deckFixture("a");
+    const cms = [...renderDeck(spec, data).matchAll(/<figure class="cap" data-capture="([^"]+)"[\s\S]*?<div class="cm">([\s\S]*?)<\/div><\/figure>/g)];
+    expect(cms.length).toBe(4);
+    for (const [, id, cm] of cms) {
+      const a = data.captures[id!]!;
+      expect([id, textOf(undot(cm!))]).toEqual([id, [a.outlet, a.account, kst(a.capturedAt), a.grade].filter(Boolean).join(" · ")]);
+      expect([id, cm!.endsWith(`<span class="nw">${kst(a.capturedAt)} <span class="dot">·</span> ${a.grade}</span>`)]).toEqual([id, true]);
+    }
+  });
   test("(c) the stage move is the signal board's one highlighted line", () => {
     const { spec, data } = deckFixture("c");
     const p3 = pages(renderDeck(spec, data))[2]!;
     expect(p3.html.match(/<mark class="hl">/g)!.length).toBe(1);
-    expect(p3.html).toContain('<mark class="hl">탈출 2단계 → 3단계</mark>');
+    expect(p3.html).toContain('<mark class="hl">탈출 2 → 3단계</mark>');
     expect(textOf(p3.html)).toContain("3단계 방어 준비");
   });
   test("the conditions card says each thing once: the server's next, a note about what is not on (DD 1509 5)", () => {
@@ -487,12 +527,41 @@ describe("the stage cell is the 투자 screen's (DD 1704 1·2·3)", () => {
       { text: "회복 1단계", name: "바닥 탐색" },
       "탈출 3단계까지: 악화 신호 1개 더",
     ]);
-    expect([st("c").escape.head, st("c").next.escape, st("c").moved]).toEqual([{ text: "탈출 3단계", name: "방어 준비" }, "탈출 4단계까지: 심각 신호 1개 더", "탈출 2단계 → 3단계"]);
+    expect([st("c").escape.head, st("c").next.escape, st("c").moved]).toEqual([{ text: "탈출 3단계", name: "방어 준비" }, "탈출 4단계까지: 심각 신호 1개 더", "탈출 2 → 3단계"]);
+    expect([st("a").moved, st("b").moved]).toEqual([undefined, undefined]);
     for (const k of ["a", "b", "c"] as const) {
       const { data, s } = readingOf(k);
       expect(data.stages!.next).toEqual(nextLines(s));
       expect(data.words!.escape_label).toBe([data.stages!.escape.head.text, data.stages!.escape.head.name].filter(Boolean).join(" "));
     }
+  });
+
+  test("the moved line is the 투자 screen's: stageChanges between the reading before and this one, word for word (DD 2236)", () => {
+    const quiet = () => null;
+    const heads = (x: Assessed) => ({ escape: escapeHead(x, quiet), recovery: recoveryHead(x, quiet) });
+    const all: [string, Assessed][] = [...corners(), ...(["a", "b", "c"] as const).map((k) => [k, readingOf(k).s] as [string, Assessed])];
+    const said = new Set<string>();
+    for (const [pn, prev] of all)
+      for (const [nn, now] of all) {
+        const want = stageChanges(heads(prev), heads(now));
+        const got = deckStages(now, { values: {}, scenario: "", sources: [], before: prev }).moved;
+        expect([pn, nn, got]).toEqual([pn, nn, want.length ? want.join(" · ") : undefined]);
+        if (got) said.add(got);
+      }
+    // the shapes the rule has: a stage up, a floor, a stage word, both kinds at once
+    expect(said).toContain("탈출 2 → 3단계");
+    expect([...said].some((x) => x.includes("→ 탈출 최소 2단계"))).toBe(true);
+    expect([...said].some((x) => x.includes("회복 판정 보류"))).toBe(true);
+    expect([...said].some((x) => x.includes(" · "))).toBe(true);
+    // never the deck's old form for a stage up ("탈출 2단계 → 3단계")
+    expect([...said].filter((x) => /탈출 \d단계 → \d단계/.test(x))).toEqual([]);
+    // no reading before, or the same one: no line
+    const { s: c } = readingOf("c");
+    expect([deckStages(c, { values: {}, scenario: "", sources: [] }).moved, deckStages(c, { values: {}, scenario: "", sources: [], before: c }).moved]).toEqual([undefined, undefined]);
+    // the 투자 screen's judged line takes its words from the same function (stagesView), and moved() has no other caller
+    const src = readFileSync(join(import.meta.dir, "../src/invest/stages.ts"), "utf8");
+    expect(src.split("const changes = stageChanges(p, { escape, recovery });").length).toBe(2);
+    expect(src.match(/\bmoved\(/g)!.length).toBe(3);
   });
 
   test("a head's pending line is the server's for the same missing inputs, each reason in its own words (DD 1704 2, lead 2246)", () => {
@@ -542,8 +611,12 @@ describe("the stage cell is the 투자 screen's (DD 1704 1·2·3)", () => {
       const { spec, data } = deckFixture(k);
       const st = data.stages!;
       const all = [...st.conditions.escape, ...st.conditions.severe, ...st.conditions.recovery];
-      // a value says 확인 불가 or 자료 없음 exactly when its condition is unknown
-      for (const c of all) expect([k, c.id, /확인 불가|자료 없음/.test(c.value)]).toEqual([k, c.id, c.status === "unknown"]);
+      // DD 2236: a known condition's value never says there is none; an unknown one shows only its known part, else
+      // nothing, and never 자료 없음 (its status cell says 확인 불가 once)
+      for (const c of all) {
+        if (c.status !== "unknown") expect([k, c.id, /확인 불가|자료 없음/.test(c.value)]).toEqual([k, c.id, false]);
+        else expect([k, c.id, /^\s*(확인 불가|자료 없음)\s*$/.test(c.value), c.value.includes("자료 없음")]).toEqual([k, c.id, false, false]);
+      }
       // every VIX the conditions name is the VIX figure
       for (const c of all.filter((x) => x.value.includes("VIX"))) expect([k, c.id, c.value.startsWith(`VIX ${figureText(data.figures.vix!)}`)]).toEqual([k, c.id, true]);
       // the gauges count the statuses
@@ -590,7 +663,7 @@ describe("the stage cell is the 투자 screen's (DD 1704 1·2·3)", () => {
     expect(noteNames("A3가 켜지면 바뀌어요.", "escape", s4)).toEqual(["다음 단계 줄이 없어서 note가 조건(A3)을 부르지 않아요"]);
   });
 
-  test("a condition as drawn: the rule without its markdown, the server's value, else 확인 불가 when unknown and nothing otherwise", () => {
+  test("a condition as drawn: the rule without its markdown and the server's value; an unknown one shows its known part or nothing (DD 2236)", () => {
     const { s } = readingOf("b");
     const plain = (r: string) => r.replace(/\*\*|`/g, "");
     const RULES: Record<string, string> = { ...ESCAPE_A_RULES, ...ESCAPE_D_RULES, ...RECOVERY_RULES };
@@ -601,12 +674,26 @@ describe("the stage cell is the 투자 screen's (DD 1704 1·2·3)", () => {
     for (const c of all) {
       expect([c.id, c.rule]).toEqual([c.id, plain(RULES[c.id]!)]);
       expect([c.id, /\*\*|`/.test(c.rule)]).toEqual([c.id, false]);
-      expect([c.id, c.value]).toEqual([c.id, c.status === "unknown" ? "확인 불가" : ""]);
+      expect([c.id, c.value]).toEqual([c.id, ""]);
     }
     // the rules carry markdown in quant (the master prompt's words): stripping is not idle
     expect(Object.values(RULES).filter((r) => /\*\*|`/.test(r)).length).toBeGreaterThan(10);
-    const given = deckStages(s, { values: { A1: "3.76%p", A4: "자료 없음" }, scenario: "", sources: [] });
-    expect([given.conditions.escape[0]!.value, given.conditions.escape[3]!.value]).toEqual(["3.76%p", "자료 없음"]);
+    // (b): A4 and A6 are unknown, A1 met. A value that only says there is none is dropped for an unknown condition; its
+    // known part stays; a known condition keeps what the server gave
+    const ab = (values: Record<string, string>) => {
+      const e = deckStages(s, { values, scenario: "", sources: [] }).conditions.escape;
+      return [e[0]!, e[3]!, e[5]!].map((c) => [c.id, c.status, c.value]);
+    };
+    expect(ab({ A1: "3.76%p", A4: "자료 없음", A6: " 확인 불가 " })).toEqual([["A1", "met", "3.76%p"], ["A4", "unknown", ""], ["A6", "unknown", ""]]);
+    expect(ab({ A4: "확인 불가", A6: "CAPEX 가이던스 확인 불가" })).toEqual([["A1", "met", ""], ["A4", "unknown", ""], ["A6", "unknown", "CAPEX 가이던스 확인 불가"]]);
+    // dropped only where the status cell already says it: a met condition keeps the server's words, contradiction and all
+    expect(ab({ A1: "확인 불가" })[0]).toEqual(["A1", "met", "확인 불가"]);
+    // the drawn page: (b)'s stage pages show no 자료 없음, and A4's value cell is empty
+    const pb = pages(renderDeck(deckFixture("b").spec, deckFixture("b").data)).filter((p) => p.kind === "gauges");
+    expect(pb.length).toBeGreaterThan(0);
+    for (const p of pb) expect(p.html).not.toContain("자료 없음");
+    const a4 = pb.map((p) => p.html.match(/<div class="cond" data-cond="A4">[\s\S]*?<span class="val t-table">([\s\S]*?)<\/span><\/div>/)).find(Boolean);
+    expect(a4?.[1]).toBe("");
   });
   test("a value breaks only between its pieces: split after each \" · \", the dot ending the piece before (DD 1704 4)", () => {
     expect(valuePieces("3.76%p · 6개월 최저보다 +0.41%p")).toEqual(["3.76%p ·", "6개월 최저보다 +0.41%p"]);

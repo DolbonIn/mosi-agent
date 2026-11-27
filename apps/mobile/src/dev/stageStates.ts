@@ -88,5 +88,5 @@ export const STAGE_STATES: { name: string; reading?: StageReading; stages: Inves
       stale: "오늘 08:00 판정을 하지 못했어요. 11월 26일 판정이에요.",
     },
   },
-  { name: "none", stages: { kind: "none", none: "첫 판정은 오늘 08:00에 나와요." } },
+  { name: "none", stages: { kind: "none", none: "첫 판정은 오늘 오전 8시에 나와요." } },
 ];
