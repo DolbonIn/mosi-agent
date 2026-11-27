@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { AgentEvent, Message, Thread, ToolActivity } from "@pickle/protocol";
 import { systemTools } from "@pickle/agent";
+import { INVEST_WHERE_NOTE } from "../src/invest/tools.ts";
 import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
 
 let h: Harness;
@@ -35,7 +36,7 @@ describe("turns", () => {
       expect(input.ctx.userId).toBe(session.user.id);
       expect(input.ctx.agentName).toBe("깽이");
       expect(input.tools.map((t) => t.name)).toEqual(expect.arrayContaining(["k_weather", "sys_phone_call"]));
-      expect(input.system).toBe("SYSTEM for 하늘");
+      expect(input.system).toBe(`SYSTEM for 하늘\n\n${INVEST_WHERE_NOTE}`); // no invest yet: the where-line (DD 1520)
       const kv = input.ctx.store.kv;
       await kv.set("location", "강남구");
       expect(await kv.get("location")).toBe("강남구");

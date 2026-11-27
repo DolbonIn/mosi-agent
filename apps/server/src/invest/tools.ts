@@ -19,7 +19,7 @@ import { createForecast, proposeJudgement } from "./forecasts.ts";
 import { unsourced, writeLedger } from "./ledger.ts";
 import { createProposal, type ProposalArgs } from "./proposals.ts";
 import { money } from "./rules.ts";
-import { stagesDetail } from "./stages.ts";
+import { STAGES_OFF_AGAIN, stagesDetail } from "./stages.ts";
 import { SOURCE_TABLE } from "./sources.ts";
 
 /** an error the person's route would answer (400/404/409) → a failed tool call the model can read and fix */
@@ -84,9 +84,26 @@ const numProp: JsonSchemaProp = { type: "number" };
 export const PROPOSE_NOTE =
   "Nothing changed yet. The person decides on the card. The card already shows its rows, its result and its foot (data.foot, written by the server): do not restate the basis, the foot or the prices in your reply; say in one line that you sent the card.";
 
+/**
+ * whether the person uses invest: they have invest settings. The invest tools' gate. Opening the invest screen stores
+ * them (GET /api/invest), and so does every path that watches a symbol or makes a rule, so someone without them has
+ * never opened that screen (team-lead 1621: a watched symbol without settings never happens)
+ */
+export const usesInvest = (core: Core, userId: string): boolean => !!idb.getSettings(core.db, userId);
+
+/**
+ * DD 1520 · 1551, team-lead 1550: for someone without the invest tools, the server's fact of where Mosi shows the
+ * market stages, so a stage question gets the way there instead of "no such thing". Where, never a value: true on a
+ * server whose sources are off too. No tool names, no sample answer, nothing to raise unasked.
+ */
+export const INVEST_WHERE_NOTE =
+  "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요.";
+
+/** the system prompt's invest line: INVEST_WHERE_NOTE for someone without the invest tools, else null */
+export const investPromptNote = (core: Core, userId: string): string | null => (usesInvest(core, userId) ? null : INVEST_WHERE_NOTE);
+
 export function investTools(core: Core, userId: string | undefined): ToolDef[] {
-  if (!userId) return [];
-  if (!idb.getSettings(core.db, userId) && !idb.watchlist(core.db, userId).length) return [];
+  if (!userId || !usesInvest(core, userId)) return [];
   const hub = core.invest;
   /** this turn's invest_technicals answers by symbol: a proposal's "technicals" basis rests only on one of these */
   const answered = new Map<string, { asOf: string; source: string; grade: string }>();
@@ -94,7 +111,7 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
   const snapshot: ToolDef = {
     name: "invest_snapshot",
     description:
-      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When it is off, relay the sentence it gives and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later.",
+      "The market stage board as judged once a day from 08:00 KST (code, from public series): the escape stage (1–4) and recovery stage (0–3) in the screen's words, the 11 core risk indicators (signal, value, as-of · source · grade, reason) and the A1–A8, D1–D5, R1–R6 conditions (충족, 미충족, 확인 불가). Say the stages only as judged here and quote the words as given; never work out a stage yourself, and keep 확인 불가 as 확인 불가. 단계는 판정본만 말해요. 지금 값은 값으로만 말해요. When it is off it gives two sentences, summary and data.again: relay both, once, and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later. If they then ask why or when, answer only from those two sentences, which hold the reason and the condition: never say the reason is unknown or that nobody told you, and name no person, switch, setting or notification.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
     icon: "chart",
     title: () => "시장 단계 확인",
@@ -102,7 +119,9 @@ export function investTools(core: Core, userId: string | undefined): ToolDef[] {
     async run(_a, ctx: ToolContext) {
       const d = stagesDetail(core, ctx.userId, core.now());
       const s = d.stages;
-      if (s.kind !== "judged") return { ok: true, summary: s.kind === "off" ? s.off : s.none, data: { stages: s } };
+      // off: the board's sentence (also the chip's) and, for the agent alone, when it judges again (DD 1526-b 가)
+      if (s.kind === "off") return { ok: true, summary: s.off, data: { stages: s, again: STAGES_OFF_AGAIN } };
+      if (s.kind !== "judged") return { ok: true, summary: s.none, data: { stages: s } };
       return {
         ok: true,
         summary: `${s.escape.text} · ${s.recovery.text}`,

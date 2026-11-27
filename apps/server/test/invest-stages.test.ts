@@ -4,16 +4,16 @@
  * @pickle/quant judges. Bodies are synthetic (test/fake-toss.ts); nothing real is called.
  */
 import { afterEach, describe, expect, test } from "bun:test";
-import type { InvestOverview, InvestStagesDetail } from "@pickle/protocol";
+import type { Friend, InviteResponse, InvestOverview, InvestStagesDetail } from "@pickle/protocol";
 import { pct } from "@pickle/quant";
 import { etToEpoch } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
 import { pctChange } from "../src/invest/stage-ledger.ts";
 import { FRED_FEEDS, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
-import { investTools } from "../src/invest/tools.ts";
+import { INVEST_WHERE_NOTE, investTools } from "../src/invest/tools.ts";
 import { makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
-import { makeHarness, type Harness } from "./helpers.ts";
+import { makeHarness, outcome, readSse, type Harness } from "./helpers.ts";
 
 const DAY = "2026-11-30";
 const LAST = "2026-11-27";
@@ -305,7 +305,7 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     const tool = investTools(h.app.core, alice.id).find((t) => t.name === "invest_snapshot")!;
     expect(tool.description).toContain("단계는 판정본만 말해요. 지금 값은 값으로만 말해요."); // team-lead 0437 2
     // DD 0717 1, DD 0907 1: off → its sentence and nothing more: no board, no setting, no other check, no promise
-    expect(tool.description).toContain("When it is off, relay the sentence it gives and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later.");
+    expect(tool.description).toContain("When it is off it gives two sentences, summary and data.again: relay both, once, and stop there: say nothing about a board, a setting or who turns anything on or off, offer no other check in its place, and do not promise to check again or tell them later.");
     expect(tool.description).not.toContain("set up");
     const ctx = { userId: alice.id, threadId: null, now: () => new Date(h.clock.t) } as never;
     h.clock.t = KST(2026, 12, 1, 7, 0);
@@ -318,6 +318,25 @@ describe("`11지표와 단계 조건` and the agent's invest_snapshot", () => {
     expect(data.stages.escape).toEqual({ stage: 3, name: "방어 준비", text: "탈출 3단계" });
     expect(data.core11).toEqual((await alice.detail()).core11);
     expect(data.conditions.map((c) => c.rows.length)).toEqual([8, 5, 6]);
+  });
+
+  test("sources off: the board's sentence and, for the agent alone, when it judges again; why or when only from those two (DD 1526-b)", async () => {
+    const { h } = await world(calm(), { sources: false });
+    const { alice } = await people(h);
+    const tool = investTools(h.app.core, alice.id).find((t) => t.name === "invest_snapshot")!;
+    const ctx = { userId: alice.id, threadId: null, now: () => new Date(h.clock.t) } as never;
+    const OFF = "지금은 지표를 받지 않아서 단계를 판정하지 않아요."; // the words, not the constants
+    const AGAIN = "지표를 다시 받으면 단계도 다시 판정해요.";
+    // (가) the second sentence rides in data only: the chip line (summary) and the board stay one line
+    expect(await tool.run({}, ctx)).toEqual({ ok: true, summary: OFF, data: { stages: { kind: "off", off: OFF }, again: AGAIN } });
+    expect((await alice.overview()).stages).toEqual({ kind: "off", off: OFF });
+    expect((await alice.detail()).stages).toEqual({ kind: "off", off: OFF });
+    // (나) a follow-up's why or when from the two sentences alone: never "unknown", no person, switch, setting or notification
+    expect(tool.description).toContain(
+      "If they then ask why or when, answer only from those two sentences, which hold the reason and the condition: never say the reason is unknown or that nobody told you, and name no person, switch, setting or notification.",
+    );
+    // and neither sentence is quoted in the description (no-sample-lines): the model reads them from the result
+    for (const quoted of [OFF, AGAIN, "받지 않아서", "판정하지", "다시 받으면", "다시 판정"]) expect(tool.description).not.toContain(quoted);
   });
 });
 
@@ -456,5 +475,69 @@ describe("6, 7 and 11 from the person's ledger (team-lead 0437 1a)", () => {
 
   test("pctChange: (a − b) ÷ |b| × 100 without float residue; no base, no change", () => {
     expect([pctChange(95, 100), pctChange(110, 100), pctChange(-5, -10), pctChange(1, 0), pctChange(100, 104)]).toEqual([-5, 10, 50, null, -3.8462]);
+  });
+});
+
+describe("someone without invest settings hears where the stages are shown (DD 1520 · 1551, team-lead 1550 · 1621)", () => {
+  const WHERE = "모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요."; // the words, not the constant
+  const NOT_HERE = "지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요.";
+  async function ask(h: Harness, token: string, threadId: string, text = "지금 시장 단계 어때?") {
+    h.turns.set(async () => outcome("네"));
+    const events = await readSse(await h.req("POST", `/api/threads/${threadId}/messages`, { token, body: { text } }));
+    expect(events.at(-1)).toMatchObject({ type: "done" });
+    return h.turns.inputs.at(-1)!;
+  }
+  const investNames = (tools: { name: string }[]) => tools.map((t) => t.name).filter((n) => n.startsWith("invest_"));
+  const count = (text: string, part: string) => text.split(part).length - 1;
+
+  for (const sources of [true, false]) {
+    test(`sources ${sources ? "on" : "off"}: never opened the invest screen → the line once, after the launcher prompt, no invest tool; opened → no line`, async () => {
+      const { h } = await world(calm(), { sources });
+      const dan = await h.signup("dan");
+      const erin = await h.signup("erin");
+      idb.ensureSettings(h.db, erin.session.user.id, h.clock.t); // erin uses invest; dan does not (yet)
+
+      const d1 = await ask(h, dan.token, dan.session.mainThreadId);
+      expect(count(d1.system, WHERE)).toBe(1);
+      expect(count(d1.system, NOT_HERE)).toBe(1);
+      expect(d1.system).toStartWith("SYSTEM for ");
+      expect(d1.system).toEndWith(`\n\n${INVEST_WHERE_NOTE}`); // after the launcher's prompt: its cache prefix stays as it was
+      expect(investNames(d1.tools)).toEqual([]);
+
+      const e1 = await ask(h, erin.token, erin.session.mainThreadId);
+      expect(count(e1.system, WHERE)).toBe(0);
+      expect(e1.system).not.toContain("# 투자");
+      expect(investNames(e1.tools)).toContain("invest_snapshot");
+
+      // dan opens the invest screen once, nothing added: that is what the line says, so the tools come and the line goes
+      expect((await h.req("GET", "/api/invest", { token: dan.token })).status).toBe(200);
+      expect(idb.watchlist(h.db, dan.session.user.id)).toEqual([]);
+      const d2 = await ask(h, dan.token, dan.session.mainThreadId);
+      expect(count(d2.system, WHERE)).toBe(0);
+      expect(investNames(d2.tools)).toContain("invest_snapshot");
+    });
+  }
+
+  test("a friend's thread never gets the line (the invest tools are not given there either)", async () => {
+    const { h } = await world(calm());
+    const a = await h.signup("alice", { displayName: "하늘", agentName: "깽이" });
+    const b = await h.signup("bob", { displayName: "진우", agentName: "콩이" });
+    const inv = (await (await h.req("POST", "/api/invites", { token: a.token, headers: { host: "pickle.test" } })).json()) as InviteResponse;
+    const friend = (await (await h.req("POST", `/api/invites/${inv.token}/accept`, { token: b.token })).json()) as Friend;
+    const input = await ask(h, a.token, friend.threadId!, "@깽이 지금 시장 단계 어때?");
+    expect(input.system).toContain("공유 대화방");
+    expect(count(input.system, WHERE)).toBe(0);
+    expect(investNames(input.tools)).toEqual([]);
+    // the same person alone in their own thread does get it
+    expect(count((await ask(h, a.token, a.session.mainThreadId)).system, WHERE)).toBe(1);
+  });
+
+  test("the line word for word (DD 1607: each sentence counts), naming no tool, quoting nothing, no answer to copy", () => {
+    expect(INVEST_WHERE_NOTE).toBe(
+      "# 투자\n- 모시의 시장 단계(탈출·회복)는 투자 화면에서 보여요. 지금 사용자는 투자 화면을 연 적이 없어서 여기서는 단계를 읽을 수 없어요. 사용자가 묻기 전에는 꺼내지 않아요.",
+    );
+    expect(INVEST_WHERE_NOTE).not.toMatch(/[a-z]+_[a-z]+/);
+    expect(INVEST_WHERE_NOTE).not.toMatch(/["'`\u201c\u201d\u2018\u2019\u300c\u300d]/);
+    expect(INVEST_WHERE_NOTE).not.toMatch(/예를 들어|예시|처럼 말/);
   });
 });

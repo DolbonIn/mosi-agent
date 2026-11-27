@@ -313,6 +313,11 @@ export type StagesView =
     };
 
 export const STAGES_OFF = "지금은 지표를 받지 않아서 단계를 판정하지 않아요.";
+/**
+ * the off tool result's second sentence, the agent's alone (DD 1526-b 가): the condition the code judges again on, no
+ * day and no promise. The board and the tool chip keep STAGES_OFF alone (0426: nowhere to get it, so quiet)
+ */
+export const STAGES_OFF_AGAIN = "지표를 다시 받으면 단계도 다시 판정해요.";
 
 /**
  * An invest alert's `시장` row (DD 0847 0, A16's 탈출·회복 단계): the board's heads without the stage names —

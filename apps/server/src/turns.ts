@@ -14,7 +14,7 @@ import { makeToolStore } from "./toolstore.ts";
 import { phoneTools } from "./phone.ts";
 import { meetPromptNote, meetTools } from "./meet.ts";
 import { settleInvestCards } from "./invest/proposals.ts";
-import { investTools } from "./invest/tools.ts";
+import { investPromptNote, investTools } from "./invest/tools.ts";
 import { newId, preview, safeJson } from "./util.ts";
 import { errInfo } from "./log.ts";
 import { SseChannel } from "./events.ts";
@@ -611,6 +611,10 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       skills: skillLines,
       recalled,
     });
+    // DD 1520 · 1551: someone without the invest tools hears where the market stages are shown; never in a friend's
+    // thread or with someone else speaking, where the invest tools are not given either
+    const investWhere = othersPresent ? null : investPromptNote(core, o.userId);
+    if (investWhere) system += `\n\n${investWhere}`;
     if (isFriend) system += friendThreadNote(core, thread, o.userId);
     else {
       // the user's meetings right now + "meeting content comes from sys_meet_notes" (only once they have one)
