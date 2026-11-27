@@ -78,6 +78,11 @@ export function linesInPage(opts = {}) {
   const AREA_NEXT = /^단위/;
   const AUX_PREV = /[\u1161\u1165\u1167\u1162\u116a\u116f\u116b]$/u;
   const AUX = /^(?:둔|둘|둬|뒀|준|줄|줘|줬|본|볼|봐|봤)(?![\p{L}\p{N}])/u;
+  // as ui/Text.tsx (keep the two in step): a time of day, 오전 / 오후 and the word starting with the time (the hour or
+  // h:mm), then the minutes' word after a bare hour
+  const HALF_DAY = /(?:^[‘“(]?|[–-])(?:오전|오후)$/u;
+  const HOUR = /^\d{1,2}(?:시(?!간)|:\d{2})/u;
+  const MINUTE = /^\d{1,2}분/u;
   // as ui/Text.tsx (keep the two in step): a domain, a letter or digit, a point and two Latin letters or more
   const URL_IN = /[\p{L}\p{N}]\.[A-Za-z]{2,}/u;
   // grapheme clusters (an emoji with a skin tone, a ZWJ family or a flag is one); an emoji is a cluster holding a
@@ -262,7 +267,7 @@ export function linesInPage(opts = {}) {
       if (NUM_END.test(a) && UNIT.test(b)) findings.push({ rule: "unit", line: `${a} / ${b}` });
     });
     // a one-syllable word cut from the word it leans on, a space between them in the source: forward ("한 / 번",
-    // "월 / 최대", "구 / 단위") and back ("예약해 / 둔")
+    // "월 / 최대", "구 / 단위") and back ("예약해 / 둔"); and a time of day ("오전 / 8시에")
     {
       const flat = chars.map((c) => c.ch).join("").replace(/\s+/g, " ");
       shown.forEach((l, k) => {
@@ -273,6 +278,9 @@ export function linesInPage(opts = {}) {
         if (DET.test(a) && DET_NEXT.test(b)) findings.push({ rule: "det", line: `${a} / ${b}` });
         if ((PER.test(a) && PER_NEXT.test(b)) || (AREA.test(a) && AREA_NEXT.test(b))) findings.push({ rule: "per", line: `${a} / ${b}` });
         if (AUX_PREV.test(a.normalize("NFD")) && AUX.test(b)) findings.push({ rule: "aux", line: `${a} / ${b}` });
+        // a time of day cut apart ("오전 / 8시에", "오후 3시 / 30분까지", "오후 / 3:12")
+        const minutes = /^\d{1,2}시$/.test(a) && MINUTE.test(b) && (flat.includes(`오전 ${a} ${b}`) || flat.includes(`오후 ${a} ${b}`));
+        if ((HALF_DAY.test(a) && HOUR.test(b)) || minutes) findings.push({ rule: "time", line: `${a} / ${b}` });
       });
     }
     // characters on two lines at once, as runs ("찾아")

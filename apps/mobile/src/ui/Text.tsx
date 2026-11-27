@@ -41,6 +41,13 @@ import "./Text.css";
  *       an answer and stays), a period noun and the amount after it ("월 최대", "연 4.5%", "주 3회", "일 단위"; "주
  *       정부" and "일 처리" stay apart), an area noun and "단위" ("구 단위까지만");
  *       back: an auxiliary verb on the -아/-어 form before it ("예약해 둔", "적어 줘", "써 볼"; "할 줄" stays apart).
+ *   - a time of day rides together over a nbsp, tied (16 characters at most): 오전 or 오후 and the word after it that
+ *     starts with the time, particle and all — the hour, then the minutes' word after a bare hour ("오전 8시에", "오후 3시
+ *     30분까지"), or h:mm and a range ("오후 3:12", "오전 7:30에", "오후 7:12–7:30", "오전 11:50–오후 1:10"); an opening
+ *     quote before 오전 / 오후 too ("‘오후 3:00"). What comes before (오늘, a date) and a " · " item after stay apart, and so
+ *     do "오전 8시간", "오후 3시에 30분" and a clock without 오전/오후 ("3시 30분"). Under keep-all both engines break at its
+ *     spaces ("첫 판정은 오늘 오전 / 8시에 나와요." at 320 × 130 %). The "08:00" of a data line keeps its own tie and no
+ *     more ("11월 27일 08:00 판정").
  *   - a word holding a domain is tied whole, path, particle and all, at any length: "microsoft.com/devicelogin에",
  *     "example.co.kr", "user@example.com". WebKit breaks inside it at "." and "/" ("microsoft. / com/devicelogin에");
  *     a box wider than the line wraps inside instead of running out.
@@ -78,6 +85,13 @@ const PER = /^(?:월|연|년|주|일|회)$/;
 const PER_NEXT = /^(?:최대|최소|최고|평균|단위|(?:약|총)(?!\p{L})|\d)/u;
 const AREA = /^(?:시|군|구|동|읍|면)$/;
 const AREA_NEXT = /^단위/;
+// a time of day (DD 0301 2, DD 0311-b): 오전 / 오후 (an opening quote or bracket before it, or a range's dash: "11:50–오후")
+// and the word starting with the time, the hour ("8시에", "12시부터"; not "8시간") or h:mm ("3:12", "7:30에", "7:12–7:30"),
+// then the minutes' word ("30분까지") after a bare hour that rides on 오전 / 오후
+const HALF_DAY = /(?:^[‘“(]?|[–-])(?:오전|오후)$/u;
+const HOUR = /^\d{1,2}(?:시(?!간)|:\d{2})/u;
+const HOUR_END = /(?:^|\u00a0)(?:오전|오후)\u00a0\d{1,2}시$/u;
+const MINUTE = /^\d{1,2}분/u;
 // a one-syllable auxiliary verb after the -아/-어 form it leans on ("예약해 둔", "적어 줘", "써 볼"; "할 줄" is no -아/-어).
 // The form is read on the decomposed word (NFD): its last syllable ends in ㅏ ㅓ ㅕ ㅐ ㅘ ㅝ ㅙ with no final consonant,
 // which holds 아 어 여 해 워 와 and the short forms (써, 가, 봐, 줘, 돼, 켜)
@@ -266,6 +280,8 @@ function rides(prev: string, w: string): boolean {
     (DET.test(end) && DET_NEXT.test(w)) ||
     (PER.test(end) && PER_NEXT.test(w)) ||
     (AREA.test(end) && AREA_NEXT.test(w)) ||
+    (HALF_DAY.test(end) && HOUR.test(w)) ||
+    (HOUR_END.test(prev) && MINUTE.test(w)) ||
     (AUX_PREV.test(prev.normalize("NFD")) && AUX.test(w))
   );
 }

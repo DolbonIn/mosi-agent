@@ -44,7 +44,8 @@ describe("Sentences", () => {
     expect(html("「모시」에게 물어봐요.")).toBe('<span class="t-tie">「모시」에게</span> 물어봐요.');
     expect(html("‘연극’이면(공연)")).toBe('<span class="t-tie">‘연극’이면</span><wbr/><span class="t-tie">(공연)</span>');
     expect(html("“좋아요” 하고 답해요.")).toBe('<span class="t-tie">“좋아요”</span> 하고 답해요.');
-    expect(html("‘오후 3:00 · 팀 회의’처럼")).toBe('<span class="t-tie">‘오후</span> <span class="t-tie">3:00\u00a0·</span> 팀 <span class="t-tie">회의’처럼</span>');
+    // with a time of day in it, the quote, 오후 and the time are one tie (DD 0311-b)
+    expect(html("‘오후 3:00 · 팀 회의’처럼")).toBe('<span class="t-tie">‘오후\u00a03:00\u00a0·</span> 팀 <span class="t-tie">회의’처럼</span>');
     // a quote standing alone, or plain words: nothing to hold
     expect(html("그는 “ 하고 멈췄어요.")).toBe("그는 “ 하고 멈췄어요.");
     expect(html("평범한 문장이에요.")).toBe("평범한 문장이에요.");
@@ -76,7 +77,9 @@ describe("Sentences", () => {
     const t = (x: string) => `<span class="t-tie">${x}</span>`;
     expect(html("수수료는 3.3%이고 할인은 12.5%예요")).toBe(`수수료는 ${t("3.3%이고")} 할인은 ${t("12.5%예요")}`);
     expect(html("합계는 1,200,000원이고")).toBe(`합계는 ${t("1,200,000원이고")}`);
-    expect(html("오후 12:30에 만나요")).toBe(`오후 ${t("12:30에")} 만나요`);
+    expect(html("내일 12:30에 만나요")).toBe(`내일 ${t("12:30에")} 만나요`);
+    // after 오전 / 오후 the time rides on it (DD 0311-b)
+    expect(html("오후 12:30에 만나요")).toBe(`${t("오후\u00a012:30에")} 만나요`);
     expect(html("기간은 11–16일이고 비율은 1/2이에요")).toBe(`기간은 ${t("11–16일이고")} 비율은 ${t("1/2이에요")}`);
     expect(html("마감은 2026-11-17이고")).toBe(`마감은 ${t("2026-11-17이고")}`);
     expect(html("할인은 3%이고 기온은 18°C예요")).toBe(`할인은 ${t("3%이고")} 기온은 ${t("18°C예요")}`);
@@ -140,6 +143,49 @@ describe("Sentences", () => {
     expect(html("할 줄 알아요")).toBe("할 줄 알아요");
     expect(html("적어 줄게요")).toBe("적어 줄게요");
     expect(html("가방 둔 곳")).toBe("가방 둔 곳");
+  });
+  test("a time of day rides together: 오전 / 오후 and the hour's word, particle and all, then the minutes after a bare hour (DD 0301 2)", () => {
+    const t = (x: string) => `<span class="t-tie">${x}</span>`;
+    // the server's none sentence: "첫 판정은 오늘 / 오전 8시에 나와요." at 320 × 130 %, not "오전 / 8시에"
+    expect(html("첫 판정은 오늘 오전 8시에 나와요.")).toBe(`${t("첫\u00a0판정은")} 오늘 ${t("오전\u00a08시에")} 나와요.`);
+    expect(html("평일 오전 9시에 출석체크")).toBe(`평일 ${t("오전\u00a09시에")} 출석체크`);
+    expect(html("오후 3시.")).toBe(t("오후\u00a03시."));
+    expect(html("오후 12시부터 오후 1시까지")).toBe(`${t("오후\u00a012시부터")} ${t("오후\u00a01시까지")}`);
+    expect(html("오전 8시")).toBe(t("오전\u00a08시"));
+    // the minutes after a bare hour: one tie
+    expect(html("내일 오후 3시 30분까지 보내 주세요")).toBe(`내일 ${t("오후\u00a03시\u00a030분까지")} 보내 주세요`);
+    expect(html("오전 10시 5분")).toBe(t("오전\u00a010시\u00a05분"));
+    // after a particle the hour's phrase is over; a clock with no 오전 / 오후, hours of work, no hour: apart
+    expect(html("오후 3시에 30분 걸려요")).toBe(`${t("오후\u00a03시에")} 30분 걸려요`);
+    expect(html("3시 30분에 만나요")).toBe("3시 30분에 만나요");
+    expect(html("오전 8시간 근무")).toBe("오전 8시간 근무");
+    expect(html("오전 중에 할게요")).toBe("오전 중에 할게요");
+    expect(html("오후 123시")).toBe("오후 123시");
+    expect(html("오후 3시 20명")).toBe(`${t("오후\u00a03시")} 20명`);
+    // over 16 characters: left alone
+    expect(html("오후 3시 30분까지는요오오오오")).toBe(`${t("오후\u00a03시")} 30분까지는요오오오오`);
+    // a data line's clock keeps its own tie and nothing more (the judgment line, the stale line)
+    expect(html("11월 27일 08:00 판정 · 어제와 같아요")).toBe(`11월 27일 ${t("08:00")} ${t("판정\u00a0·")} 어제와 같아요`);
+    expect(html("오늘 08:00 판정을 하지 못했어요. 11월 26일 판정이에요.")).toBe(
+      `<span class="t-s">오늘 ${t("08:00")} 판정을 하지 못했어요.</span> <span class="t-s">11월 26일 판정이에요.</span>`,
+    );
+  });
+  test("h:mm after 오전 / 오후 rides the same way, a range whole; 오늘 or a date before it and a \" · \" item after stay apart (DD 0311-b)", () => {
+    const t = (x: string) => `<span class="t-tie">${x}</span>`;
+    expect(html("오늘 오후 3:12")).toBe(`오늘 ${t("오후\u00a03:12")}`);
+    expect(html("오전 7:30에 알려요")).toBe(`${t("오전\u00a07:30에")} 알려요`);
+    expect(html("11월 14일 (금) 오전 9:00")).toBe(`11월 14일 ${t("(금)")} ${t("오전\u00a09:00")}`);
+    // a range: whole, across noon too ("오전 11:50–오후 1:10" rides on the dash's 오후)
+    expect(html("카카오톡 · 메시지 6개 · 오후 7:12–7:30")).toBe(`${t("카카오톡\u00a0·")} 메시지 ${t("6개\u00a0·")} ${t("오후\u00a07:12–7:30")}`);
+    expect(html("오전 11:50–오후 1:10")).toBe(t("오전\u00a011:50–오후\u00a01:10"));
+    // in quotes or brackets: the opening mark and 오전 / 오후 go with the time
+    expect(html("친구의 모시에게 ‘오후 3:00 · 팀 회의’처럼 보여요")).toBe(`친구의 모시에게 ${t("‘오후\u00a03:00\u00a0·")} 팀 ${t("회의’처럼")} 보여요`);
+    expect(html("(오후 3:00까지)")).toBe(t("(오후\u00a03:00까지)"));
+    // the dot after the time rides on it as every dot does; the item after it stays apart
+    expect(html("오전 10:00 · 30분 전")).toBe(`${t("오전\u00a010:00\u00a0·")} 30분 전`);
+    // a clock with no 오전 / 오후, or a number that is no clock: as before
+    expect(html("내일 15:00 시작")).toBe(`내일 ${t("15:00")} 시작`);
+    expect(html("오후 3.5배")).toBe(`오후 ${t("3.5배")}`);
   });
   test("a word holding a domain is tied whole, path and particle too, at any length", () => {
     const t = (x: string) => `<span class="t-tie">${x}</span>`;
@@ -285,9 +331,9 @@ describe("Sentences", () => {
 });
 
 describe("the line checker", () => {
-  test("qa/lib/lines.mjs holds the same number, unit, one-syllable and domain patterns as ui/Text.tsx", () => {
+  test("qa/lib/lines.mjs holds the same number, unit, one-syllable, time-of-day and domain patterns as ui/Text.tsx", () => {
     const pattern = (file: string, name: string) => readFileSync(new URL(file, import.meta.url), "utf8").match(new RegExp(`const ${name} =\\s*(/.+/u?);`))?.[1];
-    for (const name of ["NUM_END", "UNIT", "DET", "DET_NEXT", "PER", "PER_NEXT", "AREA", "AREA_NEXT", "AUX_PREV", "AUX", "URL_IN"]) {
+    for (const name of ["NUM_END", "UNIT", "DET", "DET_NEXT", "PER", "PER_NEXT", "AREA", "AREA_NEXT", "AUX_PREV", "AUX", "HALF_DAY", "HOUR", "MINUTE", "URL_IN"]) {
       const a = pattern("../src/ui/Text.tsx", name);
       expect(a).toBeTruthy();
       expect(pattern("./lib/lines.mjs", name)).toBe(a);
