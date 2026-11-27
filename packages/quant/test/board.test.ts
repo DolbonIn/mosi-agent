@@ -318,6 +318,19 @@ describe("event timeline (FA5 #6, DD 1935 §5-2 timeline)", () => {
     const [, second, third] = t.boxes;
     expect(third!.x).toBeCloseTo(second!.dot + 17, 2);
   });
+  test("a moved box exactly 16px from another dot still goes past it (lead 0127: more than 16; DD 1457 Q2)", () => {
+    // a page 1340 wide puts the dots at 18 + f × 1024, so these times give exact positions: 18, 294, 306, 1042. The two
+    // boxes above (dots 18 and 306) are stacked 296 apart around their dots: 14 and 310, and 310 is exactly 16 from the
+    // dot at 294; it goes one pixel further
+    const T = 2 ** 20;
+    const t0 = Date.parse("2026-12-01T00:00:00+09:00");
+    const fr = [0, 276 / 1024, 288 / 1024, 1];
+    const t = timelineSvg(input(fr.map((f, i) => ({ ...ev(i + 1), at: new Date(t0 + f * T).toISOString(), consensus: null, bull: null, bear: null, amplitude: null }))), DECK_BOARD, { ...DECK_TIMELINE, width: 1340 });
+    expect(t.boxes.map((b) => b.dot)).toEqual([18, 294, 306, 1042]);
+    expect(t.boxes[0]!.x).toBe(14);
+    expect(t.boxes[2]!.x).toBe(311);
+    expect(t.issues).toEqual([]);
+  });
   test("a moved box that cannot stand clear of another dot between its neighbours is reported, not left silent", () => {
     // six events within five minutes, one at 65 h 36 min, one at 100 h: the third boxes on each side are pinned at 566
     // between their neighbours, and the 65 h dot stands at 575

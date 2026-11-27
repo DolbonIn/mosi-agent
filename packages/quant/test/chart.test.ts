@@ -56,8 +56,57 @@ describe("helpers", () => {
     expect(labelEm("1차 익절 39.87") * 13).toBeLessThanOrEqual(90);
     expect(labelEm("1차 익절 136.50") * 13).toBeGreaterThan(90);
   });
-  test("priority: 손절 > 현재가 > 1차 익절 > 매수 검토 > 저항 > 지지 > 2·3차 익절", () => {
-    expect(LABEL_PRIORITY).toEqual(["stop", "current", "target1", "buyZone", "resistance", "support", "target2", "target3"]);
+  test("priority: 손절 > 현재가 > 무효화 > 1차 익절 > 알림 > 매수 검토 > 저항 > 지지 > 2·3차 익절", () => {
+    expect(LABEL_PRIORITY).toEqual(["stop", "current", "invalidate", "target1", "alert", "buyZone", "resistance", "support", "target2", "target3"]);
+  });
+});
+
+describe("the person's own price and the invalidation price (DD 0914 D4)", () => {
+  const r2 = (x: number) => Math.round(x * 100) / 100;
+  const lv: ChartLevel[] = [...LV, { kind: "alert", price: r2(last + 1) }, { kind: "invalidate", price: r2(last - 2.2) }];
+  const cases = [
+    ["app", APP_THEME, FULL_VIEW, "var(--label-2)", "var(--danger)"],
+    ["deck", DECK_THEME, DECK_CHART, "#5A616C", "#A62B21"],
+  ] as const;
+  for (const [name, theme, layout, alertColour, dangerColour] of cases) {
+    test(`${name}: a line each at its price, 알림 thin and solid, 무효화 dotted in the stop's colour; labelled with their prices`, () => {
+      const c = levelChart({ bars: B, levels: lv, summary: "x", unit: "USD", asOf: "11월 26일 종가 기준", source: "Yahoo" }, theme, layout);
+      const line = (k: string) => attrs(c.svg, new RegExp(`<line [^>]*data-level="${k}"[^>]*/>`, "g"));
+      const [alert] = line("alert");
+      const [inval] = line("invalidate");
+      const [stop] = line("stop");
+      expect(line("alert").length).toBe(1);
+      expect(line("invalidate").length).toBe(1);
+      expect(alert).toContain(`stroke="${alertColour}"`);
+      expect(alert).not.toContain("stroke-dasharray");
+      expect(inval).toContain(`stroke="${dangerColour}"`);
+      expect(stop).toContain(`stroke="${dangerColour}"`);
+      // the same colour as the stop, told apart by the line's shape: round dots against the stop's dashes
+      const dash = (l: string) => l.match(/stroke-dasharray="([^"]+)"/)![1]!;
+      expect(dash(inval!)).not.toBe(dash(stop!));
+      expect(inval).toContain('stroke-linecap="round"');
+      expect(Number(dash(inval!).split(" ")[0])).toBeLessThan(Number(dash(stop!).split(" ")[0]));
+      // at their prices: the alert between the current price and the first target, the invalidation between the support
+      // and the stop (a higher price is higher up: a smaller y)
+      const ys = Object.fromEntries(lines(c.svg).map((l) => [l.kind, l.y]));
+      expect(ys.alert!).toBeGreaterThan(ys.target1!);
+      expect(ys.invalidate!).toBeGreaterThan(ys.support!);
+      expect(ys.invalidate!).toBeLessThan(ys.stop!);
+      const labs = Object.fromEntries(labels(c.svg).map((l) => [l.kind, l.text]));
+      expect(labs.alert).toBe(`알림 ${r2(last + 1).toFixed(2)}`);
+      expect(labs.invalidate).toBe(`무효화 ${r2(last - 2.2).toFixed(2)}`);
+      expect(c.issues).toEqual([]);
+    });
+  }
+  test("a crowded card gives up the alert's label before the invalidation's, both after the stop and the current price", () => {
+    // all nine kinds on a card 100 high: four slots (손절, 현재가, 무효화, 1차 익절), the lower ranks go
+    const crowd: ChartLevel[] = [...lv, { kind: "resistance", price: r2(last + 0.6) }, { kind: "target2", price: r2(last + 2.6) }, { kind: "target3", price: r2(last + 3.2) }];
+    const c = levelChart({ bars: B, levels: crowd, summary: "x" }, APP_THEME, { ...PHONE_CARD, mainH: 100 });
+    const dropped = c.issues.filter((i) => i.code === "label_dropped").map((i) => i.kind);
+    expect(dropped).toEqual(["alert", "buyZone", "resistance", "support", "target2", "target3"]);
+    expect(labels(c.svg).map((l) => l.kind).sort()).toEqual(["current", "invalidate", "stop", "target1"]);
+    // the lines stay whatever happens to their labels
+    expect(lines(c.svg).map((l) => l.kind)).toContain("alert");
   });
 });
 

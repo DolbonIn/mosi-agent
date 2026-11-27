@@ -23,7 +23,8 @@ import { num, wonTicks } from "./format";
 import { volumeProfile } from "./profile";
 import type { Bar, Num } from "./types";
 
-export type LevelKind = "stop" | "target1" | "target2" | "target3" | "resistance" | "support" | "buyZone";
+/** alert: a price the person set (내가 정한 가격); invalidate: the price that undoes the strategy (DD 0914 D4) */
+export type LevelKind = "stop" | "target1" | "target2" | "target3" | "resistance" | "support" | "buyZone" | "alert" | "invalidate";
 
 /** a level from the data: a price line, or (buyZone) the band from `price` up to `hi` */
 export interface ChartLevel {
@@ -40,10 +41,12 @@ export const LEVEL_WORD: Readonly<Record<LevelKind, string>> = {
   resistance: "저항",
   support: "지지",
   buyZone: "매수 검토",
+  alert: "알림",
+  invalidate: "무효화",
 };
 
 /** label priority, first kept and last dropped (DD 1935 §4) */
-export const LABEL_PRIORITY: readonly (LevelKind | "current")[] = ["stop", "current", "target1", "buyZone", "resistance", "support", "target2", "target3"];
+export const LABEL_PRIORITY: readonly (LevelKind | "current")[] = ["stop", "current", "invalidate", "target1", "alert", "buyZone", "resistance", "support", "target2", "target3"];
 
 export interface Stroke {
   color: string;
@@ -68,6 +71,9 @@ export interface ChartTheme {
   target: Stroke;
   resistance: Stroke;
   support: Stroke;
+  /** DD 0914 D4: the person's own price, a thin solid line; invalidation, dotted in the stop's colour (the stop is dashed) */
+  alert: Stroke;
+  invalidate: Stroke;
   zone: { fill: string; label: string };
   current: { line: Stroke; color: string };
   profile: { fill: string; max: number };
@@ -93,6 +99,8 @@ export const APP_THEME: ChartTheme = {
   target: { color: "var(--label)", width: 1, dash: "2 3" },
   resistance: { color: "var(--label-2)", width: 1 },
   support: { color: "var(--label-2)", width: 1 },
+  alert: { color: "var(--label-2)", width: 1 },
+  invalidate: { color: "var(--danger)", width: 1.5, dash: "1.5 3", round: true },
   zone: { fill: "var(--fill)", label: "var(--label-2)" },
   current: { line: { color: "var(--label-3)", width: 0.5 }, color: "var(--label)" },
   profile: { fill: "var(--fill-2)", max: 48 },
@@ -118,6 +126,8 @@ export const DECK_THEME: ChartTheme = {
   target: { color: "#8A6512", width: 2, dash: "8 5" },
   resistance: { color: "#A62B21", width: 1.5 },
   support: { color: "#0B6042", width: 1.5 },
+  alert: { color: "#5A616C", width: 1.5 },
+  invalidate: { color: "#A62B21", width: 2, dash: "2 4", round: true },
   zone: { fill: "#F4F7FF", label: "#1B48D6" },
   current: { line: { color: "#A8A79E", width: 1 }, color: "#12233F" },
   profile: { fill: "#E7E3D7", max: 96 },
@@ -339,7 +349,8 @@ export function levelChart(input: LevelChartInput, theme: ChartTheme, layout: Ch
 
   // labels in the right column: which are drawn (priority, slots) does not depend on the column's width, so they are
   // chosen first, the column is sized to the widest of them, and only then does a price that still does not fit give way
-  const look = (k: LevelKind): Stroke => (k === "stop" ? theme.stop : k === "resistance" ? theme.resistance : k === "support" ? theme.support : theme.target);
+  const look = (k: LevelKind): Stroke =>
+    k === "stop" ? theme.stop : k === "resistance" ? theme.resistance : k === "support" ? theme.support : k === "alert" ? theme.alert : k === "invalidate" ? theme.invalidate : theme.target;
   const size = theme.label.size;
   const colour = (k: LevelKind | "current") => (k === "current" ? theme.current.color : k === "buyZone" ? theme.zone.label : look(k).color);
   const rank = (k: LevelKind | "current") => LABEL_PRIORITY.indexOf(k);
