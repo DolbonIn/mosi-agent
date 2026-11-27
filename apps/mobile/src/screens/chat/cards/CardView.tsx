@@ -7,6 +7,9 @@ import { ConnectionRequestView } from "../../more/connections/ConnectionRequestV
 import { CredentialCard } from "./CredentialCard";
 import { BriefingCard, MessengerCard, ResultsCard, ScheduleCard, WeatherCard } from "./InfoCards";
 import { InvestAlertCardView, InvestStopCardView } from "./InvestCards";
+import { InvestEventCardView } from "./InvestEvent";
+import { InvestRuleChangeCardView } from "./InvestRuleChange";
+import { InvestDailyCardView, InvestDeckCardView } from "./InvestReport";
 import { PROVIDER_NAME } from "./MessengerThreadCard";
 import "./cards.css";
 
@@ -74,6 +77,14 @@ export const CardView = memo(function CardView({
       return <InvestAlertCardView card={card} interactive={interactive} />;
     case "invest_stop":
       return <InvestStopCardView card={card} interactive={interactive} />;
+    case "invest_rule_change":
+      return <InvestRuleChangeCardView card={card} interactive={interactive} />;
+    case "invest_daily":
+      return <InvestDailyCardView card={card} threadId={threadId} messageId={messageId} interactive={interactive} />;
+    case "invest_deck":
+      return <InvestDeckCardView card={card} onSend={onSend} interactive={interactive} />;
+    case "invest_event":
+      return <InvestEventCardView card={card} />;
     default:
       return null;
   }

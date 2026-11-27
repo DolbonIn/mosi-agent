@@ -123,3 +123,243 @@
 .ivip-copy:active {
   background: var(--press-tint);
 }
+
+/* ── rule change confirmation (DD 1935 §2-3) ── */
+/* "$25.80 → $30.50": two items, the old value and "→ new"; the arrow stays with the new value when the pair has to
+   wrap. Only the items take the gap (DD 2225 N1) */
+.ivrc-change {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: 0.3em;
+}
+.ivrc-reason {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* the reason line by its class: with no reason the foot is the first child (it stays footnote, DD 2225 N2) */
+.ivrc-reason-text,
+.ivrc-result,
+.ivrc-warning,
+.ivrc-done {
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+}
+/* one line per rule: the server joins them with "\n" (DD 0452 §4) */
+.ivrc-result {
+  white-space: pre-line;
+}
+.ivrc-warning {
+  color: var(--danger);
+}
+.ivrc-warning .sigmark {
+  margin-right: 0.3em;
+}
+.ivrc-done {
+  color: var(--label-2);
+}
+/* both labels on one line: 바꾸기 on the right; not: both full width, 바꾸기 on top (row-reverse + wrap) */
+.ivrc-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ivrc-actions > * {
+  flex: 1 0 auto;
+}
+
+/* ── 08:00 report (DD 1935 §2-4, 0059 §2) ── */
+.ivdaily-high {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ivdaily-high p {
+  margin: 0;
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--label);
+}
+.ivdaily-high .sigmark {
+  margin-right: 0.3em;
+}
+.ivdaily-high p[data-tone="danger"] .sigmark {
+  color: var(--danger);
+}
+.ivdaily-high p[data-tone="caution"] .sigmark {
+  color: var(--caution);
+}
+.ivdaily-more {
+  font-weight: 400;
+  color: var(--label-2);
+}
+.ivdaily-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ivdaily-headbtn {
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+.ivdaily-headbtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.ivdaily-stage-line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-title2);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--label);
+}
+/* each group a box: lines break between the groups (after "·"); a group wider than the line still wraps inside */
+.ivdaily-stage-part,
+.ivdaily-sub-part {
+  display: inline-block;
+}
+.ivdaily-pending {
+  margin: 4px 0 2px;
+}
+.ivdaily-sub .sigmark {
+  margin-right: 0.3em;
+}
+/* after a US holiday: what the figures stand on, quiet, under the head (A13); a footnote (DD 0059 §2-2, 2225 N6) */
+.ivdaily-holiday {
+  margin: 0;
+  font-size: var(--t-footnote);
+  line-height: 1.45;
+  color: var(--label-2);
+  word-break: keep-all;
+}
+/* D-1 under the rows (DD 0109 §1): the date once in the head, then title | time */
+.ivdaily-events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ivdaily-events-head {
+  margin: 0;
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--label);
+}
+/* a when's bracket part (whenText's tie) stays whole while it fits the line it is on; wider than that (the value beside
+   an event's name at a large text size: "(미 동부 16:20)" was 126 px in a 119 px value) it breaks inside rather than
+   run past the card, and then only at its spaces (a span per word: InvestEvent.tsx words(), DD 2225 N4) */
+.ivdaily-events .ivfoot-tie,
+.ivevent-when .ivfoot-tie {
+  max-width: 100%;
+  white-space: normal;
+}
+/* the tally: each item whole (mark, word, count), the items wrap between them, right-aligned (DD 1949) */
+.ivtally {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px 10px;
+}
+.ivtally-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+}
+.ivtally-item .sigmark {
+  align-self: center;
+}
+.ivtally-word {
+  color: var(--label);
+}
+.ivdaily-actions {
+  display: flex;
+}
+
+/* ── deck (DD 1935 §2-6, 0059 §3): the first slide 16:9 on cream paper, edged with a hairline ── */
+.ivdeck-open {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+.ivdeck-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--r-tile);
+  background: var(--surface-2);
+}
+.ivdeck-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ivdeck-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0.5px var(--separator);
+  pointer-events: none;
+}
+.ivdeck-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ivdeck-progress {
+  gap: 6px;
+}
+/* the bar's label is the card's one progress line (만드는 중 · 12/28장, DD 2225 N3): .ivcard-sub's look, tabular */
+.ivdeck-progress .progress-label {
+  font-size: var(--t-subhead);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── D-1 event (DD 0109 §1): the heading in title3, when in body (tnum), 출처 · 등급 in footnote; no button ── */
+/* .ccard-title (cards.css, loaded later) sets body size: both classes to win */
+.ccard-title.ivevent-title {
+  font-family: var(--font-display);
+  font-size: var(--t-title3);
+  line-height: 1.3;
+}
+.ivevent-one,
+.ivevent-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ivevent-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ivevent-name,
+.ivevent-when {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: 1.4;
+  color: var(--label);
+}
+.ivevent-name {
+  font-weight: 600;
+}

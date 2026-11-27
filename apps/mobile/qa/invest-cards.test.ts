@@ -2,7 +2,7 @@
  * The chat's 투자 cards (DD 1935 §2-1·2-2, 2010 §2·3·5): cards the server's own builders make (apps/server
  * invest/cards.ts), drawn by CardView. The card draws the server's words and figures as they come.
  */
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { createElement, type ComponentType, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Card, InvestStopCard } from "@pickle/protocol";
@@ -53,6 +53,15 @@ function withInvest(screen: ComponentType<ScreenProps> | undefined, fn: () => vo
     set(was);
   }
 }
+
+/** the registration as this file found it, read right before its first test: every test leaves it so (DD 0116 K1) */
+let found: ComponentType<ScreenProps> | undefined;
+beforeAll(() => {
+  found = getScreen("invest");
+});
+afterEach(() => {
+  expect(getScreen("invest")).toBe(found);
+});
 
 const NOW = Date.UTC(2026, 10, 26, 15, 46); // 11-27 00:46 KST
 const rule = (over: Partial<RuleSpec> = {}): RuleSpec => ({
