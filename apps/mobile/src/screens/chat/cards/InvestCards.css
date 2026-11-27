@@ -1,0 +1,125 @@
+/* The chat's 투자 cards (DD 1935 §1–§2): the .ccard frame (paper, r24, padding 16, gap 12, no shadow), the shared
+   parts of ui/Invest.css inside. Hairlines and space divide; no card or plate inside a card. Nothing under 13px. */
+
+/* head: the title sentence (glyph inline before it, text size, no plate) and the KST time at the right of its first line */
+/* .ccard-head (cards.css, loaded later) centres its row: over a two-line title the time sat between the lines */
+.ccard-head.ivcard-head {
+  align-items: baseline;
+}
+.ivcard-title {
+  margin: 0;
+  flex: 1 1 auto;
+}
+.ivcard-glyph {
+  margin-right: 0.3em;
+}
+
+/* the lines under the title (noPrior, invalidated, expired) and the condition sentences: subhead, --label */
+.ivcard-lines,
+.ivcard-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ivcard-lines p,
+.ivcard-notes p,
+.ivcard-reason,
+.ivcall,
+.ivstatus {
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label);
+}
+.ivcard-lines {
+  margin-top: -6px;
+}
+
+/* the big number and its one line under it (전일 대비 · 규칙 가격까지 거리), --label-2 */
+.ivcard-price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ivcard-sub {
+  margin: 0;
+  font-size: var(--t-subhead);
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+/* 모의 · SOXL 손절: the mode word first (모의 --label-2, 실제 --danger), then the symbol, footnote */
+/* one line of text ("실제 · SOXL 손절"): as a flex row the space before "·" was dropped at the item's start */
+.ivcard-mode {
+  font-size: var(--t-footnote);
+  line-height: 1.4;
+  color: var(--label-2);
+  margin-bottom: -6px;
+}
+
+/* the call line: its mark (when the call did not go) is the text's size */
+.ivcall .sigmark {
+  margin-right: 0.3em;
+}
+
+/* 체결 확인 중 with a small loader; the check once FILLED is seen (no motion while still, reduced motion: none) */
+.ivstatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ivspin {
+  width: 0.9em;
+  height: 0.9em;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--fill);
+  border-top-color: var(--label-2);
+  animation: ivspin 0.9s linear infinite;
+}
+@keyframes ivspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ivspin {
+    animation: none;
+  }
+}
+.ivcheck {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* foot and the closing sentence: one block, the sentence under its own hairline (ui/Invest.css) */
+.ivcard-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 허용 IP 203.0.113.24 · 복사 */
+.ivip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.ivip-copy {
+  min-height: 44px;
+  margin: -12px -8px;
+  padding: 0 8px;
+  border-radius: var(--r-control);
+  font-size: var(--t-subhead);
+  font-weight: 600;
+  color: var(--label);
+}
+.ivip-copy:active {
+  background: var(--press-tint);
+}

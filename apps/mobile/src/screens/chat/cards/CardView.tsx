@@ -6,6 +6,7 @@ import { ArtifactCard } from "./ArtifactCard";
 import { ConnectionRequestView } from "../../more/connections/ConnectionRequestView";
 import { CredentialCard } from "./CredentialCard";
 import { BriefingCard, MessengerCard, ResultsCard, ScheduleCard, WeatherCard } from "./InfoCards";
+import { InvestAlertCardView, InvestStopCardView } from "./InvestCards";
 import { PROVIDER_NAME } from "./MessengerThreadCard";
 import "./cards.css";
 
@@ -69,6 +70,10 @@ export const CardView = memo(function CardView({
       return <MessengerCard card={card} />;
     case "schedule":
       return <ScheduleCard card={card} />;
+    case "invest_alert":
+      return <InvestAlertCardView card={card} interactive={interactive} />;
+    case "invest_stop":
+      return <InvestStopCardView card={card} interactive={interactive} />;
     default:
       return null;
   }
