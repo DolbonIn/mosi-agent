@@ -901,7 +901,11 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   settled stage has its name ("탈출 3단계", "방어 준비"); a floor has the least stage and no name ("탈출 최소 1단계"); the
   recovery may be "회복 단계 미확정" (outcomes include hold) or "회복 판정 보류" (stage null for both). `pending` counts,
   never numbers indicators: "지표 4개 값이 없어서 2단계 여부는 아직 몰라요." (`quiet`), "오늘 지표 2개를 받지 못해서 …"
-  (`caution`), both together (`caution`). `judgedText` "12월 2일 08:00 판정 · 어제와 같아요 | 12월 1일 판정과 같아요 |
+  (`caution`), both together (`caution`). `next` says what the stage above the sure one needs (DD 1719 · 1720): a clause
+  whose count is 0 is left out, severe signals as how many fewer ("회복 2단계까지: 회복 신호 2개 더, 심각 신호 1개 덜",
+  hold "회복 2단계까지: 심각 신호 1개 덜"), `(R3 포함)` only while R3 is not on (unknown is not on), "R3 켜짐" when R3 is
+  all that is missing, "탈출 2단계 이하" only while the escape may be 3 or more; a line with no clause left is not sent
+  (the same lines in the detail's recover foot, the report and the deck). `judgedText` "12월 2일 08:00 판정 · 어제와 같아요 | 12월 1일 판정과 같아요 |
   탈출 최소 1단계 → 탈출 3단계"; 어제 only when the judged day is today (KST) and the row before it is the day before,
   otherwise the earlier row's day (DD 0710); a day of another KST year is named with its year ("2026년 12월 31일 08:00
   판정"), here, in `stale` and in the as-of days of `GET /api/invest/stages`; `stale` when today's 08:00 row is missing

@@ -193,7 +193,12 @@ function gauge(key: StageGauge["key"], label: string, cs: readonly { id: string;
 
 export const gaugesOf = (s: Assessed): StageGauge[] => [gauge("worse", "악화 신호", s.a), gauge("severe", "심각 신호", s.d), gauge("recover", "회복 신호", s.r)];
 
-/** what the next stage up needs, from the stage that surely holds (DD 0059 §1-2 next) */
+/**
+ * what the next stage up needs, from the stage that surely holds (DD 0059 §1-2 next). DD 1719 · 1720: a clause whose
+ * count is 0 is left out; severe signals are how many fewer; `(R3 포함)` only while R3 is not on (unknown is not on),
+ * `R3 켜짐` when R3 is all that is missing; `탈출 2단계 이하` only while the escape may be 3 or more; no clause, no line.
+ * The escape lines' counts are never 0 at their floor (the floor would be higher).
+ */
 export function nextLines(s: Assessed): { escape: string | null; recovery: string | null } {
   const e = s.escape;
   const aMet = s.a.filter((c) => c.status === "met").length;
@@ -205,10 +210,19 @@ export function nextLines(s: Assessed): { escape: string | null; recovery: strin
   else if (e.floor === 3) escape = `탈출 4단계까지: 심각 신호 ${Math.max(0, 2 - dMet)}개 더`;
   const r = s.recovery;
   const at = typeof r.stage === "number" ? r.stage : r.stage === null ? Math.min(...r.possible.filter((o): o is 0 | 1 | 2 | 3 => o !== "hold"), 3) : null;
+  const line = (head: string, clauses: readonly (string | null)[]): string | null => {
+    const kept = clauses.filter((c): c is string => c !== null);
+    return kept.length ? `${head}: ${kept.join(", ")}` : null;
+  };
+  const more = (n: number, tail = ""): string | null => (n > 0 ? `회복 신호 ${n}개 더${tail}` : null);
   let recovery: string | null = null;
-  if (at === 0) recovery = `회복 1단계까지: 회복 신호 ${Math.max(0, 2 - rMet)}개 더`;
-  else if (at === 1 || (r.stage === "hold" && dMet > 0)) recovery = `회복 2단계까지: 회복 신호 ${Math.max(0, 4 - rMet)}개 더, 심각 신호 0개`;
-  else if (at === 2) recovery = `회복 3단계까지: 회복 신호 ${Math.max(0, 5 - rMet)}개 더(R3 포함), 탈출 2단계 이하`;
+  if (at === 0) recovery = line("회복 1단계까지", [more(2 - rMet)]);
+  else if (at === 1 || (r.stage === "hold" && dMet > 0)) recovery = line("회복 2단계까지", [more(4 - rMet), dMet > 0 ? `심각 신호 ${dMet}개 덜` : null]);
+  else if (at === 2) {
+    const r3On = s.r.some((c) => c.id === "R3" && c.status === "met");
+    const n = 5 - rMet;
+    recovery = line("회복 3단계까지", [r3On ? more(n) : n > 0 ? more(n, "(R3 포함)") : "R3 켜짐", e.ceiling >= 3 ? "탈출 2단계 이하" : null]);
+  }
   return { escape, recovery };
 }
 

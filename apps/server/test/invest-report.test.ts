@@ -248,7 +248,7 @@ describe("the 08:00 report", () => {
     const metOf = (k: string) => detail.groups.find((g) => g.key === k)!.rows.filter((r) => r.state === "met");
     expect(sec.worse).toEqual({ key: "worse", title: "악화·위험 신호", gauges: ov.stages.kind === "judged" ? ov.stages.gauges.slice(0, 2) : [], rows: [...metOf("worse"), ...metOf("severe")], next: detail.groups.slice(0, 2).map((g) => g.next) });
     expect((sec.worse as { rows: { id: string }[] }).rows.map((r) => r.id)).toEqual(["A1", "A4"]);
-    expect(sec.recovery).toMatchObject({ rows: metOf("recover"), next: ["회복 2단계까지: 회복 신호 1개 더, 심각 신호 0개"] });
+    expect(sec.recovery).toMatchObject({ rows: metOf("recover"), next: ["회복 2단계까지: 회복 신호 1개 더"] });
     expect(sec.etf).toEqual({ key: "etf", title: "ETF 검토 가격", groups: [], empty: NO_ETF });
     expect(sec.scenarios).toEqual({
       key: "scenarios",

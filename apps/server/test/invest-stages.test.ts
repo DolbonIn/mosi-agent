@@ -5,12 +5,12 @@
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import type { Friend, InviteResponse, InvestOverview, InvestStagesDetail } from "@pickle/protocol";
-import { pct } from "@pickle/quant";
+import { escapeStage, pct, recoveryStage, type Condition, type Core11Result } from "@pickle/quant";
 import { etToEpoch } from "../src/invest/calendar.ts";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
 import { pctChange } from "../src/invest/stage-ledger.ts";
-import { FRED_FEEDS, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
+import { FRED_FEEDS, nextLines, readStages, recoveryHead, type Assessed } from "../src/invest/stages.ts";
 import { INVEST_WHERE_NOTE, investTools } from "../src/invest/tools.ts";
 import { makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
 import { makeHarness, outcome, readSse, type Harness } from "./helpers.ts";
@@ -260,6 +260,73 @@ describe("why a stage is not settled (DD 0426 §1)", () => {
     expect(r(null, [1, 2])).toEqual({ stage: 1, floor: true, text: "회복 최소 1단계", pending: "지표 1개 값이 없어서 회복 단계는 아직 몰라요.", pendingTone: "quiet" });
     expect(r(2, [2])).toEqual({ stage: 2, name: "분할 재진입 검토", text: "회복 2단계" });
     expect(r("hold", ["hold"])).toEqual({ stage: null, text: "회복 판정 보류", pending: "회복 신호는 3개지만 심각 신호가 있어서 맞는 단계가 없어요.", pendingTone: "caution" });
+  });
+});
+
+describe("what the next stage needs (DD 1719 · 1720, team-lead 1719b)", () => {
+  /** a reading from quant's own rules: core risks, the high-yield risk, and which A · D · R are met or unknown */
+  const read = (o: { risk?: number; maybe?: number; hy?: "met" | "unmet" | "unknown"; a?: number[]; aU?: number[]; d?: number[]; dU?: number[]; r?: number[]; rU?: number[] }): Assessed => {
+    const cs = (p: string, n: number, met: number[] = [], unk: number[] = []): Condition[] =>
+      Array.from({ length: n }, (_, i) => ({ id: `${p}${i + 1}`, rule: "", status: met.includes(i + 1) ? "met" : unk.includes(i + 1) ? "unknown" : "unmet", figures: {}, asOf: null }));
+    const core = { items: [], counts: { risk: o.risk ?? 0 }, riskPossible: o.maybe ?? 0, hyRisk: o.hy ?? "unmet" } as unknown as Core11Result;
+    const a = cs("A", 8, o.a, o.aU);
+    const d = cs("D", 5, o.d, o.dU);
+    const r = cs("R", 6, o.r, o.rU);
+    return { core, a, d, r, escape: escapeStage(core, a, d), recovery: recoveryStage(r, core, a, d) } as unknown as Assessed;
+  };
+
+  test("word for word: none, one, several; hold; a clause of 0 left out; severe signals as how many fewer", () => {
+    expect(nextLines(read({}))).toEqual({ escape: "탈출 2단계까지: 핵심 위험 지표 3개 더, 또는 하이일드 스프레드 위험", recovery: "회복 1단계까지: 회복 신호 2개 더" });
+    expect(nextLines(read({ r: [1] })).recovery).toBe("회복 1단계까지: 회복 신호 1개 더");
+    expect(nextLines(read({ r: [1, 2] })).recovery).toBe("회복 2단계까지: 회복 신호 2개 더");
+    expect(nextLines(read({ r: [1, 2], d: [1] })).recovery).toBe("회복 2단계까지: 회복 신호 2개 더, 심각 신호 1개 덜");
+    expect(nextLines(read({ r: [1, 2, 4], d: [1, 4] }))).toEqual({ escape: null, recovery: "회복 2단계까지: 회복 신호 1개 더, 심각 신호 2개 덜" });
+    // hold: the count is there, a severe signal is not
+    const hold = read({ r: [1, 2, 4, 5], d: [2] });
+    expect(hold.recovery.stage).toBe("hold");
+    expect(nextLines(hold).recovery).toBe("회복 2단계까지: 심각 신호 1개 덜");
+    expect(nextLines(read({ r: [1, 2, 3, 4, 5], d: [1, 2] })).recovery).toBe("회복 2단계까지: 심각 신호 2개 덜");
+    expect(nextLines(read({ risk: 3 })).escape).toBe("탈출 3단계까지: 악화 신호 2개 더");
+    expect(nextLines(read({ risk: 3, a: [1, 2], d: [1] })).escape).toBe("탈출 4단계까지: 심각 신호 1개 더");
+    // no clause left, no line (team-lead 1719b): a kept reading at stage 1 whose counts already meet 2
+    const odd = read({ r: [1, 2, 3, 4] });
+    expect(nextLines({ ...odd, recovery: { ...odd.recovery, stage: 1, possible: [1] } }).recovery).toBeNull();
+  });
+
+  test("toward recovery 3: (R3 포함) only while R3 is not on (unknown is not on), R3 켜짐 when it is all that is missing, 탈출 2단계 이하 only while the escape may be 3 or more", () => {
+    expect(nextLines(read({ r: [1, 2, 4, 5] })).recovery).toBe("회복 3단계까지: 회복 신호 1개 더(R3 포함)");
+    expect(nextLines(read({ r: [1, 2, 4], rU: [3] })).recovery).toBe("회복 2단계까지: 회복 신호 1개 더");
+    const unk = read({ r: [1, 2, 4, 5], rU: [3] });
+    expect(unk.recovery.possible).toEqual([2, 3]);
+    expect(nextLines(unk).recovery).toBe("회복 3단계까지: 회복 신호 1개 더(R3 포함)");
+    expect(nextLines(read({ r: [1, 2, 4, 5, 6], risk: 3 }))).toEqual({ escape: "탈출 3단계까지: 악화 신호 2개 더", recovery: "회복 3단계까지: R3 켜짐" });
+    expect(nextLines(read({ r: [1, 2, 3, 4], risk: 3, a: [1, 2] }))).toEqual({ escape: "탈출 4단계까지: 심각 신호 2개 더", recovery: "회복 3단계까지: 회복 신호 1개 더, 탈출 2단계 이하" });
+    expect(nextLines(read({ r: [1, 2, 4, 5, 6], risk: 3, a: [1, 2] })).recovery).toBe("회복 3단계까지: R3 켜짐, 탈출 2단계 이하");
+    // the escape not settled (2, maybe 3): its condition stays; settled at 2 or below: it goes
+    const open = read({ r: [1, 2, 3, 4, 5], risk: 3, a: [1], aU: [2] });
+    expect([open.escape.floor, open.escape.ceiling, open.recovery.possible]).toEqual([2, 3, [2, 3]]);
+    expect(nextLines(open).recovery).toBe("회복 3단계까지: 탈출 2단계 이하");
+    expect(nextLines(read({ r: [1, 2, 3, 4] })).recovery).toBe("회복 3단계까지: 회복 신호 1개 더");
+  });
+
+  test("a sweep over quant's rules: never a count of 0, never an empty clause; a line has a head and at least one clause", () => {
+    const sets = [[], [1], [1, 2], [1, 2, 3], [1, 2, 4], [1, 2, 3, 4], [1, 2, 4, 5], [1, 2, 3, 4, 5], [1, 2, 4, 5, 6], [1, 2, 3, 4, 5, 6]];
+    let lines = 0;
+    for (const risk of [0, 2, 3])
+      for (const a of [[], [1], [1, 2]])
+        for (const d of [[], [1], [1, 2]])
+          for (const r of sets)
+            for (const rU of [[], [6]].filter((u) => !r.includes(6) || !u.length))
+              for (const aU of [[], [3]]) {
+                const nx = nextLines(read({ risk, a, aU, d, r, rU }));
+                for (const s of [nx.escape, nx.recovery]) {
+                  if (s === null) continue;
+                  lines++;
+                  expect(s).toMatch(/^(탈출|회복) [1-4]단계까지: \S/);
+                  expect(s).not.toMatch(/(^|\D)0개|, ,|,$|: ,|: $/);
+                }
+              }
+    expect(lines).toBeGreaterThan(500);
   });
 });
 
