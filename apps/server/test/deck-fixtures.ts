@@ -4,20 +4,165 @@
  * 2 → 3, the highlighted line). 28 slides each, in FA6's order. Every figure, source and capture here is made up and
  * says so (합성).
  */
-import { ESCAPE_A_RULES, ESCAPE_D_RULES, RECOVERY_RULES, SHORT_COVER_RULES, type Bar, type ChartLevel, type FlowDay, type Grid11Item, type Tri } from "@pickle/quant";
+import { ESCAPE_A_RULES, ESCAPE_D_RULES, escapeStage, RECOVERY_RULES, recoveryStage, SHORT_COVER_RULES, type Bar, type ChartLevel, type Condition, type Core11Result, type FlowDay, type Grid11Item, type Signal, type Tri } from "@pickle/quant";
+import type { Assessed, InputKey } from "../src/invest/stages";
+import { deckStages, headPhrase } from "../src/deck/stages";
+import { deflateSync } from "node:zlib";
 import { figureText } from "../src/deck/text";
 import { shortDay } from "../src/deck/render";
-import type { DeckCapture, DeckCondition, DeckData, DeckEvent, DeckFigure, DeckSpec } from "../src/deck/types";
+import type { DeckCapture, DeckData, DeckEvent, DeckFigure, DeckSpec } from "../src/deck/types";
 
 export type FixtureKind = "a" | "b" | "c";
 
 /** 2026-11-27 08:00 KST */
 export const FIXTURE_AS_OF = Date.UTC(2026, 10, 26, 23, 0);
 
+/** CRC-32 (PNG chunks) */
+const CRC = Array.from({ length: 256 }, (_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+const crc32 = (b: Uint8Array) => {
+  let c = 0xffffffff;
+  for (const x of b) c = CRC[(c ^ x) & 255]! ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+};
+
+/** a small RGB canvas: rectangles, discs and thick lines, written out as a PNG */
+class Canvas {
+  readonly px: Uint8Array;
+  constructor(
+    readonly w: number,
+    readonly h: number,
+    bg: string,
+  ) {
+    this.px = new Uint8Array(w * h * 3);
+    this.rect(0, 0, w, h, bg);
+  }
+  private rgb(c: string): [number, number, number] {
+    return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  }
+  rect(x: number, y: number, w: number, h: number, c: string) {
+    const [r, g, b] = this.rgb(c);
+    for (let j = Math.max(0, Math.round(y)); j < Math.min(this.h, Math.round(y + h)); j++)
+      for (let i = Math.max(0, Math.round(x)); i < Math.min(this.w, Math.round(x + w)); i++) this.px.set([r, g, b], (j * this.w + i) * 3);
+  }
+  disc(cx: number, cy: number, rad: number, c: string) {
+    const [r, g, b] = this.rgb(c);
+    for (let j = Math.max(0, Math.floor(cy - rad)); j <= Math.min(this.h - 1, Math.ceil(cy + rad)); j++)
+      for (let i = Math.max(0, Math.floor(cx - rad)); i <= Math.min(this.w - 1, Math.ceil(cx + rad)); i++) if ((i - cx) ** 2 + (j - cy) ** 2 <= rad * rad) this.px.set([r, g, b], (j * this.w + i) * 3);
+  }
+  line(pts: [number, number][], thick: number, c: string) {
+    for (let k = 1; k < pts.length; k++) {
+      const [[x0, y0], [x1, y1]] = [pts[k - 1]!, pts[k]!];
+      const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0));
+      for (let t = 0; t <= n; t++) this.disc(x0 + ((x1 - x0) * t) / n, y0 + ((y1 - y0) * t) / n, thick / 2, c);
+    }
+  }
+  png(): Uint8Array {
+    const raw = new Uint8Array(this.h * (this.w * 3 + 1));
+    for (let j = 0; j < this.h; j++) raw.set(this.px.subarray(j * this.w * 3, (j + 1) * this.w * 3), j * (this.w * 3 + 1) + 1);
+    const chunk = (type: string, data: Uint8Array) => {
+      const body = new Uint8Array(4 + data.length);
+      body.set(new TextEncoder().encode(type));
+      body.set(data, 4);
+      const out = new Uint8Array(12 + data.length);
+      const v = new DataView(out.buffer);
+      v.setUint32(0, data.length);
+      out.set(body, 4);
+      v.setUint32(8 + data.length, crc32(body));
+      return out;
+    };
+    const ihdr = new Uint8Array(13);
+    const v = new DataView(ihdr.buffer);
+    v.setUint32(0, this.w);
+    v.setUint32(4, this.h);
+    ihdr.set([8, 2, 0, 0, 0], 8);
+    const parts = [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw, { level: 9 })), chunk("IEND", new Uint8Array(0))];
+    const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+    let at = 0;
+    for (const p of parts) (out.set(p, at), (at += p.length));
+    return out;
+  }
+}
+
+/** text as grey bars: a synthetic picture says nothing (every capture here is made up) */
+function textBars(cv: Canvas, x: number, y: number, widths: number[], h: number, step: number, c: string) {
+  widths.forEach((w, i) => cv.rect(x, y + i * step, w, h, c));
+}
+
+function postPicture(w: number, h: number, lines: number): Canvas {
+  const cv = new Canvas(w, h, "#FFFFFF");
+  cv.disc(96, 96, 46, "#9AA7B8");
+  cv.rect(170, 66, 280, 28, "#2B2F36");
+  cv.rect(170, 106, 190, 20, "#A0A6AE");
+  textBars(cv, 60, 190, [960, 900, 940, 620, 880, 520].slice(0, lines), 24, 50, "#3C4048");
+  const top = 190 + lines * 50 + 30;
+  const ph = h - top - 150;
+  cv.rect(60, top, w - 120, ph, "#EEF1F5");
+  const n = 12;
+  for (let i = 0; i < n; i++) {
+    const bh = ((Math.sin(i * 1.7) + 1.4) / 2.4) * (ph - 80);
+    cv.rect(100 + (i * (w - 200)) / n, top + ph - 40 - bh, (w - 200) / n - 18, bh, i === n - 1 ? "#C8102E" : "#4A6FA5");
+  }
+  cv.rect(0, h - 110, w, 2, "#E2E5EA");
+  for (let i = 0; i < 4; i++) cv.disc(110 + i * 240, h - 55, 18, "#B8BEC6");
+  return cv;
+}
+
+function broadcastPicture(): Canvas {
+  const [w, h] = [1600, 900];
+  const cv = new Canvas(w, h, "#1D2A3A");
+  cv.rect(80, 90, 920, 560, "#24364C");
+  const pts: [number, number][] = [];
+  for (let i = 0; i < 30; i++) {
+    const x = 120 + i * 29;
+    const o = 360 + Math.sin(i / 3) * 90 - i * 3;
+    const c = o + Math.cos(i * 1.3) * 40;
+    cv.rect(x, Math.min(o, c), 16, Math.max(6, Math.abs(c - o)), c < o ? "#3FAE7A" : "#D9534F");
+    pts.push([x + 8, (o + c) / 2]);
+  }
+  cv.line(pts, 4, "#F2C14E");
+  cv.rect(1040, 90, 480, 560, "#2E4460");
+  textBars(cv, 1080, 140, [400, 360, 380, 300, 340, 260, 320], 22, 62, "#DCE3EC");
+  cv.rect(0, 690, w, 120, "#C8102E");
+  textBars(cv, 60, 718, [900, 620], 26, 44, "#FFFFFF");
+  cv.rect(0, 810, w, 90, "#0E1620");
+  textBars(cv, 40, 842, [1500], 22, 0, "#7D8794");
+  return cv;
+}
+
+function chartPicture(): Canvas {
+  const [w, h] = [1600, 900];
+  const cv = new Canvas(w, h, "#FFFFFF");
+  for (let i = 0; i <= 5; i++) cv.rect(120, 120 + i * 130, 1400, 2, "#E5E7EB");
+  cv.rect(120, 120, 2, 650, "#9CA3AF");
+  cv.rect(120, 770, 1400, 2, "#9CA3AF");
+  const pts: [number, number][] = Array.from({ length: 60 }, (_, i) => [130 + i * 23.5, 520 - Math.sin(i / 7) * 120 - (i > 45 ? (i - 45) * 14 : 0) + Math.cos(i * 2.1) * 18]);
+  cv.line(pts, 5, "#2563EB");
+  textBars(cv, 120, 50, [520], 30, 0, "#111827");
+  textBars(cv, 120, 820, [300, 260], 18, 0, "#6B7280");
+  return cv;
+}
+
+const synthCache = new Map<string, { src: string; width: number; height: number }>();
+/**
+ * DD 1704 6: synthetic pictures at real capture shapes for the built samples — a post 1080 × 1350 (portrait), a reply
+ * 1080 × 1080, a broadcast 1600 × 900 (landscape) and a chart 1600 × 900 — so the frames' fit and crop can be judged.
+ * Grey bars stand for text: nothing in them is real.
+ */
+export function synthCapture(id: string): { src: string; width: number; height: number } {
+  const hit = synthCache.get(id);
+  if (hit) return hit;
+  const cv = id === "cap-post" ? postPicture(1080, 1350, 6) : id === "cap-reply" ? postPicture(1080, 1080, 3) : id === "cap-broadcast" ? broadcastPicture() : chartPicture();
+  const out = { src: `data:image/png;base64,${Buffer.from(cv.png()).toString("base64")}`, width: cv.w, height: cv.h };
+  synthCache.set(id, out);
+  return out;
+}
+
 /** a valid 1 × 1 PNG: the unit tests need a capture, not a picture */
 export const DOT_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
-
-const plain = (s: string) => s.replace(/\*\*|`/g, "");
 
 function addDays(t: string, n: number): string {
   const d = new Date(`${t}T00:00:00Z`);
@@ -85,8 +230,29 @@ function capture(id: string, outlet: string, account: string | undefined, hoursB
 
 const fig = (value: number | null, format: DeckFigure["format"], source: string, extra: Partial<DeckFigure> = {}): DeckFigure => ({ value, format, source, asOf: "2026-11-26", ...extra });
 
-const cond = (rules: Readonly<Record<string, string>>, status: Record<string, Tri>, value: Record<string, string>): DeckCondition[] =>
-  Object.entries(rules).map(([id, rule]) => ({ id, rule: plain(rule), status: status[id] ?? "unmet", value: value[id] ?? "" }));
+/** quant's conditions, as assessStages would give them, from a status per id */
+const conditions = (rules: Readonly<Record<string, string>>, status: Record<string, Tri>): Condition[] =>
+  Object.entries(rules).map(([id, rule]) => ({ id, rule, status: status[id] ?? "unmet", figures: {}, asOf: "2026-11-26" }));
+
+/** quant's core-11 result behind the grid's items: the counts, the unknowns that may be 🔴, indicator 3's risk */
+export function coreOf(items: readonly Grid11Item[]): Core11Result {
+  const counts: Record<Signal, number> = { normal: 0, caution: 0, risk: 0, unknown: 0 };
+  for (const it of items) counts[it.signal]++;
+  const hy = items.find((it) => it.no === 3)!.signal;
+  return {
+    items: items.map((it) => ({ no: it.no, name: it.name, signal: it.signal, value: null, asOf: null, reason: "", extras: {}, mayBeRisk: it.signal === "unknown" })),
+    counts,
+    riskPossible: items.filter((it) => it.signal === "unknown").length,
+    hyRisk: hy === "risk" ? "met" : hy === "unknown" ? "unknown" : "unmet",
+  };
+}
+
+/** the day's reading by quant's own stage rules (escapeStage, recoveryStage), as the judgment row keeps it */
+export function assessedOf(items: readonly Grid11Item[], a: Record<string, Tri>, d: Record<string, Tri>, r: Record<string, Tri>): Assessed {
+  const core = coreOf(items);
+  const [ca, cd, cr] = [conditions(ESCAPE_A_RULES, a), conditions(ESCAPE_D_RULES, d), conditions(RECOVERY_RULES, r)];
+  return { core, a: ca, d: cd, r: cr, escape: escapeStage(core, ca, cd), recovery: recoveryStage(cr, core, ca, cd) } as Assessed;
+}
 
 /**
  * One sample. `captureSrc` lets a probe pass real pictures of synthetic captures (the unit tests use a dot).
@@ -185,9 +351,11 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   addCap("cap-broadcast", "합성 방송", "합성 경제 뉴스", 11, "B");
   addCap("cap-chart", "FRED", undefined, 10, "A");
 
-  const VALUES = ["4.53%", "+0.12%p", c ? "+0.77%p" : "+0.41%p", "1.20%", "4.30%", "확인 불가", "52.4%", "하향 0/7", "−2.1조", "0.1%", "2/4 < 20%"];
+  const VALUES = ["4.53%", "+0.12%p", c ? "+0.77%p" : "+0.41%p", "1.20%", "4.30%", "확인 불가", "52.4%", "하향 0/7", "−2.1조", "0.1%", c ? "2/4 < 20%" : "1/4 < 20%"];
   const BASIS = ["> 5%이면 위험", "> 0이면 위험", "6개월 최저 대비", "1개월 ≥ 5% 위험", "4.1% + 0.3%p", "−5% 초과 위험", "< 60%이면 위험", "전체 하향 시 위험", "순매도 지속", "MoM ≥ 0.3% 위험", "개별 < 20% 위험"];
-  const SIG = ["normal", "risk", c ? "risk" : "caution", "normal", "caution", "unknown", "risk", "normal", "caution", "normal", "risk"] as const;
+  // (a)(b): CAPEX (no. 11, A6) is one company of four, a caution, and foreign selling (no. 9) the third risk → stage 2 holds
+  // with A1 the one A met (DD 1704 2); (c): two of four, a risk, and A6 met
+  const SIG = ["normal", "risk", c ? "risk" : "caution", "normal", "caution", "unknown", "risk", "normal", c ? "caution" : "risk", "normal", c ? "risk" : "caution"] as const;
   const NAMES = ["미국 10년물 금리", "2년물 − 기준금리 상단", "하이일드 스프레드", "엔화 절상률(엔캐리)", "미국 실업률", "삼전·하닉 이익 컨센서스", "S&P500 시장 폭", "M7 이익 전망", "외국인 코스피 순매매", "미국 근원 CPI", "빅테크 AI CAPEX"];
   // (b): two more missing beside the one every sample lacks (no. 6) → three 확인 불가; no. 10 is the core CPI the
   // figures also lack (core_cpi null, A4 확인 불가)
@@ -207,17 +375,44 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
     };
   });
 
-  const aStatus: Record<string, Tri> = c ? { A1: "met", A2: "met", A3: "met", A4: "unmet", A5: "unmet", A6: "met", A7: "unknown", A8: "unmet" } : { A1: "met", A2: "unmet", A3: "met", A4: "unmet", A5: "unmet", A6: "met", A7: "unknown", A8: "unmet" };
-  const aMet = Object.values(aStatus).filter((x) => x === "met").length;
-  const aUnk = Object.values(aStatus).filter((x) => x === "unknown").length;
-  const rStatus: Record<string, Tri> = b ? { R1: "unmet", R2: "unknown", R3: "unmet", R4: "unknown", R5: "met", R6: "unknown" } : { R1: "unmet", R2: "met", R3: "unmet", R4: "unknown", R5: "met", R6: "unknown" };
-  const rMet = Object.values(rStatus).filter((x) => x === "met").length;
-  const rUnk = Object.values(rStatus).filter((x) => x === "unknown").length;
+  // the conditions, each status what its value says (DD 1704 1): (a) stage 2 with A1 alone, recovery 1 with R2·R5·R6;
+  // (b) A4 and A6 not read today (core CPI and CAPEX missing) → 최소 2단계; (c) A1·A2·A3·A6 and D3 → stage 3
+  const vix = `VIX ${figureText(figures.vix!)}`;
+  const aStatus: Record<string, Tri> = { A1: "met", A2: c ? "met" : "unmet", A3: c ? "met" : "unmet", A4: b ? "unknown" : "unmet", A5: "unmet", A6: b ? "unknown" : c ? "met" : "unmet", A7: "unmet", A8: "unmet" };
+  const dStatus: Record<string, Tri> = { D1: "unmet", D2: "unmet", D3: c ? "met" : "unmet", D4: "unmet", D5: b ? "unknown" : "unmet" };
+  const rStatus: Record<string, Tri> = { R1: "unmet", R2: "met", R3: "unmet", R4: "unmet", R5: b ? "unknown" : "met", R6: "met" };
   // A1 says the spread's level as the grid's no. 3 and the figure do (unsigned %p, DD 1520) and its rise over the low
-  const valuesA = { A1: `${figureText(figures.hy!)} · 6개월 최저보다 ${VALUES[2]}`, A2: c ? "VIX 27.40 · 2일째" : "VIX 24.10", A3: "200일선 아래 3일째", A4: b ? "확인 불가" : "MoM 0.1%", A5: "4.53% · 0일", A6: "2/4 < 20%", A7: "자료 없음", A8: "200일선 위" };
-  const valuesR = { R1: "VIX 24.10 · 0일", R2: b ? "자료 없음" : `${figureText(figures.hy!)} · 20거래일 최고보다 0.60%p 좁음`, R3: "200일선 아래", R4: "자료 없음", R5: "2년물 ≤ 상단", R6: "자료 없음" };
-  const dStatus: Record<string, Tri> = { D1: "unmet", D2: "unmet", D3: c ? "met" : "unmet", D4: "unmet", D5: "unknown" };
-  const dMet = Object.values(dStatus).filter((x) => x === "met").length;
+  const hyLine = `${figureText(figures.hy!)} · 6개월 최저보다 ${VALUES[2]}`;
+  const values: Record<string, string> = {
+    A1: hyLine,
+    A2: c ? `${vix} · 2일째` : vix,
+    A3: c ? "200일선 아래 3일째" : "200일선 아래 2일째",
+    A4: b ? "확인 불가" : `MoM ${figureText(figures.core_cpi!)}`,
+    A5: `${figureText(figures.ust10y!)} · 0일`,
+    A6: b ? "자료 없음" : VALUES[10]!,
+    A7: "삼의 법칙 0.27 · 4주 평균 22.4만 건",
+    A8: "200일선 위",
+    D1: hyLine,
+    D2: vix,
+    D3: c ? "200일선 5.2% 아래" : "200일선 2.1% 아래",
+    D4: "삼의 법칙 0.27",
+    D5: b ? "자료 없음" : c ? "NFCI −0.31" : "NFCI −0.48",
+    R1: c ? `${vix} · 0일` : `${vix} · 3일째`,
+    R2: `${figureText(figures.hy!)} · 20거래일 최고보다 0.60%p 좁음`,
+    R3: "200일선 아래",
+    R4: `시장 폭 ${figureText(figures.breadth!)}`,
+    R5: b ? "2년물 > 상단 · 근원 CPI 확인 불가" : `근원 CPI MoM ${figureText(figures.core_cpi!)}`,
+    R6: "코스피 200일선 위",
+  };
+  // (b): the two inputs behind A4 and A6 did not come today (the app's caution reason)
+  const missingToday = new Set<InputKey>(b ? ["coreCpiMoM", "capex"] : []);
+  const stages = deckStages(assessedOf(items, aStatus, dStatus, rStatus), {
+    values,
+    scenario: c ? "C 침체 경계" : "B 둔화",
+    ...(c ? { moved: "탈출 2단계 → 3단계" } : {}),
+    sources: ["fred", "cboe", "bls", "krx", "rule"],
+    missing: (k) => (missingToday.has(k) ? "today" : null),
+  });
 
   const events: DeckEvent[] = [
     { at: "2026-11-27T22:30:00+09:00", title: "미국 10월 PCE", consensus: "0.2%", bull: "근원 0.2% 이하", bear: "근원 0.3% 이상", amplitudeRef: "ev_pce" },
@@ -242,22 +437,11 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
     asOf: FIXTURE_AS_OF,
     generatedAt: FIXTURE_AS_OF + 12 * 60_000,
     figures,
-    words: { escape_label: c ? "3단계 방어 준비" : "2단계 경계", recovery_label: b ? "판정 보류" : "1단계 바닥 탐색" },
+    words: { escape_label: headPhrase(stages.escape.head), recovery_label: headPhrase(stages.recovery.head) },
     sources,
     captures,
     core11: { items, sources: ["fred", "cboe", "bls", "krx", "calc"] },
-    stages: {
-      escape: { label: c ? "3단계 방어 준비" : "2단계 경계", gauges: { a: { met: aMet, unknown: aUnk, of: 8 }, d: { met: dMet, unknown: 1, of: 5 } } },
-      recovery: { label: b ? "판정 보류" : "1단계 바닥 탐색", gauge: { met: rMet, unknown: rUnk, of: 6 } },
-      scenario: c ? "C 침체 경계" : "B 둔화",
-      ...(c ? { moved: "탈출 2단계 → 3단계" } : {}),
-      conditions: { escape: cond(ESCAPE_A_RULES, aStatus, valuesA), severe: cond(ESCAPE_D_RULES, dStatus, { D1: valuesA.A1, D2: "VIX 24.10", D3: c ? "200일선 5.2% 아래" : "200일선 2.1% 아래", D4: "0.27", D5: "자료 없음" }), recovery: cond(RECOVERY_RULES, rStatus, valuesR) },
-      next: {
-        escape: c ? "4단계까지 D 조건 1개가 더 필요해요. 지금 1개 충족이에요." : "3단계까지 A 조건 1개가 더 필요해요.",
-        recovery: "2단계까지 회복 신호 2개와 D 신호 0개가 필요해요.",
-      },
-      sources: ["fred", "cboe", "bls", "krx", "rule"],
-    },
+    stages,
     flows: { KOSPI: flowsOf(5, "코스피"), 삼성전자: flowsOf(23, "삼성전자") },
     charts: {
       SOXL: { input: { bars: soxlBars, levels: soxlLv, summary: "SOXL 60거래일 레벨 차트(합성)", unit: "단위 달러", asOf: "11월 26일 종가", source: "토스증권 · 합성", currency: "USD" }, sources: ["toss", "calc"] },
@@ -286,7 +470,7 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   const spec: DeckSpec = {
     sections: ["결론", "이슈", "지표", "펀더멘털", "수급", "레벨", "대응", "부록"],
     summary: [
-      c ? "탈출 단계가 {escape_label}로 올라갔어요." : "탈출 단계는 {escape_label}를 이어 가요.",
+      c ? "{escape_label}로 올라갔어요." : "{escape_label}를 이어 가요.",
       "하이일드 스프레드는 {hy}이고 VIX는 {vix}예요.",
       "외국인은 코스피에서 {foreign_kospi}를 순매도했어요.",
       b ? "확인 불가 지표가 {unknown11}라 판정의 근거가 얇아요." : "반도체 A의 내재 ASP 하락률은 {asp_decline}로 계산돼요.",
@@ -311,7 +495,7 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
           { ref: "ust10y", label: "미 10년물", note: "위험선까지 여유가 있어요" },
         ],
       },
-      { kind: "signal-board", section: "결론", kicker: "단계 판정", headline: c ? "탈출은 방어 준비, 회복은 아직 바닥" : "탈출은 경계, 회복은 바닥 탐색", note: b ? "확인 불가 조건이 많아 판정을 보류한 칸이 있어요." : "확인 불가 조건이 풀리면 단계가 바뀔 수 있어요." },
+      { kind: "signal-board", section: "결론", kicker: "단계 판정", headline: c ? "탈출은 방어 준비, 회복은 아직 바닥" : "탈출은 경계, 회복은 바닥 탐색", note: b ? "확인 불가 조건이 풀리면 탈출 단계가 정해져요." : "단계는 매일 아침 다시 판정해요." },
       {
         kind: "issue+capture",
         section: "이슈",
@@ -380,7 +564,7 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
         ],
         highlightRow: 2,
       },
-      { kind: "grid11", section: "지표", kicker: "핵심 11지표", headline: b ? "확인 불가 셋이 판정을 흐려요" : "위험 셋, 경계 셋이 켜져 있어요" },
+      { kind: "grid11", section: "지표", kicker: "핵심 11지표", headline: b ? "확인 불가 셋이 판정을 흐려요" : c ? "위험 넷, 경계 둘이 켜져 있어요" : "위험 셋, 경계 셋이 켜져 있어요" },
       {
         kind: "table",
         section: "지표",
@@ -401,8 +585,8 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
           { name: "달러/원", now: "{usdkrw}", th: "{usdkrw_th}", read: "여유 있음" },
         ],
       },
-      { kind: "gauges", section: "지표", kicker: "탈출 조건 A", headline: c ? "악화 신호가 넷으로 늘었어요" : "악화 신호는 셋이 켜져 있어요", focus: "escape", note: c ? "다음으로 켜질 수 있는 것은 A4와 A5예요." : "다음으로 켜질 수 있는 것은 A2와 A4예요." },
-      { kind: "gauges", section: "지표", kicker: "회복 조건 R", headline: "회복 신호는 아직 둘이에요", focus: "recovery", note: "R3가 켜지기 전에는 추세 회복으로 보지 않아요." },
+      { kind: "gauges", section: "지표", kicker: "탈출 조건 A", headline: c ? "악화 신호가 넷으로 늘었어요" : "악화 신호는 하나가 켜져 있어요", focus: "escape", note: c ? "다음으로 켜질 수 있는 것은 D1과 D2예요." : "다음으로 켜질 수 있는 것은 A2와 A3예요." },
+      { kind: "gauges", section: "지표", kicker: "회복 조건 R", headline: b ? "회복 신호는 아직 둘이에요" : "회복 신호는 아직 셋이에요", focus: "recovery", note: "R3가 켜지기 전에는 추세 회복으로 보지 않아요." },
       { kind: "roe-pbr", section: "펀더멘털", kicker: "펀더멘털 역산", headline: "주가는 ASP 하락을 미리 반영했어요", company: "반도체 A", notes: ["네 방법 모두 하락을 가리켜요.", "고든 ROE 방법이 가장 비관적이에요."] },
       {
         kind: "table",

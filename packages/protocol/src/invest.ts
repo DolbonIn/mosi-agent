@@ -438,7 +438,7 @@ export interface InvestDailyCard {
   rows: { label: string; value: string }[];
   /** the stage's pending sentence when a stage is not settled */
   pending?: string;
-  /** D-1 (team-lead 0056) for a person whose report goes out that day: head 11월 28일 일정 (· 5개 when more), 3 rows at most */
+  /** D-1 (team-lead 0056) for a person whose report goes out that day: head 일정, or 일정 N개 from two (DD 2225 1: no day; each row has its own), 3 rows at most */
   events?: { head: string; rows: { title: string; value: string }[] };
   deck: { state: "none" | "making" | "ready"; deckId?: ID };
   /** 기준 11월 27일 08:00 · FRED · Yahoo(지연 시세) 외 2곳 */

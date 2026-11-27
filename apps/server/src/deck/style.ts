@@ -55,10 +55,13 @@ h1,h2,p{margin:0}
 .headline{position:absolute;left:64px;top:118px;width:1152px;font-size:50px;font-weight:900;letter-spacing:-2.3px;line-height:1.1;color:${c.ink}}
 .body{position:absolute;left:64px;top:240px;width:1152px;height:416px}
 .foot{position:absolute;left:64px;top:676px;width:1152px;height:44px;border-top:1.5px solid ${c.rule}}
-.foot span{position:absolute;top:9px;font-size:14px;line-height:18px;color:${c.foot};white-space:nowrap;letter-spacing:-.2px}
+.foot>span{position:absolute;top:9px;font-size:14px;line-height:18px;color:${c.foot};white-space:nowrap;letter-spacing:-.2px}
 .foot .l{left:0}.foot .r{right:0}
 .t-body{font-size:19px;line-height:1.42;letter-spacing:-.3px}
 .t-table{font-size:15px}
+.dot{display:inline-block}
+.nw{white-space:nowrap}
+svg .dot{display:inline;font-feature-settings:"locl" 0}
 .t-foot{font-size:14px;line-height:1.35;color:${c.foot};letter-spacing:-.2px}
 .fig{font-variant-numeric:tabular-nums;white-space:nowrap}
 mark.hl{background:${c.marker};color:inherit;padding:0 .08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -89,7 +92,9 @@ mark.hl{background:${c.marker};color:inherit;padding:0 .08em;-webkit-box-decorat
 .sb-l{position:absolute;left:0;top:0;width:466px}
 .sb-r{position:absolute;left:490px;top:0;width:662px;height:416px;padding-top:30px}
 .sb-name{font-weight:700;color:${c.mute}}
-.sb-stage{font-size:52px;font-weight:900;letter-spacing:-2.6px;line-height:1.1;color:${c.ink};margin-bottom:22px}
+.sb-stage{font-size:52px;font-weight:900;letter-spacing:-2.6px;line-height:1.1;color:${c.ink};margin-bottom:22px;word-break:keep-all}
+.sb-sname{display:inline-block;font-size:30px;font-weight:700;letter-spacing:-.6px;color:${c.ink2}}
+.sb-pend{margin:-14px 0 20px;font-weight:600;color:${c.ink2}}
 .sb-moved{margin:-14px 0 20px;font-weight:700;color:${c.ink}}
 .sb-scen{font-size:26px;font-weight:800;letter-spacing:-.6px;line-height:1.3;color:${c.ink}}
 .gauge.row{display:grid;grid-template-columns:118px 266px 64px auto;column-gap:18px;align-items:center;margin-bottom:34px}
@@ -102,10 +107,11 @@ mark.hl{background:${c.marker};color:inherit;padding:0 .08em;-webkit-box-decorat
 /* gauges: the condition list takes the left eight columns (A5/A6 rules run to fifty characters), the gauges and what
    the next stage needs the right four */
 .gg-list{position:absolute;left:0;top:0;width:760px}
-.gg-list .cond{display:grid;grid-template-columns:104px 1fr 176px;column-gap:12px;align-items:start;padding:6px 0;border-top:1px solid ${c.rule2}}
+.gg-list .cond{display:grid;grid-template-columns:104px 1fr var(--val,176px);column-gap:12px;align-items:start;padding:6px 0;border-top:1px solid ${c.rule2}}
 .gg-list .cond:last-child{border-bottom:1px solid ${c.rule2}}
 .gg-list .cond .chip{margin-top:-2px;justify-self:start}
 .gg-list .cond .val{text-align:right}
+.gg-list .cond .val .pc{white-space:nowrap}
 .cond .rule{font-size:15px;font-weight:600;color:${c.ink};line-height:1.32;letter-spacing:-.2px}
 .cond .val{font-size:15px;color:${c.ink3};line-height:1.32;letter-spacing:-.2px}
 .gg-side{position:absolute;left:784px;top:0;width:368px}

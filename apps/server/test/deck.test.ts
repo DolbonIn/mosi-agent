@@ -1,11 +1,25 @@
 /** The deck generator's JSON checks and F-A HTML (DD 1935 §5, DD 0059 §6, DD 0103-b F): the three samples, synthetic. */
 import { describe, expect, test } from "bun:test";
 import { DISCLAIMER, DISCLAIMER_PLAYBOOK, textW } from "@pickle/quant";
-import { chars, fill, figureText, FONT_LICENCE, kstStamp, lintModelText, LOCAL_FONT_SRC, methodBars, renderDeck, validateDeck, type DeckFail, type DeckSpec, type Slide } from "../src/deck";
-import { deckFixture, FIXTURE_AS_OF } from "./deck-fixtures";
+import { inflateSync } from "node:zlib";
+import { chars, deckCss, fill, figureText, FONT_LICENCE, kstStamp, lintModelText, LOCAL_FONT_SRC, methodBars, renderDeck, validateDeck, type DeckFail, type DeckSpec, type Slide } from "../src/deck";
+import { ESCAPE_A_RULES, ESCAPE_D_RULES, RECOVERY_RULES, type Grid11Item, type Tri } from "@pickle/quant";
+import { deckStages, noteIdsFor } from "../src/deck/stages";
+import { nextLineHtml, valuePieces } from "../src/deck/render";
+import { narrowDots } from "../src/deck/text";
+import { noteNames } from "../src/deck/validate";
+import { escapeHead, gaugesOf, nextLines, recoveryHead, type Assessed, type InputKey, type Missing } from "../src/invest/stages";
+import { assessedOf, deckFixture, FIXTURE_AS_OF, synthCapture } from "./deck-fixtures";
 
 const rules = (f: DeckFail[]) => f.map((x) => x.rule);
-const pages = (html: string) => [...html.matchAll(/<section class="page" data-n="(\d+)" data-kind="([a-z0-9+-]+)">([\s\S]*?)<\/section>/g)].map((m) => ({ n: Number(m[1]), kind: m[2]!, html: m[3]! }));
+/** a page's markup without narrowDots' wrappers, as the tests before DD 1704 5 read it (the wrappers have their own test) */
+const undot = (h: string) =>
+  h
+    .replace(/<span class="dot">·<\/span>/g, "·")
+    .replace(/<span class="nw">([^<]*)<\/span>/g, "$1")
+    .replace(/<tspan class="dot" dx="-0.14em">·<\/tspan>/g, "·")
+    .replace(/<tspan dx="-0.14em">([^<]*)<\/tspan>/g, "$1");
+const pages = (html: string) => [...html.matchAll(/<section class="page" data-n="(\d+)" data-kind="([a-z0-9+-]+)">([\s\S]*?)<\/section>/g)].map((m) => ({ n: Number(m[1]), kind: m[2]!, html: undot(m[3]!) }));
 const textOf = (h: string) => h.replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
 const footLeft = (h: string) => textOf(h.match(/<span class="l" data-role="foot-left">([\s\S]*?)<\/span>/)![1]!);
 /** a sample with one slide changed */
@@ -237,7 +251,7 @@ describe("figures (§0-5) and references", () => {
   });
   test("fill: each reference becomes its figure in a span, a server phrase too; an unknown id is kept and named", () => {
     const { data } = deckFixture("a");
-    const r = fill("하이일드 {hy}, 탈출 {escape_label}, {nope} <b>", data.figures, data.words);
+    const r = fill("하이일드 {hy}, {escape_label}, {nope} <b>", data.figures, data.words);
     expect(r.plain).toBe("하이일드 3.76%p, 탈출 2단계 경계, {nope} <b>");
     expect(r.html).toContain('<span class="fig" data-ref="hy">3.76%p</span>');
     expect(r.html).toContain("&lt;b&gt;");
@@ -274,7 +288,7 @@ describe("the F-A pages (DD 1935 §5-1, §5-2)", () => {
     // DD 0103-b F, word for word
     expect(FONT_LICENCE).toBe("글꼴 Noto Sans KR · SIL OFL 1.1");
     expect(footLeft(ps[27]!.html)).toBe(FONT_LICENCE);
-    expect(html.split(FONT_LICENCE).length - 1).toBe(1);
+    expect(undot(html).split(FONT_LICENCE).length - 1).toBe(1);
     for (const p of ps.slice(0, -1)) expect(footLeft(p.html).endsWith(`기준 ${kstStamp(FIXTURE_AS_OF)}`)).toBe(true);
   });
   test("a footer too wide for its sources keeps the first ones and says how many more: 외 n곳", () => {
@@ -382,5 +396,316 @@ describe("the F-A pages (DD 1935 §5-1, §5-2)", () => {
     expect(svg).toContain(">−3.0</text>");
     expect(svg).toContain('data-role="zero"');
     expect(svg).toContain(">단위 % · 기준 · 출처</text>");
+  });
+});
+
+describe("the stage cell is the 투자 screen's (DD 1704 1·2·3)", () => {
+  const statuses = (cs: { id: string; status: Tri }[]) => Object.fromEntries(cs.map((c) => [c.id, c.status])) as Record<string, Tri>;
+  /** the reading behind a sample, again from its grid and its conditions by quant's rules */
+  const readingOf = (k: "a" | "b" | "c") => {
+    const { data } = deckFixture(k);
+    const c = data.stages!.conditions;
+    return { data, s: assessedOf(data.core11!.items, statuses(c.escape), statuses(c.severe), statuses(c.recovery)) };
+  };
+  const none = () => null;
+  /** readings across the rule's corners: every escape floor, a held and an open recovery */
+  const corners = (): [string, Assessed][] => {
+    const { data } = deckFixture("a");
+    const items = data.core11!.items;
+    const calm: Grid11Item[] = items.map((it) => (it.signal === "risk" ? { ...it, signal: "caution" as const } : it));
+    const all = (rules: Readonly<Record<string, string>>, t: Tri) => Object.fromEntries(Object.keys(rules).map((id) => [id, t])) as Record<string, Tri>;
+    const unmetA = all(ESCAPE_A_RULES, "unmet");
+    const unmetD = all(ESCAPE_D_RULES, "unmet");
+    const r = (o: Record<string, Tri>) => ({ ...all(RECOVERY_RULES, "unmet"), ...o });
+    return [
+      ["floor 1", assessedOf(calm, unmetA, unmetD, r({ R1: "met" }))],
+      ["floor 2", assessedOf(items, { ...unmetA, A1: "met" }, unmetD, r({ R1: "met", R2: "met" }))],
+      ["floor 3", assessedOf(items, { ...unmetA, A1: "met", A2: "met" }, { ...unmetD, D3: "met" }, r({ R2: "met", R5: "met", R6: "met" }))],
+      ["floor 4", assessedOf(items, { ...unmetA, A1: "met", A2: "met" }, { ...unmetD, D1: "met", D3: "met" }, r({ R1: "met", R2: "met", R4: "met", R6: "met" }))],
+      ["recovery held", assessedOf(items, { ...unmetA, A1: "met" }, { ...unmetD, D3: "met" }, r({ R1: "met", R2: "met", R4: "met", R6: "met" }))],
+      ["recovery open", assessedOf(items, { ...unmetA, A1: "met" }, { ...unmetD, D5: "unknown" }, r({ R2: "met", R5: "met", R4: "unknown", R6: "unknown" }))],
+      ["escape open", assessedOf(items, { ...unmetA, A1: "met", A4: "unknown" }, unmetD, r({ R2: "met", R6: "met" }))],
+      ["recovery 2, R3 off", assessedOf(items, { ...unmetA, A1: "met" }, unmetD, r({ R1: "met", R2: "met", R4: "met", R5: "met", R6: "met" }))],
+      ["recovery 1, D on", assessedOf(items, { ...unmetA, A1: "met" }, { ...unmetD, D3: "met" }, r({ R1: "met", R2: "met" }))],
+      ["recovery 2, R3 unknown", assessedOf(items, { ...unmetA, A1: "met" }, unmetD, r({ R1: "met", R2: "met", R3: "unknown", R4: "met", R5: "met", R6: "met" }))],
+    ];
+  };
+
+  test("heads, gauges and next lines are escapeHead, recoveryHead, gaugesOf and nextLines, word for word, at every corner", () => {
+    const seen = new Set<string>();
+    for (const [name, s] of [...corners(), ...(["a", "b", "c"] as const).map((k) => [k, readingOf(k).s] as [string, Assessed])]) {
+      const st = deckStages(s, { values: {}, scenario: "B 둔화", sources: [] });
+      const [eh, rh] = [escapeHead(s, none), recoveryHead(s, none)];
+      expect([name, st.escape.head]).toEqual([name, { text: eh.text, ...(eh.name ? { name: eh.name } : {}), ...(eh.pending ? { pending: eh.pending } : {}) }]);
+      expect([name, st.recovery.head]).toEqual([name, { text: rh.text, ...(rh.name ? { name: rh.name } : {}), ...(rh.pending ? { pending: rh.pending } : {}) }]);
+      expect([name, st.next]).toEqual([name, nextLines(s)]);
+      const g = gaugesOf(s);
+      expect([st.escape.gauges.a.met, st.escape.gauges.a.unknown, st.escape.gauges.d.met, st.escape.gauges.d.unknown, st.recovery.gauge.met, st.recovery.gauge.unknown]).toEqual([g[0]!.met, g[0]!.unknown, g[1]!.met, g[1]!.unknown, g[2]!.met, g[2]!.unknown]);
+      seen.add(eh.text.replace(/\d/g, "n")).add(rh.text.replace(/\d/g, "n")).add(String(st.next.escape == null)).add(String(st.next.recovery == null));
+    }
+    // the corners reach every kind of head and both a line and none
+    expect([...seen].sort()).toEqual(["false", "true", "탈출 n단계", "탈출 최소 n단계", "회복 n단계", "회복 최소 n단계", "회복 단계 미확정", "회복 판정 보류"].sort());
+  });
+
+  test("a note may name what its next line's clauses need: n개 더 → that gauge's unmet, 심각 신호 n개 덜 → the met D's, R3 켜짐 → R3", () => {
+    const by = Object.fromEntries(corners());
+    const ids = (name: string, which: "escape" | "recovery") => noteIdsFor(nextLines(by[name]!)[which], gaugesOf(by[name]!));
+    expect(nextLines(by["floor 1"]!).escape).toContain("핵심 위험 지표");
+    expect(ids("floor 1", "escape")).toEqual([]);
+    expect(nextLines(by["floor 2"]!).escape).toContain("악화 신호");
+    expect(ids("floor 2", "escape")).toEqual(["A2", "A3", "A4", "A5", "A6", "A7", "A8"]);
+    expect(nextLines(by["floor 3"]!).escape).toContain("심각 신호");
+    expect(ids("floor 3", "escape")).toEqual(["D1", "D2", "D4", "D5"]);
+    expect(nextLines(by["floor 4"]!).escape).toBeNull();
+    expect(ids("floor 4", "escape")).toEqual([]);
+    expect(nextLines(by["floor 2"]!).recovery).toBe("회복 2단계까지: 회복 신호 2개 더");
+    expect(ids("floor 2", "recovery")).toEqual(["R3", "R4", "R5", "R6"]);
+    // 덜: the met severe signals are the ones that must go off; with 더 beside it, both
+    expect(nextLines(by["recovery 1, D on"]!).recovery).toBe("회복 2단계까지: 회복 신호 2개 더, 심각 신호 1개 덜");
+    expect(ids("recovery 1, D on", "recovery")).toEqual(["R3", "R4", "R5", "R6", "D3"]);
+    expect(nextLines(by["recovery held"]!).recovery).toBe("회복 2단계까지: 심각 신호 1개 덜");
+    expect(ids("recovery held", "recovery")).toEqual(["D3"]);
+    // R3 켜짐 names R3 alone
+    expect(nextLines(by["recovery 2, R3 off"]!).recovery).toBe("회복 3단계까지: R3 켜짐");
+    expect(ids("recovery 2, R3 off", "recovery")).toEqual(["R3"]);
+    // ... unless R3 is unknown: the line is the same, the note names nothing
+    expect(nextLines(by["recovery 2, R3 unknown"]!).recovery).toBe("회복 3단계까지: R3 켜짐");
+    expect(ids("recovery 2, R3 unknown", "recovery")).toEqual([]);
+    // an unknown condition is never one to name
+    expect(ids("escape open", "escape")).toEqual(["A2", "A3", "A5", "A6", "A7", "A8"]);
+  });
+
+  test("the samples tell the stories the rules allow: (a) 2단계 경계, (b) 최소 2단계 and why, (c) 3단계 방어 준비", () => {
+    const st = (k: "a" | "b" | "c") => deckFixture(k).data.stages!;
+    expect([st("a").escape.head, st("a").recovery.head, st("a").next]).toEqual([
+      { text: "탈출 2단계", name: "경계" },
+      { text: "회복 1단계", name: "바닥 탐색" },
+      { escape: "탈출 3단계까지: 악화 신호 1개 더", recovery: "회복 2단계까지: 회복 신호 1개 더" },
+    ]);
+    expect([st("b").escape.head, st("b").recovery.head, st("b").next.escape]).toEqual([
+      { text: "탈출 최소 2단계", pending: "오늘 지표 2개를 받지 못해서 3단계 여부는 아직 몰라요." },
+      { text: "회복 1단계", name: "바닥 탐색" },
+      "탈출 3단계까지: 악화 신호 1개 더",
+    ]);
+    expect([st("c").escape.head, st("c").next.escape, st("c").moved]).toEqual([{ text: "탈출 3단계", name: "방어 준비" }, "탈출 4단계까지: 심각 신호 1개 더", "탈출 2단계 → 3단계"]);
+    for (const k of ["a", "b", "c"] as const) {
+      const { data, s } = readingOf(k);
+      expect(data.stages!.next).toEqual(nextLines(s));
+      expect(data.words!.escape_label).toBe([data.stages!.escape.head.text, data.stages!.escape.head.name].filter(Boolean).join(" "));
+    }
+  });
+
+  test("a head's pending line is the server's for the same missing inputs, each reason in its own words (DD 1704 2, lead 2246)", () => {
+    const { data, s } = readingOf("b");
+    const opts = { values: {}, scenario: "B 둔화", sources: [] };
+    // (b): the inputs behind A4 and A6 (core CPI, CAPEX) did not come today, as the fixture passes them
+    const today = new Set<InputKey>(["coreCpiMoM", "capex"]);
+    const fixtureMissing = (k: InputKey): Missing => (today.has(k) ? "today" : null);
+    const eh = escapeHead(s, fixtureMissing);
+    expect(eh.pending).toBe("오늘 지표 2개를 받지 못해서 3단계 여부는 아직 몰라요.");
+    expect(data.stages!.escape.head).toEqual({ text: eh.text, pending: eh.pending });
+    // an open condition with no reason given reads as not come today (the server's rule): the words a call without
+    // reasons gets, which every other reason must not fall back to
+    const bare = deckStages(s, opts).escape.head.pending;
+    expect(bare).toBe(escapeHead(s, none).pending!);
+    const cases: [string, (k: InputKey) => Missing, string][] = [
+      ["nowhere yet", (k) => (today.has(k) ? "none" : null), "지표 2개 값이 없어서 3단계 여부는 아직 몰라요."],
+      ["one of each", (k) => (k === "capex" ? "none" : k === "coreCpiMoM" ? "today" : null), "지표 1개 값이 없고 오늘 1개를 받지 못해서 3단계 여부는 아직 몰라요."],
+      ["토스증권 not connected", (k) => (today.has(k) ? "connect" : null), "지표 2개 값이 없어서 3단계 여부는 아직 몰라요."],
+    ];
+    for (const [name, m, want] of cases) {
+      const st = deckStages(s, { ...opts, missing: m });
+      expect([name, st.escape.head.pending]).toEqual([name, escapeHead(s, m).pending]);
+      expect([name, st.escape.head.pending]).toEqual([name, want]);
+      expect([name, st.escape.head.pending === bare]).toEqual([name, false]);
+    }
+    // the recovery head too: an open recovery (R4 and R6 unknown), its inputs nowhere yet → the quiet words
+    const open = corners().find(([n]) => n === "recovery open")![1];
+    const quiet = (k: InputKey): Missing => (k === "breadth200" || k === "foreignKospi" || k === "kospi" || k === "nfci" ? "none" : null);
+    const rh = recoveryHead(open, quiet);
+    expect(rh.pending).toMatch(/^지표 \d개 값이 없어서 회복 단계는 아직 몰라요\.$/);
+    expect(deckStages(open, { ...opts, missing: quiet }).recovery.head.pending).toBe(rh.pending!);
+    expect(deckStages(open, opts).recovery.head.pending).toBe(recoveryHead(open, none).pending!);
+    expect(rh.pending).not.toBe(recoveryHead(open, none).pending);
+    // nothing open: no pending line, reasons or none
+    const { s: a } = readingOf("a");
+    for (const m of [undefined, quiet, fixtureMissing]) {
+      const st = deckStages(a, { ...opts, ...(m ? { missing: m } : {}) });
+      expect([st.escape.head.pending, st.recovery.head.pending]).toEqual([undefined, undefined]);
+    }
+  });
+
+  test("each sample's values agree with their statuses and figures, and its headlines' counts with the gauges (DD 1704 1)", () => {
+    const COUNT: Record<string, number> = { 하나: 1, 둘: 2, 셋: 3, 넷: 4, 다섯: 5 };
+    const word = (h: string) => COUNT[Object.keys(COUNT).find((w) => h.includes(w)) ?? ""];
+    for (const k of ["a", "b", "c"] as const) {
+      const { spec, data } = deckFixture(k);
+      const st = data.stages!;
+      const all = [...st.conditions.escape, ...st.conditions.severe, ...st.conditions.recovery];
+      // a value says 확인 불가 or 자료 없음 exactly when its condition is unknown
+      for (const c of all) expect([k, c.id, /확인 불가|자료 없음/.test(c.value)]).toEqual([k, c.id, c.status === "unknown"]);
+      // every VIX the conditions name is the VIX figure
+      for (const c of all.filter((x) => x.value.includes("VIX"))) expect([k, c.id, c.value.startsWith(`VIX ${figureText(data.figures.vix!)}`)]).toEqual([k, c.id, true]);
+      // the gauges count the statuses
+      const n = (cs: typeof all, t: Tri) => cs.filter((c) => c.status === t).length;
+      expect([st.escape.gauges.a.met, st.escape.gauges.a.unknown, st.escape.gauges.d.met, st.escape.gauges.d.unknown, st.recovery.gauge.met, st.recovery.gauge.unknown]).toEqual([
+        n(st.conditions.escape, "met"), n(st.conditions.escape, "unknown"), n(st.conditions.severe, "met"), n(st.conditions.severe, "unknown"), n(st.conditions.recovery, "met"), n(st.conditions.recovery, "unknown"),
+      ]);
+      // a headline that counts signals counts what the gauge shows
+      for (const g of spec.slides.filter((x): x is Extract<Slide, { kind: "gauges" }> => x.kind === "gauges")) {
+        const met = g.focus === "recovery" ? st.recovery.gauge.met : st.escape.gauges.a.met;
+        if (word(g.headline) != null) expect([k, g.headline, word(g.headline)]).toEqual([k, g.headline, met]);
+      }
+      const grid = spec.slides.find((x) => x.kind === "grid11")!;
+      const items = data.core11!.items;
+      const cnt = (sig: string) => items.filter((i) => i.signal === sig).length;
+      const said = [...grid.headline.matchAll(/(위험|경계|확인 불가) (하나|둘|셋|넷|다섯)/g)].map((m) => [m[1], COUNT[m[2]!]]);
+      expect(said.length).toBeGreaterThan(0);
+      for (const [what, num] of said) expect([k, what, num]).toEqual([k, what, cnt(what === "위험" ? "risk" : what === "경계" ? "caution" : "unknown")]);
+    }
+  });
+
+  test("a gauges note naming a met, an unknown or another group's condition goes back (B2-note); the samples' notes pass", () => {
+    const note = (k: "a" | "b" | "c", n: number, text: string) => {
+      const x = withSlide(n, (s) => ({ ...s, note: text }) as Slide, k);
+      return validateDeck(x.spec, x.data).filter((f) => f.rule === "B2-note").map((f) => f.what);
+    };
+    // slide 11 shows the escape conditions, slide 12 the recovery ones
+    expect(note("c", 11, "다음으로 켜질 수 있는 것은 D1과 D2예요.")).toEqual([]);
+    expect(note("c", 11, "다음으로 켜질 수 있는 것은 A4와 A5예요.")).toEqual([
+      "note가 부르는 A4는 다음 단계가 세는 조건이 아니에요(탈출 4단계까지: 심각 신호 1개 더)",
+      "note가 부르는 A5는 다음 단계가 세는 조건이 아니에요(탈출 4단계까지: 심각 신호 1개 더)",
+    ]);
+    expect(note("c", 11, "D3가 이미 켜졌어요.")).toEqual(["note가 부르는 D3는 이미 충족이에요"]);
+    expect(note("b", 11, "A4가 켜질 수 있어요.")).toEqual(["note가 부르는 A4는 확인 불가라서 부르지 않아요"]);
+    expect(note("a", 12, "D1이 꺼져야 해요.")).toEqual(["note가 부르는 D1는 다음 단계가 세는 조건이 아니에요(회복 2단계까지: 회복 신호 1개 더)"]);
+    // (c)'s recovery line asks D3 to go off: beside it the note may name D3, met as it is
+    expect(deckFixture("c").data.stages!.next.recovery).toBe("회복 2단계까지: 회복 신호 1개 더, 심각 신호 1개 덜");
+    expect(note("c", 12, "D3가 꺼져야 2단계가 돼요.")).toEqual([]);
+    // A9 is no id; in A12 and DA3 no id stands alone (A1 is met, A3 is not the recovery line's): nothing is named
+    expect(note("a", 12, "A9와 A12, DA3는 조건 id가 아니에요.")).toEqual([]);
+    expect(note("a", 12, "R7이 켜지면 바뀌어요.")).toEqual(["note가 부르는 R7는 없는 조건이에요"]);
+    // no next line: no condition to name
+    const s4 = deckStages(corners().find(([n]) => n === "floor 4")![1], { values: {}, scenario: "", sources: [] });
+    expect(noteNames("A3가 켜지면 바뀌어요.", "escape", s4)).toEqual(["다음 단계 줄이 없어서 note가 조건(A3)을 부르지 않아요"]);
+  });
+
+  test("a condition as drawn: the rule without its markdown, the server's value, else 확인 불가 when unknown and nothing otherwise", () => {
+    const { s } = readingOf("b");
+    const plain = (r: string) => r.replace(/\*\*|`/g, "");
+    const RULES: Record<string, string> = { ...ESCAPE_A_RULES, ...ESCAPE_D_RULES, ...RECOVERY_RULES };
+    const bare = deckStages(s, { values: {}, scenario: "", sources: [] });
+    const all = [...bare.conditions.escape, ...bare.conditions.severe, ...bare.conditions.recovery];
+    expect(all.map((c) => c.id)).toEqual(Object.keys(RULES));
+    expect(all.filter((c) => c.status === "unknown").length).toBeGreaterThan(0);
+    for (const c of all) {
+      expect([c.id, c.rule]).toEqual([c.id, plain(RULES[c.id]!)]);
+      expect([c.id, /\*\*|`/.test(c.rule)]).toEqual([c.id, false]);
+      expect([c.id, c.value]).toEqual([c.id, c.status === "unknown" ? "확인 불가" : ""]);
+    }
+    // the rules carry markdown in quant (the master prompt's words): stripping is not idle
+    expect(Object.values(RULES).filter((r) => /\*\*|`/.test(r)).length).toBeGreaterThan(10);
+    const given = deckStages(s, { values: { A1: "3.76%p", A4: "자료 없음" }, scenario: "", sources: [] });
+    expect([given.conditions.escape[0]!.value, given.conditions.escape[3]!.value]).toEqual(["3.76%p", "자료 없음"]);
+  });
+  test("a value breaks only between its pieces: split after each \" · \", the dot ending the piece before (DD 1704 4)", () => {
+    expect(valuePieces("3.76%p · 6개월 최저보다 +0.41%p")).toEqual(["3.76%p ·", "6개월 최저보다 +0.41%p"]);
+    expect(valuePieces("VIX 24.10")).toEqual(["VIX 24.10"]);
+    expect(valuePieces("2년물 > 상단 · 근원 CPI 확인 불가 · 3일째")).toEqual(["2년물 > 상단 ·", "근원 CPI 확인 불가 ·", "3일째"]);
+    const p11 = pages(renderDeck(deckFixture("a").spec, deckFixture("a").data))[10]!.html;
+    expect(p11).toContain('<span class="val t-table"><span class="pc">3.76%p ·</span> <span class="pc">6개월 최저보다 +0.41%p</span></span>');
+  });
+  test("the conditions card is titled 다음 단계, and a null next line is left out; the board shows each head and its pending line", () => {
+    const { spec, data } = deckFixture("b");
+    const html = renderDeck(spec, data);
+    const ps = pages(html);
+    expect(html).not.toContain("다음 단계까지</div>");
+    expect(ps[10]!.html).toContain('<div class="t">다음 단계</div><p class="next t-body"><span class="tie">탈출 3단계까지:</span> <span class="tie">악화 신호 1개 더</span></p>');
+    // the line breaks only between its clauses, each keeping its comma
+    expect(nextLineHtml("회복 2단계까지: 회복 신호 2개 더, 심각 신호 1개 덜")).toBe('<span class="tie">회복 2단계까지:</span> <span class="tie">회복 신호 2개 더,</span> <span class="tie">심각 신호 1개 덜</span>');
+    expect(nextLineHtml("회복 3단계까지: 회복 신호 1개 더(R3 포함), 탈출 2단계 이하")).toBe('<span class="tie">회복 3단계까지:</span> <span class="tie">회복 신호 1개 더(R3 포함),</span> <span class="tie">탈출 2단계 이하</span>');
+    expect(nextLineHtml("탈출 2단계까지: 핵심 위험 지표 2개 더, 또는 하이일드 스프레드 위험")).toBe('<span class="tie">탈출 2단계까지:</span> <span class="tie">핵심 위험 지표 2개 더,</span> <span class="tie">또는 하이일드 스프레드 위험</span>');
+    expect(ps[2]!.html).toContain('<div class="sb-stage" data-stage="escape">탈출 최소 2단계</div><p class="sb-pend t-body">오늘 지표 2개를 받지 못해서 3단계 여부는 아직 몰라요.</p>');
+    expect(ps[2]!.html).toContain('<div class="sb-stage" data-stage="recovery">회복 1단계 <span class="sb-sname">바닥 탐색</span></div>');
+    data.stages!.next.escape = null;
+    const p11 = pages(renderDeck(spec, data))[10]!.html;
+    expect(p11).toContain('<div class="t">다음 단계</div><p class="note t-body">');
+    expect(p11).not.toContain('class="next');
+  });
+});
+
+describe("one width for U+00B7 (DD 1704 5)", () => {
+  test("HTML: each dot an inline-block, a word's dot inside its nowrap word; attributes and <style> untouched", () => {
+    expect(narrowDots('<p aria-label="a · b">FRED · 미 국채, 가 · 나</p>')).toBe('<p aria-label="a · b">FRED <span class="dot">·</span> 미 국채, 가 <span class="dot">·</span> 나</p>');
+    expect(narrowDots("<p>탈출·회복은 4.53% · 0일</p>")).toBe('<p><span class="nw">탈출<span class="dot">·</span>회복은</span> 4.53% <span class="dot">·</span> 0일</p>');
+    expect(narrowDots("<p>A&amp;B·C (합성)·합성</p>")).toBe('<p><span class="nw">A&amp;B<span class="dot">·</span>C</span> <span class="nw">(합성)<span class="dot">·</span>합성</span></p>');
+    expect(narrowDots("<style>.a::after{content:'·'}</style><p>x</p>")).toBe("<style>.a::after{content:'·'}</style><p>x</p>");
+  });
+  test("SVG: the dot held wide and pulled in 0.14em, the next character too (across a tspan, an entity whole); <title> untouched", () => {
+    expect(narrowDots('<svg><title>a · b</title><text x="0">단위 · KRX</text></svg>')).toBe(
+      '<svg><title>a · b</title><text x="0">단위 <tspan class="dot" dx="-0.14em">·</tspan><tspan dx="-0.14em"> </tspan>KRX</text></svg>',
+    );
+    expect(narrowDots("<svg><text><tspan>선물·</tspan><tspan>옵션</tspan> ·&amp;</text><text>B</text></svg>")).toBe(
+      '<svg><text><tspan>선물<tspan class="dot" dx="-0.14em">·</tspan></tspan><tspan><tspan dx="-0.14em">옵</tspan>션</tspan> <tspan class="dot" dx="-0.14em">·</tspan><tspan dx="-0.14em">&amp;</tspan></text><text>B</text></svg>',
+    );
+  });
+  test("the wrappers' rules: an HTML dot an inline-block, a word nowrap, an SVG dot held wide (the widths need the font: deck-pdf)", () => {
+    const css = deckCss(LOCAL_FONT_SRC);
+    for (const r of [".dot{display:inline-block}", ".nw{white-space:nowrap}", 'svg .dot{display:inline;font-feature-settings:"locl" 0}']) expect(css).toContain(r);
+  });
+  test("every dot a sample draws is wrapped: none is left bare between tags", () => {
+    for (const k of ["a", "b", "c"] as const) {
+      const { spec, data } = deckFixture(k);
+      const html = renderDeck(spec, data);
+      const body = html.slice(html.indexOf("</style>"));
+      const toks = body.match(/<[^>]*>|[^<]+/g)!;
+      let dots = 0;
+      toks.forEach((t, i) => {
+        if (t.startsWith("<") || !t.includes("·")) return;
+        dots += t.split("·").length - 1;
+        expect([k, t, toks[i - 1]]).toEqual([k, "·", toks[i - 1]!.startsWith("<tspan") ? '<tspan class="dot" dx="-0.14em">' : '<span class="dot">']);
+      });
+      expect(dots).toBeGreaterThan(100);
+    }
+  });
+});
+
+describe("the samples' captures at real shapes (DD 1704 6)", () => {
+  /** a PNG's chunks, each CRC checked, and its pixels inflated */
+  const readPng = (src: string) => {
+    const b = Buffer.from(src.slice(src.indexOf(",") + 1), "base64");
+    expect([...b.subarray(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const chunks: { type: string; data: Buffer }[] = [];
+    for (let at = 8; at < b.length; ) {
+      const n = b.readUInt32BE(at);
+      const type = b.subarray(at + 4, at + 8).toString("latin1");
+      const data = b.subarray(at + 8, at + 8 + n);
+      expect([type, b.readUInt32BE(at + 8 + n)]).toEqual([type, Bun.hash.crc32(b.subarray(at + 4, at + 8 + n))]);
+      chunks.push({ type, data });
+      at += 12 + n;
+    }
+    const ihdr = chunks[0]!.data;
+    const [w, h] = [ihdr.readUInt32BE(0), ihdr.readUInt32BE(4)];
+    const raw = inflateSync(Buffer.concat(chunks.filter((c) => c.type === "IDAT").map((c) => c.data)));
+    return { types: chunks.map((c) => c.type), w, h, depth: ihdr[8], colour: ihdr[9], rawLength: raw.length };
+  };
+  test("a portrait post 1080 × 1350, a reply 1080 × 1080, a broadcast and a chart 1600 × 900: whole PNGs whose sizes match", () => {
+    for (const [id, w, h] of [["cap-post", 1080, 1350], ["cap-reply", 1080, 1080], ["cap-broadcast", 1600, 900], ["cap-chart", 1600, 900]] as const) {
+      const c = synthCapture(id);
+      expect([id, c.width, c.height]).toEqual([id, w, h]);
+      const p = readPng(c.src);
+      expect([id, p.types[0], p.types.at(-1), p.w, p.h, p.depth, p.colour, p.rawLength]).toEqual([id, "IHDR", "IEND", w, h, 8, 2, h * (w * 3 + 1)]);
+    }
+  });
+  test("each sample's captures are those pictures when asked for, and a dot otherwise", () => {
+    for (const k of ["a", "b", "c"] as const) {
+      const real = deckFixture(k, synthCapture).data.captures;
+      const dots = deckFixture(k).data.captures;
+      expect(Object.keys(real).length).toBeGreaterThan(0);
+      for (const [id, c] of Object.entries(real)) {
+        expect([k, id, c.width, c.height]).toEqual([k, id, synthCapture(id).width, synthCapture(id).height]);
+        expect([k, id, dots[id]!.width, dots[id]!.height]).toEqual([k, id, 1, 1]);
+      }
+    }
   });
 });

@@ -7,7 +7,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import type { InvestDailyCard, InvestOverview, InvestReport, InvestStagesDetail, ServerEvent } from "@pickle/protocol";
 import * as idb from "../src/invest/db.ts";
 import { writeLedger } from "../src/invest/ledger.ts";
-import { allowedNumbers, checkSentence, checkWords, claimReport, confidenceOf, etfGroups, highlightsOf, holidayNote, judgmentOf, NO_ETF, NO_EVENTS, NO_SCENARIOS, NO_SUMMARY, REPORT_NOTE, shortHead, stageToneOf } from "../src/invest/report.ts";
+import type { EventRow } from "../src/invest/events.ts";
+import { allowedNumbers, CARD_EVENTS_MAX, checkSentence, checkWords, claimReport, confidenceOf, etfGroups, eventLines, highlightsOf, holidayNote, judgmentOf, NO_ETF, NO_EVENTS, NO_SCENARIOS, NO_SUMMARY, REPORT_NOTE, shortHead, stageToneOf } from "../src/invest/report.ts";
 import type { ChatRequest } from "../src/meet.ts";
 import { makeInvestUpstream, syntheticBars } from "./fake-toss.ts";
 import { makeHarness, type Harness } from "./helpers.ts";
@@ -506,14 +507,14 @@ describe("D-1 rides on the report (team-lead 0747 7)", () => {
     expect(list.map((x) => x.card.type)).toEqual(["invest_daily"]);
     const c = card(list[0]);
     expect(c.events).toEqual({
-      head: "12월 2일 일정 4개",
+      head: "일정 4개",
       rows: [
         { title: "ADP 고용", value: "12월 2일 22:15(미 동부 08:15)" },
         { title: "ISM 서비스업", value: "12월 3일 00:00(미 동부 10:00)" },
         { title: "베이지북", value: "12월 3일 04:00(미 동부 14:00)" },
       ],
     });
-    expect(list[0]!.record.split("\n").at(-1)).toBe("12월 2일 일정 4개: ADP 고용 12월 2일 22:15(미 동부 08:15) / ISM 서비스업 12월 3일 00:00(미 동부 10:00) / 베이지북 12월 3일 04:00(미 동부 14:00)");
+    expect(list[0]!.record.split("\n").at(-1)).toBe("일정 4개: ADP 고용 12월 2일 22:15(미 동부 08:15) / ISM 서비스업 12월 3일 00:00(미 동부 10:00) / 베이지북 12월 3일 04:00(미 동부 14:00)");
     const claims = w.h.db.sql.query("SELECT title, via, message_id FROM invest_event_reminders ORDER BY title").all() as { title: string; via: string; message_id: string }[];
     expect(claims.map((r) => [r.via, r.message_id])).toEqual(Array(4).fill(["daily", list[0]!.id]));
     // later beats: nothing more (each D-1 once by any path)
@@ -521,6 +522,51 @@ describe("D-1 rides on the report (team-lead 0747 7)", () => {
     expect(w.cards(a)).toHaveLength(1);
     const rep = (await w.get<InvestReport>(a, `/api/invest/reports/${c.reportId}`)).body;
     expect(rep.sections[7]).toMatchObject({ rows: [{ title: "ADP 고용", when: "12월 2일 22:15(미 동부 08:15)", foot: "Federal Reserve · A" }, {}, {}, { title: "FOMC 의사록 공개", when: "미 동부 12월 2일 · 시각 미정" }] });
+  });
+
+  test("the head names no day (DD 2225 1): an event after the US close is the next KST day, said in its row only", async () => {
+    const w = await world();
+    const a = await w.person("alice");
+    w.h.clock.t = KST(2026, 12, 1, 7, 0);
+    expect((await w.h.req("POST", "/api/invest/events", { token: a.token, body: { ...FOMC, title: "장 마감 뒤 발표", time: "16:20" } })).status).toBe(201);
+    w.answers.push(GOOD);
+    await w.beat(EIGHT);
+    const list = w.cards(a);
+    expect(card(list[0]).events).toEqual({ head: "일정", rows: [{ title: "장 마감 뒤 발표", value: "12월 3일 06:20(미 동부 16:20)" }] });
+    expect(list[0]!.record.split("\n").at(-1)).toBe("일정: 장 마감 뒤 발표 12월 3일 06:20(미 동부 16:20)");
+
+    // two: counted although both rows show
+    const v = await world();
+    const b = await v.person("bob");
+    v.h.clock.t = KST(2026, 12, 1, 7, 0);
+    for (const o of [{ title: "ADP 고용", time: "08:15" }, { title: "장 마감 뒤 발표", time: "16:20" }]) {
+      expect((await v.h.req("POST", "/api/invest/events", { token: b.token, body: { ...FOMC, ...o } })).status).toBe(201);
+    }
+    v.answers.push(GOOD);
+    await v.beat(EIGHT);
+    expect(card(v.cards(b)[0]).events).toEqual({
+      head: "일정 2개",
+      rows: [
+        { title: "ADP 고용", value: "12월 2일 22:15(미 동부 08:15)" },
+        { title: "장 마감 뒤 발표", value: "12월 3일 06:20(미 동부 16:20)" },
+      ],
+    });
+  });
+
+  test("the head counts every event, the rows stop at three", () => {
+    const now = KST(2026, 12, 1, 8, 0);
+    const ev = (i: number): EventRow => ({
+      id: `e${i}`, user_id: "u", market: "US", day: "2026-12-02", time: `1${i}:00`, kind: "macro", title: `발표 ${i}`, symbol: null,
+      source: "Federal Reserve", source_tier: "T1", confidence: "A", url: null, author: "person", remind: 1, created_at: 0, updated_at: 0,
+      disc_source: null, disc_item: null,
+    });
+    expect(eventLines([], now)).toBeUndefined();
+    for (let n = 1; n <= 5; n++) {
+      const e = eventLines(Array.from({ length: n }, (_, i) => ev(i)), now)!;
+      expect([n, e.head, e.rows.length]).toEqual([n, n === 1 ? "일정" : `일정 ${n}개`, Math.min(n, CARD_EVENTS_MAX)]);
+      expect(e.head).not.toMatch(/월|\d+일/);
+    }
+    expect(eventLines([ev(6)], now)!.rows).toEqual([{ title: "발표 6", value: "12월 3일 06:00(미 동부 16:00)" }]);
   });
 
   test("while the report may still come the card waits, up to an hour past 08:00; then it goes on its own", async () => {

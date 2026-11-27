@@ -970,8 +970,10 @@ Code: `apps/server/src/invest/report.ts` (A13 · A15, DD 1935 §2-4, DD 0059 §2
   1일 08:00 · FRED · Yahoo(지연 시세)" (up to three sources named; four or more: two and "외 N곳").
 - **Push**: title alone "시장 위험 보고서 · 탈출 3단계" / "… · 탈출 최소 2단계" (the card's name, DD 0828 6), body "", tag
   `invest:report:<day>`.
-- **D-1**: for a person whose report goes out today the report carries the D-1 lines (`events {head "12월 2일 일정 4개",
-  rows ≤ 3 {title, value}}`) under the same claim (via `daily`), so no `invest_event` card goes for them. Until the
+- **D-1**: for a person whose report goes out today the report carries the D-1 lines (`events {head "일정 4개",
+  rows ≤ 3 {title, value}}`; one event: `일정`; from two, `일정 N개` with every one counted; no day in the head, DD 2225 1:
+  an event after the US close falls on the next KST day, so each row says its own, `12월 3일 06:20(미 동부 16:20)`)
+  under the same claim (via `daily`), so no `invest_event` card goes for them. Until the
   report is sent, and at most until 09:00 KST, the D-1 card waits; after that it goes on its own and the report carries
   no line of it.
 - **`overview.reports`**: the last three sent, newest first: `{id, title "12월 1일(화) · 탈출 3 · 회복 최소 1" (탈출 최소 N

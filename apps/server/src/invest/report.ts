@@ -583,12 +583,15 @@ export function assemble(b: Built, w: Words, events: InvestDailyCard["events"] |
   };
 }
 
-/** the D-1 lines on the card (team-lead 0056, 0747 7): 11월 28일 일정 (· 5개), three rows at most */
+/**
+ * the D-1 lines on the card (team-lead 0056, 0747 7; DD 2225 1): head 일정 for one event, 일정 N개 (every one counted)
+ * from two; three rows at most. No day in the head: an event after the US close falls on the next KST day, so each row
+ * says its own (11월 28일 06:20(미 동부 16:20)).
+ */
 export function eventLines(rows: readonly EventRow[], now: number): InvestDailyCard["events"] | undefined {
   if (!rows.length) return undefined;
-  const day = rows[0]!.day;
   return {
-    head: `${dayWords(day, now)} 일정${rows.length > CARD_EVENTS_MAX ? ` ${rows.length}개` : ""}`,
+    head: rows.length > 1 ? `일정 ${rows.length}개` : "일정",
     rows: rows.slice(0, CARD_EVENTS_MAX).map((r) => ({ title: eventHeading(r), value: eventWhen(r, now) })),
   };
 }

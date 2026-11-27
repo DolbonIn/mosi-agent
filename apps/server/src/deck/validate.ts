@@ -23,6 +23,30 @@ interface ModelText {
   max: number;
 }
 
+/** a condition id written in the model's words: A2, D1, R3 (never inside a longer word or number) */
+const COND_ID = /(?<![A-Za-z0-9])[ADR][1-8](?![0-9])/g;
+
+/**
+ * DD 1704 3: a gauges note names only the conditions that could bring the next stage — the unmet ones of the group its
+ * next line counts (stages.noteIds). A met one is on already, an unknown one may never be read, and another group's
+ * does not move that stage, so naming any of them leads the reader wrong.
+ */
+export function noteNames(note: string, focus: "escape" | "severe" | "recovery", st: NonNullable<DeckData["stages"]>): string[] {
+  const line = focus === "recovery" ? st.next.recovery : st.next.escape;
+  const allowed = new Set(focus === "recovery" ? st.noteIds.recovery : st.noteIds.escape);
+  const all = [...st.conditions.escape, ...st.conditions.severe, ...st.conditions.recovery];
+  const out: string[] = [];
+  for (const id of new Set(note.match(COND_ID) ?? [])) {
+    if (allowed.has(id)) continue;
+    const c = all.find((x) => x.id === id);
+    if (!c) out.push(`note가 부르는 ${id}는 없는 조건이에요`);
+    else if (c.status === "unknown") out.push(`note가 부르는 ${id}는 확인 불가라서 부르지 않아요`);
+    else if (c.status === "met") out.push(`note가 부르는 ${id}는 이미 충족이에요`);
+    else out.push(line ? `note가 부르는 ${id}는 다음 단계가 세는 조건이 아니에요(${line})` : `다음 단계 줄이 없어서 note가 조건(${id})을 부르지 않아요`);
+  }
+  return out;
+}
+
 /** every text the model wrote on a slide, with its limit (DD 1935 §5-2) */
 export function modelTexts(s: Slide): ModelText[] {
   const out: ModelText[] = [
@@ -190,6 +214,7 @@ export function validateDeck(spec: DeckSpec, data: DeckData): DeckFail[] {
       case "gauges":
         if (!data.stages) at("schema", "단계 데이터가 없어요");
         if (!["escape", "severe", "recovery"].includes(s.focus)) at("schema", "focus는 escape, severe, recovery 중 하나예요");
+        else if (data.stages) for (const f of noteNames(String(s.note ?? ""), s.focus, data.stages)) at("B2-note", f);
         break;
       case "issue+capture": {
         if (!count(s.captures, 1, 2)) at("schema", "captures는 1–2장이에요");

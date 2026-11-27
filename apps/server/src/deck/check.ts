@@ -2,7 +2,8 @@
  * The rendered-page check (DD 1935 §5-3, DD 0059 §6-2): what the JSON check cannot see, measured in the browser on the
  * laid-out pages. `pageCheck` runs inside the page (it is sent as its own source text, so it uses nothing from outside
  * itself); `PAGE_CHECK` is the expression to evaluate. Rule names are DD's: FA4-2, FA4-3, FA4-4, FA4-8, FA4-11 and
- * B2-hero64, B2-captures, B2-overlap, B2-clip, B2-levels, B2-disclaimer, B2-ofl.
+ * B2-hero64, B2-captures, B2-overlap, B2-clip, B2-levels, B2-disclaimer, B2-ofl; B2-value and B2-dot are DD 1704's,
+ * B2-next DD 1719's.
  */
 
 export interface DomFail {
@@ -174,6 +175,99 @@ export function pageCheck(o: PageCheckOptions): DomReport {
       }
       if (tops.length >= 5) fail("FA4-2", `표 칸이 ${tops.length}줄이에요(5줄 이상)`, td);
     }
+    // ---- B2-value: a gauges value breaks only between its pieces, and no piece is wider than its column (DD 1704 4)
+    for (const pc of page.querySelectorAll(".cond .val .pc")) {
+      const range = document.createRange();
+      range.selectNodeContents(pc);
+      const lines: number[] = [];
+      for (const r of range.getClientRects()) {
+        if (r.width < 0.5) continue;
+        const c = (r.top + r.bottom) / 2;
+        if (!lines.some((t) => Math.abs(t - c) < 4)) lines.push(c);
+      }
+      const say = (pc.textContent ?? "").trim();
+      if (lines.length > 1) fail("B2-value", `값 칸이 조각 안에서 줄이 바뀌어요: "${say}"`, pc);
+      const cell = pc.closest(".val")!.getBoundingClientRect();
+      const r = range.getBoundingClientRect();
+      if (r.left < cell.left - 0.5 || r.right > cell.right + 0.5) fail("B2-value", `값 조각이 칸보다 넓어요: "${say}"`, pc);
+    }
+    // ---- B2-dot: every U+00B7 in the narrow form, 0.30em at most less its letter-spacing; a word's dot never ends a line
+    // (DD 1704 5). The font's narrow form grows with the weight (0.28em at 400, 0.30 at 500, 0.34 at 800): in heavier
+    // text the bound is that weight's narrow form, measured here after a Latin letter, so only the wide form fails.
+    // In SVG the dot's room is from the end of the character before it to the start of the one after.
+    const narrowCache = new Map<string, number>();
+    const dotBound = (cs: CSSStyleDeclaration) => {
+      const key = `${cs.fontFamily}|${cs.fontWeight}|${cs.fontStretch}`;
+      let em = narrowCache.get(key);
+      if (em === undefined) {
+        const probe = document.createElement("span");
+        probe.style.cssText = `position:absolute;left:0;top:0;visibility:hidden;white-space:pre;letter-spacing:0;font-size:100px;font-family:${cs.fontFamily};font-weight:${cs.fontWeight};font-stretch:${cs.fontStretch}`;
+        probe.textContent = "A\u00b7A";
+        document.body.appendChild(probe);
+        const r = document.createRange();
+        r.setStart(probe.firstChild!, 1);
+        r.setEnd(probe.firstChild!, 2);
+        em = r.getBoundingClientRect().width / 100;
+        probe.remove();
+        narrowCache.set(key, em);
+      }
+      return Math.max(0.3, em + 0.01);
+    };
+    const lines = (el: Element) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const cs: number[] = [];
+      for (const r of range.getClientRects()) {
+        if (r.width < 0.5) continue;
+        const c = (r.top + r.bottom) / 2;
+        if (!cs.some((t) => Math.abs(t - c) < 4)) cs.push(c);
+      }
+      return cs.length;
+    };
+    const dotWalker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
+    const svgTexts = new Set<SVGTextContentElement>();
+    for (let node = dotWalker.nextNode(); node; node = dotWalker.nextNode()) {
+      const t = node.nodeValue ?? "";
+      if (!t.includes("\u00b7")) continue;
+      const el = node.parentElement!;
+      if (inSvg(el)) {
+        const te = el.closest("text") as SVGTextContentElement | null;
+        if (te) svgTexts.add(te);
+        continue;
+      }
+      const cs = getComputedStyle(el);
+      const fs = parseFloat(cs.fontSize);
+      const ls = parseFloat(cs.letterSpacing) || 0;
+      for (let i = 0; i < t.length; i++) {
+        if (t[i] !== "\u00b7") continue;
+        const range = document.createRange();
+        range.setStart(node, i);
+        range.setEnd(node, i + 1);
+        const em = (range.getBoundingClientRect().width - ls) / fs;
+        const max = dotBound(cs);
+        if (em > max) fail("B2-dot", `구분점 폭 ${em.toFixed(2)}em(${max.toFixed(2)}em까지)`, el);
+      }
+    }
+    for (const te of svgTexts) {
+      const s = (te.textContent ?? "").replace(/\s+/g, " ").trim();
+      const nc = te.getNumberOfChars();
+      if (nc !== s.length) continue;
+      const cs = getComputedStyle(te);
+      const fs = parseFloat(cs.fontSize);
+      const ls = parseFloat(cs.letterSpacing) || 0;
+      for (let i = 0; i < nc; i++) {
+        if (s[i] !== "\u00b7") continue;
+        const from = i > 0 ? te.getEndPositionOfChar(i - 1).x : te.getStartPositionOfChar(i).x;
+        const to = i + 1 < nc ? te.getStartPositionOfChar(i + 1).x : te.getEndPositionOfChar(i).x;
+        // the spaces beside a dot are their own characters: the room between them is the dot's
+        const em = (to - from - ls) / fs;
+        const max = dotBound(cs);
+        if (em > max) fail("B2-dot", `구분점 폭 ${em.toFixed(2)}em(${max.toFixed(2)}em까지)`, te);
+      }
+    }
+    for (const w of page.querySelectorAll(".nw")) if (lines(w) > 1) fail("B2-dot", `단어 안 구분점에서 줄이 바뀌어요: "${(w.textContent ?? "").trim()}"`, w);
+    // ---- B2-next: a next line breaks only between its clauses, after ": " and ", " (DD 1719 1)
+    for (const t of page.querySelectorAll(".next .tie")) if (lines(t) > 1) fail("B2-next", `다음 단계 줄이 조각 안에서 바뀌어요: "${(t.textContent ?? "").trim()}"`, t);
     // ---- FA4-3: pictures only as charts, captures, signal chips
     for (const el of page.querySelectorAll("svg, img")) {
       if (el.parentElement?.closest("svg")) continue;

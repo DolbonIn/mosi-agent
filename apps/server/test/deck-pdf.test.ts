@@ -12,7 +12,8 @@ import { CHROME_FLAGS, DEFAULT_CHROME, withChrome } from "../src/deck/chrome";
 import { DECK_FONT_FAMILY, fontFacts, fontFileSrc, judgeFont, loadDeckFont, NO_FONT_FAIL, NO_FONT_ROW, type DeckFont } from "../src/deck/font";
 import { deckCss, FA3, FONT_LICENCE, LOCAL_FONT_SRC } from "../src/deck";
 import { DISCLAIMER } from "@pickle/quant";
-import { deckFixture } from "./deck-fixtures";
+import { narrowDots } from "../src/deck/text";
+import { deckFixture, synthCapture } from "./deck-fixtures";
 
 const CHROME = process.env.PICKLE_DECK_CHROME || DEFAULT_CHROME;
 const HAS_CHROME = existsSync(CHROME);
@@ -356,13 +357,78 @@ describe.skipIf(!HAS_CHROME || !FONT_PATH)("the licence line with the deck's fon
   );
 });
 
+describe.skipIf(!HAS_CHROME)("the value, next-line and word-dot checks, which need no font (DD 1704 4, 5; DD 1719 1)", () => {
+  const at = (top: number, html: string) => `<div style="position:absolute;left:64px;top:${top}px;width:700px">${html}</div>`;
+  test(
+    "a value piece that breaks inside or is wider than its column fails, a next line's clause that breaks inside, a word's dot that ends a line; pieces that fit pass",
+    async () => {
+      const row = (val: string, pcs: string) => `<div class="gg-list" style="position:static;--val:${val}"><div class="cond"><span class="chip">충족</span><span class="rule t-table">규칙</span><span class="val t-table">${pcs}</span></div></div>`;
+      const r = await checkHtml(
+        doc([
+          section(
+            1,
+            "table",
+            at(120, row("176px", '<span class="pc">VIX 27.40 ·</span> <span class="pc">2일째</span>')) +
+              at(180, row("60px", '<span class="pc">VIX 27.40 ·</span> <span class="pc">2일째</span>')) +
+              at(240, row("60px", '<span class="pc" style="white-space:normal">하이일드 3.20%p</span>')) +
+              at(300, '<p class="next t-body" style="width:90px"><span class="tie" style="white-space:normal">회복 신호 2개 더,</span> <span class="tie">R3 켜짐</span></p>') +
+              '<div style="position:absolute;left:64px;top:400px;width:40px;word-break:keep-all;font-size:16px"><span class="nw" style="white-space:normal">탈출<span class="dot">·</span>회복<span class="dot">·</span>지표</span></div>',
+          ),
+        ]),
+      );
+      expect(r.fails.filter((f) => f.rule === "B2-value").map((f) => f.what)).toEqual(['값 조각이 칸보다 넓어요: "VIX 27.40 ·"', '값 칸이 조각 안에서 줄이 바뀌어요: "하이일드 3.20%p"']);
+      expect(r.fails.filter((f) => f.rule === "B2-next").map((f) => f.what)).toEqual(['다음 단계 줄이 조각 안에서 바뀌어요: "회복 신호 2개 더,"']);
+      expect(r.fails.filter((f) => f.rule === "B2-dot" && f.what.startsWith("단어 안")).map((f) => f.what)).toEqual(['단어 안 구분점에서 줄이 바뀌어요: "탈출·회복·지표"']);
+    },
+    60_000,
+  );
+  test(
+    "a footer's dot spans stay in its line: only the footer's own two spans are placed (.foot > span)",
+    async () => {
+      const r = await checkHtml(doc([section(1, "table", "", narrowDots("<b>출처: FRED · 판정 규칙 · 기준 2026-11-27 08:00 KST</b>").slice(3, -4))]));
+      expect(r.fails.filter((f) => f.rule === "B2-overlap" || f.rule === "B2-clip")).toEqual([]);
+      expect(narrowDots("<b>출처: FRED · 판정 규칙</b>")).toContain('<span class="dot">·</span>');
+    },
+    60_000,
+  );
+});
+
+describe.skipIf(!HAS_CHROME || !FONT_PATH)("the dot widths with the deck's font (DD 1704 5)", () => {
+  const at = (top: number, html: string) => `<div style="position:absolute;left:64px;top:${top}px;width:700px">${html}</div>`;
+  test(
+    "a wide U+00B7 fails at its weight's bound; the narrowed ones pass, in HTML and in SVG",
+    async () => {
+      const page = doc([
+        section(
+          1,
+          "table",
+          [
+            at(120, '<p class="t-body">위험 · 경계</p>'),
+            at(160, narrowDots('<p class="t-body">위험 · 경계, 탈출·회복</p>')),
+            at(200, '<p style="font-weight:800;font-size:17px">지표 · 위험</p>'),
+            at(240, narrowDots('<p style="font-weight:800;font-size:17px;letter-spacing:2.2px">지표 · 위험</p>')),
+          ].join(""),
+        ),
+        section(2, "table", at(120, '<svg width="400" height="60"><text x="0" y="20" font-size="15">단위 · 합성</text></svg>') + at(220, narrowDots('<svg width="400" height="60"><text x="0" y="20" font-size="15">단위 · 합성 · KRX</text><text x="0" y="44" font-size="15" font-weight="700">선물·옵션</text></svg>'))),
+      ]).replace(`src:${LOCAL_FONT_SRC}`, `src:${fontFileSrc(FONT_PATH!)}`);
+      const r = await checkHtml(page);
+      const dot = (n: number) => r.fails.filter((f) => f.n === n && f.rule === "B2-dot").map((f) => f.what);
+      // 0.56em: the wide form at 400; 0.60em at 800, whose narrow form (0.34em) sets the bound
+      expect(dot(1)).toEqual(["구분점 폭 0.56em(0.30em까지)", "구분점 폭 0.60em(0.35em까지)"]);
+      expect(dot(2)).toEqual(["구분점 폭 0.56em(0.30em까지)"]);
+    },
+    60_000,
+  );
+});
+
 describe.skipIf(!HAS_CHROME || !FONT_PATH)("the three samples, built (DD 0059 §6-1)", () => {
   for (const k of ["a", "b", "c"] as const) {
     test(
       `(${k}) PDF pages = slides, every check passes, the archived page names no file`,
       async () => {
         const font = await loadDeckFont(FONT_PATH);
-        const { spec, data } = deckFixture(k);
+        // the samples carry pictures at real capture shapes (DD 1704 6)
+        const { spec, data } = deckFixture(k, synthCapture);
         const r: DeckBuild = await buildDeck(spec, data, { name: `fixture-${k}`, font, chrome: CHROME, generatedAt: "2026-11-26T23:12:00.000Z" });
         if (!r.ok) throw new Error(`refused: ${r.reason} ${JSON.stringify(r.check?.perSlide.filter((s) => s.fails.length))} ${JSON.stringify(r.check?.deckFails)}`);
         expect(r.check.slides).toBe(spec.slides.length);

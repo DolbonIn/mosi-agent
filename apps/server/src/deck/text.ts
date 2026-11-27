@@ -159,3 +159,56 @@ export function lintModelText(text: string): TextFault[] {
 
 /** a sentence the slide carries (FA4 #1 counts those over 40 characters) */
 export const isSentence = (s: string) => /(요|다|음|함|임)[.]?$/.test(s.trim()) || /[.?]$/.test(s.trim());
+
+/** how far an SVG dot is pulled in on each side: the wide form (0.56em) less the narrow one (0.28em), halved */
+export const DOT_PULL_EM = 0.14;
+
+/**
+ * DD 1704 5: U+00B7 has two forms in the deck's font. After Hangul, or where nothing strong comes before it, Chrome
+ * draws the wide one (0.56em); after a Latin letter, the narrow one (0.28em). Every dot is drawn narrow:
+ * - HTML: the dot is an inline-block of its own, which Chrome draws in the narrow form. A dot inside a word (탈출·회복)
+ *   keeps its word whole in a nowrap span, since under keep-all an inline-block opens a break on each side.
+ * - SVG: an inline-block cannot be used, so the dot is held to the wide form (.dot sets locl off) and pulled in by
+ *   DOT_PULL_EM on each side: it is drawn, and the next character starts, where the narrow form would put them.
+ * Tags, their attributes and <style> are left as they are; only the text between tags changes.
+ */
+export function narrowDots(html: string): string {
+  let svg = 0;
+  let text = 0;
+  let style = false;
+  let pull = false;
+  const pulled = (s: string) => `<tspan dx="-${DOT_PULL_EM}em">${s}</tspan>`;
+  return html.replace(/<[^>]*>|[^<]+/g, (tok) => {
+    if (tok.startsWith("<")) {
+      const m = /^<(\/?)([a-zA-Z]+)/.exec(tok);
+      if (m) {
+        const close = m[1] === "/";
+        const name = m[2]!.toLowerCase();
+        if (name === "svg" && !tok.endsWith("/>")) svg += close ? -1 : 1;
+        else if (name === "text" && svg) {
+          text += close ? -1 : 1;
+          pull = false;
+        } else if (name === "style") style = !close;
+      }
+      return tok;
+    }
+    if (style || (!tok.includes("·") && !pull)) return tok;
+    if (svg) {
+      if (!text) return tok;
+      // an entity is one character: &amp; is pulled whole
+      return tok.replace(/&#?\w+;|[\s\S]/gu, (ch) => {
+        if (ch === "·") {
+          pull = true;
+          return `<tspan class="dot" dx="-${DOT_PULL_EM}em">·</tspan>`;
+        }
+        if (!pull) return ch;
+        pull = false;
+        return pulled(ch);
+      });
+    }
+    return tok.replace(/[^\s]*·[^\s]*/g, (w) => {
+      const dots = w.replace(/·/g, '<span class="dot">·</span>');
+      return w === "·" ? dots : `<span class="nw">${dots}</span>`;
+    });
+  });
+}

@@ -30,9 +30,9 @@ import {
   type Tri,
 } from "@pickle/quant";
 import { deckCss, FA3 } from "./style";
-import { esc, figureParts, figureText, fill, REF_RE } from "./text";
+import { esc, figureParts, figureText, fill, narrowDots, REF_RE } from "./text";
 import { presentCaptures } from "./validate";
-import type { DeckData, DeckFigure, DeckSpec, Slide, TableSlide } from "./types";
+import type { DeckData, DeckFigure, DeckSpec, DeckStageHead, Slide, TableSlide } from "./types";
 
 export const PAGE_W = 1280;
 export const PAGE_H = 720;
@@ -129,6 +129,34 @@ function gaugeBlock(kind: GaugeKind, g: { met: number; unknown: number; of: numb
   return mode === "row" ? `<div class="gauge row"${label}>${name}${viz}${count}${unk}</div>` : `<div class="gauge"${label}><div class="h">${name}${unk}${count}</div>${viz}</div>`;
 }
 
+/** a gauges value cell's column: 176 px, wider for a piece that needs it, never past what leaves the rule room */
+/**
+ * A next line breaks only between its clauses — after ": " and ", " (DD 1719 1) — never inside one: the card is narrow,
+ * and "심각 / 신호 1개 덜" would break the gauge's name. A clause keeps its comma.
+ */
+export function nextLineHtml(line: string): string {
+  const i = line.indexOf(": ");
+  const head = i < 0 ? [] : [line.slice(0, i + 1)];
+  const body = (i < 0 ? line : line.slice(i + 2)).split(", ");
+  const parts = [...head, ...body.map((c, k) => (k < body.length - 1 ? `${c},` : c))];
+  return parts.map((p) => `<span class="tie">${esc(p)}</span>`).join(" ");
+}
+
+export const VAL_MIN = 176;
+export const VAL_MAX = 300;
+
+/** a value's pieces, each kept whole: "3.92%p ·" and "6개월 최저보다 +0.77%p" (the dot stays with the piece before it) */
+export function valuePieces(v: string): string[] {
+  const ps = v.split(" · ");
+  return ps.map((p, i) => (i < ps.length - 1 ? `${p} ·` : p));
+}
+
+/** a stage as the 투자 screen says it: 탈출 2단계 with its name beside, and the pending line under it (DD 0426 §1) */
+function stageHead(h: DeckStageHead, which: "escape" | "recovery"): string {
+  const name = h.name ? ` <span class="sb-sname">${esc(h.name)}</span>` : "";
+  return `<div class="sb-stage" data-stage="${which}">${esc(h.text)}${name}</div>${h.pending ? `<p class="sb-pend t-body">${esc(h.pending)}</p>` : ""}`;
+}
+
 /** the roe-pbr methods as horizontal bars, with its axis, unit, as of and source (FA4 #8) */
 export function methodBars(methods: readonly { name: string; value: number }[], o: { width: number; height: number; unit: string; digits: number; caption: string }): string {
   const { width: W, height: H } = o;
@@ -223,18 +251,21 @@ function body(c: Ctx, s: Slide, n: number): string {
       const st = d.stages!;
       st.sources.forEach((x) => c.sources.add(x));
       const moved = st.moved ? `<div class="sb-moved t-body"><mark class="hl">${esc(st.moved)}</mark></div>` : "";
-      return `<div class="sb-l"><div class="sb-name t-body">탈출 단계</div><div class="sb-stage">${esc(st.escape.label)}</div>${moved}<div class="sb-name t-body">회복 단계</div><div class="sb-stage">${esc(st.recovery.label)}</div><div class="sb-name t-body">시나리오</div><div class="sb-scen">${esc(st.scenario)}</div></div><div class="sb-r">${gaugeBlock("escape", st.escape.gauges.a, "row")}${gaugeBlock("severe", st.escape.gauges.d, "row")}${gaugeBlock("recovery", st.recovery.gauge, "row")}<p class="sb-note t-body">${c.t(s.note)}</p></div>`;
+      return `<div class="sb-l">${stageHead(st.escape.head, "escape")}${moved}${stageHead(st.recovery.head, "recovery")}<div class="sb-name t-body">시나리오</div><div class="sb-scen">${esc(st.scenario)}</div></div><div class="sb-r">${gaugeBlock("escape", st.escape.gauges.a, "row")}${gaugeBlock("severe", st.escape.gauges.d, "row")}${gaugeBlock("recovery", st.recovery.gauge, "row")}<p class="sb-note t-body">${c.t(s.note)}</p></div>`;
     }
     case "gauges": {
       const st = d.stages!;
       st.sources.forEach((x) => c.sources.add(x));
       const list = st.conditions[s.focus];
       const tone = s.focus === "recovery" ? "normal" : "risk";
+      // DD 1704 4: a value breaks only after its " · ", never inside a piece; the column is as wide as its widest piece
+      const valW = Math.min(VAL_MAX, Math.max(VAL_MIN, Math.ceil(Math.max(0, ...list.flatMap((k) => valuePieces(k.value).map((p) => textW(p, 15)))) + 6)));
       const rows = list
-        .map((k) => `<div class="cond" data-cond="${esc(k.id)}">${triChip(k.status, tone)}<span class="rule t-table">${esc(k.id)} ${esc(k.rule)}</span><span class="val t-table">${esc(k.value)}</span></div>`)
+        .map((k) => `<div class="cond" data-cond="${esc(k.id)}">${triChip(k.status, tone)}<span class="rule t-table">${esc(k.id)} ${esc(k.rule)}</span><span class="val t-table">${valuePieces(k.value).map((p) => `<span class="pc">${esc(p)}</span>`).join(" ")}</span></div>`)
         .join("");
       const next = s.focus === "recovery" ? st.next.recovery : st.next.escape;
-      return `<div class="gg-list">${rows}</div><div class="gg-side">${gaugeBlock("escape", st.escape.gauges.a, "stack")}${gaugeBlock("severe", st.escape.gauges.d, "stack")}${gaugeBlock("recovery", st.recovery.gauge, "stack")}<div class="card"><div class="t">다음 단계까지</div><p class="next t-body">${esc(next)}</p><p class="note t-body">${c.t(s.note)}</p></div></div>`;
+      // DD 1704 2: the card's title is 다음 단계 (the line itself says 까지), and a null line is left out
+      return `<div class="gg-list" style="--val:${valW}px">${rows}</div><div class="gg-side">${gaugeBlock("escape", st.escape.gauges.a, "stack")}${gaugeBlock("severe", st.escape.gauges.d, "stack")}${gaugeBlock("recovery", st.recovery.gauge, "stack")}<div class="card"><div class="t">다음 단계</div>${next ? `<p class="next t-body">${nextLineHtml(next)}</p>` : ""}<p class="note t-body">${c.t(s.note)}</p></div></div>`;
     }
     case "issue+capture": {
       const caps = presentCaptures(s, d)
@@ -419,7 +450,7 @@ export function renderSlide(spec: DeckSpec, data: DeckData, s: Slide, n: number,
   const names = [...new Set([...c.sources].map((x) => (x.startsWith("capture:") ? (data.captures[x.slice(8)]?.outlet ?? x.slice(8)) : c.srcName(x))))];
   const left = s.kind === "disclaimer" ? FONT_LICENCE : footLeft(c, [...new Set(names)]);
   const foot = `<footer class="foot"><span class="l" data-role="foot-left">${esc(left)}</span><span class="r" data-role="page-no">${n} / ${total}</span></footer>`;
-  return `<section class="page" data-n="${n}" data-kind="${s.kind}">${tabs}${main}${foot}</section>`;
+  return narrowDots(`<section class="page" data-n="${n}" data-kind="${s.kind}">${tabs}${main}${foot}</section>`);
 }
 
 export function renderDeck(spec: DeckSpec, data: DeckData, opts: RenderOptions = {}): string {

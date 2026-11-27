@@ -200,6 +200,13 @@ export interface DeckFigure {
   conflict?: { value: number; source: string };
 }
 
+/** a stage as the 투자 screen says it (escapeHead, recoveryHead): 탈출 2단계 and 경계, or 탈출 최소 2단계 and why */
+export interface DeckStageHead {
+  text: string;
+  name?: string;
+  pending?: string;
+}
+
 export interface DeckCondition {
   id: string;
   rule: string;
@@ -236,16 +243,19 @@ export interface DeckData {
   sources: Record<string, DeckSource>;
   captures: Record<string, DeckCapture>;
   core11?: { items: Grid11Item[]; sources: string[] };
+  /** the stage cell, from the day's reading by stages.ts (deckStages): heads, gauges and next lines are the 투자 screen's */
   stages?: {
-    escape: { label: string; gauges: { a: { met: number; unknown: number; of: 8 }; d: { met: number; unknown: number; of: 5 } } };
-    recovery: { label: string; gauge: { met: number; unknown: number; of: 6 } };
+    escape: { head: DeckStageHead; gauges: { a: { met: number; unknown: number; of: 8 }; d: { met: number; unknown: number; of: 5 } } };
+    recovery: { head: DeckStageHead; gauge: { met: number; unknown: number; of: 6 } };
     /** the scenario word: A 연착륙 · B 둔화 · C 침체 */
     scenario: string;
     /** a stage that moved since the last report: "탈출 2단계 → 3단계" (drawn as the slide's highlighted line) */
     moved?: string;
     conditions: { escape: DeckCondition[]; severe: DeckCondition[]; recovery: DeckCondition[] };
-    /** the server's sentence: what the next stage still needs */
-    next: { escape: string; recovery: string };
+    /** what the next stage up still needs: the app's nextLines, word for word; null when it names none */
+    next: { escape: string | null; recovery: string | null };
+    /** the condition ids a gauges note may name: the unmet ones of the group its next line counts (A, D or R) */
+    noteIds: { escape: string[]; recovery: string[] };
     sources: string[];
   };
   flows?: Record<
