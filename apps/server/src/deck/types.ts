@@ -185,8 +185,8 @@ export interface DeckSource {
 /** a figure the server computed; null is 확인 불가 (A1), never 0 */
 export interface DeckFigure {
   value: number | null;
-  /** pm: an expected move, ±2.0% */
-  format: "usd" | "krw" | "index" | "rate" | "pct" | "pp" | "count" | "multiple" | "pm";
+  /** pm: an expected move, ±2.0%; spread: a spread's level, 3.76%p (pp is a change, +0.12%p) */
+  format: "usd" | "krw" | "index" | "rate" | "pct" | "pp" | "spread" | "count" | "multiple" | "pm";
   digits?: number;
   /** count: the unit written after the number (조, 억원, 명) */
   unit?: string;
@@ -275,8 +275,11 @@ export interface DeckData {
       sources: string[];
     }
   >;
-  events?: { list: TimelineEvent[]; asOf: string; source: string; sources: string[] };
+  events?: { list: DeckEvent[]; asOf: string; source: string; sources: string[] };
 }
+
+/** an event on the timeline: its amplitude is a figure (a key of figures), written as figureText writes any figure */
+export type DeckEvent = Omit<TimelineEvent, "amplitude"> & { amplitudeRef?: string };
 
 /** a broken rule: where, which rule (FA4-n, B2-…, schema, limit), and what, in words the model can act on */
 export interface DeckFail {

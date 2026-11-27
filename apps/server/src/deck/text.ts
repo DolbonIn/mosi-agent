@@ -36,6 +36,10 @@ export function figureParts(f: DeckFigure): { pre: string; main: string; post: s
     case "pp":
       main = pp(v, d ?? 2);
       break;
+    case "spread":
+      // a spread's level is a difference too, written %p, without a sign of its own (DD 1520)
+      main = `${num(v, d ?? 2)}%p`;
+      break;
     case "count":
       main = `${num(v, d ?? 0)}${f.unit ?? ""}`;
       break;
@@ -131,7 +135,7 @@ const ALLOWED_DIGITS: readonly RegExp[] = [
 const ADVERBS = ["매우", "엄청", "굉장히", "정말", "극도로", "완전히", "폭발적", "역대급"];
 const HYPE = ["혁신적", "게임체인저", "획기적", "압도적", "판도를 바꿀"];
 /** DD 1935 §0-6: no recommendation, no promise */
-const ADVICE = ["사세요", "파세요", "매수하세요", "매도하세요", "기회예요", "기회입니다", "지금이 기회", "꼭 사", "꼭 팔"];
+const ADVICE = ["사세요", "파세요", "매수하세요", "매도하세요", "기회예요", "기회입니다", "지금이 기회", "꼭 사", "꼭 팔", "할 때예요", "할 때입니다"];
 
 export interface TextFault {
   rule: string;

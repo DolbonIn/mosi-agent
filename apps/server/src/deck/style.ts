@@ -55,7 +55,7 @@ h1,h2,p{margin:0}
 .headline{position:absolute;left:64px;top:118px;width:1152px;font-size:50px;font-weight:900;letter-spacing:-2.3px;line-height:1.1;color:${c.ink}}
 .body{position:absolute;left:64px;top:240px;width:1152px;height:416px}
 .foot{position:absolute;left:64px;top:676px;width:1152px;height:44px;border-top:1.5px solid ${c.rule}}
-.foot span{position:absolute;top:8px;font-size:14px;line-height:18px;color:${c.foot};white-space:nowrap;letter-spacing:-.2px}
+.foot span{position:absolute;top:9px;font-size:14px;line-height:18px;color:${c.foot};white-space:nowrap;letter-spacing:-.2px}
 .foot .l{left:0}.foot .r{right:0}
 .t-body{font-size:19px;line-height:1.42;letter-spacing:-.3px}
 .t-table{font-size:15px}
@@ -76,7 +76,6 @@ mark.hl{background:${c.marker};color:inherit;padding:0 .08em;-webkit-box-decorat
 .hero .k{font-size:17px;font-weight:800;letter-spacing:2.2px;line-height:20px;color:${c.mute}}
 .hero h1{margin-top:22px;font-size:72px;font-weight:900;letter-spacing:-3.4px;line-height:1.1;color:${c.ink}}
 .hero .lead{margin-top:28px;width:1000px;font-size:25px;font-weight:500;letter-spacing:-.6px;line-height:1.5;color:${c.ink2}}
-.hero-asof{position:absolute;left:64px;top:604px;font-size:19px;font-weight:500;letter-spacing:-.3px;color:${c.ink3}}
 /* numbers3 */
 .n3{display:grid;grid-template-columns:repeat(3,368px);column-gap:24px;padding-top:28px}
 .n3c{border-top:2px solid ${c.ink};padding-top:22px}

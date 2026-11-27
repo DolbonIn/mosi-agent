@@ -235,7 +235,8 @@ function judge3(hy?: readonly Point[]): Judgment {
     above35: f.now.v >= 3.5,
     above40: f.now.v >= 4.0,
   };
-  const line = `${fmt(f.now.v)}% − 6개월 최저 ${fmt(f.low6m)}% = ${sgn(f.fromLow)}%p`;
+  // a spread's level is %p wherever it is said, unsigned (DD 1520, DD 1539)
+  const line = `${fmt(f.now.v)}%p − 6개월 최저 ${fmt(f.low6m)}%p = ${sgn(f.fromLow)}%p`;
   if (f.fromLow >= risk) return judged(3, "risk", f.fromLow, f.now.t, `${line} ≥ +0.5%p`, extras);
   if (f.fromLow >= caution) return judged(3, "caution", f.fromLow, f.now.t, `${line} (+0.3~0.5%p)`, extras);
   return judged(3, "normal", f.fromLow, f.now.t, `${line} < +0.3%p`, extras);

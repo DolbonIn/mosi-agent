@@ -60,6 +60,13 @@ describe("each indicator at its boundary", () => {
     // 2.8 − 2.5 in floats is 0.2999…
     expect(one({ hy: series(["2026-05-01", 2.6], ["2026-10-01", 2.5], ["2026-11-24", 2.8]) }, 3).signal).toBe("caution");
   });
+  test("3 · the reason says the spread's levels in %p, unsigned, and the gap signed (DD 1539)", () => {
+    const base = [{ t: "2026-04-20", v: 3.0 }, { t: "2026-06-01", v: 3.52 }, { t: "2026-09-01", v: 3.7 }];
+    const at = (v: number) => one({ hy: [...base, { t: "2026-11-24", v }] }, 3).reason;
+    expect(at(4.02)).toBe("4.02%p − 6개월 최저 3.52%p = +0.50%p ≥ +0.5%p");
+    expect(at(3.82)).toBe("3.82%p − 6개월 최저 3.52%p = +0.30%p (+0.3~0.5%p)");
+    expect(at(3.52)).toBe("3.52%p − 6개월 최저 3.52%p = 0.00%p < +0.3%p");
+  });
   test("3 · the 6-month window starts after the same day six months before", () => {
     // 2026-05-24 is exactly six months before 11-24: outside (but it shows the series reaches back); 05-25 inside
     expect(one({ hy: [{ t: "2026-05-24", v: 2.0 }, { t: "2026-11-24", v: 2.4 }] }, 3).extras.low6m).toBe(2.4);

@@ -48,6 +48,8 @@ export function kstStamp(ms: number): string {
 }
 
 const kstDay = (ms: number) => new Date(ms + 9 * 3_600_000).toISOString().slice(0, 10);
+/** 2026-11-25 → 11/25 */
+export const shortDay = (day: string) => `${Number(day.slice(5, 7))}/${Number(day.slice(8, 10))}`;
 
 export interface RenderOptions {
   /** the CSS src of the font: url("file:///…/NotoSansKR-VF.ttf") format("truetype") for the PDF pass; the archived
@@ -80,12 +82,12 @@ class Ctx {
   srcName(id: string): string {
     return this.data.sources[id]?.name ?? id;
   }
-  /** "FRED · A", with "11-25 기준" when the figure's day is not the deck's */
+  /** "FRED · A", with "11/25 기준" when the figure's day is not the deck's (the deck's short date is M/D, DD 1935 §4) */
   figureBasis(f: DeckFigure): string {
     const s = this.data.sources[f.source];
     const parts = [s?.name ?? f.source, s?.grade ?? ""].filter(Boolean);
     const day = f.asOf.slice(0, 10);
-    if (day !== kstDay(this.data.asOf)) parts.push(`${day.slice(5)} 기준`);
+    if (day !== kstDay(this.data.asOf)) parts.push(`${shortDay(day)} 기준`);
     return parts.join(" · ");
   }
   /** a conflicting figure, written beside (B-2): 다른 출처 4.51% · Bloomberg */
@@ -242,7 +244,7 @@ function body(c: Ctx, s: Slide, n: number): string {
           return `<figure class="cap" data-capture="${esc(cp.assetId)}" style="margin:0"><div class="frame"><img src="${esc(a.src)}" width="${a.width}" height="${a.height}" alt="${esc(fill(cp.caption, d.figures, c.words).plain)}" data-viz="capture" data-url="${esc(a.url)}"></div><figcaption class="cc">${c.t(cp.caption)}</figcaption><div class="cm">${esc(meta)}</div></figure>`;
         })
         .join("");
-      for (const cp of presentCaptures(s, d)) c.sources.add(`capture:${d.captures[cp.assetId]!.outlet}`);
+      for (const cp of presentCaptures(s, d)) c.sources.add(`capture:${cp.assetId}`);
       const pts = s.points.map((p) => `<div class="pt card"><div class="lab"><span>${c.t(p.label)}</span><span>${esc(p.grade)}</span></div><p class="txt t-body">${c.t(p.text)}</p></div>`).join("");
       return `<div class="cap-l">${caps}</div><div class="cap-r">${pts}</div>`;
     }
@@ -291,8 +293,12 @@ function body(c: Ctx, s: Slide, n: number): string {
     case "timeline": {
       const ev = d.events!;
       ev.sources.forEach((x) => c.sources.add(x));
-      const t = timelineSvg({ events: ev.list, summary: s.headline, asOf: ev.asOf, source: ev.source }, DECK_BOARD);
-      return `<div class="viz" data-viz="chart" data-issues="${t.issues.length}">${t.svg}</div>`;
+      const list = ev.list.map(({ amplitudeRef, ...e }) => {
+        const a = amplitudeRef ? c.useFigure(amplitudeRef) : null;
+        return { ...e, amplitude: a ? figureText(a) : null };
+      });
+      const t = timelineSvg({ events: list, summary: s.headline, asOf: ev.asOf, source: ev.source }, DECK_BOARD);
+      return `<div class="viz" data-viz="timeline" data-issues="${t.issues.length}">${t.svg}</div>`;
     }
     case "risks": {
       const k = s.items.length;
@@ -312,12 +318,22 @@ function body(c: Ctx, s: Slide, n: number): string {
         .map((r) => `<tr><td class="t-table">${c.t(r.if)}</td><td class="t-table">${c.t(r.then)}</td><td class="t-table">${c.t(r.basis)}</td></tr>`)
         .join("")}</tbody></table>`;
     case "sources": {
-      const used = usedSources(c.spec, d);
+      // each line starts with the name the footers use, so a footer's name is found here (DD 1509 1); captures too
+      const all = used(c.spec, d);
+      const line = (x: string): { grade: string; text: string } => {
+        if (x.startsWith("capture:")) {
+          const a = d.captures[x.slice(8)]!;
+          return { grade: a.grade, text: [a.outlet, a.account, `캡처 ${kst(a.capturedAt)}`, a.url].filter(Boolean).join(" · ") };
+        }
+        const v = d.sources[x]!;
+        return { grade: v.grade, text: [v.name, v.title, v.publisher, v.date, v.url].join(" · ") };
+      };
+      const lines = all.map(line);
       const groups = (["A", "B+", "B", "C"] as const)
         .map((g) => {
-          const items = used.filter((x) => d.sources[x]?.grade === g).map((x) => d.sources[x]!);
+          const items = lines.filter((x) => x.grade === g);
           if (!items.length) return "";
-          return `<div class="src-g"><h2>등급 ${g}</h2><ol>${items.map((x) => `<li>${esc([x.title, x.publisher, x.date, x.url].join(" · "))}</li>`).join("")}</ol></div>`;
+          return `<div class="src-g"><h2>등급 ${g}</h2><ol>${items.map((x) => `<li>${esc(x.text)}</li>`).join("")}</ol></div>`;
         })
         .join("");
       return `<div class="src-cols">${groups}</div>`;
@@ -331,13 +347,18 @@ function body(c: Ctx, s: Slide, n: number): string {
 
 /** every source the deck's pages use, in first-use order (the sources page lists them by grade) */
 export function usedSources(spec: DeckSpec, data: DeckData): string[] {
+  return used(spec, data).filter((x) => !x.startsWith("capture:"));
+}
+
+/** every source and capture ("capture:<id>") the deck's pages draw on, in the order they first appear */
+function used(spec: DeckSpec, data: DeckData): string[] {
   const seen = new Set<string>();
   for (const s of spec.slides) {
     if (s.kind === "sources" || s.kind === "disclaimer") continue;
     const c = new Ctx(spec, data);
     body(c, s, 0);
     renderTexts(c, s);
-    for (const x of c.sources) if (!x.startsWith("capture:") && data.sources[x]) seen.add(x);
+    for (const x of c.sources) if (x.startsWith("capture:") ? data.captures[x.slice(8)] : data.sources[x]) seen.add(x);
   }
   return [...seen];
 }
@@ -386,7 +407,7 @@ export function renderSlide(spec: DeckSpec, data: DeckData, s: Slide, n: number,
     const k = c.t(s.kicker);
     const h = withHighlight(c.t(s.headline), s.headline.includes(s.highlight ?? "\u0000") ? s.highlight : undefined, !!s.mark);
     const l = withHighlight(c.t(s.lead), !s.headline.includes(s.highlight ?? "\u0000") ? s.highlight : undefined, !!s.mark);
-    main = `<div class="hero"><div class="k">${k}</div><h1>${h}</h1><p class="lead">${l}</p></div><div class="hero-asof">데이터 기준 ${esc(kstStamp(data.asOf))}</div>`;
+    main = `<div class="hero"><div class="k">${k}</div><h1>${h}</h1><p class="lead">${l}</p></div>`;
   } else if (s.kind === "disclaimer") {
     const t = renderTexts(c, s);
     main = `<div class="kicker">${t.kicker}</div><h2 class="headline">${t.headline}</h2><div class="dc"><p data-role="disclaimer">${esc(DISCLAIMER)}</p>${s.playbook ? `<p data-role="disclaimer-playbook">${esc(DISCLAIMER_PLAYBOOK)}</p>` : ""}<p class="when">생성 ${esc(kstStamp(data.generatedAt))} · 데이터 기준 ${esc(kstStamp(data.asOf))}</p></div>`;
@@ -394,7 +415,8 @@ export function renderSlide(spec: DeckSpec, data: DeckData, s: Slide, n: number,
     const t = renderTexts(c, s);
     main = `<div class="kicker">${t.kicker}</div><h2 class="headline">${t.headline}</h2><div class="body">${body(c, s, n)}</div>`;
   }
-  const names = [...c.sources].map((x) => (x.startsWith("capture:") ? x.slice(8) : c.srcName(x)));
+  // a capture is named by its outlet; two captures from one outlet name it once
+  const names = [...new Set([...c.sources].map((x) => (x.startsWith("capture:") ? (data.captures[x.slice(8)]?.outlet ?? x.slice(8)) : c.srcName(x))))];
   const left = s.kind === "disclaimer" ? FONT_LICENCE : footLeft(c, [...new Set(names)]);
   const foot = `<footer class="foot"><span class="l" data-role="foot-left">${esc(left)}</span><span class="r" data-role="page-no">${n} / ${total}</span></footer>`;
   return `<section class="page" data-n="${n}" data-kind="${s.kind}">${tabs}${main}${foot}</section>`;

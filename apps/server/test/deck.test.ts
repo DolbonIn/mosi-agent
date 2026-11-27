@@ -40,6 +40,21 @@ describe("the three samples (DD 0059 §6-1)", () => {
     expect(p3.html).toContain('<mark class="hl">탈출 2단계 → 3단계</mark>');
     expect(textOf(p3.html)).toContain("3단계 방어 준비");
   });
+  test("the conditions card says each thing once: the server's next, a note about what is not on (DD 1509 5)", () => {
+    for (const k of ["a", "b", "c"] as const) {
+      const { spec, data } = deckFixture(k);
+      const g = spec.slides.find((x) => x.kind === "gauges" && x.focus === "escape") as Extract<Slide, { kind: "gauges" }>;
+      const rows = [...data.stages!.conditions.escape, ...data.stages!.conditions.severe];
+      // the note names only conditions not met yet, and nothing the next already says
+      const named = g.note!.match(/[AD]\d/g) ?? [];
+      expect(named.length).toBeGreaterThan(0);
+      for (const id of named) expect(rows.find((r) => r.id === id)!.status).not.toBe("met");
+      expect(data.stages!.next.escape).not.toContain("자료 없음");
+      expect(g.note).not.toContain("자료 없음");
+      // the kicker is not the headline's opening words
+      expect(g.headline.startsWith(g.kicker!.split(" ")[0]!)).toBe(false);
+    }
+  });
 });
 
 describe("what the model may not write (FA4 #6, #9, #10; DD 1935 §0-6)", () => {
@@ -56,6 +71,10 @@ describe("what the model may not write (FA4 #6, #9, #10; DD 1935 §0-6)", () => 
     expect(rules(lintModelText("매우 좋아요"))).toEqual(["FA4-10"]);
     expect(rules(lintModelText("혁신적인 변화예요"))).toEqual(["FA4-6"]);
     expect(rules(lintModelText("지금 사세요"))).toEqual(["copy"]);
+    // a stage put as a time to act is advice too (A17; DD 1509 6)
+    expect(rules(lintModelText("방어를 준비할 때예요"))).toEqual(["copy"]);
+    expect(rules(lintModelText("정리할 때입니다"))).toEqual(["copy"]);
+    expect(rules(lintModelText("방어 준비 단계예요"))).toEqual([]);
   });
   test("a slide's text over its limit, a missing reference and a number go back with the field named", () => {
     const { spec, data } = withSlide(2, (s) => ({ ...s, headline: "가".repeat(31), kicker: "숫자 {nope}" }));
@@ -76,11 +95,11 @@ describe("what the model may not write (FA4 #6, #9, #10; DD 1935 §0-6)", () => 
     expect(validateDeck(at31.spec, at31.data).map((x) => x.what)).toEqual(["headline는 30자까지예요(지금 31자)"]);
   });
   test("limits count what is read: a reference counts as its formatted figure", () => {
-    // 2 + "3.76%" (5) + 21 = 28 characters: under 30
-    const { spec, data } = withSlide(2, (s) => ({ ...s, headline: "지금{hy}" + "가".repeat(21) }));
+    // 2 + "3.76%p" (6) + 22 = 30 characters: at the limit; one more is over
+    const { spec, data } = withSlide(2, (s) => ({ ...s, headline: "지금{hy}" + "가".repeat(22) }));
     expect(validateDeck(spec, data)).toEqual([]);
-    const over = withSlide(2, (s) => ({ ...s, headline: "지금{hy}" + "가".repeat(24) }));
-    expect(rules(validateDeck(over.spec, over.data))).toEqual(["limit"]);
+    const over = withSlide(2, (s) => ({ ...s, headline: "지금{hy}" + "가".repeat(23) }));
+    expect(validateDeck(over.spec, over.data).map((x) => x.what)).toEqual(["headline는 30자까지예요(지금 31자)"]);
   });
   test("three sentences over 40 characters on one slide is a text wall (FA4 #1)", () => {
     const long = "하이일드 스프레드가 넓어지는 동안 회사채 발행도 함께 줄어들었다는 보도가 이어졌어요";
@@ -190,6 +209,27 @@ describe("figures (§0-5) and references", () => {
     expect(figureText(f.kospi_chg!)).toBe("−0.35%");
     expect(figureText(f.foreign_kospi!)).toBe("−8,130억원");
     expect(figureText(f.us2y_spread!)).toBe("+0.12%p");
+    // a spread's level: %p, no sign of its own (DD 1520); a negative one keeps U+2212
+    expect(figureText(f.hy!)).toBe("3.76%p");
+    expect(figureText(f.hy_th!)).toBe("3.5%p");
+    expect(figureText({ ...f.hy!, value: -0.25 })).toBe("−0.25%p");
+    // the stage conditions on the spread say its level the same way: A1, D1, R2 (DD 1520; agent-runtime 1534 §2)
+    for (const k of ["a", "c"] as const) {
+      const d = deckFixture(k).data;
+      const hy = figureText(d.figures.hy!);
+      const c = d.stages!.conditions;
+      const rows = [...c.escape, ...c.severe, ...c.recovery];
+      const val = (id: string) => rows.find((r) => r.id === id)!.value;
+      expect(val("A1")).toBe(`${hy} · 6개월 최저보다 ${k === "c" ? "+0.77%p" : "+0.41%p"}`);
+      expect(val("D1")).toBe(val("A1"));
+      expect(val("R2")).toBe(`${hy} · 20거래일 최고보다 0.60%p 좁음`);
+      // A1 and D1 hold as their thresholds say: 3.5%p and 4.0%p (the sample's statuses agree with its figure)
+      const st = (id: string) => rows.find((r) => r.id === id)!.status;
+      const v = d.figures.hy!.value!;
+      expect([st("A1"), st("D1")]).toEqual([v >= 3.5 ? "met" : "unmet", v >= 4.0 ? "met" : "unmet"]);
+      // nowhere the level with a bare % (the old "3.76% · …")
+      expect(rows.filter((r) => r.value.includes(`${hy.slice(0, -2)}% `))).toEqual([]);
+    }
     expect(figureText(f.core_cpi!)).toBe("확인 불가");
     expect(figureText(f.asp_decline!)).toBe("약 −14.0%(추정)");
     expect(figureText(f.amp_b!)).toBe("약 ±2.5%(추정)");
@@ -198,12 +238,12 @@ describe("figures (§0-5) and references", () => {
   test("fill: each reference becomes its figure in a span, a server phrase too; an unknown id is kept and named", () => {
     const { data } = deckFixture("a");
     const r = fill("하이일드 {hy}, 탈출 {escape_label}, {nope} <b>", data.figures, data.words);
-    expect(r.plain).toBe("하이일드 3.76%, 탈출 2단계 경계, {nope} <b>");
-    expect(r.html).toContain('<span class="fig" data-ref="hy">3.76%</span>');
+    expect(r.plain).toBe("하이일드 3.76%p, 탈출 2단계 경계, {nope} <b>");
+    expect(r.html).toContain('<span class="fig" data-ref="hy">3.76%p</span>');
     expect(r.html).toContain("&lt;b&gt;");
     expect(r.missing).toEqual(["nope"]);
     expect(r.refs).toEqual(["hy", "escape_label"]);
-    expect(fill("<i>{hy}", data.figures).html).toBe('&lt;i&gt;<span class="fig" data-ref="hy">3.76%</span>');
+    expect(fill("<i>{hy}", data.figures).html).toBe('&lt;i&gt;<span class="fig" data-ref="hy">3.76%p</span>');
   });
 });
 
@@ -260,18 +300,22 @@ describe("the F-A pages (DD 1935 §5-1, §5-2)", () => {
   });
   test("numbers come from the data: big figures, a disputed one with the other source's value beside it", () => {
     const p2 = ps[1]!.html;
-    expect(p2).toContain('<div class="num">3.76%</div>');
-    expect(textOf(p2)).toContain("FRED · A · 11-25 기준");
-    expect(textOf(p2)).toContain("FRED · A · 11-26 기준 · 다른 출처 4.51% · 합성 매체");
+    expect(p2).toContain('<div class="num">3.76%p</div>');
+    // a figure from another day says its day as M/D, the deck's short date (DD 1509 2)
+    expect(textOf(p2)).toContain("FRED · A · 11/25 기준");
+    expect(textOf(p2)).toContain("FRED · A · 11/26 기준 · 다른 출처 4.51% · 합성 매체");
+    expect(html).not.toMatch(/\d{2}-\d{2} 기준/);
     expect(textOf(ps[22]!.html)).toContain("임계 5.0% · 지금 4.53%다른 출처 4.51% · 합성 매체");
   });
-  test("the cover: the highlight inside the hand-drawn ring, the as of at the bottom; no tabs", () => {
+  test("the cover: the highlight inside the hand-drawn ring, the as of once, in the footer; no tabs", () => {
     const p1 = ps[0]!.html;
     expect(p1).toContain('<span class="ring" data-viz="hand-mark"><mark class="hl">경계가 이어지고</mark></span>');
-    expect(textOf(p1)).toContain("데이터 기준 2026-11-27 08:00 KST");
+    // DD 1509 4: no second basis line above the footer
+    expect(textOf(p1).split("2026-11-27 08:00 KST").length - 1).toBe(1);
+    expect(footLeft(p1)).toBe("출처: FRED · 기준 2026-11-27 08:00 KST");
     // the particle after the highlight stays on its line
     const c = deckFixture("c");
-    expect(pages(renderDeck(c.spec, c.data))[0]!.html).toContain('<span class="tie"><span class="ring" data-viz="hand-mark"><mark class="hl">방어를 준비할 때</mark></span>예요</span>');
+    expect(pages(renderDeck(c.spec, c.data))[0]!.html).toContain('<span class="tie"><span class="ring" data-viz="hand-mark"><mark class="hl">방어 준비 단계</mark></span>예요</span>');
   });
   test("charts are the quant renderers with their captions; the appendix names each row's source", () => {
     expect(ps[8]!.html).toContain('aria-label="11지표: 위험 3 · 경계 3 · 정상 4 · 확인 불가 1"');
@@ -281,6 +325,34 @@ describe("the F-A pages (DD 1935 §5-1, §5-2)", () => {
     expect(ps[21]!.html).toContain("11월 26일 08:00 기준 · 각 기관 일정 · 합성");
     expect(ps[24]!.html).toContain('<td class="t-table src">FRED · A</td>');
     expect(ps[12]!.html).toContain("단위 % · 11월 26일 종가 · 합성 IR · 모시 계산");
+  });
+  test("the sources page names each source first, so every footer's names are found there (DD 1509 1)", () => {
+    const list = [...ps[26]!.html.matchAll(/<li>([^<]*)<\/li>/g)].map((m) => m[1]!);
+    expect(list).toContain("FRED · 미 국채·하이일드 시계열(합성) · 합성 데이터 · 2026-11-26 · example.invalid/fred");
+    // a capture is listed under its grade by the outlet the footer names
+    expect(list.some((l) => /^합성 SNS · @sample_analyst · 캡처 11월 26일 \d{2}:\d{2} · example\.invalid\/cap-post$/.test(l))).toBe(true);
+    const named = new Set(list.map((l) => l.split(" · ")[0]));
+    const inFooters = new Set(ps.flatMap((p) => /^출처: (.+) · 기준/.exec(footLeft(p.html))?.[1]!.split(", ") ?? []));
+    expect(inFooters.size).toBeGreaterThan(5);
+    for (const n of inFooters) expect(named.has(n)).toBe(true);
+    expect(html).not.toContain("quant");
+  });
+  test("an event's amplitude is a figure, written as the scenarios write theirs (DD 1509 3)", () => {
+    const tl = textOf(ps[21]!.html);
+    expect(tl).toContain("진폭 약 ±1.5%(추정)");
+    expect(tl).not.toMatch(/진폭 ±/);
+    expect(textOf(ps[20]!.html)).toContain("진폭 약 ±1.5%(추정)");
+    const x = deckFixture("a");
+    x.data.events!.list[0] = { ...x.data.events!.list[0]!, amplitudeRef: "nope" };
+    expect(validateDeck(x.spec, x.data)).toContainEqual({ n: 22, kind: "timeline", rule: "schema", what: '이벤트 "미국 10월 PCE"의 진폭 nope가 figures에 없어요' });
+  });
+  test("the grid says what a figure says: same value, same day (DD 1509 7)", () => {
+    const grid = data.core11!.items;
+    expect(grid[8]!.value).toBe(figureText(data.figures.foreign_kospi!));
+    expect(grid[8]!.value).toBe("−8,130억원");
+    expect(grid[4]!).toMatchObject({ value: "4.3%", asOf: "11/7 기준" });
+    expect(textOf(ps[8]!.html)).toContain("−8,130억원");
+    expect(textOf(ps[8]!.html)).not.toContain("−2.1조");
   });
   test("the scenario probability only where a model gives one (E4-3)", () => {
     expect(ps[20]!.html.match(/class="prob"/g)!.length).toBe(3);

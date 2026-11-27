@@ -244,6 +244,7 @@ export function validateDeck(spec: DeckSpec, data: DeckData): DeckFail[] {
       case "timeline":
         if (!data.events?.list.length) at("schema", "이벤트 데이터가 없어요");
         else if (data.events.list.length > TIMELINE_EVENTS) at("schema", `이벤트가 ${data.events.list.length}개예요(${TIMELINE_EVENTS}개까지, 나머지는 appendix로 보내요)`);
+        for (const e of data.events?.list ?? []) if (e.amplitudeRef && !data.figures[e.amplitudeRef]) at("schema", `이벤트 "${e.title}"의 진폭 ${e.amplitudeRef}가 figures에 없어요`);
         break;
       case "risks":
         if (!count(s.items, 3, 5)) at("B2-risks", "risks는 3–5개예요(반증 조건 3개 이상)");

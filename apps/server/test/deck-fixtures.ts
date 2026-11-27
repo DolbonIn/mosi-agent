@@ -4,8 +4,10 @@
  * 2 → 3, the highlighted line). 28 slides each, in FA6's order. Every figure, source and capture here is made up and
  * says so (합성).
  */
-import { ESCAPE_A_RULES, ESCAPE_D_RULES, RECOVERY_RULES, SHORT_COVER_RULES, type Bar, type ChartLevel, type FlowDay, type Grid11Item, type TimelineEvent, type Tri } from "@pickle/quant";
-import type { DeckCapture, DeckCondition, DeckData, DeckFigure, DeckSpec } from "../src/deck/types";
+import { ESCAPE_A_RULES, ESCAPE_D_RULES, RECOVERY_RULES, SHORT_COVER_RULES, type Bar, type ChartLevel, type FlowDay, type Grid11Item, type Tri } from "@pickle/quant";
+import { figureText } from "../src/deck/text";
+import { shortDay } from "../src/deck/render";
+import type { DeckCapture, DeckCondition, DeckData, DeckEvent, DeckFigure, DeckSpec } from "../src/deck/types";
 
 export type FixtureKind = "a" | "b" | "c";
 
@@ -103,7 +105,8 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   const figures: Record<string, DeckFigure> = {
     ust10y: fig(4.53, "rate", "fred", kind === "a" ? { conflict: { value: 4.51, source: "news" } } : {}),
     us2y_spread: fig(0.12, "pp", "fred"),
-    hy: fig(c ? 4.12 : 3.76, "rate", "fred", { asOf: "2026-11-25" }),
+    // (c) 3.92: over A1's 3.5 but under D1's 4.0, as its statuses say (A1 met, D1 not)
+    hy: fig(c ? 3.92 : 3.76, "spread", "fred", { asOf: "2026-11-25" }),
     vix: fig(c ? 27.4 : 24.1, "index", "cboe"),
     sp500: fig(6012.45, "index", "toss"),
     sp500_chg: fig(c ? -1.84 : 0.42, "pct", "toss"),
@@ -145,8 +148,14 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
     amp_a: fig(1.5, "pm", "calc", { estimate: true }),
     amp_b: fig(2.5, "pm", "calc", { estimate: true }),
     amp_c: fig(4, "pm", "calc", { estimate: true }),
+    ev_pce: fig(1.5, "pm", "calc", { estimate: true }),
+    ev_ism: fig(1, "pm", "calc", { estimate: true }),
+    ev_jobs: fig(2, "pm", "calc", { estimate: true }),
+    ev_cpi: fig(2.5, "pm", "calc", { estimate: true }),
+    ev_fomc: fig(3, "pm", "calc", { estimate: true }),
+    ev_earn: fig(6, "pm", "calc", { estimate: true }),
     vix_th: fig(25, "index", "rule"),
-    hy_th: fig(3.5, "rate", "rule", { digits: 1 }),
+    hy_th: fig(3.5, "spread", "rule", { digits: 1 }),
     ust_th: fig(5, "rate", "rule", { digits: 1 }),
     kospi_th: fig(2400, "index", "rule", { digits: 0 }),
     usdkrw_th: fig(1450, "krw", "rule"),
@@ -161,7 +170,7 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
     bls: { name: "BLS", title: "고용·물가 발표(합성)", publisher: "합성 데이터", date: "2026-11-13", url: "example.invalid/bls", grade: "A" },
     ir: { name: "합성 IR", title: "분기 실적 자료(합성)", publisher: "합성 회사", date: "2026-10-30", url: "example.invalid/ir", grade: "B+" },
     news: { name: "합성 매체", title: "시장 기사(합성)", publisher: "합성 매체", date: "2026-11-26", url: "example.invalid/news", grade: "B" },
-    calc: { name: "모시 계산", title: "quant 계산(합성 입력)", publisher: "모시", date: "2026-11-27", url: "example.invalid/calc", grade: "B" },
+    calc: { name: "모시 계산", title: "모시 계산(합성 입력)", publisher: "모시", date: "2026-11-27", url: "example.invalid/calc", grade: "B" },
     rule: { name: "판정 규칙", title: "탈출·회복 판정 규칙", publisher: "모시", date: "2026-11-27", url: "example.invalid/rules", grade: "A" },
   };
 
@@ -183,14 +192,20 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   // (b): two more missing beside the one every sample lacks (no. 6) → three 확인 불가; no. 10 is the core CPI the
   // figures also lack (core_cpi null, A4 확인 불가)
   const missing = new Set(b ? [9, 10] : []);
-  const items: Grid11Item[] = NAMES.map((name, i) => ({
-    no: i + 1,
-    name,
-    signal: missing.has(i) || SIG[i] === "unknown" ? "unknown" : SIG[i]!,
-    value: missing.has(i) || SIG[i] === "unknown" ? "확인 불가" : VALUES[i]!,
-    basis: BASIS[i]!,
-    asOf: missing.has(i) || SIG[i] === "unknown" ? "자료 없음" : "11/26 기준",
-  }));
+  // the grid says what a figure says when it has one (DD 1509 7): same id, same value, same day
+  const FROM: Record<number, string> = { 0: "ust10y", 4: "unemployment", 6: "breadth", 8: "foreign_kospi", 9: "core_cpi" };
+  const items: Grid11Item[] = NAMES.map((name, i) => {
+    const gone = missing.has(i) || SIG[i] === "unknown";
+    const f = FROM[i] != null ? figures[FROM[i]!]! : null;
+    return {
+      no: i + 1,
+      name,
+      signal: gone ? "unknown" : SIG[i]!,
+      value: gone ? "확인 불가" : f ? figureText(f) : VALUES[i]!,
+      basis: BASIS[i]!,
+      asOf: gone ? "자료 없음" : `${f ? shortDay(f.asOf) : "11/26"} 기준`,
+    };
+  });
 
   const aStatus: Record<string, Tri> = c ? { A1: "met", A2: "met", A3: "met", A4: "unmet", A5: "unmet", A6: "met", A7: "unknown", A8: "unmet" } : { A1: "met", A2: "unmet", A3: "met", A4: "unmet", A5: "unmet", A6: "met", A7: "unknown", A8: "unmet" };
   const aMet = Object.values(aStatus).filter((x) => x === "met").length;
@@ -198,20 +213,21 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
   const rStatus: Record<string, Tri> = b ? { R1: "unmet", R2: "unknown", R3: "unmet", R4: "unknown", R5: "met", R6: "unknown" } : { R1: "unmet", R2: "met", R3: "unmet", R4: "unknown", R5: "met", R6: "unknown" };
   const rMet = Object.values(rStatus).filter((x) => x === "met").length;
   const rUnk = Object.values(rStatus).filter((x) => x === "unknown").length;
-  const valuesA = { A1: "3.76% · 최저 대비 +0.41%p", A2: c ? "VIX 27.40 · 2일째" : "VIX 24.10", A3: "200일선 아래 3일째", A4: b ? "확인 불가" : "MoM 0.1%", A5: "4.53% · 0일", A6: "2/4 < 20%", A7: "자료 없음", A8: "200일선 위" };
-  const valuesR = { R1: "VIX 24.10 · 0일", R2: b ? "자료 없음" : "고점 대비 −0.6%p", R3: "200일선 아래", R4: "자료 없음", R5: "2년물 ≤ 상단", R6: "자료 없음" };
+  // A1 says the spread's level as the grid's no. 3 and the figure do (unsigned %p, DD 1520) and its rise over the low
+  const valuesA = { A1: `${figureText(figures.hy!)} · 6개월 최저보다 ${VALUES[2]}`, A2: c ? "VIX 27.40 · 2일째" : "VIX 24.10", A3: "200일선 아래 3일째", A4: b ? "확인 불가" : "MoM 0.1%", A5: "4.53% · 0일", A6: "2/4 < 20%", A7: "자료 없음", A8: "200일선 위" };
+  const valuesR = { R1: "VIX 24.10 · 0일", R2: b ? "자료 없음" : `${figureText(figures.hy!)} · 20거래일 최고보다 0.60%p 좁음`, R3: "200일선 아래", R4: "자료 없음", R5: "2년물 ≤ 상단", R6: "자료 없음" };
   const dStatus: Record<string, Tri> = { D1: "unmet", D2: "unmet", D3: c ? "met" : "unmet", D4: "unmet", D5: "unknown" };
   const dMet = Object.values(dStatus).filter((x) => x === "met").length;
 
-  const events: TimelineEvent[] = [
-    { at: "2026-11-27T22:30:00+09:00", title: "미국 10월 PCE", consensus: "0.2%", bull: "근원 0.2% 이하", bear: "근원 0.3% 이상", amplitude: "±1.5%(추정)" },
-    { at: "2026-12-01T09:00:00+09:00", title: "한국 11월 수출", consensus: null, bull: "반도체 +20% 이상", bear: "반도체 둔화", amplitude: null },
-    { at: "2026-12-03T00:00:00+09:00", title: "ISM 제조업", consensus: "48.5", bull: "50 회복", bear: "47 아래", amplitude: "±1.0%(추정)" },
-    { at: "2026-12-05T22:30:00+09:00", title: "미국 11월 고용보고서", consensus: "15만 명", bull: "실업률 4.2% 이하", bear: "실업률 4.4% 이상", amplitude: "±2.0%(추정)" },
-    { at: "2026-12-10T22:30:00+09:00", title: "미국 11월 CPI", consensus: "0.3%", bull: "근원 0.2%", bear: "근원 0.4%", amplitude: "±2.5%(추정)" },
-    { at: "2026-12-11T04:00:00+09:00", title: "FOMC 금리 결정", consensus: "동결", bull: "인하 신호", bear: "점도표 상향", amplitude: "±3.0%(추정)" },
-    { at: "2026-12-17T06:00:00+09:00", title: "반도체 B 실적", consensus: null, bull: "가이던스 상향", bear: "재고 증가", amplitude: "±6.0%(추정)" },
-    { at: "2026-12-19T15:30:00+09:00", title: "선물·옵션 동시 만기", consensus: null, bull: null, bear: "프로그램 매도 출회", amplitude: null },
+  const events: DeckEvent[] = [
+    { at: "2026-11-27T22:30:00+09:00", title: "미국 10월 PCE", consensus: "0.2%", bull: "근원 0.2% 이하", bear: "근원 0.3% 이상", amplitudeRef: "ev_pce" },
+    { at: "2026-12-01T09:00:00+09:00", title: "한국 11월 수출", consensus: null, bull: "반도체 +20% 이상", bear: "반도체 둔화", },
+    { at: "2026-12-03T00:00:00+09:00", title: "ISM 제조업", consensus: "48.5", bull: "50 회복", bear: "47 아래", amplitudeRef: "ev_ism" },
+    { at: "2026-12-05T22:30:00+09:00", title: "미국 11월 고용보고서", consensus: "15만 명", bull: "실업률 4.2% 이하", bear: "실업률 4.4% 이상", amplitudeRef: "ev_jobs" },
+    { at: "2026-12-10T22:30:00+09:00", title: "미국 11월 CPI", consensus: "0.3%", bull: "근원 0.2%", bear: "근원 0.4%", amplitudeRef: "ev_cpi" },
+    { at: "2026-12-11T04:00:00+09:00", title: "FOMC 금리 결정", consensus: "동결", bull: "인하 신호", bear: "점도표 상향", amplitudeRef: "ev_fomc" },
+    { at: "2026-12-17T06:00:00+09:00", title: "반도체 B 실적", consensus: null, bull: "가이던스 상향", bear: "재고 증가", amplitudeRef: "ev_earn" },
+    { at: "2026-12-19T15:30:00+09:00", title: "선물·옵션 동시 만기", consensus: null, bull: null, bear: "프로그램 매도 출회", },
   ];
 
   const flowsOf = (seed: number, label: string) => ({
@@ -235,9 +251,9 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
       recovery: { label: b ? "판정 보류" : "1단계 바닥 탐색", gauge: { met: rMet, unknown: rUnk, of: 6 } },
       scenario: c ? "C 침체 경계" : "B 둔화",
       ...(c ? { moved: "탈출 2단계 → 3단계" } : {}),
-      conditions: { escape: cond(ESCAPE_A_RULES, aStatus, valuesA), severe: cond(ESCAPE_D_RULES, dStatus, { D1: "3.76%", D2: "VIX 24.10", D3: c ? "200일선 5.2% 아래" : "200일선 2.1% 아래", D4: "0.27", D5: "자료 없음" }), recovery: cond(RECOVERY_RULES, rStatus, valuesR) },
+      conditions: { escape: cond(ESCAPE_A_RULES, aStatus, valuesA), severe: cond(ESCAPE_D_RULES, dStatus, { D1: valuesA.A1, D2: "VIX 24.10", D3: c ? "200일선 5.2% 아래" : "200일선 2.1% 아래", D4: "0.27", D5: "자료 없음" }), recovery: cond(RECOVERY_RULES, rStatus, valuesR) },
       next: {
-        escape: c ? "4단계까지 D 조건 1개가 더 필요해요. 지금 1개 충족이에요." : "3단계까지 A 조건 1개가 더 필요해요. A7은 자료가 없어요.",
+        escape: c ? "4단계까지 D 조건 1개가 더 필요해요. 지금 1개 충족이에요." : "3단계까지 A 조건 1개가 더 필요해요.",
         recovery: "2단계까지 회복 신호 2개와 D 신호 0개가 필요해요.",
       },
       sources: ["fred", "cboe", "bls", "krx", "rule"],
@@ -279,9 +295,9 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
       {
         kind: "hero",
         kicker: "11월 27일 일일 심층판",
-        headline: c ? "탈출 단계가 한 칸 올라 방어를 준비할 때예요" : "신용 경계는 그대로, 반도체는 바닥을 시험 중",
+        headline: c ? "탈출 단계가 한 칸 올라 방어 준비 단계예요" : "신용 경계는 그대로, 반도체는 바닥을 시험 중",
         lead: c ? "하이일드가 {hy}로 넓어지고 VIX가 {vix}에 닿아 악화 신호가 하나 더 켜졌어요." : "하이일드 스프레드가 {hy}로 올라 경계가 이어지고, 반도체 수급은 외국인 매도가 줄어드는 쪽이에요.",
-        highlight: c ? "방어를 준비할 때" : "경계가 이어지고",
+        highlight: c ? "방어 준비 단계" : "경계가 이어지고",
         mark: true,
       },
       {
@@ -385,8 +401,8 @@ export function deckFixture(kind: FixtureKind, captureSrc: (id: string) => { src
           { name: "달러/원", now: "{usdkrw}", th: "{usdkrw_th}", read: "여유 있음" },
         ],
       },
-      { kind: "gauges", section: "지표", kicker: "악화 신호", headline: c ? "악화 신호가 넷으로 늘었어요" : "악화 신호는 셋이 켜져 있어요", focus: "escape", note: "A7은 자료가 없어 확인 불가로 남겨 뒀어요." },
-      { kind: "gauges", section: "지표", kicker: "회복 신호", headline: "회복 신호는 아직 둘이에요", focus: "recovery", note: "R3가 켜지기 전에는 추세 회복으로 보지 않아요." },
+      { kind: "gauges", section: "지표", kicker: "탈출 조건 A", headline: c ? "악화 신호가 넷으로 늘었어요" : "악화 신호는 셋이 켜져 있어요", focus: "escape", note: c ? "다음으로 켜질 수 있는 것은 A4와 A5예요." : "다음으로 켜질 수 있는 것은 A2와 A4예요." },
+      { kind: "gauges", section: "지표", kicker: "회복 조건 R", headline: "회복 신호는 아직 둘이에요", focus: "recovery", note: "R3가 켜지기 전에는 추세 회복으로 보지 않아요." },
       { kind: "roe-pbr", section: "펀더멘털", kicker: "펀더멘털 역산", headline: "주가는 ASP 하락을 미리 반영했어요", company: "반도체 A", notes: ["네 방법 모두 하락을 가리켜요.", "고든 ROE 방법이 가장 비관적이에요."] },
       {
         kind: "table",
