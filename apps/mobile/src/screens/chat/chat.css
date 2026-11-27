@@ -926,9 +926,13 @@ pre.md-code code {
   color: var(--label-2);
   white-space: nowrap;
 }
-.composer-count[data-over] {
-  color: var(--danger);
-  font-weight: 600;
+/* text past the 4,000 characters a message holds went, or goes, as a .txt (DD 1736 §3): a status, not an error —
+   the error's place, in the secondary colour */
+.composer-note {
+  color: var(--label-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: keep-all;
 }
 
 /* ── empty thread (empty-thread A): the agent's face, one sentence, the suggestions as one grouped list ── */

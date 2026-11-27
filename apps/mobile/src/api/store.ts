@@ -3,6 +3,7 @@ import type {
   AgentProfile,
   AgentStatus,
   ApprovalStatus,
+  AttachmentRef,
   Card,
   ConnectRequest,
   ConnectResponse,
@@ -420,8 +421,8 @@ export function catchUp(hello: { settingsRev?: number; agentRev?: number }) {
 const turns = new Map<ID, AbortController>();
 /** an agent turn runs somewhere else (another tab, a schedule, a friend's thread) — from agent_status */
 let remoteBusy = false;
-/** the last failed send, for island 다시 시도 */
-let lastFailed: { threadId: ID; text: string; tempId: ID | null } | null = null;
+/** the last failed send, for island 다시 시도 (its files too: a long text sent as a .txt has no text of its own) */
+let lastFailed: { threadId: ID; text: string; attachments: AttachmentRef[]; tempId: ID | null } | null = null;
 /**
  * The island's "다시 시도할까요?" (lastFailed's thread) gave way to a turn from elsewhere that started while it showed: the
  * follow-up the server runs right after a failed turn for the lines it left (or any other turn). That turn's work shows
@@ -785,8 +786,9 @@ function sendResult(
 interface TurnCtx {
   threadId: ID;
   temp: ID | null;
-  /** the text, for 다시 시도 */
+  /** the text and the files, for 다시 시도 */
   text: string;
+  attachments: AttachmentRef[];
   onStart?: () => void;
   /** a decision is pending in the final message → island stays awaiting_approval */
   pendingDecision: boolean;
@@ -861,7 +863,7 @@ function applyEvent(ctx: TurnCtx, e: AgentEvent) {
     case "error":
       finalizeDraft(threadId);
       setThreadError(threadId, e.message || koreanMessage(0, e.error));
-      lastFailed = { threadId, text: ctx.text, tempId: null };
+      lastFailed = { threadId, text: ctx.text, attachments: ctx.attachments, tempId: null };
       island.error();
       return;
   }
@@ -962,7 +964,7 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
     const err = new ApiError(0, "stream_cut", "답변이 중간에 끊겼어요. 다시 보내 주세요.");
     setThreadError(threadId, err.message);
     failTemp();
-    lastFailed = { threadId, text: ctx.text, tempId: ctx.temp };
+    lastFailed = { threadId, text: ctx.text, attachments: ctx.attachments, tempId: ctx.temp };
     island.error();
     void loadMessages(threadId); // the server persisted whatever it had
     return sendResult("failed", { accepted: true, keepText: false, error: err, partial });
@@ -981,7 +983,7 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
       // server's Korean reason inline (the quota text is long — a banner would cut it short); no turn ran
       setThreadError(threadId, err.message);
       failTemp();
-      lastFailed = { threadId, text: ctx.text, tempId: ctx.temp };
+      lastFailed = { threadId, text: ctx.text, attachments: ctx.attachments, tempId: ctx.temp };
       if (primary) settleIsland();
       return sendResult("failed", { accepted: false, keepText: false, error: err, partial: null });
     }
@@ -1001,7 +1003,7 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
     // network / timeout / stream broke mid-way: keep the bubble, offer 다시 보내기
     setThreadError(threadId, err.message);
     failTemp();
-    lastFailed = { threadId, text: ctx.text, tempId: ctx.temp };
+    lastFailed = { threadId, text: ctx.text, attachments: ctx.attachments, tempId: ctx.temp };
     if (primary) island.error();
     if (accepted) void loadMessages(threadId);
     return sendResult("failed", { accepted, keepText: false, error: err, partial });
@@ -1016,6 +1018,11 @@ async function runTurn(ctx: TurnCtx, start: (signal: AbortSignal, onAccepted: (k
 export interface SendOptions {
   mode?: "text" | "voice";
   attachmentIds?: ID[];
+  /**
+   * the files those ids stand for, drawn on the optimistic bubble: a send that fails keeps its bubble with them, and
+   * 다시 보내기 sends the same ids again (a long text sent as a .txt has no text of its own: DD 0121)
+   */
+  attachments?: AttachmentRef[];
   signal?: AbortSignal;
   /** the server accepted the message (before any streamed event) */
   onAccepted?: (kind: TurnResult["kind"]) => void;
@@ -1031,11 +1038,14 @@ export async function sendMessage(threadId: ID, text: string, opts: SendOptions 
     return sendResult("rejected", { accepted: false, keepText: true, error: new ApiError(400, "empty_message", "메시지를 입력해 주세요"), partial: null });
   }
   const id = tempId();
-  const optimistic: Message = { id, threadId, role: "user", text: body, cards: [], tools: [], attachments: [], createdAt: Date.now() };
+  const attachmentIds = opts.attachmentIds?.slice(0, ep.MAX_ATTACHMENTS);
+  // the bubble shows the files that go (in the ids' order); one without its ref is still sent, just not drawn
+  const refs = new Map((opts.attachments ?? []).map((a) => [a.id, a]));
+  const attachments = (attachmentIds ?? []).flatMap((x) => refs.get(x) ?? []);
+  const optimistic: Message = { id, threadId, role: "user", text: body, cards: [], tools: [], attachments, createdAt: Date.now() };
   patchThread(threadId, (t) => ({ ...t, items: [...t.items, optimistic], error: undefined }));
   if (!turns.size) island.thinking(threadId); // a running turn here = steer (island keeps its state); elsewhere = 409
-  const ctx: TurnCtx = { threadId, temp: id, text: body, pendingDecision: false };
-  const attachmentIds = opts.attachmentIds?.slice(0, ep.MAX_ATTACHMENTS);
+  const ctx: TurnCtx = { threadId, temp: id, text: body, attachments, pendingDecision: false };
   return runTurn(
     ctx,
     (signal, accepted) =>
@@ -1055,12 +1065,13 @@ export async function sendMessage(threadId: ID, text: string, opts: SendOptions 
   );
 }
 
-/** Re-send a failed optimistic message (removes the failed copy first). */
+/** Re-send a failed optimistic message with its files, the same ids (removes the failed copy first). */
 export function retryMessage(threadId: ID, failedId: ID, opts?: SendOptions): Promise<SendResult> {
   const t = messagesStore.get()[threadId];
   const m = t?.items.find((x) => x.id === failedId);
   patchThread(threadId, (s) => ({ ...s, items: s.items.filter((x) => x.id !== failedId), failed: s.failed.filter((x) => x !== failedId) }));
-  return sendMessage(threadId, m?.text ?? "", opts);
+  const files = m?.attachments ?? [];
+  return sendMessage(threadId, m?.text ?? "", { ...opts, attachmentIds: files.map((a) => a.id), attachments: files });
 }
 
 /** the voice call cut a spoken reply off: its history keeps what the person heard (errors are the caller's to drop) */
@@ -1128,7 +1139,8 @@ export function failRemoteTurn(threadId: ID, error: string, message: string): bo
   }
   if (!line) return false;
   if (!sentHere.has(line.id)) return true; // sent from another device (or before a reload): the row only
-  lastFailed = { threadId, text: line.text, tempId: null };
+  // a file taken out of the archive since has nothing to send again
+  lastFailed = { threadId, text: line.text, attachments: line.attachments.filter((a) => !a.deleted), tempId: null };
   if (!turns.size) island.error(); // a send of theirs runs: the island stays on it
   return true;
 }
@@ -1145,7 +1157,7 @@ island.setHandlers({
     lastFailed = null;
     const t = messagesStore.get()[f.threadId];
     if (f.tempId && t?.failed.includes(f.tempId)) void retryMessage(f.threadId, f.tempId);
-    else void sendMessage(f.threadId, f.text);
+    else void sendMessage(f.threadId, f.text, { attachmentIds: f.attachments.map((a) => a.id), attachments: f.attachments });
   },
 });
 
@@ -1171,6 +1183,7 @@ export async function decideApproval(threadId: ID, approvalId: ID, decision: "ap
     threadId,
     temp: null,
     text: "",
+    attachments: [],
     pendingDecision: false,
     onStart: () => setApprovalStatus(threadId, approvalId, decision === "approve" ? "approved" : "rejected"),
   };

@@ -1,4 +1,4 @@
-import type { ID, Message } from "@pickle/protocol";
+import type { AttachmentRef, ID, Message } from "@pickle/protocol";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { cancelTurn, loadMessages, markThreadRead, messagesStore, refreshRecent, retryMessage, sendMessage, useAgent, useMessages, useUi, type SendResult } from "../../api/store";
@@ -316,11 +316,12 @@ function ThreadBody({ threadId, active, header, footer }: { threadId: ID; active
   // a turn sent from here came back stopped: the lines steered into it lose "하던 일에 이어서 전했어요" (dropStoppedSteers)
   const ended = useCallback((r: SendResult) => dropStoppedSteers(r, messagesStore.get()[threadId]?.items ?? []), [threadId]);
   const send = useCallback(
-    async (text: string, attachmentIds: ID[] = []): Promise<boolean> => {
+    async (text: string, attachments: AttachmentRef[] = []): Promise<boolean> => {
       if (!data.streaming) turnStarted.set(threadId, performance.now());
       const under = head.current.key;
       requestAnimationFrame(() => scrollToEnd(true, under));
-      const r = await sendMessage(threadId, text, { attachmentIds });
+      // the files ride on the bubble: a failed send shows them and 다시 보내기 sends the same ids (DD 0121)
+      const r = await sendMessage(threadId, text, { attachmentIds: attachments.map((a) => a.id), attachments });
       ended(r);
       // 202 steered → the bubble stays and the running turn keeps streaming; 201 delivered → friend thread, no turn.
       // busy (409) / rejected: the store already showed the server's Korean message; keep the composer text.
