@@ -169,7 +169,7 @@ export type InvestStages =
       recovery: InvestStageHead;
       /** worse, severe, recover */
       gauges: InvestStageGauge[];
-      /** 탈출 3단계까지: 악화 신호 2개 더 / 회복 2단계까지: 회복 신호 2개 더, 심각 신호 0개 */
+      /** 탈출 3단계까지: 악화 신호 2개 더 / 회복 2단계까지: 회복 신호 2개 더, 심각 신호 1개 덜 (DD 1719 · 1720) */
       next: string[];
       judgedAt: Millis;
       /** 11월 27일 08:00 판정 · 어제와 같아요 / · 회복 0 → 1단계 */

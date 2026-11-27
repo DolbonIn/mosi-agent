@@ -1071,11 +1071,46 @@ keeps `{code, found: 0, text: "확인 불가"}` for it).
   the model's own event marks nothing.
 - **Nothing announces a find** (DD 1551 6): the calendar, the 08:00 report's events and D-1 show it as any code event (a
   find dated tomorrow goes at that 08:00 KST D-1).
-- **Not yet**: a find the source later moves or drops stays as it was (a run only adds); BEA and the BoK's MPC
-  (B2d-2b), company earnings (B2d-2c).
+- **Later**: BEA, the BoK's MPC, and moving or dropping what a source no longer lists (B2d-2b below); company earnings
+  (B2d-2c).
 - v14, additive, no rollback: `invest_discovery (day PK, state running|done, started_at, finished_at, result JSON)`,
   `invest_event_dismissed (user_id → users cascade, source, item, day, symbol '', dismissed_at; PK the first five)`,
   `invest_events.disc_source` and `disc_item` (null on rows before v14 and on the person's and the model's).
+
+## Invest (B2d-2b) — BEA, the Bank of Korea's MPC, moves and drops
+
+The same run, gate and rules as B2d-2a (team-lead 1618 · 1700 · 1701; DD 1551); two more hosts, each read at most twice a
+day, and a page that fails stops its source (no second request to that host that day).
+- **BEA** (`BEA · A`): the calendar subscription the release schedule page links (`/news/schedule/ics/online-calendar-
+  subscription.ics`, one GET a day; the schedule page itself is not read). The national GDP release (`GDP (… Estimate)`,
+  or `Gross Domestic Product, Nth Quarter …`; by state, by county, Puerto Rico left out) reads `미국 3분기 GDP 확정치 발표`
+  with the quarter as written (else `미국 GDP 발표`) and the estimate in Korean (DD 1753: Advance 속보치, Second 잠정치,
+  Third 확정치; Initial, Updated or none: no word, `미국 3분기 GDP 발표`); Personal Income and Outlays reads
+  `미국 10월 PCE 발표` with the month as written, none for a release of two months or none named. Times are UTC there
+  (ET wall clock stored); a time with no zone is not read. Kind `macro`, url the schedule page, window
+  `EVENT_SPAN_DAYS`. Items (team-lead 1712, DD 1716): `gdp:2026Q3:third` (quarter, year and the estimate as written:
+  advance, second, third, initial, updated; without all three the release day `gdp:2027-03-26`), `pce:2026-10` by the
+  reference month and its year (the release day for two months or none). BLS reads two months the same way since 2b:
+  no month in the title, the day in the item.
+- **The Bank of Korea** (`한국은행 · A`): the MPC year list (`listYear.do?mtgSe=A&menuNo=200755&pYear=<year>`, the address
+  the page's own year picker builds): the KST year's, and the next year's only on days the window reaches into it. Rows
+  `01월 15일(목)` under the page's `2026년`; a row whose weekday does not match its date is left out, a page of another
+  year or no list is not the calendar (rests the host), a list with no rows yet is empty. `금통위 기준금리 결정`, market KR,
+  no time (none on the page: `when` "… · 시각 미정"), kind `policy`, item `mpc:<day>`, url that year's list, window
+  `EVENT_SPAN_DAYS`. When the next year's page fails, what this year's gave still goes in.
+- **Moves and drops** (team-lead 1700 1), only for a source read whole and ok that day (every page ok; a Federal Register
+  answer whose `count` is above its page is cut: its finds go in, its result says `partial: true`, nothing moves). For
+  each person, each find from that source (`disc_source` that source, which only the run's own rows have; from the
+  market's today to the end of the source's window) that the source no longer lists on its day moves (same row, day
+  and time, `updated_at`) to the day it now lists for the same item, else is deleted, with no deletion mark (nobody
+  deleted it). An item is one occurrence, so only a Federal Register rule or a release named by its month or quarter
+  can move; a meeting the Fed or the Bank of Korea moves, or a release named by its day, is dropped and added. Nothing
+  moves onto an item that person deleted (the stale find goes). A move onto a day where that title already is (the
+  person's own) deletes the stale find. The person's and the model's rows (no `disc_source`), past days and days past
+  the window are never touched. A kind (the item before `:`: gdp, pce, cpi, nfp, ppi, fomc, mpc, fr) the source gave
+  none of in the window while that person has its rows there is held as it is, not moved or dropped (DD 1753: a page
+  whose shape changed, the whole source empty included); the source's result says `stale: ["gdp"]` and a log line
+  names the kinds. Nothing announces it; the day's result keeps `moved` and `removed`, and the log line counts them.
 
 ## Web Push (B1c) — the lock-screen line
 

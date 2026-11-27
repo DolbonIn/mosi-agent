@@ -1,7 +1,8 @@
 /**
  * Public sources for the invest watch (agent-runtime 2052 §A-4, team-lead 2045 and its 21:2x correction): Yahoo chart
  * JSON for quotes and daily bars, and since B2e-0 (team-lead 0243) FRED's fredgraph CSV for the macro series (macro.ts);
- * since B2d-2a the calendars new events are found in (discovery.ts): the Federal Register, the Fed's FOMC page, BLS.
+ * since B2d-2a the calendars new events are found in (discovery.ts): the Federal Register, the Fed's FOMC page, BLS, and
+ * since B2d-2b BEA's calendar and the Bank of Korea's MPC list.
  * Toss (the person's own key) is toss.ts. Stooq is out: it answers this server with a JavaScript browser
  * check instead of its CSV (mobile-foundation 2118), and a bot check is never worked around.
  *
@@ -16,7 +17,7 @@ import { nextMarketDayStart, type Market } from "./calendar.ts";
 import { cacheGet, cachePut, sourcePausedUntil, sourceRecord } from "./db.ts";
 
 /** the calendars discovery.ts reads (B2d-2a) */
-export type DiscoverySource = "fedreg" | "fomc" | "bls";
+export type DiscoverySource = "fedreg" | "fomc" | "bls" | "bea" | "bok";
 export type SourceKey = "toss" | "yahoo" | "fred" | DiscoverySource;
 export type PublicSource = Exclude<SourceKey, "toss">;
 
@@ -28,6 +29,8 @@ export const SOURCE_TABLE: Readonly<Record<SourceKey, { name: string; grade: "A"
   fedreg: { name: "연방관보", grade: "A" }, // DD 1711: the Federal Register as Korean readers know it
   fomc: { name: "연준", grade: "A" },
   bls: { name: "BLS", grade: "A" },
+  bea: { name: "BEA", grade: "A" },
+  bok: { name: "한국은행", grade: "A" },
 };
 
 /** keyed public APIs a person may connect later (2045 and its correction): listed, never called in B1 */
@@ -45,6 +48,8 @@ const HOSTS: Readonly<Record<PublicSource, string>> = {
   fedreg: "www.federalregister.gov",
   fomc: "www.federalreserve.gov",
   bls: "www.bls.gov",
+  bea: "www.bea.gov",
+  bok: "www.bok.or.kr",
 };
 
 export type SourceResult =

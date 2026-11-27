@@ -67,6 +67,9 @@ export function makeInvestUpstream() {
     fedreg: null as string | number | null,
     fomc: null as string | number | null,
     bls: null as string | number | null,
+    /** B2d-2b: BEA's ICS; the Bank of Korea's MPC list by its pYear (unset years answer 404) */
+    bea: null as string | number | null,
+    bok: new Map<string, string | number>(),
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -213,6 +216,9 @@ export function makeInvestUpstream() {
     if (url.host === "www.federalregister.gov" && url.pathname === "/api/v1/documents.json") return calendar(state.fedreg, "application/json");
     if (url.host === "www.federalreserve.gov" && url.pathname === "/monetarypolicy/fomccalendars.htm") return calendar(state.fomc, "text/html");
     if (url.host === "www.bls.gov" && url.pathname === "/schedule/news_release/bls.ics") return calendar(state.bls, "text/calendar");
+    if (url.host === "www.bea.gov" && url.pathname === "/news/schedule/ics/online-calendar-subscription.ics") return calendar(state.bea, "text/plain");
+    if (url.host === "www.bok.or.kr" && url.pathname === "/portal/singl/crncyPolicyDrcMtg/listYear.do")
+      return calendar(state.bok.get(url.searchParams.get("pYear") ?? "") ?? null, "text/html");
 
     throw new Error(`fake upstream: unexpected ${url.host}`);
   }) as typeof fetch;
