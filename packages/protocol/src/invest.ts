@@ -705,7 +705,8 @@ export interface InvestEvent {
   kind: InvestEventKind;
   title: string;
   symbol: string | null;
-  /** the title as cards show it, the symbol first (DD 0109 §1) */
+  /** the title as cards show it, the symbol first (DD 0109 §1); a found earnings row (B2d-2c) starts with its subject,
+   * nothing in front (DD 1754) */
   heading: string;
   /** 11월 26일 06:20(미 동부 16:20) · 11월 26일 10:00 · 미 동부 11월 25일 · 시각 미정 · 11월 26일 · 시각 미정; another
    * KST year names it: 2027년 1월 5일 06:20(미 동부 16:20) · 미 동부 2027년 1월 5일 · 시각 미정 (DD 0405 E) */

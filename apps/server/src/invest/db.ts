@@ -27,6 +27,12 @@ export interface WatchRow {
   market: "US" | "KR";
   name: string;
   added_at: number;
+  /** v15: Toss's securityType asked with this person's token; '' = asked, Toss had none; null = not yet */
+  security_type?: string | null;
+  /** v15: Toss's Korean name from the same answer (the KR earnings subject, team-lead 1823); the screen keeps `name` */
+  toss_name?: string | null;
+  /** v15: the KST day the type was last asked (once a day per row, team-lead 1813 3) */
+  type_asked_day?: string | null;
 }
 
 export interface RuleRow {
@@ -143,6 +149,24 @@ export function watchRow(db: Db, userId: string, symbol: string): WatchRow | nul
 
 export function addWatch(db: Db, w: WatchRow): boolean {
   return db.sql.query("INSERT OR IGNORE INTO invest_watchlist (user_id, symbol, market, name, added_at) VALUES ($u, $s, $m, $n, $a)").run({ u: w.user_id, s: w.symbol, m: w.market, n: w.name, a: w.added_at }).changes > 0;
+}
+
+/**
+ * B2d-2c: Toss's answer for this person's own rows (asked with their token): each symbol asked gets its type and
+ * Korean name, or '' when the answer has none (not asked again); the KST day either way.
+ */
+export function putWatchTypes(db: Db, userId: string, asked: string[], got: ReadonlyMap<string, { type: string; name: string | null }>, day: string): void {
+  const q = db.sql.query("UPDATE invest_watchlist SET security_type = $t, toss_name = COALESCE($n, toss_name), type_asked_day = $d WHERE user_id = $u AND symbol = $s");
+  for (const s of asked) {
+    const a = got.get(s);
+    q.run({ t: a ? a.type : "", n: a?.name ?? null, d: day, u: userId, s });
+  }
+}
+
+/** B2d-2c: the type ask failed: the type stays unknown, asked again on another KST day */
+export function markTypeAsked(db: Db, userId: string, asked: string[], day: string): void {
+  const q = db.sql.query("UPDATE invest_watchlist SET type_asked_day = $d WHERE user_id = $u AND symbol = $s");
+  for (const s of asked) q.run({ d: day, u: userId, s });
 }
 
 export function removeWatch(db: Db, userId: string, symbol: string): boolean {

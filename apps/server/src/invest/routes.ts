@@ -315,6 +315,9 @@ export function investRoutes(core: Core) {
         idb.ensureSettings(core.db, userId, now);
         idb.addWatch(core.db, { user_id: userId, symbol, market, name, added_at: now });
         await hub().publish(userId);
+        // B2d-2c: its Toss type, asked with this person's token once the add is done (team-lead 1755 1, 1853 3): a slow
+        // or failing Toss never holds or fails the add (a failure is logged); unknown until Toss answers
+        core.track(hub().fillTypes(userId, now, [symbol]));
       }
       const ov = await hub().overview(userId);
       return json(ov.watchlist.find((w) => w.symbol === symbol)!, have ? 200 : 201);

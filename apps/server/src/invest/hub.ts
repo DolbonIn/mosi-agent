@@ -666,6 +666,26 @@ export class InvestHub {
     this.core.log.warn("invest toss error", { user: userId, code: error });
   }
 
+  /**
+   * B2d-2c (team-lead 1755 · 1813 3): this person's own rows with no type yet, asked with their own token, once a KST
+   * day per row; a refused ask follows the Toss pause (403: no reads, no asks). `only`: these symbols (one just added).
+   */
+  async fillTypes(userId: string, now: number, only?: string[]): Promise<void> {
+    const { db } = this.core;
+    const day = kstDayKey(now);
+    const rows = idb.watchlist(db, userId).filter((w) => w.security_type == null && w.type_asked_day !== day && (!only || only.includes(w.symbol)));
+    if (!rows.length) return;
+    const s = idb.getSettings(db, userId);
+    if (!s || !this.tossUsable(s, now) || !(await this.toss.connected(userId))) return;
+    const asked = rows.map((w) => w.symbol);
+    const r = await this.toss.stocks(userId, asked);
+    if (r.ok) idb.putWatchTypes(db, userId, asked, r.value, day);
+    else {
+      idb.markTypeAsked(db, userId, asked, day);
+      this.recordToss(userId, r.error, now);
+    }
+  }
+
   private tossUsable(s: idb.InvestSettingsRow, now: number): boolean {
     return !!this.toss.base() && !(s.toss_paused_until && s.toss_paused_until > now);
   }
@@ -778,6 +798,8 @@ export class InvestHub {
         else err = h.error;
       }
       this.recordToss(userId, err, now);
+      // B2d-2c: rows with no type yet, asked once a KST day with this person's token (team-lead 1755 1)
+      if (p.ok) await this.fillTypes(userId, now);
     }
     for (const sym of new Set(live.map((r) => r.symbol))) {
       if (got.has(sym)) continue;

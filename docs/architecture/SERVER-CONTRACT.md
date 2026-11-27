@@ -710,8 +710,9 @@ Watch prices, keep price rules, alert. No model call anywhere in B1, and no orde
   Session: `investMode: "real"` only while real orders are on (never in B1).
 - Watchlist: `POST /api/invest/watchlist {symbol}` → `InvestSymbolRow` (201 new, 200 already there). US `^[A-Z][A-Z0-9.-]{0,9}$`,
   KR six digits; trimmed and upper-cased. With sources on, Yahoo's own "not found" → 404 `unknown_symbol`; any other
-  failure takes the symbol with its symbol as name. `DELETE /api/invest/watchlist/:symbol` → 409 `has_rules {count}` while
-  it has rules; `?withRules=1` removes both. Newest first. At most 30.
+  failure takes the symbol with its symbol as name; with a Toss login its Toss type is asked with that person's token
+  once the add is done (B2d-2c; the add never waits for it). `DELETE /api/invest/watchlist/:symbol` → 409
+  `has_rules {count}` while it has rules; `?withRules=1` removes both. Newest first. At most 30.
 - Rules: `POST /api/invest/rules/preview` (a draft, or `{ruleId, changes}`) → `InvestRulePreview` (the server's sentence,
   stop warning, `basis`, `buffer`/`bufferPct`/`bufferDefault`/`bufferFoot` for stops, `sellable` for sell stops, `callNote`
   for calls, `confirm` tap|hold; valid 10 minutes, used once). `POST /api/invest/rules {draft, previewId?}` → 201
@@ -1072,7 +1073,7 @@ keeps `{code, found: 0, text: "확인 불가"}` for it).
 - **Nothing announces a find** (DD 1551 6): the calendar, the 08:00 report's events and D-1 show it as any code event (a
   find dated tomorrow goes at that 08:00 KST D-1).
 - **Later**: BEA, the BoK's MPC, and moving or dropping what a source no longer lists (B2d-2b below); company earnings
-  (B2d-2c).
+  (B2d-2c below).
 - v14, additive, no rollback: `invest_discovery (day PK, state running|done, started_at, finished_at, result JSON)`,
   `invest_event_dismissed (user_id → users cascade, source, item, day, symbol '', dismissed_at; PK the first five)`,
   `invest_events.disc_source` and `disc_item` (null on rows before v14 and on the person's and the model's).
@@ -1111,6 +1112,65 @@ day, and a page that fails stops its source (no second request to that host that
   none of in the window while that person has its rows there is held as it is, not moved or dropped (DD 1753: a page
   whose shape changed, the whole source empty included); the source's result says `stale: ["gdp"]` and a log line
   names the kinds. Nothing announces it; the day's result keeps `moved` and `removed`, and the log line counts them.
+
+## Invest (B2d-2c) — watched stocks' next earnings
+
+The last step of the same 07:00 KST run (team-lead 1755 · 1756 · 1813 · 1823; DD 1754 · 1756 · 1757 · 1825-b). A web
+search and a model proposal per search, every figure checked by code; nothing one person's Toss token brought in reaches
+another person.
+- **The Toss type** (v15): a watched row's `security_type` and `toss_name` (Toss's Korean name) come from
+  `GET /api/v1/stocks?symbols=` asked with that person's own token: once after adding (the add does not wait for it,
+  and a failing ask is only logged), and at the next quote read for a row
+  with none, at most once a KST day per row (`type_asked_day`). A symbol not in the answer is `''` (not asked again); a
+  failed ask leaves it unknown (asked on another day); a 403 pauses the person's Toss reads and the asks with them. The
+  screen's name (`name`) stays. A row takes part when its type is STOCK, FOREIGN_STOCK, DEPOSITARY_RECEIPT or unknown
+  (null, `''`); an ETF, ETN or any other form does not. Each person by their own row only.
+- **Searches**: one per (symbol, market, subject). The subject: US the symbol; KR the person's own `toss_name`, else
+  their row's `name` with a corporate tail cut once at its end (`Co., Ltd.`, `Ltd.`, `Limited`, `Inc.`, `Corp.`,
+  `Corporation`, `Company`, `PLC`, case aside, with the comma and spaces before it; `Holdings`, `Group` stay; nothing
+  left: not cut), else (the name is the code) the code. People with the same subject share that search; its name check,
+  title and rows are theirs only. Without `deps.skills.searchWeb` (`@pickle/skills` searchWeb: the key stays in skills),
+  or when the first search answers `not_configured` (no provider key), nothing more runs: `company: { skipped:
+  "no_search" }`; without the model `{ skipped: "no_model" }`.
+- **At most 20 searches a run**, the longest unsearched first (`invest_earn_searched (symbol, market, subject,
+  searched_at)`: nothing else; a row for a symbol nobody watches is not read), the time taken before the search: one
+  search each (`web`, 8 results; US `<symbol> earnings date` in English; KR by the subject's letters: a Latin name
+  `<subject> earnings date` in English, Hangul or the code `<subject> 실적 발표일` in Korean), one model
+  call and one more only when it fails (no JSON or an error); nothing runs again that day.
+- **The model's input**: the symbol, the subject (US: a holder's row name, tail cut) and market, today and the window's
+  end, the results (title, url, published, excerpt) as untrusted data. It only proposes `{url, day, quote}` (at most
+  five).
+- **Code's checks**, each counted by reason when it fails: the url is one of this search's results (`url`); the quote
+  (6–300 characters, spaces folded) is in that result's title or excerpt as written (`quote`); a date code reads in the
+  quote (English, Korean or numeric; a date with no year only when the result's published day is in the last 90 days,
+  then the next such day; no published day, none) is the day (`date`); the title or the quote names the
+  company (the symbol as a whole word, case kept; the subject or the row names, case aside: `company`); the day is from
+  the market's today to `EVENT_SPAN_DAYS` (`window`); a T2 quote has none of `estimated`, `projected`, `tentative`,
+  `unconfirmed`, `예상` (any form), `추정`, `미확정`, `확정 공시는 없` (`estimated`; `잠정` and `expected` are not among
+  them), and says the date as the company's schedule, with `will report|announce|release|host|hold|present|publish`,
+  `scheduled to|for`, `set to report|announce|release`, `예정`, `발표한다|발표할`, `개최한다|개최할` or `공개한다|공개할`
+  (`unstated`: a calendar site writes its guess with no word at all; DD 1914-b). T1 is held to neither. A malformed
+  proposal is `bad`. The time is only the one time the quote writes in the market's zone (US: ET, KR: KST or 오전/오후),
+  else none (`시각 미정`).
+- **Evidence** (DD 1754): T1 · A for the company's own words, named by the subject: `<subject> IR` on a host starting
+  `investor.`, `investors.` or `ir.` with two names or more after it (`investors.com`, `investor.gov` are not),
+  `<subject> 보도자료` on businesswire.com, prnewswire.com, globenewswire.com, `<subject> 공시` on dart.fss.or.kr and
+  kind.krx.co.kr; anything else T2 · B named by its host without `www.` (`reuters.com · B`). The best grade's passed
+  proposals must agree on one day, else nothing that day (`conflict`); the first with a time leads.
+- **Rows**: title `<subject> 실적 발표` (`NVDA 실적 발표`, `삼성전자 실적 발표`; the heading puts nothing in front),
+  kind `earnings`, the symbol, author `code`, `disc_source` `company`, item `earn:<YYYY-MM>` (the release month). One
+  upcoming earnings row per symbol per person (from the market's today through the window). A different day moves that
+  row (day, time, item, url, source, grade, `updated_at`) when the new grade is the same or higher, else it stays; a
+  move onto a day that already holds the person's row of that title deletes the stale find. The same day: a higher grade
+  replaces url, source, grade and time (none when it writes none: `시각 미정`); the same grade with a time the row lacks
+  sets the time
+  with its own url and source; a lower grade changes nothing. An item that person deleted (source `company` · item ·
+  symbol) is neither added nor moved to. Nothing is dropped: a search is not a calendar.
+- **The result** (`company` in the day's `invest_discovery.result`): `searches`, `waiting` (over the cap), `added`,
+  `moved`, `updated`, `kept`, `skipped_rows`, `removed`, `dismissed`, and per search (`NVDA`, `005930 삼성전자`) `hits`,
+  `candidates`, `passed`, `dropped` by reason, `search: "failed"`, `model: "failed"`, `conflict`; `{ error: true }` when
+  the step threw. Counts only, in the log too (the model's tokens logged, not counted against the daily quota).
+- v15, additive, no rollback: `invest_watchlist.security_type`, `toss_name`, `type_asked_day`; `invest_earn_searched`.
 
 ## Web Push (B1c) — the lock-screen line
 

@@ -224,6 +224,7 @@ export async function buildDeps(env: Record<string, string | undefined> = proces
     skillCatalogForPrompt: optional<(e?: string[]) => string>(skillsMod, "@pickle/skills", "skillCatalogForPrompt") ?? (() => ""),
     httpStats: optional<() => Record<string, unknown>>(skillsMod, "@pickle/skills", "httpStats") ?? undefined,
     connectionServices,
+    searchWeb: optional<NonNullable<SkillsLike["searchWeb"]>>(skillsMod, "@pickle/skills", "searchWeb") ?? undefined,
   };
 
   // TWILIO_FROM is optional: without it, use the account's first voice-capable number (if it has one)

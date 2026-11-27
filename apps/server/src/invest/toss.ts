@@ -87,6 +87,17 @@ export function readPrices(j: unknown, now: number): TossPrice[] {
   return out;
 }
 
+/** GET /api/v1/stocks?symbols= (openapi 1.2.28 StockInfo): each symbol's securityType and Korean name */
+export function readStocks(j: unknown): Map<string, { type: string; name: string | null }> {
+  const out = new Map<string, { type: string; name: string | null }>();
+  for (const it of listOf(j)) {
+    const symbol = str(it.symbol);
+    const type = str(it.securityType);
+    if (symbol && type) out.set(symbol.toUpperCase(), { type: type.toUpperCase(), name: str(it.name) });
+  }
+  return out;
+}
+
 export function readHoldings(j: unknown): TossHolding[] {
   const out: TossHolding[] = [];
   for (const it of listOf(j)) {
@@ -342,6 +353,12 @@ export class TossClient {
   async prices(userId: string, symbols: string[]): Promise<TossResult<TossPrice[]>> {
     const r = await this.get(userId, `/api/v1/prices?symbols=${symbols.map(encodeURIComponent).join(",")}`);
     return r.ok ? { ok: true, value: readPrices(r.value, this.core.now()) } : r;
+  }
+
+  /** B2d-2c: the stock info of this person's own watched symbols, asked with this person's token only */
+  async stocks(userId: string, symbols: string[]): Promise<TossResult<Map<string, { type: string; name: string | null }>>> {
+    const r = await this.get(userId, `/api/v1/stocks?symbols=${symbols.map(encodeURIComponent).join(",")}`);
+    return r.ok ? { ok: true, value: readStocks(r.value) } : r;
   }
 
   async holdings(userId: string): Promise<TossResult<TossHolding[]>> {

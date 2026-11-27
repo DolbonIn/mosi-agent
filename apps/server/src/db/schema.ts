@@ -622,4 +622,19 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (user_id, source, item, day, symbol)
   );
   `,
+  // v15 (B2d-2c, team-lead 1755 · 1813 · 1823): a watched row's Toss stock type and Korean name, asked with that
+  // person's own token only ('' = asked, Toss had none), and the KST day it was last asked (once a day per row). The
+  // earnings search order: one row per (symbol, market, subject), when it was last searched; no answer, no person.
+  `
+  ALTER TABLE invest_watchlist ADD COLUMN security_type TEXT;
+  ALTER TABLE invest_watchlist ADD COLUMN toss_name TEXT;
+  ALTER TABLE invest_watchlist ADD COLUMN type_asked_day TEXT;
+  CREATE TABLE invest_earn_searched (
+    symbol TEXT NOT NULL,
+    market TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    searched_at INTEGER NOT NULL,
+    PRIMARY KEY (symbol, market, subject)
+  );
+  `,
 ];

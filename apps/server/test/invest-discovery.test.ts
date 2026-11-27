@@ -227,6 +227,7 @@ describe("the 07:00 run", () => {
       skipped: 0,
       moved: 0,
       removed: 0,
+      company: { skipped: "no_search" }, // B2d-2c: no search in this harness (team-lead 1813 1)
     });
 
     // the same day again: nothing read, nothing added

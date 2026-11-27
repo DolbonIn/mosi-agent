@@ -60,8 +60,12 @@ const shift = (day: string, days: number) => civilDate(dayNumber(day) + days);
 
 // ───────────── words (the server's; DD 0109 §1) ─────────────
 
-/** the title as cards show it: the symbol first when there is one and the title does not start with it */
-export function eventHeading(r: Pick<EventRow, "title" | "symbol">): string {
+/**
+ * the title as cards show it: the symbol first when there is one and the title does not start with it; a found
+ * earnings row already starts with its subject (US the symbol, KR the name: DD 1754), so nothing goes in front
+ */
+export function eventHeading(r: Pick<EventRow, "title" | "symbol"> & Partial<Pick<EventRow, "disc_source">>): string {
+  if (r.disc_source === "company") return r.title;
   return r.symbol && r.title !== r.symbol && !r.title.startsWith(`${r.symbol} `) ? `${r.symbol} ${r.title}` : r.title;
 }
 

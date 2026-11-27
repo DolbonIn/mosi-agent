@@ -24,6 +24,8 @@
  *   moves when its item is listed on another day; a failed, resting or junk source changes nothing, and so does a kind
  *   (the item before ':') the source gave none of in the window (its shape more likely changed: DD 1753).
  * - Nothing announces a find (DD 1551 6): the calendar, the 08:00 report's events and D-1 show it, as any code event.
+ * - Last, watched stocks' next earnings (B2d-2c, earnings.ts): a web search and one model proposal per search, every
+ *   figure checked by code; its counts under `company` in the day's result.
  */
 import type { InvestEventKind } from "@pickle/protocol";
 import { civilDate, dayNumber, weekday } from "@pickle/quant";
@@ -32,6 +34,7 @@ import { HttpError } from "../http.ts";
 import { errInfo } from "../log.ts";
 import { etDate, kstDay, marketClock, marketDate, type Market } from "./calendar.ts";
 import { createEvent, EVENT_MAX_DAYS, EVENT_SPAN_DAYS } from "./events.ts";
+import { discoverEarnings, type EarningsResult } from "./earnings.ts";
 import { SOURCE_TABLE, type DiscoverySource, type SourceGate } from "./sources.ts";
 
 /** team-lead 1550 7: before the 08:00 report and D-1, every day (weekends and holidays too) */
@@ -346,6 +349,8 @@ export interface DiscoveryResult {
   /** finds a source read whole and ok no longer lists on their day: moved to the day it lists, or dropped (team-lead 1700 1) */
   moved: number;
   removed: number;
+  /** B2d-2c: the earnings step's counts (`skipped: "no_search"` without a search, `error` when it threw) */
+  company?: EarningsResult | { skipped: "no_search" | "no_model" } | { error: true };
 }
 
 /** what a source gave that falls in its window, from the market's today */
@@ -476,6 +481,12 @@ export async function discoverDay(core: Core, gate: SourceGate, now: number): Pr
     const list = [...kinds].sort();
     result.sources[source] = { ...result.sources[source]!, stale: list };
     core.log.warn("invest discovery: kinds the source gave none of, rows held", { source, kinds: list.join(" ") });
+  }
+  try {
+    result.company = await discoverEarnings(core, now);
+  } catch (err) {
+    core.log.error("invest earnings failed", { err: errInfo(err) });
+    result.company = { error: true };
   }
   core.db.sql.query("UPDATE invest_discovery SET state = 'done', finished_at = $n, result = $r WHERE day = $d").run({ n: core.now(), r: JSON.stringify(result), d: day });
   core.log.info("invest discovery", {

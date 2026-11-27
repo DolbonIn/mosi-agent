@@ -16,6 +16,8 @@ export interface FakeCall {
   account: string | null;
   body: string | null;
   userAgent: string | null;
+  /** Toss API calls: the client_id the call's token was issued to (null: no such token) */
+  client?: string | null;
 }
 
 /** Toss's /api/v1/prices has no previous close (openapi.json 1.2.28); `prevClose` is ignored here, kept for Yahoo-shaped calls */
@@ -70,6 +72,9 @@ export function makeInvestUpstream() {
     /** B2d-2b: BEA's ICS; the Bank of Korea's MPC list by its pYear (unset years answer 404) */
     bea: null as string | number | null,
     bok: new Map<string, string | number>(),
+    /** B2d-2c: GET /api/v1/stocks per symbol (securityType, Korean name); `tossStocksBy` per client_id first */
+    tossStocks: new Map<string, { securityType: string; name: string }>(),
+    tossStocksBy: new Map<string, Map<string, { securityType: string; name: string }>>(),
   };
 
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -98,6 +103,7 @@ export function makeInvestUpstream() {
       }
       if (state.tossStatus) return json({ error: { code: "x" } }, state.tossStatus);
       const bearer = /^Bearer (.+)$/.exec(headers.get("authorization") ?? "")?.[1] ?? "";
+      calls[calls.length - 1]!.client = tokens.get(bearer) ?? null;
       if (!tokens.has(bearer) || state.tossRevoked.has(bearer)) return json({ error: { code: "invalid_token" } }, 401);
       // the account surfaces need X-Tossinvest-Account (openapi.json AccountSeq, required); market data does not
       if (["/api/v1/holdings", "/api/v1/sellable-quantity", "/api/v1/buying-power"].includes(url.pathname)) {
@@ -106,6 +112,17 @@ export function makeInvestUpstream() {
       }
       if (url.pathname === "/api/v1/accounts") return json({ result: state.tossAccounts });
       if (url.pathname === "/api/v1/buying-power") return json({ result: { currency: "KRW", cashBuyingPower: "1000000" } });
+      if (url.pathname === "/api/v1/stocks") {
+        const syms = (url.searchParams.get("symbols") ?? "").split(",").filter(Boolean);
+        const mine = state.tossStocksBy.get(tokens.get(bearer) ?? "");
+        return json({
+          result: syms.flatMap((s) => {
+            const a = mine?.get(s) ?? state.tossStocks.get(s);
+            const kr = /^\d{6}$/.test(s);
+            return a ? [{ symbol: s, name: a.name, englishName: s, isinCode: "XX0000000000", market: kr ? "KOSPI" : "NASDAQ", securityType: a.securityType, isCommonShare: true, status: "ACTIVE", currency: kr ? "KRW" : "USD", sharesOutstanding: "1000" }] : [];
+          }),
+        });
+      }
       if (url.pathname === "/api/v1/prices") {
         const syms = (url.searchParams.get("symbols") ?? "").split(",").filter(Boolean);
         // the shapes of the public openapi.json (1.2.28), synthetic values

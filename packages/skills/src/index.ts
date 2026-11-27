@@ -42,7 +42,7 @@ export type { SkillTool, SkillMeta, SkillConnection } from "./util";
 export { connectionServices } from "./connected/services";
 export { resetDirectState } from "./direct";
 export type { TossSession } from "./connected/toss";
-export { configuredProviders as webSearchProviders, resetWebSearchState } from "./web/providers";
+export { configuredProviders as webSearchProviders, resetWebSearchState, searchWeb } from "./web/providers";
 export { resetWebReadState, setWebLookup, WEB_USER_AGENT } from "./web/net";
 
 /** All tools, in catalog order. */

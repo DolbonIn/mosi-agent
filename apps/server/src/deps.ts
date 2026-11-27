@@ -101,7 +101,29 @@ export interface SkillsLike {
   httpStats?(): Record<string, unknown>;
   /** @pickle/skills connectionServices(): the k-skill services a person connects with their own account */
   connectionServices?(): ConnectionService[];
+  /**
+   * @pickle/skills searchWeb(): one search through the first provider with a key (B2d-2c, team-lead 1813 1); the key
+   * stays inside skills (its own request header). Not set: invest's earnings step does not run.
+   */
+  searchWeb?(q: WebSearchQuery, signal: AbortSignal): Promise<WebSearchResult>;
 }
+
+/** the slice of @pickle/skills' search query and result the server reads */
+export interface WebSearchQuery {
+  query: string;
+  kind: "web" | "news";
+  lang: "ko" | "en";
+  limit: number;
+  page: number;
+}
+export interface WebSearchHit {
+  title: string;
+  url: string;
+  snippet: string;
+  /** YYYY-MM-DD when the provider gives one */
+  date?: string;
+}
+export type WebSearchResult = { ok: true; hits: WebSearchHit[] } | { ok: false; error: { kind: string } };
 
 /**
  * k-skill logins (@pickle/agent ConnectionRegistry, docs/architecture/KSKILL-CONNECTIONS.md): the catalog, per-user
