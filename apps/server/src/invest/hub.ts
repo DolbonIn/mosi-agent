@@ -99,6 +99,7 @@ import {
   type Stored,
 } from "./report.ts";
 import { OrderDesk } from "./orders.ts";
+import { realBlockerText } from "./real.ts";
 import { judgeDay, stageCallText, stageRowText, stagesView, type FlowRead, type JudgmentRow } from "./stages.ts";
 import { alertLine, chartAria, chartFoot, chartLevels, chartNote } from "./symbol.ts";
 import { cachedGet, parseYahooDaily, parseYahooQuote, SourceGate, SOURCE_TABLE, yahooUrl, type Quote, type SourceKey } from "./sources.ts";
@@ -340,11 +341,14 @@ export class InvestHub {
     const s = idb.ensureSettings(this.core.db, userId, this.core.now());
     const toss = await this.tossStatus(userId, s);
     const blockers: InvestSettingsView["realBlockers"] = [];
+    // B3b: the server switch first (with it off every enable is refused); a 429 pause blocks too (no Toss read then)
+    if (!this.core.cfg.invest.orders) blockers.push("orders_off");
     if (!this.toss.base()) blockers.push("toss_off");
     else if (!toss.connected) blockers.push("toss_not_connected");
     else {
       if (!toss.okAt) blockers.push("toss_never_ok");
       if (toss.error?.code === "ip_not_allowed") blockers.push("toss_ip_blocked");
+      else if (!this.tossUsable(s, this.core.now())) blockers.push("toss_paused");
     }
     const callBlock = this.callBlock(userId);
     return {
@@ -358,6 +362,7 @@ export class InvestHub {
       phone: myPhoneView(readMyPhone(this.core, userId)),
       openOrders: idb.openOrders(this.core.db, userId),
       realBlockers: blockers,
+      realBlockerText: realBlockerText(blockers),
     };
   }
 
@@ -685,7 +690,7 @@ export class InvestHub {
 
   // ───────────────────────────── Toss ─────────────────────────────
 
-  private recordToss(userId: string, error: TossErrorCode | null, now: number): void {
+  recordToss(userId: string, error: TossErrorCode | null, now: number): void {
     const { db } = this.core;
     if (!error) {
       idb.updateSettings(db, userId, { toss_ok_at: now, toss_error: null, toss_error_at: null, toss_paused_until: null }, now);
@@ -781,6 +786,7 @@ export class InvestHub {
     this.holdingsByUser.delete(userId);
     const s = idb.getSettings(core.db, userId);
     if (s) idb.updateSettings(core.db, userId, { mode: "mock", real_since: null, toss_ok_at: null, toss_error: null, toss_error_at: null, toss_paused_until: null }, core.now());
+    idb.clearConfirms(core.db, userId);
     await this.publish(userId);
   }
 
@@ -1131,6 +1137,21 @@ export class InvestHub {
     if (!notify) return { threadId, messageId };
     this.bannerFor(userId, banner, threadId, messageId, ruleId);
     return { threadId, messageId };
+  }
+
+  /**
+   * B3b: turning real orders on or off is the person's own act: an event row in the invest thread (the small centred
+   * line), with the `[투자 기록]` line for the model (DD 2044 §5). No banner, no push, not unread.
+   */
+  recordEvent(userId: string, text: string, record: string): void {
+    const { core } = this;
+    const threadId = this.ensureThread(userId);
+    const messageId = newId("m");
+    const now = core.now();
+    core.db.insertMessage({ id: messageId, threadId, role: "event", text, llm: [{ role: "assistant", content: record }], createdAt: now });
+    core.db.touchThread(threadId, now, text);
+    publishMessage(core, messageId);
+    publishThread(core, threadId);
   }
 
   /** the banner and push of a row already stored (a real order's next step: B3a); its thread comes up unread */

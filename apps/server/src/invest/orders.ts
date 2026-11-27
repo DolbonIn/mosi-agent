@@ -238,7 +238,8 @@ export class OrderDesk {
     }
     if (!core.cfg.invest.orders) return { kind: "skip", code: "server_off" };
     const c = r ? idb.realConfirm(db, userId, r.id) : null;
-    if (!r || !c || c.rev !== r.rev || !(c.qty > 0)) return planned ? { kind: "cancel", code: "disabled" } : { kind: "skip", code: "not_confirmed" };
+    // planned: real mode is on (above), so the person's confirmation was taken back or rewritten (DD 2314 §6)
+    if (!r || !c || c.rev !== r.rev || !(c.qty > 0)) return planned ? { kind: "cancel", code: "confirm_changed" } : { kind: "skip", code: "not_confirmed" };
     const w = orderWindow(market, now, this.h.dayOverride(userId));
     if (w.kind === "unknown") return { kind: "skip", code: "calendar_unknown" };
     if (w.kind === "early_close") return { kind: "skip", code: "early_close" };
@@ -522,7 +523,7 @@ export class OrderDesk {
     if (idb.getSettings(db, row.user_id)?.mode !== "real") return { state: "canceled", code: "disabled" };
     if (!core.cfg.invest.orders) return { state: "skipped", code: "server_off" };
     const c = idb.realConfirm(db, row.user_id, row.rule_id);
-    if (!c || c.rev !== r.rev || !(c.qty > 0) || row.qty == null || row.qty > c.qty) return { state: "canceled", code: "disabled" };
+    if (!c || c.rev !== r.rev || !(c.qty > 0) || row.qty == null || row.qty > c.qty) return { state: "canceled", code: "confirm_changed" };
     return null;
   }
 

@@ -572,12 +572,14 @@ const SKIP_TITLE: Readonly<Record<string, string>> = {
   rule_changed: "손절 규칙이 바뀌어서 주문을 내지 않았어요",
   rule_deleted: "손절 규칙을 지워서 주문을 내지 않았어요",
   disabled: "실제 주문을 꺼서 주문을 내지 않았어요",
+  confirm_changed: "실제 매도 확인이 바뀌어서 주문을 내지 않았어요",
   key_removed: "토스증권 연결을 지워서 주문을 내지 않았어요",
 };
 
 /** a planned order (scheduled, or waiting out a 429 pause) that does not go out (DD 2044 1-2, 2046-b) */
 const PLANNED_TITLE: Readonly<Record<string, string>> = {
   disabled: "실제 주문을 꺼서 예정된 주문을 내지 않았어요",
+  confirm_changed: "실제 매도 확인이 바뀌어서 예정된 주문을 내지 않았어요",
   rule_changed: "손절 규칙이 바뀌어서 예정된 주문을 내지 않았어요",
   rule_deleted: "손절 규칙을 지워서 예정된 주문을 내지 않았어요",
   key_removed: "토스증권 연결을 지워서 예정된 주문을 내지 않았어요",

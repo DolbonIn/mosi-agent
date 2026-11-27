@@ -133,7 +133,8 @@ describe("invest routes", () => {
     expect(ov.body.watch).toEqual({ state: "off", text: "지금은 시세를 받지 않아요" });
     expect(ov.body.quotesFoot).toBeNull(); // DD 0454-b: no period sentence while nothing is checked
     expect(ov.body.settings.toss.error?.code).toBe("off");
-    expect(ov.body.settings.realBlockers).toEqual(["toss_off"]);
+    expect(ov.body.settings.realBlockers).toEqual(["orders_off", "toss_off"]); // B3b: the switch is off here
+    expect(ov.body.settings.realBlockerText).toBe("실제 주문은 아직 준비 중이라 켤 수 없어요.");
     expect(ov.body.settings.callBlock).toBe("not_configured");
     // DD 2341: the call footnote and the default buffer come from the server; footnote sentences end in a period
     expect(ov.body.settings.callNote).toBe("지금은 전화를 걸 수 없어요.");
@@ -610,7 +611,7 @@ describe("invest Toss status", () => {
     let st = (await api<InvestOverview>(w, "GET", "/api/invest")).body.settings;
     expect(st.toss).toMatchObject({ connected: true, error: null, outboundIp: "203.0.113.7" });
     expect(st.toss.okAt).not.toBeNull();
-    expect(st.realBlockers).toEqual([]);
+    expect(st.realBlockers).toEqual(["orders_off"]); // Toss is fine; the server switch is off in this world (B3b)
     expect(w.up.calls.filter((c) => c.path === "/oauth2/token")).toHaveLength(1);
     const tok = w.up.calls.find((c) => c.path === "/oauth2/token")!;
     expect(tok.body).toContain("grant_type=client_credentials");
@@ -627,7 +628,7 @@ describe("invest Toss status", () => {
     const tried = w.up.calls.slice(before).map((c) => c.path);
     expect(tried).toEqual(["/api/v1/holdings", "/oauth2/token", "/api/v1/holdings"]); // once more with a new token
     st = (await api<InvestOverview>(w, "GET", "/api/invest")).body.settings;
-    expect(st.realBlockers).toEqual(["toss_ip_blocked"]);
+    expect(st.realBlockers).toEqual(["orders_off", "toss_ip_blocked"]);
 
     // the watch does not call Toss while it rests
     await watch(w, "SOXL");
@@ -641,7 +642,8 @@ describe("invest Toss status", () => {
     st = (await api<InvestOverview>(w, "GET", "/api/invest")).body.settings;
     expect(st.toss.connected).toBe(false);
     expect(st.mode).toBe("mock");
-    expect(st.realBlockers).toEqual(["toss_not_connected"]);
+    expect(st.realBlockers).toEqual(["orders_off", "toss_not_connected"]);
+    expect(st.realBlockerText).toBe("실제 주문은 아직 준비 중이라 켤 수 없어요."); // the switch's sentence comes first (DD 2044 §4)
   });
 
   test("no Toss calls without PICKLE_TOSS_BASE, even with a saved key", async () => {

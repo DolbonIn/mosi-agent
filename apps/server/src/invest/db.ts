@@ -248,11 +248,14 @@ export function updateRuleWatch(
   );
 }
 
+/** a rule goes with its real-sale confirmation (B3b) */
 export function deleteRule(db: Db, userId: string, id: string): boolean {
+  db.sql.query("DELETE FROM invest_real_confirms WHERE rule_id = $id AND user_id = $u").run({ id, u: userId });
   return db.sql.query("DELETE FROM invest_rules WHERE id = $id AND user_id = $u").run({ id, u: userId }).changes > 0;
 }
 
 export function deleteSymbolRules(db: Db, userId: string, symbol: string): number {
+  db.sql.query("DELETE FROM invest_real_confirms WHERE user_id = $u AND rule_id IN (SELECT id FROM invest_rules WHERE user_id = $u AND symbol = $s)").run({ u: userId, s: symbol });
   return db.sql.query("DELETE FROM invest_rules WHERE user_id = $u AND symbol = $s").run({ u: userId, s: symbol }).changes;
 }
 
@@ -363,8 +366,21 @@ export function getPreview(db: Db, userId: string, id: string, now: number): { k
   } | null;
 }
 
-export function usePreview(db: Db, id: string, now: number): void {
-  db.sql.query("UPDATE invest_previews SET used_at = $n WHERE id = $id").run({ id, n: now });
+/** false: another request used it first */
+export function usePreview(db: Db, id: string, now: number): boolean {
+  return db.sql.query("UPDATE invest_previews SET used_at = $n WHERE id = $id AND used_at IS NULL").run({ id, n: now }).changes > 0;
+}
+
+/** B3b: the person's real-order sheets still in their 10 minutes (`ttl`: how long one lives), used or not */
+export function realPreviewCount(db: Db, userId: string, now: number): number {
+  return (db.sql.query("SELECT COUNT(*) AS n FROM invest_previews WHERE user_id = $u AND kind = 'real' AND expires_at > $n").get({ u: userId, n: now }) as { n: number }).n;
+}
+
+/** B3b: the person's newest unused real-order sheet that expires after `after` (made within the reuse window), or null */
+export function liveRealPreview(db: Db, userId: string, after: number): { id: string; spec_json: string; expires_at: number } | null {
+  return db.sql
+    .query("SELECT id, spec_json, expires_at FROM invest_previews WHERE user_id = $u AND kind = 'real' AND used_at IS NULL AND expires_at > $a ORDER BY expires_at DESC LIMIT 1")
+    .get({ u: userId, a: after }) as { id: string; spec_json: string; expires_at: number } | null;
 }
 
 // ───────────── B3a: real stop orders (v17) ─────────────
@@ -480,6 +496,16 @@ export function setRealOrderMessage(db: Db, id: string, messageId: string, now: 
 /** the quantity the person confirmed for real selling at a rule's rev (B3b writes it; the executor reads it) */
 export function realConfirm(db: Db, userId: string, ruleId: string): RealConfirmRow | null {
   return db.sql.query("SELECT * FROM invest_real_confirms WHERE rule_id = $r AND user_id = $u").get({ r: ruleId, u: userId }) as RealConfirmRow | null;
+}
+
+/** B3b: every confirmation the person has goes (real mode off, the Toss login removed, before enable writes its own) */
+export function clearConfirms(db: Db, userId: string): void {
+  db.sql.query("DELETE FROM invest_real_confirms WHERE user_id = $u").run({ u: userId });
+}
+
+/** B3b: a rule saved without a new confirmation keeps none from its earlier rev */
+export function deleteConfirm(db: Db, userId: string, ruleId: string): void {
+  db.sql.query("DELETE FROM invest_real_confirms WHERE rule_id = $r AND user_id = $u").run({ r: ruleId, u: userId });
 }
 
 export function confirmReal(db: Db, userId: string, ruleId: string, rev: number, qty: number, now: number): void {

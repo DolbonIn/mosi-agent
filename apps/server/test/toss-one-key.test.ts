@@ -161,7 +161,7 @@ describe("one Toss login", () => {
     const st = (await overview(h, a)).settings;
     expect(st.toss).toMatchObject({ connected: true, error: null });
     expect(st.toss.okAt).not.toBeNull();
-    expect(st.realBlockers).toEqual([]);
+    expect(st.realBlockers).toEqual(["orders_off"]); // Toss is fine; the server switch is off in this world (B3b)
     expect(tokenCalls()).toHaveLength(1);
     expect(tokenCalls()[0]!.body).toContain(`client_id=${ALICE_KEY.clientId}`);
     expect(tokenCalls()[0]!.userAgent).toMatch(KSKILL_UA); // the connect check asked; invest reused it

@@ -93,9 +93,12 @@ export interface InvestTossStatus {
   error: { code: "ip_not_allowed" | "auth" | "rate_limited" | "down" | "off"; at: Millis; text: string } | null;
 }
 
-/** Why real orders cannot be turned on (B4). A device without a device key cannot sign: the app knows that itself
- * and says so first (DD 2042-b §5); the server refuses an unsigned enable. */
-export type InvestRealBlocker = "toss_off" | "toss_not_connected" | "toss_never_ok" | "toss_ip_blocked";
+/**
+ * Why real orders cannot be turned on (B3b). `orders_off`: the server switch (PICKLE_INVEST_ORDERS) is off;
+ * `toss_paused`: Toss is in a short pause after a 429. A device without a device key cannot sign: the app knows that
+ * itself and says so first (DD 2042-b §5); the server refuses an unsigned enable.
+ */
+export type InvestRealBlocker = "orders_off" | "toss_off" | "toss_not_connected" | "toss_never_ok" | "toss_ip_blocked" | "toss_paused";
 
 export interface InvestSettingsView {
   mode: InvestMode;
@@ -112,6 +115,8 @@ export interface InvestSettingsView {
   phone: { masked: string; verified: boolean } | null;
   openOrders: number;
   realBlockers: InvestRealBlocker[];
+  /** the one sentence the 실제 주문 row's foot gives for the first blocker (DD 2044 §4 order); null with none */
+  realBlockerText: string | null;
 }
 
 export interface InvestWatch {
@@ -161,7 +166,7 @@ export interface InvestStageGauge {
 export type InvestStages =
   /** this server reads no public source: 지금은 지표를 받지 않아서 단계를 판정하지 않아요. */
   | { kind: "off"; off: string }
-  /** before the first judgment: 첫 판정은 오늘 08:00에 나와요. */
+  /** before the first judgment: 첫 판정은 오늘 오전 8시에 나와요. */
   | { kind: "none"; none: string }
   | {
       kind: "judged";
@@ -376,6 +381,7 @@ export type InvestStopReason =
   | "toss_not_connected"
   | "server_off"
   | "disabled"
+  | "confirm_changed"
   | "key_removed"
   | "rule_changed"
   | "rule_deleted"
@@ -789,4 +795,46 @@ export interface InvestEventDraft {
 /** PATCH /api/invest/settings */
 export interface InvestSettingsPatch {
   calls?: Partial<InvestSettingsView["calls"]>;
+}
+
+/** one sell stop the real-order sheet lists (DD 1935 §3-5, 2042-b §2): a held symbol's watched stop, per rule */
+export interface InvestRealTarget {
+  ruleId: string;
+  rev: number;
+  symbol: string;
+  /** what Toss said can be sold when the sheet was drawn: the quantity confirmed on enable */
+  qty: InvestNum;
+  /** `SOXL · 47주 전량` */
+  head: string;
+  /** `종가 $25.80 이하 또는 장중 $24.51 이하`, ` · 장중 버퍼 7%(직접 정함)` when the person set the buffer */
+  line: string;
+  /** the second line (footnote, label-2), the cards' words: `지금은 장중 가격만으로 판단해요.` for a stop judged on intraday
+   * prices only (DD 0010-b 1); null otherwise */
+  note: string | null;
+}
+
+/**
+ * POST /api/invest/real/preview: what turning real orders on would sell (B3b). The words that change come from the
+ * server; the sheet's title, first sentence, buttons and busy label are the app's. Used once, for 10 minutes.
+ */
+export interface InvestRealPreview {
+  previewId: string;
+  expiresAt: Millis;
+  targets: InvestRealTarget[];
+  /** `보유하지 않아 팔지 않아요: SOXS, TQQQ`, or null */
+  notHeld: string | null;
+  /** the operating-default buffer's footnote under the list (DD 2042-b §2), or null */
+  bufferFoot: string | null;
+  /** no targets: the list's place and its footnote (DD 2044 §4) */
+  empty: { text: string; foot: string } | null;
+  /** the conditions, one line each, in order (DD 1935 §3-5, 2042-b §3, 2044 §4) */
+  conditions: string[];
+}
+
+/** POST /api/invest/real/enable: signed with the device key over `approve:<previewId>:<nonce>` (the approvals' message) */
+export interface InvestRealEnable {
+  previewId: string;
+  deviceId: string;
+  nonce: string;
+  signature: string;
 }

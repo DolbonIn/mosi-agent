@@ -315,6 +315,9 @@ export function createApp(deps: AppDeps): App {
   r.on("GET", "/api/invest/toss", authed(invest.toss));
   r.on("POST", "/api/invest/toss/check", authed(invest.tossCheck));
   r.on("PATCH", "/api/invest/settings", authed(invest.settings));
+  r.on("POST", "/api/invest/real/preview", authed(invest.realPreview));
+  r.on("POST", "/api/invest/real/enable", authed(invest.realEnable));
+  r.on("POST", "/api/invest/real/disable", authed(invest.realDisable));
   // invest B2a: the ledger, forecasts and events — no model call behind any of them
   r.on("GET", "/api/invest/ledger", authed(invest.ledger));
   r.on("POST", "/api/invest/ledger", authed(invest.addLedger));

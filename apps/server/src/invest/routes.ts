@@ -10,6 +10,7 @@ import { bad, HttpError, json, notFound, readJson, type Ctx } from "../http.ts";
 import { newId } from "../util.ts";
 import { marketDate, marketOf, normalizeSymbol } from "./calendar.ts";
 import * as idb from "./db.ts";
+import { disableReal, enableReal, realPreview } from "./real.ts";
 import { reportView } from "./report.ts";
 import { stagesDetail } from "./stages.ts";
 import { createEvent, deleteEvent, listEvents, setEventRemind } from "./events.ts";
@@ -190,7 +191,10 @@ interface PreviewSaved {
   ruleRev: number | null;
   spec: RuleSpec;
   qty: number | null;
+  /** the mode the sentence was drawn in (B3b): a save in another mode is stale; absent (drawn before B3b) = mock */
+  mode?: "mock" | "real";
 }
+
 
 export function investRoutes(core: Core) {
   const hub = () => core.invest;
@@ -220,7 +224,7 @@ export function investRoutes(core: Core) {
     const changed = !before || !sameSpec(before, spec);
     const sentence = changed ? (change ? `${change} ${result}` : result) : `지금 규칙이에요. ${result}`;
     const previewId = newId("ip");
-    const saved: PreviewSaved = { ruleId: before?.id ?? null, ruleRev: before?.rev ?? null, spec: specOf(spec), qty };
+    const saved: PreviewSaved = { ruleId: before?.id ?? null, ruleRev: before?.rev ?? null, spec: specOf(spec), qty, mode: ctx.mode };
     idb.putPreview(core.db, { id: previewId, user_id: userId, kind: before ? "patch" : "create", spec_json: JSON.stringify(saved), expires_at: now + PREVIEW_TTL_MS });
     const isSell = spec.kind === "stop" && spec.action === "sell";
     const qtyNum: InvestNum | null = isSell ? (qty != null ? { v: qty, text: shares(qty), unit: "qty" } : { v: null, text: "확인 불가", unit: "qty" }) : null;
@@ -243,9 +247,12 @@ export function investRoutes(core: Core) {
     };
   }
 
-  /** a previewId sent with a save: still unused, unexpired, for this rule at this rev, the same spec and quantity */
-  async function checkPreview(userId: string, previewId: unknown, before: idb.RuleRow | null, spec: RuleSpec): Promise<void> {
-    if (previewId === undefined || previewId === null) return;
+  /**
+   * A previewId sent with a save: still unused, unexpired, for this rule at this rev, the same spec and quantity, drawn
+   * in the mode it is saved in (read after the last wait). Returns what it kept (null: none sent).
+   */
+  async function checkPreview(userId: string, previewId: unknown, before: idb.RuleRow | null, spec: RuleSpec): Promise<PreviewSaved | null> {
+    if (previewId === undefined || previewId === null) return null;
     const stale = async () => {
       throw new HttpError(409, "preview_stale", INVEST_ERRORS.preview_stale, undefined, { preview: await buildPreview(userId, before, spec) });
     };
@@ -260,7 +267,21 @@ export function investRoutes(core: Core) {
     }
     if (saved.ruleId !== (before?.id ?? null) || saved.ruleRev !== (before?.rev ?? null) || !sameSpec(saved.spec, spec)) return stale();
     if ((await sellableQty(userId, spec)) !== saved.qty) return stale();
-    idb.usePreview(core.db, previewId, core.now());
+    if ((saved.mode ?? "mock") !== idb.ensureSettings(core.db, userId, core.now()).mode) return stale();
+    // two saves with one preview: the second is stale (two creates would make two rules)
+    if (!idb.usePreview(core.db, previewId, core.now())) return stale();
+    return saved;
+  }
+
+  /**
+   * B3b (team-lead 2040 2): a save in real mode with its preview (drawn in real mode: checkPreview, with no wait since)
+   * that showed a quantity to sell — only a sell stop's does — confirms the rule at its new rev with that quantity (the
+   * long press); any other save of the rule leaves it unconfirmed. Called in the save's own step.
+   */
+  function confirmSaved(userId: string, ruleId: string, rev: number, saved: PreviewSaved | null): void {
+    const real = idb.getSettings(core.db, userId)?.mode === "real";
+    if (real && saved && saved.qty != null && saved.qty > 0) idb.confirmReal(core.db, userId, ruleId, rev, saved.qty, core.now());
+    else idb.deleteConfirm(core.db, userId, ruleId);
   }
 
   function requireWatched(userId: string, symbol: string): idb.WatchRow {
@@ -359,7 +380,7 @@ export function investRoutes(core: Core) {
       if (idb.rules(core.db, userId).length >= MAX_RULES) throw bad(INVEST_ERRORS.too_many_rules, "too_many_rules");
       const s = idb.ensureSettings(core.db, userId, now);
       if (spec.action === "sell" && s.mode === "real" && (await sellableQty(userId, spec)) === 0) throw bad(INVEST_ERRORS.not_held, "not_held");
-      await checkPreview(userId, body.previewId, null, spec);
+      const saved = await checkPreview(userId, body.previewId, null, spec);
       const row: idb.RuleRow = {
         id: newId("ir"),
         user_id: userId,
@@ -377,7 +398,10 @@ export function investRoutes(core: Core) {
         created_at: now,
         updated_at: now,
       };
-      idb.insertRule(core.db, row);
+      core.db.tx(() => {
+        idb.insertRule(core.db, row);
+        confirmSaved(userId, row.id, row.rev, saved);
+      });
       await hub().publish(userId);
       return json(view(userId, idb.rule(core.db, userId, row.id)!), 201);
     },
@@ -391,7 +415,7 @@ export function investRoutes(core: Core) {
       const spec = specWithChanges(r, body.changes ?? {}, now);
       const s = idb.ensureSettings(core.db, userId, now);
       if (spec.action === "sell" && r.action !== "sell" && s.mode === "real" && (await sellableQty(userId, spec)) === 0) throw bad(INVEST_ERRORS.not_held, "not_held");
-      await checkPreview(userId, body.previewId, r, spec);
+      const saved = await checkPreview(userId, body.previewId, r, spec);
       // any save of a stopped or expired rule watches it again; a moved line forgets the earlier state (team-lead 2045-8)
       let state = r.state;
       let paused_at = r.paused_at;
@@ -409,6 +433,7 @@ export function investRoutes(core: Core) {
         const cur = idb.rule(core.db, userId, r.id);
         if (!cur || cur.rev !== r.rev) throw new HttpError(409, "rule_changed", INVEST_ERRORS.rule_changed, undefined, { rule: cur ? view(userId, cur) : null });
         idb.updateRuleDefinition(core.db, { id: r.id, user_id: userId, ...spec, state, paused_at, seen_slot }, now);
+        confirmSaved(userId, r.id, idb.rule(core.db, userId, r.id)!.rev, saved);
       });
       hub().ruleChanged(userId, r.id, false);
       await hub().publish(userId);
@@ -429,6 +454,12 @@ export function investRoutes(core: Core) {
       if ((await hub().checkToss(userId, { floor: true })) === "too_soon") throw new HttpError(429, "toss_check_too_soon", INVEST_ERRORS.toss_check_too_soon);
       return json(await hub().tossStatus(userId, idb.ensureSettings(core.db, userId, core.now())));
     },
+
+    // ── B3b: real orders on and off (real.ts) ──
+
+    realPreview: async (_c: Ctx, userId: string) => json(await realPreview(core, userId)),
+    realEnable: async (c: Ctx, userId: string) => json(await enableReal(core, userId, await readJson<Record<string, unknown>>(c.req))),
+    realDisable: async (_c: Ctx, userId: string) => json(await disableReal(core, userId)),
 
     settings: async (c: Ctx, userId: string) => {
       const body = await readJson<InvestSettingsPatch>(c.req);

@@ -429,6 +429,11 @@ export async function decideProposal(core: Core, userId: string, id: string | un
           { ...rule, price: i.after.price, lo: i.after.lo, hi: i.after.hi, direction: i.after.direction, state: "armed", paused_at: null, seen_slot: resumed ? SEEN_RESUMED : SEEN_EDITED },
           now,
         );
+        // B3b: the long press on 바꾸기 confirms a sell stop with the quantity the card printed (only a card drawn in real
+        // mode has one; the stale check compared it with Toss's sellable), while real mode is still on
+        const moved = idb.rule(core.db, userId, i.ruleId)!;
+        if (idb.getSettings(core.db, userId)?.mode === "real" && isSell(moved) && cur.qty != null && cur.qty > 0) idb.confirmReal(core.db, userId, moved.id, moved.rev, cur.qty, now);
+        else idb.deleteConfirm(core.db, userId, moved.id);
       } else {
         idb.insertRule(core.db, {
           id: newId("ir"),

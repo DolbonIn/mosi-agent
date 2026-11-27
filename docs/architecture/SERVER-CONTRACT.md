@@ -907,7 +907,7 @@ Code: `apps/server/src/invest/stages.ts`, `stage-ledger.ts`; every comparison an
   line before the ledger's says the constant's number: `코스피 일봉과 외국인 수급은 마지막 값 뒤에 끝난 한국 거래일이 2일
   이상이면 확인 불가예요.`
 - **`overview.stages: InvestStages`** — `{kind: "off", off}` ("지금은 지표를 받지 않아서 단계를 판정하지 않아요."), `{kind:
-  "none", none}` ("첫 판정은 오늘 08:00에 나와요." / "첫 판정은 곧 나와요."), or `{kind: "judged", escape, recovery,
+  "none", none}` ("첫 판정은 오늘 오전 8시에 나와요." / "첫 판정은 곧 나와요."), or `{kind: "judged", escape, recovery,
   gauges, next, judgedAt, judgedText, stale?}`. A head is `{stage, name?, floor?, text, pending?, pendingTone?}`: a
   settled stage has its name ("탈출 3단계", "방어 준비"); a floor has the least stage and no name ("탈출 최소 1단계"); the
   recovery may be "회복 단계 미확정" (outcomes include hold) or "회복 판정 보류" (stage null for both). `pending` counts,
@@ -1229,8 +1229,7 @@ Indicator 9 and R6's foreign side (team-lead 1854, DD 1857-b). Code: `apps/serve
 A sell stop hit in real mode becomes a real Toss order (team-lead 0052 · 2040 · 2045b; DD 1935 §2-2, 2044, 2046-b).
 Code: `apps/server/src/invest/orders.ts` (the desk), `toss.ts` (`sellStop`, `order`, `ordersSince`), `cards.ts`
 (`realStopCard`, `realStopBanner`, `realStopCallLine`), `hub.ts` (`fire`, `beat`, `ruleChanged`, `onTossRemoved`).
-B3a has no way to turn real mode on and no way to confirm a rule for real selling (B3b adds both), so no real order is
-sent from it; tests write both into the database.
+B3a has no way to turn real mode on and no way to confirm a rule for real selling: B3b (the next section) adds both.
 - **The server switch**: `PICKLE_INVEST_ORDERS=on` (`cfg.invest.orders`). Off (the default): every hit is `skipped
   server_off` and nothing is POSTed; a restart without it stops real orders.
 - **The gates, in order** (G8): the switch; the rule confirmed at its current rev with a quantity
@@ -1280,7 +1279,9 @@ sent from it; tests write both into the database.
   → `rule_changed` / `rule_deleted`; real mode off → `disabled`; the Toss login removed → `key_removed`; nothing to sell
   at the time → `zero_sellable`: no banner, no call. The switch off or an early close at the time: skipped with a banner
   and a call. At the time the gates run again with the rule as it is then; right before any first POST the row, the rule's
-  rev and confirmation, real mode and the switch are read once more.
+  rev and confirmation, real mode and the switch are read once more. Real mode still on but the confirmation gone or
+  changed (rev, quantity) → `canceled confirm_changed` ("실제 매도 확인이 바뀌어서 (예정된) 주문을 내지 않았어요", DD 2314 §6),
+  no banner, no call.
 - **The login removed**: planned orders dropped; sent ones are no longer checked and their cards say so (no banner).
 - **The card** (`invest_stop`, `mode: "real"`, one per order, rewritten in place with a `message` event): `state`
   `waiting` | `scheduled` | `submitted` | `partial` | `filled` | `unknown` | `failed` | `skipped`, `sub` (the hero's
@@ -1294,6 +1295,54 @@ sent from it; tests write both into the database.
   account, order number, token or key. The alert row is kind `stop_order`. The vault records a real-mode token's use as
   `투자 시세 확인과 손절 주문(토스증권)`.
 - v17, additive (new tables only): `invest_real_confirms`, `invest_real_orders`.
+
+## Invest (B3b) — real orders on and off
+
+The person turns real orders on and off from the app (team-lead 2040 10·11·13, 2342; DD 1935 §3-4 · §3-5, 2042-b §2 ·
+§3 · §5, 2044 §4 · §5, 2314 §6). Code: `apps/server/src/invest/real.ts`, the routes in `routes.ts`, `hub.ts`
+(`settingsView`, `recordEvent`, `onTossRemoved`), `proposals.ts` (apply). No model tool reaches the mode or a
+confirmation (a static test).
+- **Blockers** (`InvestSettingsView.realBlockers`, `realBlockerText`): `orders_off` (the server switch, always first),
+  `toss_off`, `toss_not_connected`, `toss_never_ok`, `toss_ip_blocked`, `toss_paused` (a 429 pause). `realBlockerText` is
+  one sentence for the first in DD 2044 §4's order: orders_off → not connected → off / allowed IP / pause → never ok;
+  null with none. The device-key sentence is the app's. With the switch off every enable is 409.
+- **`POST /api/invest/real/preview`** → `InvestRealPreview`: per rule, every watched (armed or hit) sell stop of a symbol
+  Toss says can be sold right then (`head` `SOXL · 47주 전량`, `line` `종가 $25.80 이하 또는 장중 $24.51 이하` with ` · 장중
+  버퍼 7%(직접 정함)` for the person's own buffer, `장중 $25.80 이하` with `note` `지금은 장중 가격만으로 판단해요.` (the cards'
+  words) when the stop is judged intraday only), `notHeld` (`보유하지 않아 팔지 않아요: SOXS`), `bufferFoot` (the operating
+  default's sentence), `empty` (no targets), `conditions` (six lines; the last, the first that holds: the server cannot
+  place calls → chat alone, the phone not verified → verifying, the 손절 결과 call off → where to turn it on, on → calls and
+  chat; DD 0010-b 2, 0055 §3). The
+  sheet's title, first sentence, buttons and busy label are the app's. One sellable read per symbol, one after another; any that fails → 503 `sellable_unknown` (no sheet). A
+  blocker → 409 `real_blocked` with no Toss read. A live unused sheet of the same person is reused for 30 s; at most 6
+  sheets a person in 10 minutes (a stale enable's new sheet counts) → 429 `rate_limited`. Used once, for 10 minutes.
+- **`POST /api/invest/real/enable`** `{previewId, deviceId, nonce, signature}`: signed with the person's device key over
+  the approvals' message `approve:<previewId>:<nonce>` (`deps.verifyApproval`). In order: fields (400
+  `invalid_signature`), the device (400 `unknown_device`), the signature (403 `bad_signature`), real mode already on (200,
+  nothing changes: a second press), blockers (409 `real_blocked`, `realBlockerText` in the body), the person's own live
+  unused real preview (else 409 `preview_stale`, nothing more), Toss asked again (other rules, revs or quantities → 409
+  `preview_stale` with the new sheet as `preview`), then one step with no wait: every target still at its rev, the
+  preview taken, mode real, the person's confirmations replaced by the targets' (each at its rev with the sheet's
+  quantity). The preview is single-use, so a replayed request is 409 once off again, 200 with nothing changed while on;
+  a press whose preview another press took while it asked Toss is 409 `preview_stale` (also after a disable in between:
+  real mode never comes back without a new sheet). A nonce is single-use through its preview.
+  Turning on with no targets is allowed (later stops are confirmed from the rule sheet).
+- **`POST /api/invest/real/disable`**: no signature; already off → 200. Mode mock, every confirmation gone, planned and
+  waiting orders `canceled disabled` (no banner, no call); sent orders are still checked. The Toss login removed does
+  the same to confirmations.
+- **Confirmations are written in three places only**: enable; a rule create or save in real mode whose `previewId` was
+  drawn in real mode and showed a quantity to sell (only a sell stop's does; > 0) — the rule is confirmed at its new rev
+  with that quantity, and any other save leaves it unconfirmed; a proposal applied in real mode — each sell stop it moves,
+  with the quantity the card printed (none printed → unconfirmed; the stale check compares Toss's sellable and the mode).
+  A rule deleted (or unwatched with its rules) takes its confirmation. A rule preview remembers the mode it was drawn in:
+  saved in the other mode → 409 `preview_stale` (B2's sentence differs by mode). Two saves with one preview: the second
+  is stale.
+- **Records** (DD 2044 §5, 0010-b 4): an `event` row in the invest thread, `실제 주문을 켰어요 · SOXL 47주 · TQQQ 10주` (two
+  symbols at most; three or more `SOXL 47주 외 2종목`, the sheet's first; none `지금은 대상 없음`) /
+  `실제 주문을 껐어요 · 예정 주문 1건 취소 · 보낸 주문 1건 체결 확인 중` (each part only when there is one), with the model's
+  `[투자 기록] 실제 주문 켬 · 대상 SOXL 47주, TQQQ 10주` / `[투자 기록] 실제 주문 끔 · …`. No banner, no push, not unread; no
+  account, token or key.
+- No migration (v17's tables).
 
 ## Web Push (B1c) — the lock-screen line
 

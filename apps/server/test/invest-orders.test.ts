@@ -715,8 +715,9 @@ describe("invest real orders: changes that land while Toss is asked", () => {
     const cases: [string, (w: World, ruleId: string) => void, Record<string, unknown>][] = [
       ["switch", (w) => (w.h.app.core.cfg.invest.orders = false), { state: "skipped", reason: "server_off" }],
       ["mode", (w) => idb.updateSettings(w.h.db, w.uid, { mode: "mock" }, w.h.clock.t), { state: "canceled", reason: "disabled" }],
-      ["confirm gone", (w, id) => w.h.db.sql.query("DELETE FROM invest_real_confirms WHERE rule_id = $r").run({ r: id }), { state: "canceled", reason: "disabled" }],
-      ["confirm lowered", (w, id) => w.h.db.sql.query("UPDATE invest_real_confirms SET qty = 10 WHERE rule_id = $r").run({ r: id }), { state: "canceled", reason: "disabled" }],
+      // real mode still on: the confirmation itself changed (DD 2314 §6)
+      ["confirm gone", (w, id) => w.h.db.sql.query("DELETE FROM invest_real_confirms WHERE rule_id = $r").run({ r: id }), { state: "canceled", reason: "confirm_changed" }],
+      ["confirm lowered", (w, id) => w.h.db.sql.query("UPDATE invest_real_confirms SET qty = 10 WHERE rule_id = $r").run({ r: id }), { state: "canceled", reason: "confirm_changed" }],
     ];
     for (const [, act, want] of cases) {
       const w = await world();
