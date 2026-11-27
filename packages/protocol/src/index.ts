@@ -521,7 +521,12 @@ export type AgentEvent =
   | { type: "card"; card: Card }
   | { type: "memory"; text: string } // a new memory was saved ("기억했어요")
   | { type: "done"; message: Message; quota: Quota }
-  | { type: "error"; error: string; message: string };
+  /**
+   * The turn failed. `steersDropped`: the rows of the lines steered into it (202) that it read and leaves unanswered,
+   * oldest first — the same rows as the `steers_dropped` every device got right before it, with no wait between, so
+   * the app can drop their receipts as it draws the error row. Absent: none (lines still queued get a follow-up turn).
+   */
+  | { type: "error"; error: string; message: string; steersDropped?: ID[] };
 
 // ───────────────────────────── explore (task templates) ─────────────────────────────
 
@@ -1031,7 +1036,8 @@ export type ServerEvent =
    * A turn ended without answering lines the server steered into it (202; `messageIds` = their rows, oldest first).
    * A turn the app started: it stopped after the server took it (멈추기 on any device, the island's, the call talking
    * over it, the stream closing: all its lines, as no follow-up turn comes after a Stop), or it failed (the lines it took
-   * in; those still queued get a follow-up turn); the error itself still goes to the turn's stream alone. A turn with no
+   * in, right before its stream's `error`, which names the same rows; those still queued get a follow-up turn; the
+   * error itself goes to the turn's stream alone). A turn with no
    * stream of its own (a briefing, a schedule, a follow-up; nothing stops it) failed: right after its `turn_error`, the
    * lines it took in and, for a follow-up, the lines it was answering (all of them when the day's quota kept it from
    * running); those still queued get a follow-up turn. Every

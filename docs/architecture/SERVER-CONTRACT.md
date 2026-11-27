@@ -118,7 +118,9 @@ day (a morning and a pre-market one) it comes to ~12–22% of the day's 400k bil
 
 **Steered lines left unanswered.** A turn that ends without answering lines steered into it (202) — Stop, a failed turn,
 a follow-up the day's quota kept from running — sends `steers_dropped {threadId, messageIds}` to every device of the
-person (right after a stream-less turn's `turn_error`), and the server stores it on those rows just before: from then on
+person (right after a stream-less turn's `turn_error`; a failed turn the app started: right before its stream's
+`error`, which names the same rows as `steersDropped`, with no wait between, and from then on the turn takes no more
+lines, so those still queued go to its follow-up turn), and the server stores it on those rows just before: from then on
 every view of such a line, page reads (GET messages) and any later `message` push, carries `steerDropped: true`, for the
 line's sender alone. A device that missed the event (asleep, offline) drops the line's steer receipt when it reads the
 page again. `steered: true` stays on live pushes only (a page read never carries it) and never comes with
@@ -129,7 +131,8 @@ the model reads of the thread does not change.
 - Each event `data: <json>\n\n`; heartbeats are comment lines (`: hb`) — ignore (15 s on turn streams, 25 s on events).
 - Turn stream order: `start {threadId, userMessage, messageId}` (userMessage null on approval resume) → any of
   `status {text}` / `text {delta}` / `tool {tool}` / `card {card}` / `memory {…}` → `done {message, quota}` or
-  `error {error, message}`; the stream then closes. HTTP status is 200 even if the turn fails; errors before streaming
+  `error {error, message, steersDropped?}` (the rows of steered lines the failed turn read and leaves unanswered; absent:
+  none); the stream then closes. HTTP status is 200 even if the turn fails; errors before streaming
   are JSON. Client disconnect = Stop (see below); the partial answer is persisted (refetch messages).
 - Events: `GET /api/events?token=<session token>` (EventSource can't send headers) → `: connected`,
   `{type:"hello", at, settingsRev, agentRev}`, then `message {threadId, message}` (other tabs, friend side, steer

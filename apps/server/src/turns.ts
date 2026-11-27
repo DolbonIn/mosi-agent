@@ -562,6 +562,28 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
   let failure: unknown = null;
   /** the person's lines steered into this turn */
   const steered: string[] = [];
+  /** set once the turn has failed on its stream: it takes no more lines (those still queued go to a follow-up turn) */
+  let steerClosed = false;
+  /**
+   * A turn the app started failed (not stopped: a Stop's lines all go in finally, its stream is gone): the lines it read
+   * (steeredIds less those still queued, as finally counts them) are marked and every device hears steers_dropped, then
+   * the stream gets the error naming the same rows, with no await between; finally sends no more. Called once: the
+   * persist step's catch runs only when the error above it was not sent.
+   */
+  const failOnStream = (error: { error: string; message: string }) => {
+    let ids: string[] = [];
+    if (o.initiatedBy === "user" && !clientGone) {
+      steerClosed = true;
+      try {
+        const all = (o.lease as Partial<HeldLease>).steeredIds?.() ?? [];
+        ids = all.slice(0, Math.max(0, all.length - (o.lease.pending?.() ?? 0)));
+      } catch {
+        ids = [];
+      }
+      if (ids.length) dropSteers(core, o.userId, o.threadId, ids);
+    }
+    o.sink({ type: "error", ...error, ...(ids.length ? { steersDropped: ids } : {}) });
+  };
   let runPromise: Promise<TurnOutcome> | null = null;
   let promptChars = 0;
   try {
@@ -673,6 +695,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       tools: toolDefs,
       mode: o.mode,
       steer: () => {
+        if (steerClosed) return [];
         try {
           const got = o.lease.drain();
           steered.push(...got);
@@ -823,11 +846,11 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
       db.addUsage(o.userId, quotaDay(now), totalTokens);
     }
 
-    if (result.error) o.sink({ type: "error", ...result.error });
+    if (result.error) failOnStream(result.error);
     else if (result.message) o.sink({ type: "done", message: result.message, quota: quotaFor(core, o.userId) });
     else if (!clientGone) {
       result.error = { error: "empty_reply", message: "답을 만들지 못했어요. 다시 한번 말해 주세요." };
-      o.sink({ type: "error", ...result.error });
+      failOnStream(result.error);
     }
 
     if (result.message) {
@@ -852,7 +875,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
   } catch (err) {
     log.error("turn persist failed", { user: o.userId, thread: o.threadId, err: errInfo(err) });
     result = { message: result.message, error: { error: "internal", message: "답을 저장하지 못했어요. 다시 시도해 주세요." }, aborted: clientGone };
-    o.sink({ type: "error", ...result.error! });
+    failOnStream(result.error!);
   } finally {
     loginCards.done();
     // No stream carries this error (a system turn, a steer follow-up) but the person's lines went into the turn: they
@@ -880,9 +903,9 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     // The lines a turn ends without answering: every device of the person hears their rows, so the one that sent a line
     // drops its receipt (the device that stopped the turn or held its stream may be another one, or the island's retry,
     // a delegate sheet). A turn the app started, stopped: all lines steered into it, there is no follow-up after a Stop.
-    // Failed (the app's turn, or one with a turn_error above: a briefing, a schedule, a follow-up): the lines it took
-    // in, the oldest (the launcher's queue is first in, first out), and a follow-up's own lines; the lines still queued
-    // get their follow-up turn
+    // Failed: the app's turn sent them with its stream's error already (failOnStream: nothing more here); one with a
+    // turn_error below (a briefing, a schedule, a follow-up): the lines it took in, the oldest (the launcher's queue is
+    // first in, first out), and a follow-up's own lines; the lines still queued get their follow-up turn
     let ids: string[] = [];
     try {
       ids = (o.lease as Partial<HeldLease>).steeredIds?.() ?? [];
@@ -892,7 +915,6 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     const read = ids.slice(0, Math.max(0, ids.length - leftovers.length));
     let dropped: string[] = [];
     if (o.initiatedBy === "user" && clientGone) dropped = ids;
-    else if (o.initiatedBy === "user" && result.error) dropped = read;
     else if (turnError) dropped = [...(o.forSteered ?? []), ...read];
     if (clientGone) {
       // Stop = stop everything in flight for this thread: steered/leftover messages get no
@@ -907,8 +929,7 @@ export async function executeTurn(core: Core, o: ExecuteTurnOptions): Promise<Tu
     }
     // A failed turn with no stream: its turn_error goes out once the turn has wound down (a tool may still have been
     // running above), right before its steers_dropped with no await between, so no line keeps its receipt beside the
-    // error row. (A turn the app started sent its error on its stream; the app draws the error row once that stream
-    // closes, right after this.)
+    // error row. (A turn the app started sent its steers_dropped and its error, naming the same rows, at once above.)
     if (turnError) {
       try {
         core.events.publish(o.userId, { type: "turn_error", threadId: o.threadId, error: turnError.error, message: turnError.message });

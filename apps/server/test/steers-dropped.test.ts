@@ -6,15 +6,16 @@
  * one from running: the quota message as its turn_error, and all its lines). Every device of the person hears
  * which rows those are, so the device that sent a line drops its steer receipt even when another device stopped the turn
  * or held its stream (the island's retry, a delegate sheet). The rows keep it (`steerDropped` on every later view of the
- * line), so a device that missed the event learns it from its next page read.
+ * line), so a device that missed the event learns it from its next page read. A failed turn the app started names the
+ * same rows on its stream's `error` (`steersDropped`), sent right after the notice with no wait between.
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { Attachment, Friend, InviteResponse, Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
+import type { AgentEvent, Attachment, Friend, InviteResponse, Message, ServerEvent, SteeredResponse } from "@pickle/protocol";
 import { messageViewById, publishMessage, QUOTA_MESSAGE } from "../src/core.ts";
 import { historyFromRows } from "../src/history.ts";
 import { executeTurn, holdLease } from "../src/turns.ts";
 import { quotaDay } from "../src/kst.ts";
-import { makeHarness, outcome, readSse, sseReader, type Harness } from "./helpers.ts";
+import { makeHarness, outcome, parseSse, readSse, sseReader, type Harness } from "./helpers.ts";
 
 let h: Harness;
 beforeEach(async () => {
@@ -130,6 +131,70 @@ describe("steers_dropped", () => {
     await d.cancel();
   });
 
+  test("the answer cannot be stored: an app turn's stream error (internal) names the line it read, one notice; a stopped turn's lines all go once, from its end, as before", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const d = await device(token);
+    const db = h.app.core.db;
+    const insert = db.insertMessage.bind(db);
+    db.insertMessage = (m) => {
+      if (m.role === "assistant") throw new Error("disk full");
+      return insert(m);
+    };
+    // not stopped: the turn answers after reading a line, and its row cannot be stored
+    let go!: () => void;
+    const sent = new Promise<void>((res) => (go = res));
+    h.turns.set(async (input) => {
+      await sent;
+      input.steer!();
+      return outcome("답이에요");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steer(token, tid, "그리고 이것도");
+    go();
+    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "internal", steersDropped: [a] });
+    await h.app.core.idle();
+    expect((await d.got()).filter((x) => x !== "idle")).toEqual([`steers_dropped ${tid} ${a}`]);
+    // stopped with text on screen (its row is stored on the way out, and fails): one notice with both lines, from the end
+    let go2!: () => void;
+    const sent2 = new Promise<void>((res) => (go2 = res));
+    h.turns.set(async (input, emit) => {
+      await sent2;
+      input.steer!();
+      emit({ type: "text", delta: "적고 있어요" });
+      return waitForAbort(input.ctx.signal);
+    });
+    const t2 = await startTurn(token, tid, "두 번째 질문");
+    const b = await steer(token, tid, "이것도");
+    go2();
+    await Bun.sleep(5);
+    const c = await steer(token, tid, "하나 더");
+    await t2.stop();
+    expect((await d.got()).filter((x) => x !== "idle")).toEqual([`steers_dropped ${tid} ${b},${c}`]);
+    db.insertMessage = insert;
+    await d.cancel();
+  });
+
+  test("an app turn that ends with nothing to say after reading a line: empty_reply on its stream, naming that line; one notice", async () => {
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const d = await device(token);
+    let go!: () => void;
+    const sent = new Promise<void>((res) => (go = res));
+    h.turns.set(async (input) => {
+      await sent;
+      input.steer!();
+      return outcome("");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    const a = await steer(token, tid, "그리고 이것도");
+    go();
+    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "empty_reply", steersDropped: [a] });
+    await h.app.core.idle();
+    expect((await d.got()).filter((x) => x !== "idle")).toEqual([`steers_dropped ${tid} ${a}`]);
+    await d.cancel();
+  });
+
   test("no event: a stopped turn with no steered line, a turn that ends on its own (a line it took in is answered, a queued one gets the follow-up turn)", async () => {
     const { token, session } = await h.signup("haneul");
     const tid = session.mainThreadId;
@@ -196,7 +261,8 @@ describe("steers_dropped", () => {
     await steer(token, tid, "하나 더"); // queued: its own follow-up turn answers it
     h.turns.set(async () => outcome("하나 더 할게요"));
     fail();
-    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "upstream_rate_limited" }); // the error: this stream alone
+    // the error: this stream alone, naming the rows every device hears in steers_dropped (lead 1741 follow-up)
+    expect(await t.r.next((e) => e.type === "error")).toEqual({ type: "error", error: "upstream_rate_limited", message: "지금 요청이 많아요. 잠시 후 다시 시도해 주세요.", steersDropped: [a] });
     await h.app.core.idle();
     const want = [`steers_dropped ${tid} ${a}`, "idle"];
     expect((await phone.got()).slice(0, 2)).toEqual(want);
@@ -221,7 +287,9 @@ describe("steers_dropped", () => {
     await steer(token, tid, "추가 2");
     h.turns.set(async () => outcome("네"));
     fail();
-    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "upstream_rate_limited" });
+    const err = await t.r.next<{ type: string; steersDropped?: string[] }>((e) => e.type === "error");
+    expect(err).toMatchObject({ error: "upstream_rate_limited" });
+    expect(err && "steersDropped" in err).toBe(false); // none: no field
     await h.app.core.idle();
     expect((await d.got()).filter((x) => x !== "idle")).toEqual([]);
     expect(h.turns.inputs.at(-1)!.userText).toBe("추가 1\n추가 2");
@@ -520,7 +588,7 @@ describe("a turn that fails while a tool still runs: no line keeps its receipt b
     await phone.cancel();
   });
 
-  test("a turn the app started fails while a tool still runs: its stream's error at once as before (before its row is pushed); after the tool's wait steers_dropped, and the turn ends right after it (its stream closes then, and the app draws the error row then)", async () => {
+  test("a turn the app started fails while a tool still runs: steers_dropped and then its stream's error naming the same rows, no await between, before its row is pushed; nothing more after the tool's wait (lead 1741 follow-up)", async () => {
     await slow();
     const { token, session } = await h.signup("haneul");
     const uid = session.user.id;
@@ -537,30 +605,45 @@ describe("a turn that fails while a tool still runs: no line keeps its receipt b
     // what streamTurn runs for POST /api/threads/:id/messages (it closes the stream once this returns), its stream
     // recorded in the same log
     const lease = holdLease(h.app.core, uid, tid, await h.launcher.acquire(uid));
-    const result = await executeTurn(h.app.core, { userId: uid, threadId: tid, userText: "첫 질문", userMessage: null, mode: "text", lease, sink: (e) => rec.note(`stream ${e.type}`), initiatedBy: "user" });
+    const hub: string[][] = [];
+    const publish = h.app.core.events.publish.bind(h.app.core.events);
+    h.app.core.events.publish = (u, e) => {
+      if (u === uid && e.type === "steers_dropped") hub.push(e.messageIds);
+      return publish(u, e);
+    };
+    let streamIds: string[] | undefined;
+    const sink = (e: AgentEvent) => {
+      if (e.type === "error") streamIds = e.steersDropped;
+      rec.note(`stream ${e.type}`);
+    };
+    const result = await executeTurn(h.app.core, { userId: uid, threadId: tid, userText: "첫 질문", userMessage: null, mode: "text", lease, sink, initiatedBy: "user" });
     rec.note("returned");
     await h.app.core.idle();
     expect(result.error).toMatchObject({ error: "upstream_timeout" });
     const names = rec.names();
-    const i = names.indexOf("stream error");
+    const i = names.indexOf("hub steers_dropped");
     expect(i).toBeGreaterThan(-1);
-    expect(names.indexOf("hub message assistant")).toBeGreaterThan(i); // the error first, as before
-    const j = names.indexOf("hub steers_dropped");
-    expect(names.slice(j, j + 2)).toEqual(["hub steers_dropped", "hub agent_status"]);
-    expect(rec.at("returned") - rec.at("hub steers_dropped")).toBeLessThan(50);
-    expect(names.filter((n) => n === "stream error" || n === "hub steers_dropped")).toEqual(["stream error", "hub steers_dropped"]);
+    expect(names.slice(i, i + 2)).toEqual(["hub steers_dropped", "stream error"]);
+    expect(names.indexOf("·")).toBeGreaterThan(i + 1); // no await between the two
+    expect(names.indexOf("hub message assistant")).toBeGreaterThan(i + 1); // both before the row, as the error was
+    // the same rows; one notice in all (finally, after the tool's wait, sends nothing more)
+    expect(hub).toHaveLength(1);
+    expect(streamIds).toEqual(hub[0]);
+    expect(streamIds).toHaveLength(1);
+    expect(rec.at("returned") - rec.at("stream error")).toBeGreaterThan(200); // the tool's wait came after both
     expect(names).not.toContain("hub turn_error"); // the error goes to the turn's stream alone
     tool.done();
   });
 
-  test("over HTTP, the same app turn: its error comes on the stream at once; the stream closes right after steers_dropped goes out (the app draws the error row once its stream closes)", async () => {
+  test("over HTTP, the same app turn: its error comes on the stream at once with the rows steers_dropped named just before it; the stream closes after the tool's wait with no second notice", async () => {
     await slow();
     const { token, session } = await h.signup("haneul");
     const tid = session.mainThreadId;
     const rec = recorder(session.user.id);
     const tool = stuckTool();
+    let a = "";
     h.turns.set(async (input, emit) => {
-      await steer(token, tid, "그리고 이것도");
+      a = await steer(token, tid, "그리고 이것도");
       expect(input.steer!()).toEqual(["그리고 이것도"]);
       emit({ type: "tool", tool: { id: "t1", name: "k_weather", title: "날씨 확인", state: "running", startedAt: 1 } });
       await tool.p;
@@ -579,9 +662,39 @@ describe("a turn that fails while a tool still runs: no line keeps its receipt b
     rec.note("stream closed");
     await h.app.core.idle();
     const names = rec.names();
-    expect(names.filter((n) => n === "stream error read" || n === "hub steers_dropped" || n === "stream closed")).toEqual(["stream error read", "hub steers_dropped", "stream closed"]);
-    expect(rec.at("stream closed") - rec.at("hub steers_dropped")).toBeLessThan(50);
+    expect(names.filter((n) => n === "stream error read" || n === "hub steers_dropped" || n === "stream closed")).toEqual(["hub steers_dropped", "stream error read", "stream closed"]);
+    const error = (parseSse(body) as AgentEvent[]).find((e) => e.type === "error");
+    expect(error).toMatchObject({ error: "upstream_timeout", steersDropped: [a] });
     tool.done();
+  });
+
+  test("a line steered after the error while the tool winds down: the failed turn cannot read it, it is never dropped, and its follow-up turn answers it", async () => {
+    await slow();
+    const { token, session } = await h.signup("haneul");
+    const tid = session.mainThreadId;
+    const d = await device(token);
+    const tool = stuckTool();
+    let late = null as string[] | null;
+    let a = "";
+    h.turns.set(async (input, emit) => {
+      a = await steer(token, tid, "그리고 이것도");
+      expect(input.steer!()).toEqual(["그리고 이것도"]);
+      emit({ type: "tool", tool: { id: "t1", name: "k_weather", title: "날씨 확인", state: "running", startedAt: 1 } });
+      await tool.p;
+      late = input.steer!(); // a tool that kept going reads the queue on its way out
+      throw new DOMException("aborted", "AbortError");
+    });
+    const t = await startTurn(token, tid, "첫 질문");
+    expect(await t.r.next((e) => e.type === "error")).toMatchObject({ error: "upstream_timeout", steersDropped: [a] });
+    const b = await steer(token, tid, "늦은 한 줄"); // still steered: the turn holds the agent until it winds down
+    h.turns.set(async () => outcome("늦은 한 줄에 답해요"));
+    tool.done();
+    await h.app.core.idle();
+    expect(late).toEqual([]);
+    expect(h.turns.inputs.at(-1)!.userText).toBe("늦은 한 줄");
+    expect((await d.got()).filter((x) => x !== "idle")).toEqual([`steers_dropped ${tid} ${a}`]);
+    expect(b).not.toBe(a);
+    await d.cancel();
   });
 
   test("a turn that does not fail is as before: the app's stream gets done before the row is pushed, no steers_dropped; a briefing that answers sends no turn_error", async () => {
